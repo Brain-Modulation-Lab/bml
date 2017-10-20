@@ -1,9 +1,7 @@
 # bml
 Matlab functions for ECoG/MER data manipulation and analysis
 ============================================================
-
 Brain Modulation Laboratory, University of Pittsburgh
------------------------------------------------------
 
 This repository provides functions for analysis and manipulation of ECoG, MER 
 and Audio data acquired in the Brain Modulation Laboratory (University of Pittsburgh). 
@@ -21,9 +19,9 @@ IO - provides input/output functions for file manipulation
 * bml_neuroomega_load       - loads a NeuroOmega dataset as a struct-array of
 
 SIGNAL - time series manipulation functions
-* bml_envelope_binabs - Calculate envelope as maximum of abssolute value in
+* bml_envelope_binabs - Calculate envelope as maximum of absolute value in
 
-UTILS - miscelaneous utility functions
+UTILS - miscelLaneous utility functions
 * bml_date2sec - transforms a cell-array of date strings to seconds from
 * bml_praat    - opens FT_DATATYPE_RAWs in praat
 
