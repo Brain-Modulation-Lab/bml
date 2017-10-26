@@ -1,18 +1,19 @@
 function info = bml_info_raw(cfg)
 
-% BML_INFO_RAW returns a table with the information of each raw file in a
-% folder. 
+% BML_INFO_RAW returns table with OS and header info of each raw file in a folder. 
 %
 % Use as
 %   tab = bml_info_raw(cfg);
 %
-% Raw files can be read by ft_read_header.
+% 'raw' files are those that can be read by ft_read_header.
 %
 % The first argument cfg is a configuration structure, which can contain
 % the following field:
 % cfg.path - string: path to the folder containing the files. Defauts to '.'
 %
 % Returns a matlab 'table' with the folloing variables:
+%   starts - double: time in seconds 
+%   ends - double: time in seconds 
 %   name - cell array of char: filename
 %   folder - cell array of char: path
 %   date - cell array of char: data of file modification 
@@ -27,10 +28,6 @@ function info = bml_info_raw(cfg)
 %   chantype
 %   chanunit
 %   duration
-%   start
-%   end
-
-% 2017.10.19 AB
 
 chantype       = ft_getopt(cfg, 'chantype', {});   
 info = bml_info_file(cfg);

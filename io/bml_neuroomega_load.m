@@ -11,6 +11,8 @@ function [Rec] =  bml_neuroomega_load(cfg)
 % cfg.path - string: path to the folder containing the .mat files. Defauts to '.'
 % cfg.depth - double: depths to be loaded. If empty (defaults) all depths
 %             are loaded
+% cfg.files_table - table: compatible with output of bml_neuroomega_info_file
+%             should conatin vars 'depth', 'name', 'folder'
 % cfg.chantype - cell array of strings: defines channel types to be loaded.
 %                use an invalid channel as '?' to get a table of available
 %                channels and chantypes printed out. An error will stop
@@ -36,13 +38,19 @@ function [Rec] =  bml_neuroomega_load(cfg)
 
 %2017.10.12 AB Based on Ahmad's function ReadNeuroOmega_AA.m, adapted for
 %fieltrip
+REQUIRED_VARS = {'depth','name','folder'};
 
-path = ft_getopt(cfg,'path','.');
 depth = ft_getopt(cfg,'depth',[]);
+files = ft_getopt(cfg,'files_table',[]);
 chantype = ft_getopt(cfg,'chantype',{'micro','macro','analog'});
 if ~iscell(chantype); chantype={chantype}; end
 
-files = bml_neuroomega_info_file(cfg);
+if isempty(files)
+  files = bml_neuroomega_info_file(cfg);
+elseif ~all(ismember(REQUIRED_VARS,files.Properties.VariableNames))
+  error(['variables ' strjoin(REQUIRED_VARS,', ') ' required in cfg.files_table']);
+end
+
 depth_all = unique([files.depth]);
 if isempty(depth); depth=depth_all; end
 
@@ -55,13 +63,17 @@ N=numel(depth_sel);
 Rec(N)=struct();
 for m=1:N %cycling through depths
     fprintf('\n--- Processing Depth %f ---\n', depth_sel(m));
-    Rec(m).files=files.name([files.depth]==depth_sel(m));
+    db = files([files.depth]==depth_sel(m),:);
+    db = sortrows(db,'name');
+    Rec(m).folder=db.folder;    
+    Rec(m).filename=db.name;
     Rec(m).depth=depth_sel(m);
    
     for i=1:numel(chantype) %cycling through chantypes
       tmp=cellfun(@(x) ft_preprocessing(...
           struct('dataset',x,'chantype',chantype{i})),...
-          fullfile(path,sort(Rec(m).files)),'UniformOutput',false);
+          fullfile(Rec(m).folder,Rec(m).filename),'UniformOutput',false);
       Rec(m).(chantype{i})=ft_appenddata(struct('appenddim','time'),tmp{:});       
     end   
 end
+

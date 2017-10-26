@@ -1,7 +1,6 @@
 function info = bml_info_file(cfg)
 
-% BML_INFO_FILE returns a table with the information of each file in a
-% folder
+% BML_INFO_FILE returns table with OS info of each file in a folder
 %
 % Use as
 %   tab = bml_info_file(cfg);
@@ -20,8 +19,6 @@ function info = bml_info_file(cfg)
 %   bytes - double: Size of the file in bytes
 %   isdir - logical: 1 if name is a folder; 0 if name is a file
 %   datenum - double: Modification date as serial date number.
-
-% 2017.10.19 AB
 
 path        = ft_getopt(cfg,'path','.');
 filepattern = ft_getopt(cfg,'pattern','*');

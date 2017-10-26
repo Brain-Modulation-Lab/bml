@@ -1,12 +1,11 @@
 function info = bml_neuroomega_info_raw(cfg)
 
-% BML_NEUROOMEGA_INFO_RAW returns a table with the information of each raw neuroomega .mat file in a
-% folder.
+% BML_NEUROOMEGA_INFO_RAW returns table with OS and header info of raw neuroomega.mat (.mpx) files.
 %
 % Use as
 %   tab = bml_neuroomega_info_raw(cfg);
 %
-% Raw files can be read by ft_read_header.
+% 'raw' files can be read by ft_read_header.
 %
 % The first argument cfg is a configuration structure, which can contain
 % the following field:
@@ -15,8 +14,14 @@ function info = bml_neuroomega_info_raw(cfg)
 % cfg.regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat')
 % cfg.time_channel - string: channel to use for TimeBegin and TimeEnd (defaults to 'CANALOG_IN_1')
 % cfg.chantype - string: channel type. Defaults to 'chaninfo'
+% cfg.mpx_path - string: path to the folder containing the .mpx_ files. Defauts to cfg.path
+% cfg.mpx_pattern - string: file name pattern (defaults to '*.mpx')
+% cfg.mpx_regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx')
+%
 %
 % Returns a matlab 'table' with the folloing variables:
+%   start - double: time in seconds (calculated if mpx files are found in cfg.mpx_path)  
+%   end - double: time in seconds (calculated if mpx files are found in cfg.mpx_path)
 %   name - cell array of char: filename
 %   folder - cell array of char: path
 %   date - cell array of char: data of file modification 
@@ -31,16 +36,20 @@ function info = bml_neuroomega_info_raw(cfg)
 %   chantype
 %   chanunit
 %   duration
-%   start
-%   end
 
-% 2017.10.20 AB
+
 chantype       = ft_getopt(cfg, 'chantype', 'chaninfo');   
 time_channel = ft_getopt(cfg,'time_channel','CANALOG_IN_1');
 time_begin = strcat(time_channel,'_TimeBegin');
 time_end = strcat(time_channel,'_TimeEnd');
 
 info = bml_neuroomega_info_file(cfg);
+
+cfg_mpx=[];
+cfg_mpx.path    = ft_getopt(cfg,'mpx_path',ft_getopt(cfg,'path','.'));
+cfg_mpx.pattern = ft_getopt(cfg,'mpx_pattern','*.mpx');
+cfg_mpx.regexp  = ft_getopt(cfg,'mpx_regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx');
+info_mpx=bml_info_file(cfg_mpx);
 
 hdr_vars={'chantype','Fs','nSamples','nChans','nTrials','chanunit','time_begin','time_end'};
 hdr_table = cell2table(cell(size(info,1),length(hdr_vars)));
@@ -66,12 +75,28 @@ hdr_table.time_end = cell2mat(hdr_table.time_end);
 
 info = [info hdr_table];
 
-%info.duration = info.nSamples ./ info.Fs; %date of mat is not informative
-%ends = bml_date2sec(info.date);
-%starts = ends-info.duration;
-%info=[table(starts,ends,'VariableNames',{'starts','ends'}) info];
-%info=sortrows(info,'starts');
-info=sortrows(info,'time_begin');
+if ~isempty(info_mpx) %loading date from .mpx OS info if available
+  info_mpx.basename = erase(info_mpx.name,'.mpx');
+  info_mpx=info_mpx(:,{'basename','date','datenum'});
+  
+  info.date=[];
+  info.datenum=[];
+  info.basename = erase(info.name,'.mat');
+  
+  info=join(info,info_mpx,'Keys','basename');
+
+  %adjusting time_end to bml_date2sec origin.
+  ends = info.time_end+median(bml_date2sec(info.date)-info.time_end);
+  info.duration = info.time_end - info.time_begin; 
+  starts = ends - info.duration;
+  info = [table(starts,ends,'VariableNames',{'starts','ends'}) info];
+  info.basename = [];
+  info=sortrows(info,'starts');
+else
+  warning('Specify cfg.mpx_path for starts/ends calculation')
+  info=sortrows(info,'time_begin');
+end
+
 
 
 

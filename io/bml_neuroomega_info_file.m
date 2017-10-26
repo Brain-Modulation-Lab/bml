@@ -1,10 +1,11 @@
 function info = bml_neuroomega_info_file(cfg)
 
-% BML_NEUROOMEGA_INFO_FILE returns a table with the information of each .mat
-% file in a folder
+% BML_NEUROOMEGA_INFO_FILE returns table with OS info of each neuroomega.mat file in a folder
 %
 % Use as
 %   tab = bml_neuroomega_info_file(cfg);
+%
+% Same as BML_INFO_FILE but extracts depth and filenumber from filename.
 %
 % The first argument cfg is a configuration structure, which can contain
 % the following field:
@@ -22,8 +23,6 @@ function info = bml_neuroomega_info_file(cfg)
 %   depth - double: depth of the electrodes as extracted from the file name
 %   filenum - double: index of the file at the specified depth
 
-% 2017.10.20 AB
-
 cfg.pattern = ft_getopt(cfg,'pattern','*.mat');
 cfg.regexp  = ft_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat');
 
@@ -32,24 +31,4 @@ info = bml_info_file(cfg);
 info.depth = cellfun(@(x) str2double(regexp(x,'-?\d+\.\d+','match')), info.name);
 info.filenum = cellfun(@(x) str2double(regexp(x,'F(\d+)\.mat','tokens','once')), info.name);
 
-% path = ft_getopt(cfg,'path','.');
-% filepattern = ft_getopt(cfg,'pattern','*.mat');
-% fileregexp  = ft_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat');
-% 
-% files=dir(fullfile(path, filepattern));
-% if ~isempty(fileregexp)
-%   rx=regexp({files.name},fileregexp,'once');
-%   files=files(~cellfun(@isempty,rx));
-% end
-% 
-% for i=1:numel(files)
-%   files(i).depth=str2double(regexp(files(i).name,'-?\d+\.\d+','match'));
-%   files(i).filenum=str2double(regexp(files(i).name,'F(\d+)\.mat','tokens','once'));
-% end
-% 
-% if isempty(files)
-%   info=table();
-% else
-%   info=struct2table(files);
-% end
 
