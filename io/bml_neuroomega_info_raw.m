@@ -87,7 +87,10 @@ if ~isempty(info_mpx) %loading date from .mpx OS info if available
 
   %adjusting time_end to bml_date2sec origin.
   ends = info.time_end+median(bml_date2sec(info.date)-info.time_end);
-  info.duration = info.time_end - info.time_begin; 
+  %NOTE: time_start and time_end are time coordinates of the first and 
+  %last data point. Duration is the length of the 'represented' time
+  %therefore the correct way of calculating duration is as follows:
+  info.duration = info.time_end - info.time_begin + 1./info.Fs; 
   starts = ends - info.duration;
   info = [table(starts,ends,'VariableNames',{'starts','ends'}) info];
   info.basename = [];

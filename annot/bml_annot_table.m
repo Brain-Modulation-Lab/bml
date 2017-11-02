@@ -1,6 +1,6 @@
 function annot=bml_annot_table(x, description, x_var_name)
 
-% BML_ANNOT_TABLE transforms a table into an annotations table
+% BML_ANNOT_TABLE transforms a table into an annotations table [internal]
 %
 % Use as
 %   annot=bml_annot_table(x)
@@ -50,11 +50,7 @@ if any(strcmp('duration',x.Properties.VariableNames))
 end
 x = [x, table(x.ends - x.starts,'VariableNames',{'duration'})];
 
-% vars = {'id','starts','ends','duration'};
-% vars = [vars, setdiff(x.Properties.VariableNames,vars)];
-% annot = x(:,vars);
-cfg=[]; cfg.order = {'id','starts','ends','duration'};
-annot=bml_annot_reorder_vars(cfg,x);
+annot = bml_annot_reorder_vars(x, {'id','starts','ends','duration'});
 annot.Properties.Description = description;
 
 

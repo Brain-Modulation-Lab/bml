@@ -7,7 +7,7 @@ function env = bml_envelope_binabs(cfg, data)
 %   env = bml_envelope_binabs(cfg, data)
 %
 % cfg is a configureation struct with the following fields
-% cfg.target_fsample - integer: intended output sampling frequency (default 100Hz)
+% cfg.freq - integer: intended output sampling frequency (default 100Hz)
 % cfg.bin_size - integer: size of the bin. If given overwrites cfg.target_fsample
 %
 % data - FT_DATATYPE_RAW
@@ -16,9 +16,13 @@ function env = bml_envelope_binabs(cfg, data)
 
 DEFAULT_TARGET_FSAMPLE=100;
 
-target_fsample=ft_getopt(cfg,'target_fsample',DEFAULT_TARGET_FSAMPLE);
-bin_size=ft_getopt(cfg,'bin_size',round(data.fsample/target_fsample));
+freq            = bml_getopt(cfg,'freq',DEFAULT_TARGET_FSAMPLE);
+bin_size        = bml_getopt(cfg,'bin_size',round(data.fsample/freq));
     
+if abs(data.fsample/freq - bin_size) > 0.1
+  warning(char(strcat('Specified envelope freq ',num2str(freq),' not possible. Using ',num2str(data.fsample/bin_size))));
+end
+
 n_bins=floor(size(data.trial{1},2)./bin_size);
 env=struct();
 env.trial=cellfun(@(T) reshape(max(...
