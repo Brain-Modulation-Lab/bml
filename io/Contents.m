@@ -8,3 +8,8 @@
 %   bml_neuroomega_info_raw   - returns table with OS and header info of raw neuroomega.mat (.mpx) files.
 %   bml_neuroomega_load       - loads a NeuroOmega dataset as a struct-array of
 
+%   bml_crop_idx              - calculates sample indices for a time window and file coordinates
+%   bml_idx2time              - calculates samples midpoint times from a index vector and file coordinates
+%   bml_load_continuous       - loads continuous raw from one or more files
+%   bml_time2idx              - calculates sample indices from a time vector and file coordinates
+
