@@ -100,6 +100,7 @@ end
 
 %doing the synchronization
 for session_i=1:height(sessions)
+  session_id = sessions.id(session_i);
   session_files_os = bml_annot_intersect(files_os, sessions(session_i,:));  
   master_session_files_os=session_files_os(strcmp(session_files_os.filetype,master_filetype),:);  
 
@@ -108,12 +109,18 @@ for session_i=1:height(sessions)
   cfg.roi = master_session_files_os;
   master = bml_load_continuous(cfg);
 
+  if praat
+  	bml_praat(strcat('s',num2str(session_id),'_master_',master_filetype),master);  
+  end
+  
   for slave_i=1:length(slave_filetypes)
     filetype_session_files_os=session_files_os(string(session_files_os.filetype)==slave_filetypes(slave_i),:);
+    slave_channel = sync_channels.channel{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
+    slave_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
     
     cfg=[]; %creating slave raw with sync channel for entire session
-    cfg.channel = sync_channels.channel{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
-    cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
+    cfg.channel = slave_channel;
+    cfg.chantype = slave_chantype;
     cfg.roi = filetype_session_files_os;
     slave = bml_load_continuous(cfg);  
 
@@ -147,13 +154,15 @@ for session_i=1:height(sessions)
     sync_roi.warpfactor(filtvec) = wc_env.ws1*wc_lpf.ws1;
       
     if praat
-      t1=max(master.time{1}(1),slave.time{1}(1));
-      t2=min(master.time{1}(end),slave.time{1}(end));
-      master_crop=bml_crop(master,t1,t2);
-      cfg=[]; cfg.time=master_crop.time; cfg.method='pchip';
+      %t1=max(master.time{1}(1),slave.time{1}(1));
+      %t2=min(master.time{1}(end),slave.time{1}(end));
+      %master_crop=bml_crop(master,t1,t2);
+      t1=master.time{1}(1);
+      t2=master.time{1}(end);
+      cfg=[]; cfg.time=master.time; cfg.method='pchip';
       slave_crop=ft_resampledata(cfg,bml_crop(slave,t1,t2));
-      slave_crop.fsample = master_crop.fsample;
-      bml_praat(master_crop,slave_crop);
+      slave_crop.fsample = master.fsample;
+      bml_praat(strcat('s',num2str(session_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
     end
 
   end

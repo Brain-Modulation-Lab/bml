@@ -12,10 +12,10 @@ function bml_praat(varargin)
 % index of the FT_DATATYPE_RAW in the call to bml_praat, <T> is the trial 
 % number and <channel_name> is the name of the label of the channel.
 %
-% If a name is provided, the praat objects will be named <name>_t<T>_<channel_name>. 
+% Should open a new praat window
 %
-% Opens a new praat window
-%
+
+% 2017.10.12 AB Tested on Mac OS X 10.12.6
 
 %saving files to temp directory
 recycle('off');
@@ -36,18 +36,19 @@ names={};
 raws={};
 waslastname=false;
 for i=1:numel(varargin)
+  keyboard
   if isa(varargin{i},'string') || isa(varargin{i},'char') 
     assert(~waslastname,'two consecutive names in argument %i', i);
-    names = [names {strcat(varargin{i},'_')}];
+    names = {names{:} strcat(varargin{i},'_')};
     waslastname=true;  
   elseif iscellstr(varargin{i})
-    assert(numel(varargin{i})==1,'invalid name parameter %i',i);
+    if n
     assert(~waslastname,'two consecutive names in argument %i', i);
-    names = [names {strcat(varargin{i}{1},'_')}];
+    names = {names{:} strcat(varargin{i},'_')};
     waslastname=true; 
   elseif isstruct(varargin{i})
     if ~waslastname; names = {names{:} ""}; end
-    raws = [raws {varargin{i}}];   
+    raws = {raws{:} varargin{i}};   
     waslastname=false;
   else
     error('unknown type for argument %i',i);
