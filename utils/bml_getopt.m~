@@ -61,12 +61,9 @@ if isa(opt, 'struct') || isa(opt, 'config')
   end
   
 elseif istable(opt)
-  assert(height(opt)==1,'configuration tables should be a 1 row high');
-  if ~any(strcmp(key, opt.Properties.VariableNames))
-    val = default;
-  else
-    val = opt.(key);
-  end
+  assert(height(opt)==1,'configuration tables should be a 1 row high')
+  cfg=table2struct(cfg);
+end  
   
 elseif isa(opt, 'cell')
   % get the key-value from the cell-array

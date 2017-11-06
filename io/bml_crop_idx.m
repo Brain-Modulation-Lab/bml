@@ -22,10 +22,10 @@ function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)
 % if starts and ends are given (3 argument call) the values of cfg are
 % ignored
 
-if istable(cfg)
-  if height(cfg) > 1; error('cfg should be a 1 row table'); end
-  cfg=table2struct(cfg);
-end
+% if istable(cfg)
+%   if height(cfg) > 1; error('cfg should be a 1 row table'); end
+%   cfg=table2struct(cfg);
+% end
 
 if nargin==1
   starts=bml_getopt(cfg,'starts');
@@ -45,11 +45,10 @@ t1=bml_getopt(cfg,'t1');
 s1=bml_getopt(cfg,'s1');
 t2=bml_getopt(cfg,'t2');
 s2=bml_getopt(cfg,'s2');
-nSamples=bml_getopt(cfg,'nSamples');
 
 Fs=(s2-s1)/(t2-t1);
 
-tol=bml_getopt(cfg,'tol',1e-3/Fs);
+tol=bml_getopt(cfg,'tol',1e-2/Fs);
 
 if ~isempty(starts)
   starts_idx = round((t2*s1-s2*t1)/(t2-t1)+Fs*starts+tol);
@@ -67,10 +66,3 @@ if isempty(starts)
   starts_idx = ends_idx - samples;
 end
 
-% % check consistency in bml_roi_table, overflow indices useful for padding
-% if starts_idx<=0; error('starts results in negative index'); end
-% if ends_idx<=0; error('ends results in negative index'); end
-% if ~isempty(nSamples)
-%   if starts_idx>nSamples; error('starts index exceeds number of samples in file'); end
-%   if ends_idx>nSamples; error('ends index exceeds number of samples in file'); end
-% end

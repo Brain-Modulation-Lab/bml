@@ -41,8 +41,8 @@ function warpedcoords = bml_timewarp(cfg, master, slave)
   % warpedcoords.t1 - double: first coordinate time in seconds
   % warpedcoords.s2 - integer: second coordinate sample
   % warpedcoords.t2 - double: second coordinate time in seconds
-  % warpedcoords.wt0
-  % warpedcoords.ws1 
+  % warpedcoords.wt0 - double: fitted parameter
+  % warpedcoords.ws1 - double: fitted parameter
   
   penalty_wt0       = bml_getopt(cfg,'penalty_wt0', 60);
   penalty_ws1       = bml_getopt(cfg,'penalty_ws1', 1e-3); 

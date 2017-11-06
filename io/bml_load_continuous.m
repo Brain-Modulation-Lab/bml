@@ -9,10 +9,12 @@ function raw = bml_load_continuous(cfg)
 %   cfg.folder
 %   cfg.channel
 %   cfg.chantype
+%   cfg.filetype
 %   cfg.Fs
 %   cfg.roi - roi table (see BML_ROI_TABLE) Annotations should not overlap.
 %   cfg.timetol - double: time tolerance in seconds per sample. Defaults to 1e-6
 %   cfg.chantype - string
+%   cfg.dryrun - logical: should a dry-run test be performed?
 %
 % returns a continuous FT_DATATYPE_RAW 
 
@@ -23,6 +25,7 @@ filetype  = string(bml_getopt(cfg,'filetype'));
 Fs        = bml_getopt(cfg,'Fs');
 roi       = bml_getopt(cfg,'roi');
 timetol   = bml_getopt(cfg,'timetol',1e-6);
+dryrun    = bml_getopt(cfg,'dryrun',false);
 
 if ~isempty(folder)
   %ToDo: combine cfg.folder with roi.folder in a smart way
@@ -30,6 +33,10 @@ if ~isempty(folder)
 end
 
 roi = bml_roi_table(roi);
+if height(roi)==0
+  raw=[];
+  return  
+end
 
 %assert for no time overlaps between rows
 if ~isempty(bml_annot_overlap(roi))
@@ -46,59 +53,74 @@ end
 if isempty(Fs) && ismember('Fs',roi.Properties.VariableNames)
   Fs        = unique(roi.Fs);
 end
-if length(filetype) ~= 1; error('unique filetype required'); end
-if length(chantype) ~= 1; error('unique chantype required'); end
-if length(Fs) ~= 1; error('unique Fs required'); end
+assert(length(filetype)==1,'unique filetype required: %s',strjoin(filetype));
+assert(length(chantype)==1,'unique chantype required: %s',strjoin(chantype));
+assert(length(Fs)==1,'unique Fs required: %s',strjoin(string(num2str(Fs))));
 
 %loading first raw
 cfg=[]; cfg.chantype=chantype;
-[s,e]=bml_crop_idx(roi(1,:));
+[s,e]=bml_crop_idx_valid(roi(1,:));
 cfg.trl = [s, e, 0];
-% cfg.trl = [roi.s1(1) roi.s2(1) 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
-raw = ft_preprocessing(cfg);
+if ~dryrun
+  raw = ft_preprocessing(cfg);
+else
+  raw = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
+  assert(raw.nSamples>=e,'index overflow s2=%i but nSample=%i',e,raw.nSamples);
+end
 
 if ~isempty(channel)
   if ~ismember(channel,raw.label)
     error(char(strcat(channel,' not present in raw ',cfg.dataset,' \nAvailable channels are: ',strjoin(raw.label))));
+  elseif ~dryrun
+    cfg=[]; cfg.channel=channel{:};
+    raw = ft_selectdata(cfg,raw);
   end
-  cfg=[]; cfg.channel=channel{:};
-  raw = ft_selectdata(cfg,raw);
 end
 
-% time = raw.time{1}+roi.t1(1);
-time = raw.time{1}+bml_idx2time(roi(1,:),s);
+% time = raw.time{1}+bml_idx2time(roi(1,:),s);
+time = bml_idx2time(roi(1,:),s:e);
 raw.time{1} = time;
 if abs(time(end)-bml_idx2time(roi(1,:),e)) > timetol; error('timetol violated'); end
 
 for i=2:height(roi)
   %loading next raw
   cfg=[]; cfg.chantype=chantype;
-  [s,e]=bml_crop_idx(roi(i,:));
+  [s,e]=bml_crop_idx_valid(roi(i,:));
   cfg.trl = [s, e, 0];
-  %cfg.trl = [roi.s1(i) roi.s2(i) 0];
   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
-  next_raw = ft_preprocessing(cfg);
+  if ~dryrun
+    next_raw = ft_preprocessing(cfg);
+  else
+    next_raw = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
+    assert(next_raw.nSamples>=e,'index overflow s2=%i but nSample=%i',e,next_raw.nSamples);
+  end
   
   if ~isempty(channel)
     if isstring(channel); channel = {char(channel)}; end
-    cfg=[]; cfg.channel=channel;
-    next_raw = ft_selectdata(cfg,next_raw);
+    if ~dryrun
+      cfg=[]; cfg.channel=channel;
+      next_raw = ft_selectdata(cfg,next_raw);
+    end
   end
     
-  %next_time = next_raw.time{1}+roi.t1(i);
-  next_time = next_raw.time{1}+bml_idx2time(roi(i,:),s);
+  %next_time = next_raw.time{1}+bml_idx2time(roi(i,:),s);
+  next_time = bml_idx2time(roi(i,:),s:e);
   next_raw.time{1} = next_time;
-  if abs(next_time(end)-bml_idx2time(roi(i,:),e)) > timetol; error('timetol violated'); end
+  assert(abs(next_time(end)-bml_idx2time(roi(i,:),e)) < timetol, 'timetol violated');
  
   %verifying contiguity
   delta_t = time(end) - next_time(1) + 1/Fs;
   if abs(delta_t) < timetol
-    cfg1=[]; cfg1.timetol = timetol; cfg1.timeref = 'common';
-    raw = bml_hstack(cfg1, raw, next_raw);
-    
-    time = raw.time{1};
+    if ~dryrun
+      cfg1=[]; cfg1.timetol = timetol; cfg1.timeref = 'common';
+      raw = bml_hstack(cfg1, raw, next_raw);
+      time = raw.time{1};
+    else
+      time = [time next_time];
+    end
   else %dealing with non-contiguous files
+    roi
     error('concatenating non-contiguous files is not supported yet');
     keyboard
     %delta_s=round(delta_t/Fs);
@@ -110,5 +132,8 @@ for i=2:height(roi)
   end
 end
 
+if dryrun
+  raw = [];
+end
 
 

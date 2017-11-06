@@ -133,12 +133,12 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
 
   %correlation
   [corr,lag]=xcorr(master.trial{1}(1,:), slave.trial{1}(1,:),...
-                    floor(max(abs(scan))*master.fsample),'unbiased');
+                    floor(max(abs(scan))*master.fsample),'coeff');
   [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n);  
 
   if try_polarity                              
     [corr_m,lag_m]=xcorr(master.trial{1}(1,:), (-1).* slave.trial{1}(1,:),...
-                      floor(max(abs(scan))*master.fsample),'unbiased');                 
+                      floor(max(abs(scan))*master.fsample),'coeff');                 
     [max_corr_idx_m,max_corr_m] = find_delta_corr(corr_m,lag_m,penalty_tau,penalty_n);   
     if max_corr_m > max_corr
       slave.trial{1}=(-1).* slave.trial{1};
