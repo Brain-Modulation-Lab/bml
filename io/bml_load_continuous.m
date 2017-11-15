@@ -4,6 +4,7 @@ function raw = bml_load_continuous(cfg)
 %
 % Use as 
 %   raw = bml_load_continuous(cfg)
+%   raw = bml_load_continuous(roi_table)
 %
 % cfg is configuratin struct
 %   cfg.folder
@@ -15,17 +16,27 @@ function raw = bml_load_continuous(cfg)
 %   cfg.timetol - double: time tolerance in seconds per sample. Defaults to 1e-6
 %   cfg.chantype - string
 %   cfg.dryrun - logical: should a dry-run test be performed?
+%   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
+%           functions 
+%
+% roi_table is what would go in the cfg.roi field 
 %
 % returns a continuous FT_DATATYPE_RAW 
 
-folder    = string(bml_getopt(cfg,'folder'));
-channel   = string(bml_getopt(cfg,'channel'));
-chantype  = string(bml_getopt(cfg,'chantype'));
-filetype  = string(bml_getopt(cfg,'filetype'));
-Fs        = bml_getopt(cfg,'Fs');
-roi       = bml_getopt(cfg,'roi');
-timetol   = bml_getopt(cfg,'timetol',1e-6);
-dryrun    = bml_getopt(cfg,'dryrun',false);
+if istable(cfg)
+  cfg = struct('roi',cfg);
+end
+
+folder      = bml_getopt(cfg,'folder');
+channel     = bml_getopt(cfg,'channel');
+chantype    = bml_getopt(cfg,'chantype');
+filetype    = bml_getopt(cfg,'filetype');
+Fs          = bml_getopt(cfg,'Fs');
+roi         = bml_getopt(cfg,'roi');
+timetol     = bml_getopt(cfg,'timetol',1e-6);
+dryrun      = bml_getopt(cfg,'dryrun',false);
+ft_feedback = bml_getopt(cfg,'ft_feedback','no');
+ft_feedback = ft_feedback{1};
 
 if ~isempty(folder)
   %ToDo: combine cfg.folder with roi.folder in a smart way
@@ -45,14 +56,15 @@ if ~isempty(bml_annot_overlap(roi))
 end
 
 if isempty(chantype) && ismember('chantype',roi.Properties.VariableNames)
-  chantype  = unique(roi.chantype);
+  chantype  = cellstr(unique(roi.chantype));
 end
 if isempty(filetype) && ismember('filetype',roi.Properties.VariableNames)
-  filetype  = unique(roi.filetype);
+  filetype  = cellstr(unique(roi.filetype));
 end
 if isempty(Fs) && ismember('Fs',roi.Properties.VariableNames)
   Fs        = unique(roi.Fs);
 end
+
 assert(length(filetype)==1,'unique filetype required: %s',strjoin(filetype));
 assert(length(chantype)==1,'unique chantype required: %s',strjoin(chantype));
 assert(length(Fs)==1,'unique Fs required: %s',strjoin(string(num2str(Fs))));
@@ -62,6 +74,7 @@ cfg=[]; cfg.chantype=chantype;
 [s,e]=bml_crop_idx_valid(roi(1,:));
 cfg.trl = [s, e, 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
+cfg.feedback=ft_feedback;
 if ~dryrun
   raw = ft_preprocessing(cfg);
 else
@@ -70,10 +83,11 @@ else
 end
 
 if ~isempty(channel)
-  if ~ismember(channel,raw.label)
+  channel_selected=ft_channelselection(channel,raw.label);
+  if numel(channel_selected)==0
     error(char(strcat(channel,' not present in raw ',cfg.dataset,' \nAvailable channels are: ',strjoin(raw.label))));
   elseif ~dryrun
-    cfg=[]; cfg.channel=channel{:};
+    cfg=[]; cfg.channel=channel{:}; cfg.feedback=ft_feedback;
     raw = ft_selectdata(cfg,raw);
   end
 end
@@ -89,6 +103,7 @@ for i=2:height(roi)
   [s,e]=bml_crop_idx_valid(roi(i,:));
   cfg.trl = [s, e, 0];
   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
+  cfg.feedback=ft_feedback;
   if ~dryrun
     next_raw = ft_preprocessing(cfg);
   else
@@ -99,7 +114,7 @@ for i=2:height(roi)
   if ~isempty(channel)
     if isstring(channel); channel = {char(channel)}; end
     if ~dryrun
-      cfg=[]; cfg.channel=channel;
+      cfg=[]; cfg.channel=channel; cfg.feedback=ft_feedback;
       next_raw = ft_selectdata(cfg,next_raw);
     end
   end

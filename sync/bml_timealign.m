@@ -27,6 +27,8 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   % cfg.penalty_n - double: penalty 'hill-coefficient' use to weight the
   %            correlation. Defines how abrupt is the penalty increase when
   %            slave_delta_t > cfg.penalty_tau. Defaults to 2. 
+  % cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
+  %            functions 
   %
   % master - FT_DATATYPE_RAW continuous with single channel and trial
   % slave - FT_DATATYPE_RAW continuous with single channel and trial
@@ -47,6 +49,8 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   lpf_freq          = bml_getopt(cfg,'lpf_freq', 4000);
   penalty_tau       = bml_getopt(cfg,'penalty_tau');
   penalty_n         = bml_getopt(cfg,'penalty_n', 2); 
+  ft_feedback       = bml_getopt(cfg,'ft_feedback','no');
+  ft_feedback       = ft_feedback{1};
 
   %assert single trial and channel
   if numel(master.trial) > 1; error('master should be single trial raw'); end
@@ -90,9 +94,11 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   slave = bml_pad(slave, master.time{1}(1), master.time{1}(end), 0);
 
   %common resample frequency
-  cfg=[]; cfg.resamplefs=resample_freq;
+  cfg=[]; cfg.feedback=ft_feedback;
+  cfg.resamplefs=resample_freq;
   master = ft_resampledata(cfg, master);
-  cfg=[]; cfg.time=master.time; cfg.method='linear';
+  cfg=[]; cfg.feedback=ft_feedback;
+  cfg.time=master.time; cfg.method='linear';
   slave = ft_resampledata(cfg, slave);
 
   %checking slave resampling

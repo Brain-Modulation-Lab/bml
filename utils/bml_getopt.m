@@ -66,6 +66,9 @@ elseif istable(opt)
     val = default;
   else
     val = opt.(key);
+    if iscell(val)
+      val = val{:};
+    end
   end
   
 elseif isa(opt, 'cell')
@@ -111,3 +114,10 @@ if isempty(val) && ~isempty(default) && ~emptymeaningful
   % what the value is
   val = default;
 end
+
+%returning cell of char instead of strings for compatibility with fieldtrip
+if isstring(val) || iscellstr(val) || ischar(val)
+  val = cellstr(val);
+end
+
+

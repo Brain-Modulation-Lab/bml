@@ -1,19 +1,24 @@
-function sync_roi = bml_synchronize_files(cfg)
+function sync_roi = bml_sync_digital(cfg)
 
-% BML_SYNCHRONIZE_FILES time-aligns files based on a common sync channel
+% BML_SYNC_ANALOG time-aligns files based on a common analog sync channel
 %
 % Use as
-%   sync_roi = bml_synchronize_files(cfg)
+%   sync_roi = bml_sync_digital(cfg)
 %
 % cfg - configuration structure
 %   cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'
 %   cfg.master_filetype - string: filetype that defines the time to which to align
 %             other filetypes
 %   cfg.sessions - annot table: defines starts and ends of sessions in master time
+%   cfg.session_extend - double or double array of length 2: amount of seconds by 
+%             which to extend each session to avoid cropping out relevant part of
+%             files. Defaults to 100 seconds.    
 %   cfg.files - roi table with vars 'id','starts','ends','folder','name',
 %            'nSamples','filetype'. Contains a coarse alignment of the
 %            files, normally inferred from the OS 'Date-Modified' metadata.
 %            'starts' and 'ends' should be given in seconds from midnight.
+%   cfg.timewarp - logical: Should slave time be warped? defaults to 
+%            true.
 %   cfg.praat - logical: should synchronized files be opened in praat for
 %            manual quality check
 %   cfg.resample_freq - double: frequency in Hz at which to resample master
@@ -24,8 +29,8 @@ function sync_roi = bml_synchronize_files(cfg)
 %   cfg.env_scan - double: number of seconds in which to scan for initial
 %           coarse grain alignement between master and slave's envelopes.
 %           Defaults to 300 seconds (5 minutes).
-%   cfg.env_penalty_wt0 - double: penalty parameter for midpoint shift in
-%           coarse time-warp. Defaults to 30. (see BML_TIMEWARP)
+%   cfg.env_penalty_wt0_min - double: penalty parameter for midpoint shift in
+%           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)
 %   cfg.env_penalty_ws1 - double: penalty parameter for time stretching in
 %           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)
 %   cfg.lpf_max_freq - double: maximum low-pass-filter cutoff frequency (Hz).
@@ -34,10 +39,12 @@ function sync_roi = bml_synchronize_files(cfg)
 %   cfg.lpf_scan - double: number of seconds in which to scan for fine-grain
 %           alignement between master and slave's low-pass-filter signal.
 %           Defaults to 1 seconds.
-%   cfg.lpf_penalty_wt0 - double: penalty parameter for midpoint shift in
-%           fine-grain time-warp. Defaults to 1. (see BML_TIMEWARP)
+%   cfg.lpf_penalty_wt0_min - double: penalty parameter for midpoint shift in
+%           fine-grain time-warp. Defaults to 1e-6. (see BML_TIMEWARP)
 %   cfg.lpf_penalty_ws1 - double: penalty parameter for time stretching in
 %           fine-grain time-warp. Defaults to 1e-4. (see BML_TIMEWARP)
+%   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
+%           functions 
 %
 % returns roi table with vars 
 %   id: integer identification number of the synchronized file chunk
@@ -55,27 +62,39 @@ function sync_roi = bml_synchronize_files(cfg)
 %   filetype: 
 % 
 
-sync_channels   = bml_getopt(cfg,'sync_channels');
-master_filetype = bml_getopt(cfg,'master_filetype');
-sessions        = bml_annot_table(bml_getopt(cfg,'sessions'),'sessions');
-files_os        = bml_roi_table(bml_getopt(cfg,'files'),'files_os');
-praat           = bml_getopt(cfg,'praat',false);
-resample_freq   = bml_getopt(cfg,'resample_freq',10000);
-env_freq        = bml_getopt(cfg,'env_freq',100);
-env_scan        = bml_getopt(cfg,'env_scan',300);
-env_penalty_wt0 = bml_getopt(cfg,'env_penalty_wt0',30);
-env_penalty_ws1 = bml_getopt(cfg,'env_penalty_ws1',1e-3);
-lpf_max_freq    = bml_getopt(cfg,'lpf_max_freq',4000);
-lpf_scan        = bml_getopt(cfg,'lpf_scan',1);
-lpf_penalty_wt0 = bml_getopt(cfg,'lpf_penalty_wt0',1);
-lpf_penalty_ws1 = bml_getopt(cfg,'lpf_penalty_ws1',1e-4);
+
+sync_channels       = bml_getopt(cfg,'sync_channels');
+master_filetype     = bml_getopt(cfg,'master_filetype');
+sessions            = bml_annot_table(bml_getopt(cfg,'sessions'),'sessions');
+session_extend      = bml_getopt(cfg,'session_extend',100);
+files_os            = bml_roi_table(bml_getopt(cfg,'files'),'files_os');
+praat               = bml_getopt(cfg,'praat',false);
+resample_freq       = bml_getopt(cfg,'resample_freq',10000);
+env_freq            = bml_getopt(cfg,'env_freq',100);
+env_scan            = bml_getopt(cfg,'env_scan',300);
+env_penalty_wt0_min = bml_getopt(cfg,'env_penalty_wt0_min',1e-3);
+env_penalty_ws1     = bml_getopt(cfg,'env_penalty_ws1',1e-3);
+lpf_max_freq        = bml_getopt(cfg,'lpf_max_freq',4000);
+lpf_scan            = bml_getopt(cfg,'lpf_scan',1);
+lpf_penalty_wt0_min = bml_getopt(cfg,'lpf_penalty_wt0_min',1e-6);
+lpf_penalty_ws1     = bml_getopt(cfg,'lpf_penalty_ws1',1e-4);
+timewarp            = bml_getopt(cfg,'timewarp',true);
+ft_feedback         = bml_getopt(cfg,'ft_feedback','no');
+ft_feedback         = ft_feedback{1};
 
 assert(~ismember('filetype',sessions.Properties.VariableNames),...
   'cfg.sessions should not containt ''filetype'' variable');
+assert(~isempty(sessions),'empty session table');
 
 sync_roi = files_os;
 if ~ismember('warpfactor',sync_roi.Properties.VariableNames)
   sync_roi.warpfactor=ones(height(sync_roi),1);
+end
+if ~ismember('chantype',sync_roi.Properties.VariableNames)
+  sync_roi.chantype=char(zeros(height(sync_roi),0));
+end
+if ~ismember('session_id',sync_roi.Properties.VariableNames)
+  sync_roi.session_id=zeros(height(sync_roi),1);
 end
 
 filetypes=unique(sync_channels.filetype);
@@ -87,7 +106,7 @@ master_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,master_fi
 for session_i=1:height(sessions)
   session_files_os = bml_annot_intersect(files_os, sessions(session_i,:));  
   for filetype_i=1:length(filetypes)
-    cfg=[];
+    cfg=[]; cfg.ft_feedback=ft_feedback;
     cfg.channel = sync_channels.channel{strcmp(sync_channels.filetype,filetypes(filetype_i))};
     cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,filetypes(filetype_i))};
   	cfg.roi=session_files_os(string(session_files_os.filetype)==filetypes(filetype_i),:);
@@ -98,17 +117,21 @@ for session_i=1:height(sessions)
   end
 end
 
-%doing the synchronization
+%synchronizing
 for session_i=1:height(sessions)
   session_id = sessions.id(session_i);
-  session_files_os = bml_annot_intersect(files_os, sessions(session_i,:));  
+  extended_sessions = bml_annot_extend(sessions,session_extend);
+  session_files_os = bml_annot_intersect(files_os, extended_sessions(session_i,:));  
   master_session_files_os=session_files_os(strcmp(session_files_os.filetype,master_filetype),:);  
 
   cfg=[]; %creating masters raw with sync channel for entire session
   cfg.channel = master_channel; cfg.chantype = master_chantype; 
-  cfg.roi = master_session_files_os;
+  cfg.roi = master_session_files_os; cfg.ft_feedback=ft_feedback;
   master = bml_load_continuous(cfg);
-
+    
+  filtvec=(ismember(sync_roi.id,master_session_files_os.files_os_id));
+  sync_roi.chantype{filtvec} = master_chantype;  
+  sync_roi.session_id(filtvec) = session_id;  
   if praat
   	bml_praat(strcat('s',num2str(session_id),'_master_',master_filetype),master);  
   end
@@ -119,7 +142,8 @@ for session_i=1:height(sessions)
     slave_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
     
     cfg=[]; %creating slave raw with sync channel for entire session
-    cfg.channel = slave_channel;
+    cfg.ft_feedback=ft_feedback;
+    cfg.channel = slave_channel; 
     cfg.chantype = slave_chantype;
     cfg.roi = filetype_session_files_os;
     slave = bml_load_continuous(cfg);  
@@ -128,16 +152,18 @@ for session_i=1:height(sessions)
     sc.s1=1; sc.s2=length(slave.time{1});
     sc.t1=slave.time{1}(sc.s1); sc.t2=slave.time{1}(sc.s2);
     
-    cfg=[]; cfg.resample_freq=resample_freq;
+    cfg=[]; cfg.ft_feedback=ft_feedback;
+    cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
     cfg.method='envelope';cfg.env_freq=env_freq; cfg.scan=env_scan;
-    cfg.penalty_wt0=env_penalty_wt0; cfg.penalty_ws1=env_penalty_ws1;
+    cfg.penalty_wt0_min=env_penalty_wt0_min; cfg.penalty_ws1=env_penalty_ws1;
     wc_env = bml_timewarp(cfg,master,slave);
     slave.time{1} = bml_idx2time(wc_env, 1:length(slave.time{1}));
 
-    cfg=[]; cfg.resample_freq=resample_freq;
+    cfg=[]; cfg.ft_feedback=ft_feedback;
+    cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
     cfg.method='low-pass-filter'; cfg.scan=lpf_scan;
     cfg.lpf_freq=min([master.fsample,slave.fsample,lpf_max_freq]);
-    cfg.penalty_wt0=lpf_penalty_wt0; cfg.penalty_ws1=lpf_penalty_ws1;
+    cfg.penalty_wt0_min=lpf_penalty_wt0_min; cfg.penalty_ws1=lpf_penalty_ws1;
     wc_lpf = bml_timewarp(cfg,master,slave);
     slave.time{1} = bml_idx2time(wc_lpf, 1:length(slave.time{1}));
 
@@ -151,15 +177,15 @@ for session_i=1:height(sessions)
     filtvec=(ismember(sync_roi.id,filetype_session_files_os.files_os_id));
     sync_roi.t1(filtvec) = bml_idx2time(wc_lpf,filetype_session_files_os.raw1);
     sync_roi.t2(filtvec) = bml_idx2time(wc_lpf,filetype_session_files_os.raw2);
+    sync_roi.chantype(filtvec) = repmat({slave_chantype},sum(filtvec),1);
     sync_roi.warpfactor(filtvec) = wc_env.ws1*wc_lpf.ws1;
+    sync_roi.session_id(filtvec) = session_id;  
       
     if praat
-      %t1=max(master.time{1}(1),slave.time{1}(1));
-      %t2=min(master.time{1}(end),slave.time{1}(end));
-      %master_crop=bml_crop(master,t1,t2);
       t1=master.time{1}(1);
       t2=master.time{1}(end);
       cfg=[]; cfg.time=master.time; cfg.method='pchip';
+      cfg.feedback=ft_feedback;
       slave_crop=ft_resampledata(cfg,bml_crop(slave,t1,t2));
       slave_crop.fsample = master.fsample;
       bml_praat(strcat('s',num2str(session_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
