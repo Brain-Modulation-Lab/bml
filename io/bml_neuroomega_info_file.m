@@ -23,8 +23,8 @@ function info = bml_neuroomega_info_file(cfg)
 %   depth - double: depth of the electrodes as extracted from the file name
 %   filenum - double: index of the file at the specified depth
 
-cfg.pattern = ft_getopt(cfg,'pattern','*.mat');
-cfg.regexp  = ft_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat');
+cfg.pattern = bml_getopt(cfg,'pattern','*.mat');
+cfg.regexp  = bml_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat');
 
 info = bml_info_file(cfg);
 

@@ -20,13 +20,16 @@ function info = bml_info_file(cfg)
 %   isdir - logical: 1 if name is a folder; 0 if name is a file
 %   datenum - double: Modification date as serial date number.
 
-path        = ft_getopt(cfg,'path','.');
-filepattern = ft_getopt(cfg,'pattern','*');
-fileregexp  = ft_getopt(cfg,'regexp',[]);
+path        = bml_getopt(cfg,'path','.');
+if iscell(path); path = path{1}; end
+filepattern = bml_getopt(cfg,'pattern','*');
+if iscell(filepattern); filepattern = filepattern{1}; end
+fileregexp  = bml_getopt(cfg,'regexp',[]);
+if iscell(fileregexp); fileregexp = fileregexp{1}; end
 
 filetype    = regexp(filepattern,'.*\.(.*)$','tokens','once');
 if isempty(filetype); filetype = 'unknown'; end
-filetype    = ft_getopt(cfg,'filetype',filetype);
+filetype    = bml_getopt(cfg,'filetype',filetype);
 
 files=dir(fullfile(path, filepattern));
 if ~isempty(fileregexp)

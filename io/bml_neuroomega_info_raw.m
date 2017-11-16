@@ -94,7 +94,8 @@ if ~isempty(info_mpx) %loading date from .mpx OS info if available
   starts = ends - info.duration;
   info = [table(starts,ends,'VariableNames',{'starts','ends'}) info];
   info.basename = [];
-  info=sortrows(info,'starts');
+  %info=sortrows(info,'starts');
+  info = bml_annot_table(info);
 else
   warning('Specify cfg.mpx_path for starts/ends calculation')
   info=sortrows(info,'time_begin');

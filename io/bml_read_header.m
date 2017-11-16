@@ -7,8 +7,8 @@ function hdr = bml_read_header(cfg)
 %
 % returns fieldtrip header
 
-name    = bml_getopt(cfg,'name');
-folder  = bml_getopt(cfg,'folder');
+name    = bml_getopt_single(cfg,'name');
+folder  = bml_getopt_single(cfg,'folder');
 
 assert(~isempty(name),"cfg.name required")
 if isempty(folder); folder = "."; end

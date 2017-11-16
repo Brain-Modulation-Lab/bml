@@ -23,7 +23,7 @@ function roi=bml_roi_table(x, description, x_var_name)
 %   t1: midpoint time of sample s1. Note that if s1==1 => t1=starts+0.5/Fs
 %   s2: last sample number of synchronization coordinate
 %   t2: midpoint time of sample s2. Note that if s2==end => t2=ends-0.5/Fs
-%   folder: 
+%   folder: path to folder with file
 %   name: file name. Note that several each file can have several file
 %         chunks, i.e. several rows in this table 
 %   nSamples: integer total number of samples of the file

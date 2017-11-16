@@ -15,7 +15,7 @@ function sync_roi = bml_sync_digital(cfg)
 %   cfg.chunk_extend - double or double array of length 2: amount of seconds by 
 %             which to extend each sync chunk in slave files to avoid cropping out 
 %             relevant part of because of incorrect initial alignemnt
-%             files. Defaults to 0 seconds.    
+%             files. Defaults to 100 seconds.    
 %   cfg.roi - roi table with vars 'id','starts','ends','folder','name',
 %            'nSamples','filetype'. Contains a coarse alignment of the
 %            files, normally inferred from the OS 'Date-Modified' metadata.
@@ -68,7 +68,7 @@ function sync_roi = bml_sync_digital(cfg)
 sync_channels       = bml_getopt(cfg,'sync_channels');
 master_filetype     = bml_getopt_single(cfg,'master_filetype');
 chunks              = bml_annot_table(bml_getopt(cfg,'chunks'),'chunks');
-chunk_extend        = bml_getopt(cfg,'chunk_extend',0);
+chunk_extend        = bml_getopt(cfg,'chunk_extend',100);
 roi_os              = bml_roi_table(bml_getopt(cfg,'roi'),'roi_os');
 praat               = bml_getopt(cfg,'praat',false);
 resample_freq       = bml_getopt(cfg,'resample_freq',10000);
@@ -149,7 +149,7 @@ for chunk_i=1:height(chunks)
   sync_roi = [sync_roi;row];
   
   if praat
-  	bml_praat(strcat('c',num2str(chunk_id),'_master_',master_filetype),master);  
+  	bml_praat(strcat('s',num2str(chunk_id),'_master_',master_filetype),master);  
   end
   
   for slave_i=1:length(slave_filetypes)
@@ -200,12 +200,11 @@ for chunk_i=1:height(chunks)
     %sync_roi.chunk_id(filtvec) = chunk_id;  
       
     row = filetype_chunk_roi_os(:,sync_roi_vars);
-    row.t1 = bml_idx2time(wc_lpf,filetype_chunk_roi_os.raw1);
-    row.t2 = bml_idx2time(wc_lpf,filetype_chunk_roi_os.raw2);
     row.chantype=repmat({slave_chantype},height(row),1);
-    row.warpfactor = repmat(wc_env.ws1*wc_lpf.ws1,height(row),1);
+    row.warpfac
     row.chunk_id = repmat(chunk_id,height(row),1);
-    sync_roi = [sync_roi; row];
+    sync_roi = [sync_roi;row];
+    
     
     if praat
       t1=master.time{1}(1);
@@ -214,7 +213,7 @@ for chunk_i=1:height(chunks)
       cfg.feedback=ft_feedback;
       slave_crop=ft_resampledata(cfg,bml_crop(slave,t1,t2));
       slave_crop.fsample = master.fsample;
-      bml_praat(strcat('c',num2str(chunk_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
+      bml_praat(strcat('s',num2str(chunk_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
     end
 
   end

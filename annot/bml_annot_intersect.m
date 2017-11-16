@@ -40,6 +40,9 @@ else
   error('use as bml_annot_intersect(x, y)')
 end
 
+if isempty(x.Properties.Description); x.Properties.Description = 'x'; end
+if isempty(y.Properties.Description); y.Properties.Description = 'y'; end
+
 xidn=[x.Properties.Description '_id'];
 yidn=[y.Properties.Description '_id'];
 

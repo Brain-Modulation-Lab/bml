@@ -35,8 +35,7 @@ Fs          = bml_getopt(cfg,'Fs');
 roi         = bml_getopt(cfg,'roi');
 timetol     = bml_getopt(cfg,'timetol',1e-6);
 dryrun      = bml_getopt(cfg,'dryrun',false);
-ft_feedback = bml_getopt(cfg,'ft_feedback','no');
-ft_feedback = ft_feedback{1};
+ft_feedback = bml_getopt_single(cfg,'ft_feedback','no');
 
 if ~isempty(folder)
   %ToDo: combine cfg.folder with roi.folder in a smart way
