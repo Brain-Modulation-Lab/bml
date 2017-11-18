@@ -137,15 +137,13 @@ for chunk_i=1:height(chunks)
   cfg.channel = master_channel; cfg.chantype = master_chantype; 
   cfg.roi = master_chunk_roi_os; cfg.ft_feedback=ft_feedback;
   master = bml_load_continuous(cfg);
-    
-  %filtvec=(ismember(sync_roi.id,master_chunk_roi_os.roi_os_id));
-  %sync_roi.chantype{filtvec} = master_chantype;  
-  %sync_roi.chunk_id(filtvec) = chunk_id;  
   
   row = master_chunk_roi_os(:,sync_roi_vars);
   row.chantype = repmat({master_chantype},height(row),1);
   row.chunk_id = repmat(chunk_id,height(row),1);
   row.warpfactor = ones(height(row),1);
+  row.sync_channel = master_channel;
+  row.sync_type = {'master'};
   sync_roi = [sync_roi;row];
   
   if praat
@@ -163,10 +161,6 @@ for chunk_i=1:height(chunks)
     cfg.chantype = slave_chantype;
     cfg.roi = filetype_chunk_roi_os;
     slave = bml_load_continuous(cfg);  
-
-    sc=[]; %saving slave coordinates
-    sc.s1=1; sc.s2=length(slave.time{1});
-    sc.t1=slave.time{1}(sc.s1); sc.t2=slave.time{1}(sc.s2);
     
     %envelope alingment and warping
     cfg=[]; cfg.ft_feedback=ft_feedback;
@@ -185,35 +179,32 @@ for chunk_i=1:height(chunks)
     wc_lpf = bml_timewarp(cfg,master,slave);
     slave.time{1} = bml_idx2time(wc_lpf, 1:length(slave.time{1}));
 
-    %calculating mapping between original file samples and raw samples
-    cumsample=cumsum(filetype_chunk_roi_os.s2-filetype_chunk_roi_os.s1+1);
+    %calculating mapping between original files samples and raw samples
+    %needed for NeuroOmega files, when bml_load_continuous concatenates
+    %files
+    %ToDo: this mapping should be done in bml_load_continuous
+    se=zeros(height(filetype_chunk_roi_os),2);
+    for r=1:height(filetype_chunk_roi_os)
+      [s,e]=bml_crop_idx_valid(filetype_chunk_roi_os(r,:));
+      se(r,:)=[s,e];
+    end  
+    cumsample=cumsum(se(:,2)-se(:,1)+1);
     cumsample=[0; cumsample(1:end-1,:)];
-    filetype_chunk_roi_os.raw1=filetype_chunk_roi_os.s1+cumsample;
-    filetype_chunk_roi_os.raw2=filetype_chunk_roi_os.s2+cumsample;
-    
-    %saving synchronized time coordinates
-    %filtvec=(ismember(sync_roi.id,filetype_chunk_roi_os.roi_os_id));
-    %sync_roi.t1(filtvec) = bml_idx2time(wc_lpf,filetype_chunk_roi_os.raw1);
-    %sync_roi.t2(filtvec) = bml_idx2time(wc_lpf,filetype_chunk_roi_os.raw2);
-    %sync_roi.chantype(filtvec) = repmat({slave_chantype},sum(filtvec),1);
-    %sync_roi.warpfactor(filtvec) = wc_env.ws1*wc_lpf.ws1;
-    %sync_roi.chunk_id(filtvec) = chunk_id;  
       
     row = filetype_chunk_roi_os(:,sync_roi_vars);
-    row.t1 = bml_idx2time(wc_lpf,filetype_chunk_roi_os.raw1);
-    row.t2 = bml_idx2time(wc_lpf,filetype_chunk_roi_os.raw2);
+    row.s1 = se(:,1);
+    row.s2 = se(:,2); 
+    row.t1 = bml_idx2time(wc_lpf,1+cumsample);
+    row.t2 = bml_idx2time(wc_lpf,se(:,2)-se(:,1)+1+cumsample);
     row.chantype=repmat({slave_chantype},height(row),1);
+    row.sync_channel = repmat({slave_channel},height(row),1);
+    row.sync_type = repmat({'slave'},height(row),1);
     row.warpfactor = repmat(wc_env.ws1*wc_lpf.ws1,height(row),1);
     row.chunk_id = repmat(chunk_id,height(row),1);
     sync_roi = [sync_roi; row];
     
     if praat
-      t1=master.time{1}(1);
-      t2=master.time{1}(end);
-      cfg=[]; cfg.time=master.time; cfg.method='pchip';
-      cfg.feedback=ft_feedback;
-      slave_crop=ft_resampledata(cfg,bml_crop(slave,t1,t2));
-      slave_crop.fsample = master.fsample;
+      slave_crop = bml_conform_to(master,slave);
       bml_praat(strcat('c',num2str(chunk_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
     end
 

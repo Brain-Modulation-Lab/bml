@@ -54,6 +54,20 @@ if ~isempty(bml_annot_overlap(roi))
   error('annotations in roi table overlap');
 end
 
+%consolidating chunks if of same file
+if height(roi)>1 && length(unique(roi.name))==1 && length(unique(roi.folder))==1
+  %ToDo: improve consolidation algorithm
+  consrow = roi(1,:);
+  consrow.starts = min(roi.starts);
+  consrow.ends = max(roi.ends);
+  consrow.s1 = min(roi.s1);
+  consrow.s2 = min(roi.s2);
+  consrow.t1 = min(roi.t1);
+  consrow.t2 = min(roi.t2);
+  consrow.warpfactor = sum(roi.warpfactor .* roi.duration)/sum(roi.duration);
+  roi = consrow;
+end
+
 if isempty(chantype) && ismember('chantype',roi.Properties.VariableNames)
   chantype  = cellstr(unique(roi.chantype));
 end
@@ -86,7 +100,7 @@ if ~isempty(channel)
   if numel(channel_selected)==0
     error(char(strcat(channel,' not present in raw ',cfg.dataset,' \nAvailable channels are: ',strjoin(raw.label))));
   elseif ~dryrun
-    cfg=[]; cfg.channel=channel{:}; cfg.feedback=ft_feedback;
+    cfg=[]; cfg.channel=channel; cfg.feedback=ft_feedback;
     raw = ft_selectdata(cfg,raw);
   end
 end
