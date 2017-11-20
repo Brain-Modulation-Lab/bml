@@ -13,6 +13,7 @@ function chunks = bml_chunk_sessions(sessions, split_time)
 
 sessions = bml_annot_table(sessions);
 assert(isempty(bml_annot_overlap(sessions)),'sessions should not overlap');
+if nargin == 1; split_time = []; end
 
 if ~ismember('session_id',sessions.Properties.VariableNames)
   sessions.session_id = sessions.id;

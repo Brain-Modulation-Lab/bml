@@ -33,10 +33,12 @@ function info = bml_info_raw(cfg)
 chantype    = bml_getopt(cfg, 'chantype', {}); 
 path        = bml_getopt(cfg, 'path');
 has_channel = bml_getopt(cfg, 'has_channel'); 
+
 info        = bml_info_file(cfg);
 
-info = info(info.bytes > 0,:);
-
+if isempty(info); return; end
+info = info(info.bytes > 0,:);  
+  
 hdr_vars={'chantype','Fs','nSamples','nChans','nTrials','chanunit'};
 hdr_table = cell2table(cell(height(info),length(hdr_vars)));
 hdr_table.Properties.VariableNames = hdr_vars;

@@ -27,6 +27,11 @@ if ~exist('description','var') || isempty(description)
   end
 end
 
+if isempty(x) 
+  annot=table();
+  return
+end
+
 if iscell(x); x=cell2table(x); end
 if isstruct(x); x=struct2table(x); end
 

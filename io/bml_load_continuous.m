@@ -36,7 +36,7 @@ channel     = bml_getopt(cfg,'channel');
 chantype    = bml_getopt(cfg,'chantype');
 filetype    = bml_getopt(cfg,'filetype');
 Fs          = bml_getopt(cfg,'Fs');
-roi         = bml_getopt(cfg,'roi');
+roi         = bml_roi_table(bml_getopt(cfg,'roi'));
 timetol     = bml_getopt(cfg,'timetol',1e-6);
 dryrun      = bml_getopt(cfg,'dryrun',false);
 ft_feedback = bml_getopt_single(cfg,'ft_feedback','no');
@@ -85,9 +85,18 @@ file_raw_map.t2=bml_idx2time(roi(1,:),e);
 file_raw_map.raw1=1;
 file_raw_map.raw2=e-s+1;
 
+%dealing with skip factors
+sf=1;
+chantype_split=strsplit(chantype{1},':');
+if numel(chantype_split) == 2
+  sf=str2double(chantype_split{2});
+elseif numel(chantype_split) > 2
+  ft_error('Use : to specify skipfactor, e.g. analog:10')
+end
+
 %loading first raw
 cfg=[]; cfg.chantype=chantype;
-cfg.trl = [s, e, 0];
+cfg.trl = [ceil(s/sf), floor(e/sf), 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
 cfg.feedback=ft_feedback;
 if ~dryrun
