@@ -13,12 +13,19 @@ function annot = bml_annot_consolidate(cfg, x)
 % cfg.description - string: description of the output annot table
 %
 % Returns a annotation table with the folloing variables:
+% 
+% EXAMPLES
+% ========
 %
-%
-%
-%
-%
-%
+% %detecting stretches of constant depth in neuroomega
+% cfg=[];
+% cfg.criterion = @(x) (length(unique(x.depth))==1) && (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
+% neuro_cons_depth = bml_annot_consolidate(cfg,info_neuroomega);
+% 
+% %grouping annotations in fours
+% cfg=[];
+% cfg.criterion = @(x) height(x)<=4
+% grouped_annot = bml_annot_consolidate(cfg,annot);
 
 x=bml_annot_table(x,[],inputname(2));
 description = ft_getopt(cfg,'description', ['cons_' x.Properties.Description]);

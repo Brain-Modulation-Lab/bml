@@ -1,10 +1,12 @@
-function raw = bml_load_continuous(cfg)
+function [raw, file_raw_map] = bml_load_continuous(cfg)
 
 % BML_LOAD_CONTINUOUS loads continuous raw from one or more files
 %
 % Use as 
 %   raw = bml_load_continuous(cfg)
 %   raw = bml_load_continuous(roi_table)
+%   [raw, file_raw_map] = bml_load_continuous(cfg)
+%   [raw, file_raw_map] = bml_load_continuous(roi_table)
 %
 % cfg is configuratin struct
 %   cfg.folder
@@ -21,7 +23,9 @@ function raw = bml_load_continuous(cfg)
 %
 % roi_table is what would go in the cfg.roi field 
 %
-% returns a continuous FT_DATATYPE_RAW 
+% returns a continuous FT_DATATYPE_RAW and optionally a raw table
+
+file_raw_map_vars = {'starts','ends','s1','t1','s2','t2','folder','name','nSamples','Fs'};
 
 if istable(cfg)
   cfg = struct('roi',cfg);
@@ -54,20 +58,10 @@ if ~isempty(bml_annot_overlap(roi))
   error('annotations in roi table overlap');
 end
 
-%consolidating chunks if of same file
-if height(roi)>1 && length(unique(roi.name))==1 && length(unique(roi.folder))==1
-  %ToDo: improve consolidation algorithm
-  consrow = roi(1,:);
-  consrow.starts = min(roi.starts);
-  consrow.ends = max(roi.ends);
-  consrow.s1 = min(roi.s1);
-  consrow.s2 = min(roi.s2);
-  consrow.t1 = min(roi.t1);
-  consrow.t2 = min(roi.t2);
-  consrow.warpfactor = sum(roi.warpfactor .* roi.duration)/sum(roi.duration);
-  roi = consrow;
-end
+%consolidating chunks of same file when possible
+roi = bml_sync_consolidate(roi);
 
+%using roi parameters if none specified in call
 if isempty(chantype) && ismember('chantype',roi.Properties.VariableNames)
   chantype  = cellstr(unique(roi.chantype));
 end
@@ -77,14 +71,22 @@ end
 if isempty(Fs) && ismember('Fs',roi.Properties.VariableNames)
   Fs        = unique(roi.Fs);
 end
-
 assert(length(filetype)==1,'unique filetype required: %s',strjoin(filetype));
 assert(length(chantype)==1,'unique chantype required: %s',strjoin(chantype));
 assert(length(Fs)==1,'unique Fs required: %s',strjoin(string(num2str(Fs))));
 
+%saving mapping between raw and files
+file_raw_map=roi(1,file_raw_map_vars);
+[s,e]=bml_crop_idx_valid(roi(1,:));
+file_raw_map.s1=s;
+file_raw_map.s2=e;
+file_raw_map.t1=bml_idx2time(roi(1,:),s);
+file_raw_map.t2=bml_idx2time(roi(1,:),e);
+file_raw_map.raw1=1;
+file_raw_map.raw2=e-s+1;
+
 %loading first raw
 cfg=[]; cfg.chantype=chantype;
-[s,e]=bml_crop_idx_valid(roi(1,:));
 cfg.trl = [s, e, 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
 cfg.feedback=ft_feedback;
@@ -111,9 +113,20 @@ raw.time{1} = time;
 if abs(time(end)-bml_idx2time(roi(1,:),e)) > timetol; error('timetol violated'); end
 
 for i=2:height(roi)
+  
+  %saving mapping between raw and files
+  row=roi(i,file_raw_map_vars);
+  [s,e]=bml_crop_idx_valid(roi(i,:));
+  row.s1=s;
+  row.s2=e;
+  row.t1=bml_idx2time(roi(i,:),s);
+  row.t2=bml_idx2time(roi(i,:),e);
+  row.raw1=max(file_raw_map.raw2)+1;
+  row.raw2=e-s+row.raw1;
+  file_raw_map = [file_raw_map;row];
+  
   %loading next raw
   cfg=[]; cfg.chantype=chantype;
-  [s,e]=bml_crop_idx_valid(roi(i,:));
   cfg.trl = [s, e, 0];
   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
   cfg.feedback=ft_feedback;
@@ -164,4 +177,5 @@ if dryrun
   raw = [];
 end
 
+file_raw_map = bml_roi_table(file_raw_map);
 

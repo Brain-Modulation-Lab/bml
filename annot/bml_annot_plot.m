@@ -1,9 +1,12 @@
-function bml_annot_plot(cfg, annot, varargin)
+function bml_annot_plot(annot, varargin)
 
 % BML_ANNOT_PLOT plots an annotation table
 %
+% Use as
+%   bml_annot_plot(annot, varargin)
 %
-%
+% annot - annotation table
+% varargin - further arguments for plot
 
 annot = bml_annot_table(annot);
 if isempty(varargin)
