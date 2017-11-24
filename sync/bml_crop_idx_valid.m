@@ -25,8 +25,9 @@ function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)
 % if starts and ends are given (3 argument call) the values of cfg are
 % ignored
 
-nSamples=bml_getopt(cfg,'nSamples',[]);
-assert(~isempty(nSamples),'cfg.nSamples reuired');
+
+nSamples  = bml_getopt(cfg,'nSamples',[]);
+assert(~isempty(nSamples),'cfg.nSamples required');
 
 [starts_idx,ends_idx] = bml_crop_idx(cfg, varargin{:});
 

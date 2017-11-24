@@ -4,6 +4,7 @@ function env = bml_envelope_binabs(cfg, data)
 % bins of 'bin_size' points, repeating each value 'repeat' times
 %
 % Use as
+%   env = bml_envelope_binabs(data)
 %   env = bml_envelope_binabs(cfg, data)
 %
 % cfg is a configureation struct with the following fields
@@ -15,6 +16,11 @@ function env = bml_envelope_binabs(cfg, data)
 % Returns a FT_DATATYPE_RAW
 
 DEFAULT_TARGET_FSAMPLE=100;
+
+if nargin==1
+  data=cfg;
+  cfg=[];
+end
 
 freq            = bml_getopt(cfg,'freq',DEFAULT_TARGET_FSAMPLE);
 bin_size        = bml_getopt(cfg,'bin_size',round(data.fsample/freq));

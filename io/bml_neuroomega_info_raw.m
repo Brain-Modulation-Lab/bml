@@ -38,17 +38,17 @@ function info = bml_neuroomega_info_raw(cfg)
 %   duration
 
 
-chantype       = ft_getopt(cfg, 'chantype', 'chaninfo');   
-time_channel = ft_getopt(cfg,'time_channel','CANALOG_IN_1');
-time_begin = strcat(time_channel,'_TimeBegin');
-time_end = strcat(time_channel,'_TimeEnd');
+chantype       = bml_getopt(cfg, 'chantype', 'chaninfo');   
+time_channel   = bml_getopt_single(cfg,'time_channel','CANALOG_IN_1');
+time_begin     = strcat(time_channel,'_TimeBegin');
+time_end       = strcat(time_channel,'_TimeEnd');
 
 info = bml_neuroomega_info_file(cfg);
 
 cfg_mpx=[];
-cfg_mpx.path    = ft_getopt(cfg,'mpx_path',ft_getopt(cfg,'path','.'));
-cfg_mpx.pattern = ft_getopt(cfg,'mpx_pattern','*.mpx');
-cfg_mpx.regexp  = ft_getopt(cfg,'mpx_regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx');
+cfg_mpx.path    = bml_getopt(cfg,'mpx_path',ft_getopt(cfg,'path','.'));
+cfg_mpx.pattern = bml_getopt(cfg,'mpx_pattern','*.mpx');
+cfg_mpx.regexp  = bml_getopt(cfg,'mpx_regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx');
 info_mpx=bml_info_file(cfg_mpx);
 
 hdr_vars={'chantype','Fs','nSamples','nChans','nTrials','chanunit','time_begin','time_end'};
@@ -63,8 +63,14 @@ for i=1:height(info)
   hdr_table.nChans(i) = {hdr.nChans};  
   hdr_table.nTrials(i) = {hdr.nTrials};    
   hdr_table.chanunit(i) = {strjoin(unique(hdr.chanunit))}; 
-  hdr_table.time_begin(i) = {hdr.orig.(time_begin)};
-  hdr_table.time_end(i) = {hdr.orig.(time_end)};
+
+  if ismember(time_begin,fields(hdr.orig))
+    hdr_table.time_begin(i) = {hdr.orig.(time_begin)};
+    hdr_table.time_end(i) = {hdr.orig.(time_end)};
+  else
+    error('%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s',...
+      time_begin,fullfile(cfg.path,info.name{i}), strjoin(hdr.label));
+  end
 end
 hdr_table.Fs = cell2mat(hdr_table.Fs);
 hdr_table.nSamples = cell2mat(hdr_table.nSamples);

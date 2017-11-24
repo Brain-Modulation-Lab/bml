@@ -51,6 +51,11 @@ function sync_roi = bml_sync_digital(cfg)
 %           fine-grain time-warp. Defaults to 1e-4. (see BML_TIMEWARP)
 %   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
 %           functions 
+%   cfg.discontinuous - string or logical: 
+%           * true or 'allow' to allow discontinous files to be loaded filling 
+%           the gap with zero-padding, if possible within timetol.
+%           * false or 'no' to issue an error if discontinous files are found
+%           * 'warn' to allow with a warning (defaul)
 %
 % returns roi table with vars 
 %   id: integer identification number of the synchronized file chunk
@@ -87,6 +92,7 @@ lpf_penalty_wt0_min = bml_getopt(cfg,'lpf_penalty_wt0_min',1e-6);
 lpf_penalty_ws1     = bml_getopt(cfg,'lpf_penalty_ws1',1e-4);
 timewarp            = bml_getopt(cfg,'timewarp',true);
 ft_feedback         = bml_getopt_single(cfg,'ft_feedback','no');
+discontinuous       = bml_getopt(cfg,'discontinuous','warn');
 
 assert(~ismember('filetype',chunks.Properties.VariableNames),...
   'cfg.chunks should not containt ''filetype'' variable');
@@ -111,6 +117,7 @@ for chunk_i=1:height(chunks)
     cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,filetypes(filetype_i))};
   	cfg.roi=chunk_roi_os(string(chunk_roi_os.filetype)==filetypes(filetype_i),:);
     cfg.dryrun=true;
+    cfg.discontinuous=discontinuous;
     assert(height(cfg.roi)>0,'No files for filetype %s and session %i',...
       filetypes{filetype_i},chunks.id(chunk_i));
     bml_load_continuous(cfg); %raises error if continuity is violated
@@ -132,6 +139,7 @@ for chunk_i=1:height(chunks)
   cfg.channel = master_channel; cfg.chantype = master_chantype; 
   cfg.roi = master_chunk_roi_os; cfg.ft_feedback=ft_feedback;
   cfg.dryrun = dryrun;
+  cfg.discontinuous=discontinuous;
   [master, master_map] = bml_load_continuous(cfg);
   
   row = master_chunk_roi_os(:,sync_roi_vars);
@@ -157,13 +165,14 @@ for chunk_i=1:height(chunks)
     cfg.chantype = slave_chantype;
     cfg.roi = filetype_chunk_roi_os;
     cfg.dryrun = dryrun;
+    cfg.discontinuous=discontinuous;
     [slave, slave_map] = bml_load_continuous(cfg);  
     
     %envelope alingment and warping
     if ~dryrun
       cfg=[]; cfg.ft_feedback=ft_feedback;
       cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
-      cfg.method='envelope';cfg.env_freq=env_freq; cfg.scan=env_scan;
+      cfg.method='envelope'; cfg.env_freq=env_freq; cfg.scan=env_scan;
       cfg.penalty_wt0_min=env_penalty_wt0_min; cfg.penalty_ws1=env_penalty_ws1;
       wc_env = bml_timewarp(cfg,master,slave);
       slave.time{1} = bml_idx2time(wc_env, 1:length(slave.time{1}));

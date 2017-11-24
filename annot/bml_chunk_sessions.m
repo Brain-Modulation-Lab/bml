@@ -26,12 +26,13 @@ for i=1:length(split_time)
   session_i=sessions((sessions.starts < split_time(i)) & (sessions.ends > split_time(i)),:);
   if isempty(session_i)
     warning("time %d does not belong to any session",split_time(i));
+  else
+    sessions.ends(sessions.id==session_i.id(1)) = split_time(i);
+    session_i.id = max(sessions.id)+1;
+    session_i.starts = split_time(i);
+    session_i.session_part = session_i.session_part + 1;
+    sessions = [sessions; session_i];
   end
-  sessions.ends(sessions.id==session_i.id(1)) = split_time(i);
-  session_i.id = max(sessions.id)+1;
-  session_i.starts = split_time(i);
-  session_i.session_part = session_i.session_part + 1;
-  sessions = [sessions; session_i];
 end
 
 sessions.id=[];

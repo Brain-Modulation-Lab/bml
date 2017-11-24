@@ -43,6 +43,11 @@ end
 if isempty(x.Properties.Description); x.Properties.Description = 'x'; end
 if isempty(y.Properties.Description); y.Properties.Description = 'y'; end
 
+if strcmp(x.Properties.Description,y.Properties.Description)
+  x.Properties.Description = [x.Properties.Description '_x'];
+  y.Properties.Description = [y.Properties.Description '_y'];
+end
+
 xidn=[x.Properties.Description '_id'];
 yidn=[y.Properties.Description '_id'];
 
@@ -101,6 +106,7 @@ else %no overlaps in x
 end
 
 annot = bml_annot_table(annot,description);
+if isempty(annot); return; end
 
 x.starts=[]; x.ends=[]; % x.Properties.VariableNames{1}=xidn;
 y.starts=[]; y.ends=[]; % y.Properties.VariableNames{1}=yidn;

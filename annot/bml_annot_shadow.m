@@ -47,3 +47,4 @@ else %shadow into pass
   
 end
 
+shadow = bml_annot_table(shadow);

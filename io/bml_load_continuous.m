@@ -20,6 +20,13 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %   cfg.dryrun - logical: should a dry-run test be performed?
 %   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
 %           functions 
+%   cfg.discontinuous - string or logical: 
+%           * true or 'allow' to allow discontinous files to be loaded filling 
+%           the gap with zero-padding, if possible within timetol.
+%           * false or 'no' to issue an error if discontinous files are found
+%           * 'warn' to allow with a warning
+%   cfg.padval - value with which to pad if discontinuous files are loaded.
+%           Defualts to zero
 %
 % roi_table is what would go in the cfg.roi field 
 %
@@ -31,15 +38,25 @@ if istable(cfg)
   cfg = struct('roi',cfg);
 end
 
-folder      = bml_getopt(cfg,'folder');
-channel     = bml_getopt(cfg,'channel');
-chantype    = bml_getopt(cfg,'chantype');
-filetype    = bml_getopt(cfg,'filetype');
-Fs          = bml_getopt(cfg,'Fs');
-roi         = bml_roi_table(bml_getopt(cfg,'roi'));
-timetol     = bml_getopt(cfg,'timetol',1e-6);
-dryrun      = bml_getopt(cfg,'dryrun',false);
-ft_feedback = bml_getopt_single(cfg,'ft_feedback','no');
+folder        = bml_getopt(cfg,'folder');
+channel       = bml_getopt(cfg,'channel');
+chantype      = bml_getopt(cfg,'chantype');
+filetype      = bml_getopt(cfg,'filetype');
+Fs            = bml_getopt(cfg,'Fs');
+roi           = bml_roi_table(bml_getopt(cfg,'roi'));
+timetol       = bml_getopt(cfg,'timetol',1e-6);
+dryrun        = bml_getopt(cfg,'dryrun',false);
+ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
+discontinuous = bml_getopt(cfg,'discontinuous','warn');
+padval        = bml_getopt(cfg,'padval',0);
+
+if islogical(discontinuous)
+  if istrue(discontinuous)
+    discontinuous = {'allow'};
+  else
+    discontinuous = {'no'};
+  end
+end
 
 if ~isempty(folder)
   %ToDo: combine cfg.folder with roi.folder in a smart way
@@ -119,7 +136,9 @@ end
 % time = raw.time{1}+bml_idx2time(roi(1,:),s);
 time = bml_idx2time(roi(1,:),s:e);
 raw.time{1} = time;
-if abs(time(end)-bml_idx2time(roi(1,:),e)) > timetol; error('timetol violated'); end
+if abs(time(end)-bml_idx2time(roi(1,:),e)) > timetol
+  error('timetol violated')
+end
 
 for i=2:height(roi)
   
@@ -160,28 +179,43 @@ for i=2:height(roi)
   assert(abs(next_time(end)-bml_idx2time(roi(i,:),e)) < timetol, 'timetol violated');
  
   %verifying contiguity
-  delta_t = time(end) - next_time(1) + 1/Fs;
-  if abs(delta_t) < timetol
-    if ~dryrun
-      cfg1=[]; cfg1.timetol = timetol; cfg1.timeref = 'common';
-      raw = bml_hstack(cfg1, raw, next_raw);
-      time = raw.time{1};
+  delta_t = next_time(1) - time(end) - 1/Fs;
+  if abs(delta_t) > timetol %non contiguous files
+    if ~ismember(discontinuous,{'allow','warn'})
+      roi
+      error("To concateneting discontinuous rois use cfg.discontinuous='allow'");
+    end  
+    
+    delta_s = delta_t*Fs;
+    delta_s_int = round(delta_s);
+    assert(delta_s>0,"overlaping rois can't be concatenated"); 
+
+    if abs(delta_s_int - delta_s) < timetol
+      if ismember(discontinuous,{'warn'})
+        warning("concatenating discontinous files %i samples added",delta_s_int);
+      end
+      if ~dryrun
+        starts = raw.time{1}(1) - 0.5/Fs;
+        ends = next_time(1) - 0.5/Fs;
+        raw = bml_pad(raw,starts,ends,0);
+      else
+        time = [time,time(end)+(1:delta_s_int)/Fs];
+      end
     else
-      time = [time next_time];
-    end
-  else %dealing with non-contiguous files
-    roi
-    error('concatenating non-contiguous files is not supported yet');
-    keyboard
-    %delta_s=round(delta_t/Fs);
-    %if abs(delta_t/Fs - delta_s) < timetol * delta_s %checking relative error
-    % snap next_times in-frame with times
-    %else
-    % error('non-contiguos files can''t be merged within timetol')
-    %end
+    	roi
+      error('can''t concatenate discontinuous files within timetol');
+    end 
+  end
+    
+  if ~dryrun
+    cfg1=[]; cfg1.timetol = timetol; cfg1.timeref = 'common';
+    raw = bml_hstack(cfg1, raw, next_raw);
+    time = raw.time{1};
+  else
+    time = [time next_time];
   end
 end
-
+  
 if dryrun
   raw = [];
 end

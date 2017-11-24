@@ -41,7 +41,7 @@ for i_uff=1:length(uff)
 
   %last
   if complete
-    roi.ends(end) = bml_idx2time(i_roi(end,:),i_roi.nSamples(end)) + 0.5 ./ i_roi.Fs(end);
+    i_roi.ends(end) = bml_idx2time(i_roi(end,:),i_roi.nSamples(end)) + 0.5 ./ i_roi.Fs(end);
   end
   
   confluent = [confluent; i_roi];
