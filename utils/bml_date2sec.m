@@ -8,4 +8,5 @@ function sec=bml_date2sec(date)
 % returns a [N,1] array of doubles with the number of seconds since
 % midnight
 
+if ~iscell(date); date = {date}; end
 sec=(datenum(cellfun(@(x){x(13:20)},date))-datenum('00:00:00'))*24*60*60;

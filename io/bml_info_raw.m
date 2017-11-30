@@ -44,7 +44,7 @@ hdr_table = cell2table(cell(height(info),length(hdr_vars)));
 hdr_table.Properties.VariableNames = hdr_vars;
 
 for i=1:height(info)
-    hdr = ft_read_header(fullfile(path{1},info.name{i}),'chantype',chantype);
+    hdr = ft_read_header(fullfile(info.folder{i},info.name{i}),'chantype',chantype);
     if ~isempty(has_channel)
       if ~all(ismember(has_channel,hdr.label))
         continue
@@ -68,7 +68,7 @@ hdr_table.nTrials = cell2mat(hdr_table.nTrials);
 
 info = [info(filtvec,:) hdr_table];
 info.duration = info.nSamples ./ info.Fs;
-ends=bml_date2sec(info.date);
+ends=bml_date2sec(info{:,'date'});
 starts = ends-info.duration;
 
 info=[table(starts,ends,'VariableNames',{'starts','ends'}) info];

@@ -40,6 +40,13 @@ tmp=collapse_table_rows(x(1,:));
 annot = cell2table(cell(0,width(tmp))); 
 annot.Properties.VariableNames = tmp.Properties.VariableNames;
 
+if height(x)<=1
+  annot = collapse_table_rows(x);
+  annot.id=[];
+  annot = bml_annot_table(annot,description);
+  return
+end
+
 while i<=height(x)
   if j==1 
     curr_s=collapse_table_rows(x(i,:));

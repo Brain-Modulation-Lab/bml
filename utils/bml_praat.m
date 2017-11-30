@@ -46,13 +46,15 @@ for i=1:numel(varargin)
     names = [names {strcat(varargin{i}{1},'_')}];
     waslastname=true; 
   elseif isstruct(varargin{i})
-    if ~waslastname; names = {names{:} ""}; end
+    if ~waslastname; names = {names{:} ''}; end
     raws = [raws {varargin{i}}];   
     waslastname=false;
   else
     error('unknown type for argument %i',i);
   end
 end
+
+names = strrep(deblank(names),' ','_');
 
 %wavs={};
 rf=['%0' num2str(ceil(log10(numel(raws)))+1) 'd']; 

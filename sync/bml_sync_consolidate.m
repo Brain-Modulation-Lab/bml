@@ -2,25 +2,32 @@ function consolidated = bml_sync_consolidate(cfg)
 
 % BML_SYNC_CONSOLIDATE consolidates file chunks synchronizations
 %
-%
 % cfg.roi - roi table with sync chunks to consolidate
 % cfg.timetol - double: time tolerance allowed in consolidation. Defaults
 %               to 1e-2
+% cfg.contiguous - logical: should time contiguous files of the same type
+%               be consolidated toghether. Defaults to true. 
 %
 % If chunking for consolidation, each file can have several entries in the
-% sync output. This function consolidates those entries into one per file
+% sync output. This function consolidates those entries into one per file.
 
 if istable(cfg)
   cfg = struct('roi',cfg);
 end
-roi       = bml_getopt(cfg,'roi');
-timetol   = bml_getopt(cfg,'timetol',1e-2);
+roi        = bml_roi_table(bml_getopt(cfg,'roi'));
+timetol    = bml_getopt(cfg,'timetol',1e-2);
+contiguous = bml_getopt(cfg,'contiguous',true);
+
+REQUIRED_VARS = {'s1','t1','s2','t2','folder','name','nSamples','Fs','chantype','filetype'};
+assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
+  'Variables %s required',strjoin(REQUIRED_VARS))
 
 roi.fullfile = fullfile(roi.folder,roi.name);
 roi.sync_id = roi.id;
 uff = unique(roi.fullfile); %unique fullfile
 consolidated = table();
 
+%consolidating several entries for the same file. 
 for i_uff=1:length(uff)
   i_roi = roi(strcmp(roi.fullfile,uff(i_uff)),:);
   if height(i_roi)>1
@@ -48,11 +55,67 @@ for i_uff=1:length(uff)
         consrow.warpfactor = consrow.Fs * p(1);
       end
       i_roi = consrow;      
+    else  
+      warning('can''t consolidate within tolerance');
     end
   end
   consolidated = [consolidated; i_roi];
 end
 
 consolidated.id=[];
+roi.fullfile=[];
+consolidated = bml_roi_table(consolidated);
+
+%consolidating several time contiguos files together
+if istrue(contiguous)
+  roi = consolidated;
+  consolidated = table();
+  roi.filetype_chantype = strcat(roi.filetype,roi.chantype,num2str(roi.Fs));
+  ufc = unique(roi.filetype_chantype);
+  for i_ufc=1:length(ufc)
+  	i_roi = roi(strcmp(roi.filetype_chantype,ufc(i_ufc)),:);
+    
+    %detecting contiguos stretches
+    cfg=[];
+    cfg.criterion = @(x) sum(x.duration)-max(x.ends)+min(x.starts) < height(x)*timetol;
+    i_roi_cont = bml_annot_consolidate(cfg,i_roi);   
+    
+    for j=1:height(i_roi_cont)
+    	i_roi_cont_j = i_roi(i_roi.id>=i_roi_cont.id_starts(j) & i_roi.id<=i_roi_cont.id_ends(j),:);
+    
+      if height(i_roi_cont_j)>1
+        
+        %calculating raw samples of contiguous file
+        cs = cumsum(i_roi_cont_j.s2-i_roi_cont_j.s1) + i_roi_cont_j.s1(1);
+        cs = cs + (0:(height(i_roi_cont_j)-1))';
+        cs = [0; cs(1:end-1)];
+        i_roi_cont_j.raw1 = i_roi_cont_j.s1 + cs;
+        i_roi_cont_j.raw2 = i_roi_cont_j.s2 + cs;
+        
+        %doing linear fit to asses if consolidation is plausible
+        s = [i_roi_cont_j.raw1; i_roi_cont_j.raw2];
+        t = [i_roi_cont_j.t1; i_roi_cont_j.t2];
+        p = polyfit(s,t,1);
+        tfit = polyval(p,s);
+      
+        if max(abs(t - tfit)) <= timetol %consolidating
+          i_roi_cont_j.t1 = polyval(p,i_roi_cont_j.raw1);
+          i_roi_cont_j.t2 = polyval(p,i_roi_cont_j.raw2);
+          if ismember('warpfactor',i_roi_cont_j.Properties.VariableNames)
+            i_roi_cont_j.warpfactor = i_roi_cont_j.Fs * p(1);
+          end
+        else  
+          warning('can''t consolidate within tolerance');
+        end
+        i_roi_cont_j.raw1=[];
+        i_roi_cont_j.raw2=[];          
+        consolidated = [consolidated; i_roi_cont_j];
+      else
+        consolidated = [consolidated; i_roi_cont_j];
+      end
+    end
+  end
+end
+
 consolidated = bml_roi_table(consolidated);
 

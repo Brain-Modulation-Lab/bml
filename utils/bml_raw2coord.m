@@ -1,6 +1,6 @@
 function coord = bml_raw2coord(raw)
 
-% BMLRAW2COORD returns the time coordinated of the raw
+% BML_RAW2COORD returns the time coordinated of the raw
 %
 % Use as 
 %  coord = bml_raw2coord(raw)

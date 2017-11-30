@@ -40,7 +40,12 @@ end
 if isempty(files)
   info=table();
 else
+  if length(files)==1
+    files.name = {files.name};
+    files.folder = {files.folder};
+    files.date = {files.date};
+  end
   info=struct2table(files);
-  info.filetype = repmat(string(filetype),height(info),1);
+  info.filetype = repmat(filetype,height(info),1);
 end
 

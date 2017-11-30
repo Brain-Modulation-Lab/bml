@@ -1,4 +1,4 @@
-function sync_roi = bml_sync_digital(cfg)
+function sync_roi = bml_sync_analog(cfg)
 
 % BML_SYNC_ANALOG time-aligns files based on a common analog sync channel
 %
@@ -222,7 +222,7 @@ for chunk_i=1:height(chunks)
   end
 end
 
-
+sync_roi = bml_roi_table(sync_roi);
 
 
 

@@ -1,7 +1,6 @@
 function [Rec] =  bml_neuroomega_load(cfg)
 
-% BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as a struct-array of
-% fieldtrip's FT_DATATYPE_RAW data structure. 
+% BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as FT_DATATYPE_RAW data structure. 
 %
 % Use as
 %   rec = bml_load_neuroomega(cfg);

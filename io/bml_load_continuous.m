@@ -44,7 +44,7 @@ chantype      = bml_getopt(cfg,'chantype');
 filetype      = bml_getopt(cfg,'filetype');
 Fs            = bml_getopt(cfg,'Fs');
 roi           = bml_roi_table(bml_getopt(cfg,'roi'));
-timetol       = bml_getopt(cfg,'timetol',1e-6);
+timetol       = bml_getopt(cfg,'timetol',1e-5);
 dryrun        = bml_getopt(cfg,'dryrun',false);
 ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous = bml_getopt(cfg,'discontinuous','warn');
@@ -70,7 +70,9 @@ if height(roi)==0
 end
 
 %assert for no time overlaps between rows
-if ~isempty(bml_annot_overlap(roi))
+cfg1=[];
+cfg1.timetol = timetol;
+if ~isempty(bml_annot_overlap(cfg1,roi))
   roi %printing table for user
   error('annotations in roi table overlap');
 end
@@ -190,13 +192,13 @@ for i=2:height(roi)
     delta_s_int = round(delta_s);
     assert(delta_s>0,"overlaping rois can't be concatenated"); 
 
-    if abs(delta_s_int - delta_s) < timetol
+    if abs(delta_s_int - delta_s) < timetol*Fs
       if ismember(discontinuous,{'warn'})
         warning("concatenating discontinous files %i samples added",delta_s_int);
       end
       if ~dryrun
         starts = raw.time{1}(1) - 0.5/Fs;
-        ends = next_time(1) - 0.5/Fs;
+        ends = next_time(1) + 0.5/Fs;
         raw = bml_pad(raw,starts,ends,0);
       else
         time = [time,time(end)+(1:delta_s_int)/Fs];
