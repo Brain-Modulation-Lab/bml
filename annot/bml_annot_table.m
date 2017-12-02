@@ -15,6 +15,20 @@ function annot=bml_annot_table(x, description, x_var_name)
 % returns a table with variables 'id', 'starts', 'ends' and any additonal
 % variable present in x. Issues a error on inconsistent input. 
 
+if isempty(x) 
+  annot=table();
+  return
+end
+
+if isnumeric(x)
+  if size(x,1) < size(x,2)
+    x = x';
+  end
+  x = table(x);
+end
+if iscell(x); x=cell2table(x); end
+if isstruct(x); x=struct2table(x); end
+
 if ~exist('description','var') || isempty(description)
   if isempty(x.Properties.Description)
     if exist('x_var_name','var')
@@ -27,19 +41,21 @@ if ~exist('description','var') || isempty(description)
   end
 end
 
-if isempty(x) 
-  annot=table();
-  return
-end
-
-if iscell(x); x=cell2table(x); end
-if isstruct(x); x=struct2table(x); end
-
 if ~strcmp('starts',x.Properties.VariableNames)
-  error('x should have variable ''starts''');
+  if width(x)<=2 
+    x.Properties.VariableNames(1)={'starts'};
+  else
+    error('x should have variable ''starts''');
+  end
 end
 if ~strcmp('ends',x.Properties.VariableNames)
-  error('x should have variable ''ends''');
+  if width(x)==1 
+    x.ends = x.starts;
+  elseif width(x)==2 
+    x.Properties.VariableNames(2)={'ends'};
+  else
+    error('x should have variable ''ends''');
+  end
 end
 
 x=sortrows(x,'starts');

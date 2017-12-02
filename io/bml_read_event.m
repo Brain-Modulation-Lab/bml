@@ -19,5 +19,9 @@ if isempty(folder); folder = "."; end
 assert(numel(folder)==1,'single folder required');
 if iscell(folder); folder = folder{1}; end
 
-event = ft_read_event(fullfile(folder,name),'detectflank',detectflank);
+try
+  event = ft_read_event(fullfile(folder,name),'detectflank',detectflank);
+catch
+  event = [];
+end
 

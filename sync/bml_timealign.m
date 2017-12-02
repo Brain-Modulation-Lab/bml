@@ -3,9 +3,11 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   % BML_TIMEALIGN aligns slave to master and returns the slave's delta t
   %
   % Use as
+  %   slave_delta_t = bml_timealign(master, slave)
   %   slave_delta_t = bml_timealign(cfg, master, slave)
   %   [slave_delta_t, max_corr] = bml_timealign(cfg, master, slave)
   %   [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)
+  %
   %
   % cfg is a configuration structure with fields:
   % cfg.resample_freq - double: frequency to resample and aligned master and
@@ -40,6 +42,14 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   %           slave_delta_t
   % master - FT_DATATYPE_RAW: master raw after applying the preprocessing
   % slave - FT_DATATYPE_RAW: slave raw after applying the preprocessing
+  
+  if nargin == 2
+    slave = master;
+    master = cfg;
+    cfg = [];
+  elseif nargin ~=3
+    error('incorrect number of arguments in call');
+  end
   
   resample_freq     = bml_getopt(cfg,'resample_freq', 10000);
   scan              = bml_getopt(cfg, 'scan');

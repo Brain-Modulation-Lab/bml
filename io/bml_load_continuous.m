@@ -30,7 +30,8 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %
 % roi_table is what would go in the cfg.roi field 
 %
-% returns a continuous FT_DATATYPE_RAW and optionally a raw table
+% returns a continuous FT_DATATYPE_RAW and optionally a file-raw mapping
+
 
 file_raw_map_vars = {'starts','ends','s1','t1','s2','t2','folder','name','nSamples','Fs'};
 
@@ -43,12 +44,18 @@ channel       = bml_getopt(cfg,'channel');
 chantype      = bml_getopt(cfg,'chantype');
 filetype      = bml_getopt(cfg,'filetype');
 Fs            = bml_getopt(cfg,'Fs');
-roi           = bml_roi_table(bml_getopt(cfg,'roi'));
+roi           = bml_getopt(cfg,'roi');
 timetol       = bml_getopt(cfg,'timetol',1e-5);
 dryrun        = bml_getopt(cfg,'dryrun',false);
 ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous = bml_getopt(cfg,'discontinuous','warn');
 padval        = bml_getopt(cfg,'padval',0);
+
+if isempty(roi)
+  raw=[];
+  return  
+end
+roi = bml_roi_table(roi);
 
 if islogical(discontinuous)
   if istrue(discontinuous)
@@ -63,19 +70,12 @@ if ~isempty(folder)
   roi.folder = repmat({folder},height(roi),1);
 end
 
-roi = bml_roi_table(roi);
-if height(roi)==0
-  raw=[];
-  return  
-end
-
-%assert for no time overlaps between rows
-cfg1=[];
-cfg1.timetol = timetol;
-if ~isempty(bml_annot_overlap(cfg1,roi))
-  roi %printing table for user
-  error('annotations in roi table overlap');
-end
+% %assert for no time overlaps between rows
+% cfg1=[]; cfg1.timetol = timetol;
+% if ~isempty(bml_annot_overlap(cfg1,roi))
+%   roi %printing table for user
+%   error('annotations in roi table overlap');
+% end
 
 %consolidating chunks of same file when possible
 roi = bml_sync_consolidate(roi);
@@ -94,7 +94,16 @@ assert(length(filetype)==1,'unique filetype required: %s',strjoin(filetype));
 assert(length(chantype)==1,'unique chantype required: %s',strjoin(chantype));
 assert(length(Fs)==1,'unique Fs required: %s',strjoin(string(num2str(Fs))));
 
-%saving mapping between raw and files
+%dealing with skip factors
+skipFactor=1;
+chantype_split=strsplit(chantype{1},':');
+if numel(chantype_split) == 2
+  skipFactor=str2double(chantype_split{2});
+elseif numel(chantype_split) > 2
+  ft_error('Use : to specify skipfactor, e.g. analog:10')
+end
+
+%saving mapping between raw and files (original mapping without skipfactor)
 file_raw_map=roi(1,file_raw_map_vars);
 [s,e]=bml_crop_idx_valid(roi(1,:));
 file_raw_map.s1=s;
@@ -102,27 +111,18 @@ file_raw_map.s2=e;
 file_raw_map.t1=bml_idx2time(roi(1,:),s);
 file_raw_map.t2=bml_idx2time(roi(1,:),e);
 file_raw_map.raw1=1;
-file_raw_map.raw2=e-s+1;
-
-%dealing with skip factors
-sf=1;
-chantype_split=strsplit(chantype{1},':');
-if numel(chantype_split) == 2
-  sf=str2double(chantype_split{2});
-elseif numel(chantype_split) > 2
-  ft_error('Use : to specify skipfactor, e.g. analog:10')
-end
+file_raw_map.raw2=floor((e-s)/skipFactor)+1;
 
 %loading first raw
 cfg=[]; cfg.chantype=chantype;
-cfg.trl = [ceil(s/sf), floor(e/sf), 0];
+cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
 cfg.feedback=ft_feedback;
 if ~dryrun
   raw = ft_preprocessing(cfg);
 else
   raw = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
-  assert(raw.nSamples>=e,'index overflow s2=%i but nSample=%i',e,raw.nSamples);
+  assert(raw.nSamples>=floor(e/skipFactor),'index overflow s2=%i but nSample=%i',floor(e/skipFactor),raw.nSamples);
 end
 
 if ~isempty(channel)
@@ -136,15 +136,15 @@ if ~isempty(channel)
 end
 
 % time = raw.time{1}+bml_idx2time(roi(1,:),s);
-time = bml_idx2time(roi(1,:),s:e);
+time = bml_idx2time(roi(1,:),ceil(s/skipFactor):floor(e/skipFactor),skipFactor);
 raw.time{1} = time;
-if abs(time(end)-bml_idx2time(roi(1,:),e)) > timetol
+if abs(time(end)-bml_idx2time(roi(1,:),floor(e/skipFactor),skipFactor)) > timetol
   error('timetol violated')
 end
 
 for i=2:height(roi)
   
-  %saving mapping between raw and files
+  %saving mapping between raw and files (original mapping without skipfactor)
   row=roi(i,file_raw_map_vars);
   [s,e]=bml_crop_idx_valid(roi(i,:));
   row.s1=s;
@@ -152,19 +152,19 @@ for i=2:height(roi)
   row.t1=bml_idx2time(roi(i,:),s);
   row.t2=bml_idx2time(roi(i,:),e);
   row.raw1=max(file_raw_map.raw2)+1;
-  row.raw2=e-s+row.raw1;
+  row.raw2=floor((e-s)/skipFactor)+row.raw1;
   file_raw_map = [file_raw_map;row];
   
   %loading next raw
   cfg=[]; cfg.chantype=chantype;
-  cfg.trl = [s, e, 0];
+  cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
   cfg.feedback=ft_feedback;
   if ~dryrun
     next_raw = ft_preprocessing(cfg);
   else
     next_raw = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
-    assert(next_raw.nSamples>=e,'index overflow s2=%i but nSample=%i',e,next_raw.nSamples);
+    assert(next_raw.nSamples>=floor(e/skipFactor),'index overflow s2=%i but nSample=%i',floor(e/skipFactor),next_raw.nSamples);
   end
   
   if ~isempty(channel)
@@ -176,32 +176,32 @@ for i=2:height(roi)
   end
     
   %next_time = next_raw.time{1}+bml_idx2time(roi(i,:),s);
-  next_time = bml_idx2time(roi(i,:),s:e);
+  next_time = bml_idx2time(roi(i,:),ceil(s/skipFactor):floor(e/skipFactor),skipFactor);
   next_raw.time{1} = next_time;
-  assert(abs(next_time(end)-bml_idx2time(roi(i,:),e)) < timetol, 'timetol violated');
+  assert(abs(next_time(end)-bml_idx2time(roi(i,:),floor(e/skipFactor),skipFactor)) < timetol, 'timetol violated');
  
   %verifying contiguity
-  delta_t = next_time(1) - time(end) - 1/Fs;
+  delta_t = next_time(1) - time(end) - skipFactor/Fs;
   if abs(delta_t) > timetol %non contiguous files
     if ~ismember(discontinuous,{'allow','warn'})
       roi
       error("To concateneting discontinuous rois use cfg.discontinuous='allow'");
     end  
     
-    delta_s = delta_t*Fs;
+    delta_s = delta_t*Fs/skipFactor;
     delta_s_int = round(delta_s);
     assert(delta_s>0,"overlaping rois can't be concatenated"); 
 
-    if abs(delta_s_int - delta_s) < timetol*Fs
+    if abs(delta_s_int - delta_s) < timetol*Fs/skipFactor
       if ismember(discontinuous,{'warn'})
         warning("concatenating discontinous files %i samples added",delta_s_int);
       end
       if ~dryrun
-        starts = raw.time{1}(1) - 0.5/Fs;
-        ends = next_time(1) + 0.5/Fs;
+        starts = raw.time{1}(1) - 0.5*skipFactor/Fs;
+        ends = next_time(1) + 0.5*skipFactor/Fs;
         raw = bml_pad(raw,starts,ends,0);
       else
-        time = [time,time(end)+(1:delta_s_int)/Fs];
+        time = [time,time(end)+(1:delta_s_int)*skipFactor/Fs];
       end
     else
     	roi

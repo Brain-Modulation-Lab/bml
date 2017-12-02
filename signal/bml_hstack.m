@@ -95,7 +95,13 @@ end
 if ~isequalfreq
     ft_error('Same Fs required to append data by time')        
 end
-data.fsample=varargin{1}.fsample;
+
+if ismember('fsample',fields(varargin{1}))
+  data.fsample=varargin{1}.fsample;
+end
+if ismember('hdr',fields(varargin{1}))
+  data.hdr=varargin{1}.hdr;
+end
 %data.sampleinfo=[]; 
 
 if strcmp(timeref,'auto')

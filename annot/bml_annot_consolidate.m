@@ -100,7 +100,9 @@ for i=1:length(vars)
   if length(uval)==1
     row.(vars{i}) = uval;
   elseif iscell(uval)
-    row.(vars{i}) = {[]};    
+    row.(vars{i}) = {[]};   
+  elseif isa(uval,'datetime')
+    row.(vars{i}) = NaT;
   else
     row.(vars{i}) = nan;
   end

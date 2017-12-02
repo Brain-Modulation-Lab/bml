@@ -84,6 +84,10 @@ if istrue(contiguous)
     	i_roi_cont_j = i_roi(i_roi.id>=i_roi_cont.id_starts(j) & i_roi.id<=i_roi_cont.id_ends(j),:);
     
       if height(i_roi_cont_j)>1
+        %todo: use bml_roi2coord
+        
+        left_complete = i_roi_cont_j.starts(1)<=i_roi_cont_j.t1(1);
+        right_complete = i_roi_cont_j.ends(end)>=i_roi_cont_j.t2(end);
         
         %calculating raw samples of contiguous file
         cs = cumsum(i_roi_cont_j.s2-i_roi_cont_j.s1) + i_roi_cont_j.s1(1);
@@ -109,6 +113,19 @@ if istrue(contiguous)
         end
         i_roi_cont_j.raw1=[];
         i_roi_cont_j.raw2=[];          
+        
+        %adjusting starts and ends to take to confluence
+        if left_complete
+          i_roi_cont_j.starts(1) = i_roi_cont_j.t1(1) - 0.5/i_roi_cont_j.Fs(1);
+        end
+        for i=1:(height(i_roi_cont_j)-1)
+          i_roi_cont_j.ends(i)     = (i_roi_cont_j.t2(i) + i_roi_cont_j.t1(i+1))/2;
+          i_roi_cont_j.starts(i+1) = (i_roi_cont_j.t2(i) + i_roi_cont_j.t1(i+1))/2;        
+        end
+        if right_complete
+          i_roi_cont_j.ends(1) = i_roi_cont_j.t2(1) + 0.5/i_roi_cont_j.Fs(1);
+        end
+    
         consolidated = [consolidated; i_roi_cont_j];
       else
         consolidated = [consolidated; i_roi_cont_j];

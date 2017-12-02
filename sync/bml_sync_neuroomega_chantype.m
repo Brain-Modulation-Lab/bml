@@ -1,29 +1,59 @@
-function sync = bml_sync_neuroomega_chantype(cfg, roi)
+function sync = bml_sync_neuroomega_chantype(cfg)
 
 % BML_SYNC_NEUROOMEGA_CHANTYPE transfer sync info from one chantype to another
 %
 % Use as 
-%   sync = bml_sync_neuroomega_chantype(cfg, roi)
+%   sync = bml_sync_neuroomega_chantype(cfg)
 %
 % This function calculates synchronization rows for neuroomega channels,
 % based on a sync channel. Normally neuroomega files are sync with the
 % analog 2750Hz channel. This function creates registries for other
 % channels (for example 'macro' and 'micro'), based on the synchronized channel. 
 %
-% roi - original sync table (normaly with chantype=analog)
-% cfg.chantype      - char, new chantype 
-% cfg.time_channel  - char, channel of new chantype
+% cfg.roi            - original sync table (normaly with chantype=analog)
+% cfg.chantype      - char, new chantype. Options are 'micro', 'macro', 'analog'
+% cfg.time_channel  - char, channel of new chantype used to extract time
+%                     use 'CRAW_01___Central', etc. 
+%                     if not provided uses the first channel of the
+%                     correct chantype from the first entry of cfg.roi
+% cfg.time_channel  - char, channel of original chantype used in sync
+%                     use 'CANALOG_IN_1', etc
+%                     if not provided uses the first channel of the
+%                     correct chantype from the first entry of cfg.roi
 % cfg.filetype      - char, defaults to 'neuroomega.mat'
 %
 % returns an roi table with the new entries for neuroomega files.
+%
+% ----------------------------------------
+% chantype     |   example channel
+% ----------------------------------------
+% 'macro'      | 'CMacro_RAW_01___Central'
+% 'micro'      | 'CRAW_01___Central'
+% 'micro_hp'   | 'CSPK_01___Central'
+% 'analog'     | 'CANALOG_IN_1'
+% 'add_analog' | 'CADD_ANALOG_IN_1'
+% 'micro_lfp'  | 'CLFP_01___Central'
+% 'macro_lfp'  | 'CMacro_LFP_01___Central
+% ----------------------------------------
+%
+%
 
 filetype          = bml_getopt(cfg,'filetype','neuroomega.mat');
 time_channel      = bml_getopt_single(cfg,'time_channel');
-sync_time_channel = bml_getopt_single(cfg,'sync_time_channel','CANALOG_IN_1');
+sync_time_channel = bml_getopt_single(cfg,'sync_time_channel');
 chantype          = bml_getopt(cfg,'chantype');
+roi               = bml_getopt(cfg,'roi');
 
 assert(~isempty(chantype),'chantype required');
-assert(~isempty(time_channel),'time_channel required');
+assert(~isempty(roi),'roi required');
+
+hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),'chantype','chaninfo');
+if isempty(time_channel)
+  time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,chantype),:).channel{1};
+end
+if isempty(sync_time_channel)
+  sync_time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,roi.chantype{1}),:).channel{1};
+end
 
 time_begin_var      = strcat(time_channel,'_TimeBegin');
 time_end_var        = strcat(time_channel,'_TimeEnd');

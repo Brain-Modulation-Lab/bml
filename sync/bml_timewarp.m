@@ -3,7 +3,8 @@ function warpedcoords = bml_timewarp(cfg, master, slave)
   % BML_TIMEWARP aligns and linearly warps slave to master 
   %
   % Use as
-  %   slave_t1 = bml_timealign(cfg, master, slave)
+  %   warpedcoords = bml_timealign(master, slave)
+  %   warpedcoords = bml_timealign(cfg, master, slave)
   %   
   % This function first aligns slave to master by calling BML_TIMEALIGN and
   % then applies a constrained linear time-warp to slave, in order to
@@ -47,6 +48,14 @@ function warpedcoords = bml_timewarp(cfg, master, slave)
   % warpedcoords.t2 - double: second coordinate time in seconds
   % warpedcoords.wt0 - double: fitted parameter
   % warpedcoords.ws1 - double: fitted parameter
+  
+  if nargin == 2
+    slave = master;
+    master = cfg;
+    cfg = [];
+  elseif nargin ~=3
+    error('incorrect number of arguments');
+  end
   
   penalty_wt0_min   = bml_getopt(cfg,'penalty_wt0_min', 60);
   penalty_ws1       = bml_getopt(cfg,'penalty_ws1', 1e-3); 
