@@ -1,10 +1,20 @@
-function padded = bml_pad(raw, starts, ends, padval)
+function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)
 
 % BML_PAD returns a padded version of the raw (crops if necessary)
 %
 % Use as
-%   bml_pad(raw, starts, ends, padval)
-%   bml_pad(cfg, raw)
+%   padded = bml_pad(raw, starts, ends, padval)
+%   padded = bml_pad(cfg, raw)
+%   [padded, presamples, postsamples] = bml_pad(___)
+%
+% raw     - FT_DATATYPE_RAW to be padded and/or cropped
+% starts  - double: global time at which to start
+% ends    - double: global time at which to end
+% padval  - double: value used for padding, defaults to zero
+%
+% padded  - FT_DATATYPE_RAW: padded version of raw
+% presamples - integer: number of padval samples added at the begging 
+% postsamples - integer: number of padval samples added at the end          
 
 if nargin==2
   cfg=raw;
@@ -25,17 +35,21 @@ end
 if numel(raw.time) > 1; error('single trial continuous raw required'); end
 nSamples = length(raw.time{1});
 
-tc=[]; 
-tc.s1=1; tc.s2=length(raw.time{1});
-tc.t1=raw.time{1}(1); tc.t2=raw.time{1}(end);
+% tc=[]; 
+% tc.s1=1; tc.s2=length(raw.time{1});
+% tc.t1=raw.time{1}(1); tc.t2=raw.time{1}(end);
+tc = bml_raw2coord(raw);
 [s,e]=bml_crop_idx(tc,starts,ends);
 
 padded = bml_crop(raw,starts,ends);
-if s<1 
-  padded.trial{1} = padarray(padded.trial{1},[0 1-s],padval,'pre');
+presamples = max([1-s, 0]);
+postsamples = max([e-nSamples, 0]);
+
+if presamples>0 
+  padded.trial{1} = padarray(padded.trial{1},[0 presamples],padval,'pre');
 end
-if e > nSamples
-  padded.trial{1} = padarray(padded.trial{1},[0 e-nSamples],padval,'post');
+if postsamples > 0
+  padded.trial{1} = padarray(padded.trial{1},[0 postsamples],padval,'post');
 end
 padded.time{1} = bml_idx2time(tc,s:e);
 

@@ -40,5 +40,5 @@ end
 if ends_idx>nSamples
   ends_idx=nSamples;
 elseif ends_idx<=0
-  error('ends index before first sample');
+  error('ends index %i before first sample',ends_idx);
 end

@@ -114,12 +114,40 @@ y.starts=[]; y.ends=[]; % y.Properties.VariableNames{1}=yidn;
 common_vars=intersect(x.Properties.VariableNames,y.Properties.VariableNames);
 common_vars_x=ismember(x.Properties.VariableNames,common_vars);
 common_vars_y=ismember(y.Properties.VariableNames,common_vars);
+unique_vars_x=setdiff(x.Properties.VariableNames,common_vars);
+unique_vars_y=setdiff(y.Properties.VariableNames,common_vars);
 
-x.Properties.VariableNames(common_vars_x)=...
-  strcat([x.Properties.Description '_'],x.Properties.VariableNames(common_vars_x));
+new_names_common_vars_x = strcat([x.Properties.Description '_'],x.Properties.VariableNames(common_vars_x));
+new_names_common_vars_x_repeated = ismember(new_names_common_vars_x,unique_vars_x);
+if any(new_names_common_vars_x_repeated)
+  rm_vars = new_names_common_vars_x(new_names_common_vars_x_repeated);
+  for i=1:length(rm_vars)
+    warning('Overwriting variable %s of table %s',rm_vars{i},x.Properties.Description)
+    x.(rm_vars{i})=[];
+  end
+end
 
-y.Properties.VariableNames(common_vars_y)=...
-  strcat([y.Properties.Description '_'],y.Properties.VariableNames(common_vars_y));
+new_names_common_vars_y = strcat([y.Properties.Description '_'],y.Properties.VariableNames(common_vars_y));
+new_names_common_vars_y_repeated = ismember(new_names_common_vars_y,unique_vars_y);
+if any(new_names_common_vars_y_repeated)
+  rm_vars = new_names_common_vars_y(new_names_common_vars_y_repeated);
+  for i=1:length(rm_vars)
+    warning('Overwriting variable %s of table %s',rm_vars{i},y.Properties.Description)
+    y.(rm_vars{i})=[];
+  end
+end
+
+x.Properties.VariableNames(common_vars_x) = new_names_common_vars_x;
+y.Properties.VariableNames(common_vars_y) = new_names_common_vars_y;
+
+if ismember(yidn,x.Properties.VariableNames)
+  warning('Overwriting variable %s from table %s',yidn,x.Properties.Description)
+  x.(yidn)=[];
+end
+if ismember(xidn,y.Properties.VariableNames)
+  warning('Overwriting variable %s from table %s',xidn,y.Properties.Description)
+  y.(xidn)=[];
+end
 
 annot=join(annot,x,'Keys',xidn);
 annot=join(annot,y,'Keys',yidn);

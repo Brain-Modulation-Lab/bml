@@ -5,25 +5,30 @@ function sync_roi = bml_sync_analog(cfg)
 % Use as
 %   sync_roi = bml_sync_digital(cfg)
 %
-% cfg - configuration structure
-%   cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'
-%   cfg.master_filetype - string: filetype that defines the time to which to align
-%             other filetypes
-%   cfg.sync_chunks - annot table: defines starts and ends of chunks of time to sync
-%             in master time. Usually corresponds to sessions but can be
-%             shorter periods.
-%   cfg.chunk_extend - double or double array of length 2: amount of seconds by 
-%             which to extend each sync chunk in slave files to avoid cropping out 
-%             relevant part of because of incorrect initial alignemnt
-%             files. Defaults to 0 seconds.    
+% cfg - configuration structure (reuired fields)
 %   cfg.roi - roi table with vars 'id','starts','ends','folder','name',
 %            'nSamples','filetype'. Contains a coarse alignment of the
 %            files, normally inferred from the OS 'Date-Modified' metadata.
 %            'starts' and 'ends' should be given in seconds from midnight.
-%   cfg.timewarp - logical: Should slave time be warped? defaults to 
-%            true.
+%   cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'
+%            This table defines how channels of different filetypes will be
+%            mapped with each other. 
+%   cfg.chunks - annot table: defines starts and ends of chunks of time to sync
+%            in master time. Usually corresponds to sessions but can be
+%            shorter periods.
+%   cfg.master_filetype - string: filetype that defines filetype used as master time,
+%            to which to align other filetypes
+%
+%
+% cfg - configuration structure (optional fields)
+%   cfg.timewarp - logical: Should slave time be warped? defaults to true.
+%   cfg.lpf - logical: low-pass-filter alignment if true (default)
 %   cfg.praat - logical: should synchronized files be opened in praat for
-%            manual quality check
+%            manual quality check. Defaults to false.
+%   cfg.chunk_extend - double or double array of length 2: amount of seconds by 
+%             which to extend each sync chunk in slave files to avoid cropping out 
+%             relevant part of because of incorrect initial alignemnt
+%             files. Defaults to 0 seconds.    
 %   cfg.resample_freq - double: frequency in Hz at which to resample master
 %            and slave raws. Defaults to 10000. 
 %   cfg.dryrun - logical: if true no alignment is performed (defaults to
@@ -38,7 +43,6 @@ function sync_roi = bml_sync_analog(cfg)
 %           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)
 %   cfg.env_penalty_ws1 - double: penalty parameter for time stretching in
 %           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)
-%   cfg.lpf - logical: low-pass-filter alignment if true (default)
 %   cfg.lpf_max_freq - double: maximum low-pass-filter cutoff frequency (Hz).
 %           The value used is the minimum between this argument and the
 %           master's and slave's sampling frequency. Defaults to 4000 Hz. 
@@ -55,7 +59,10 @@ function sync_roi = bml_sync_analog(cfg)
 %           * true or 'allow' to allow discontinous files to be loaded filling 
 %           the gap with zero-padding, if possible within timetol.
 %           * false or 'no' to issue an error if discontinous files are found
-%           * 'warn' to allow with a warning (defaul)
+%           * 'warn' to allow with a warning (default)
+%   cfg.high_pass - logical: should high pass filter be applied before
+%           alignment. Defaults to false.
+%   cfg.high_pass_freq - float: high pass frequency in Hz. Defaults to 5 Hz
 %
 % returns roi table with vars 
 %   id: integer identification number of the synchronized file chunk
@@ -72,10 +79,26 @@ function sync_roi = bml_sync_analog(cfg)
 %   nSamples: integer total number of samples of the file
 %   filetype: 
 % 
+%--------------------------------------------------------------------------
+%
+% The algorithm first opens time chucks (defined in cfg.chunks) of the files 
+% defined in cfg.roi, loading the channels defined in cfg.sync_channels. 
+% The coarse alignment of cfg.roi should be within a 60 second tolerance.
+% It then calculates the envelope of the channels with BML_ENVELOPE_BINABS,
+% and aligns these envelopes with BML_TIMEALIGN. If cfg.timewarp is true, 
+% it applies a time-warping algorithm as defined in BML_TIMEWARP to
+% maximize the correlation between slave and master channels. If cfg.lpf is
+% true, it then repeats these processes for a low-pass filter version of
+% the channels. If cfg.praat is true, the resulting synchronized chunks are 
+% loaded in praat. The function returns a synchronization roi table. 
+%
+
+%ToDo: check that filetype of roi is consitent with cfg.sync_channels
+%add examples to documentation
 
 sync_channels       = bml_getopt(cfg,'sync_channels');
 master_filetype     = bml_getopt_single(cfg,'master_filetype');
-chunks              = bml_annot_table(bml_getopt(cfg,'chunks'),'chunks');
+chunks              = bml_getopt(cfg,'chunks');
 chunk_extend        = bml_getopt(cfg,'chunk_extend',0);
 roi_os              = bml_roi_table(bml_getopt(cfg,'roi'),'roi_os');
 praat               = bml_getopt(cfg,'praat',false);
@@ -93,10 +116,15 @@ lpf_penalty_ws1     = bml_getopt(cfg,'lpf_penalty_ws1',1e-4);
 timewarp            = bml_getopt(cfg,'timewarp',true);
 ft_feedback         = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous       = bml_getopt(cfg,'discontinuous','warn');
+high_pass           = bml_getopt(cfg,'high_pass',false);
+high_pass_freq      = bml_getopt(cfg,'high_pass_freq',5);
 
 assert(~ismember('filetype',chunks.Properties.VariableNames),...
   'cfg.chunks should not containt ''filetype'' variable');
 assert(~isempty(chunks),'empty chunks table');
+
+chunks = bml_chunk_sessions(chunks);
+chunks = bml_annot_table(chunks,'chunks');
 
 sync_roi = table();
 sync_roi_vars = {'starts','ends','s1','t1','s2','t2','folder','name','nSamples','Fs','session_id','session_part','filetype'};
@@ -142,6 +170,11 @@ for chunk_i=1:height(chunks)
   cfg.discontinuous=discontinuous;
   [master, master_map] = bml_load_continuous(cfg);
   
+  if istrue(high_pass)
+    master.trial{1} = ft_preproc_highpassfilter(master.trial{1},...
+                      master.fsample, high_pass_freq, 4, 'but', 'twopass');
+  end
+  
   row = master_chunk_roi_os(:,sync_roi_vars);
   row.chantype = repmat({master_chantype},height(row),1);
   row.chunk_id = repmat(chunk_id,height(row),1);
@@ -167,6 +200,11 @@ for chunk_i=1:height(chunks)
     cfg.dryrun = dryrun;
     cfg.discontinuous=discontinuous;
     [slave, slave_map] = bml_load_continuous(cfg);  
+    
+    if istrue(high_pass) && ~dryrun
+      slave.trial{1} = ft_preproc_highpassfilter(slave.trial{1},...
+                      slave.fsample, 5, 4, 'but', 'twopass');
+    end
     
     %envelope alingment and warping
     if ~dryrun
@@ -201,6 +239,9 @@ for chunk_i=1:height(chunks)
       
     %saving sync info
     row = filetype_chunk_roi_os(:,sync_roi_vars);
+    if height(row) ~= height(slave_map)
+      row = row(ismember(row.name,slave_map.name),:);
+    end
     row.s1 = slave_map.s1;
     row.s2 = slave_map.s2; 
     row.t1 = bml_idx2time(wc_lpf,slave_map.raw1);

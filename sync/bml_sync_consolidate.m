@@ -43,7 +43,8 @@ for i_uff=1:length(uff)
     p = polyfit(s,t,1);
     tfit = polyval(p,s);
     
-    if max(abs(t - tfit)) <= timetol %consolidating
+    max_delta_t = max(abs(t - tfit));
+    if max_delta_t <= timetol %consolidating
       consrow = i_roi(1,:);
       consrow.starts = min(i_roi.starts);
       consrow.ends = max(i_roi.ends);
@@ -56,7 +57,7 @@ for i_uff=1:length(uff)
       end
       i_roi = consrow;      
     else  
-      warning('can''t consolidate within tolerance');
+      warning('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);
     end
   end
   consolidated = [consolidated; i_roi];
@@ -99,17 +100,19 @@ if istrue(contiguous)
         %doing linear fit to asses if consolidation is plausible
         s = [i_roi_cont_j.raw1; i_roi_cont_j.raw2];
         t = [i_roi_cont_j.t1; i_roi_cont_j.t2];
+        %plot(s,t,'o')
         p = polyfit(s,t,1);
         tfit = polyval(p,s);
       
-        if max(abs(t - tfit)) <= timetol %consolidating
+        max_delta_t = max(abs(t - tfit));
+        if max_delta_t <= timetol %consolidating
           i_roi_cont_j.t1 = polyval(p,i_roi_cont_j.raw1);
           i_roi_cont_j.t2 = polyval(p,i_roi_cont_j.raw2);
           if ismember('warpfactor',i_roi_cont_j.Properties.VariableNames)
             i_roi_cont_j.warpfactor = i_roi_cont_j.Fs * p(1);
           end
         else  
-          warning('can''t consolidate within tolerance');
+          warning('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);
         end
         i_roi_cont_j.raw1=[];
         i_roi_cont_j.raw2=[];          

@@ -6,7 +6,7 @@ function raw = bml_event2raw(cfg, event)
 %   raw = bml_event2raw(cfg, event)
 %   raw = bml_event2raw(roi, event)
 %
-% cfg.roi
+% cfg.roi - roi table: raw is created from s1 to s2
 % cfg.event_type - cells of char: event types selected
 %
 % returns a raw

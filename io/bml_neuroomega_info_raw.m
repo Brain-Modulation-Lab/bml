@@ -16,7 +16,8 @@ function info = bml_neuroomega_info_raw(cfg)
 % cfg.time_channel - string: channel to use for TimeBegin and TimeEnd 
 %               defaults to first channel of indicated chantype in first
 %               file detected.
-
+% cfg.rm_vars - cell of char with variables names to be removed if present
+%               defaults to {'time_end','time_begin','filenum'}
 % cfg.mpx_path - string: path to the folder containing the .mpx_ files. Defauts to cfg.path
 % cfg.mpx_pattern - string: file name pattern (defaults to '*.mpx')
 % cfg.mpx_regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx')
@@ -64,6 +65,8 @@ cfg_mpx=[];
 cfg_mpx.path    = bml_getopt(cfg,'mpx_path',ft_getopt(cfg,'path','.'));
 cfg_mpx.pattern = bml_getopt(cfg,'mpx_pattern','*.mpx');
 cfg_mpx.regexp  = bml_getopt(cfg,'mpx_regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx');
+rm_vars         = bml_getopt(cfg,'rm_vars',{'time_end','time_begin','filenum'});
+
 info_mpx=bml_info_file(cfg_mpx);
 
 hdr_vars={'chantype','Fs','nSamples','nChans','nTrials','chanunit','time_begin','time_end'};
@@ -129,6 +132,13 @@ else
   warning('Specify cfg.mpx_path for starts/ends calculation')
   info=sortrows(info,'time_begin');
 end
+
+for i=1:numel(rm_vars)
+  if ismember(rm_vars(i),info.Properties.VariableNames)
+    info.(rm_vars{i}) = [];
+  end
+end  
+  
 
 
 

@@ -70,7 +70,16 @@ for i=1:numel(raws)
         wfn=[tdir filesep char(names{i}) 't' num2str(t,tf) '_' wfn '.wav'];
       end
       v=raws{i}.trial{t}(c,:);
-      audiowrite(wfn,v./max(abs(v)),raws{i}.fsample);
+      
+      if ismember({'fsample'},fields(raws{i}))
+        Fs = raws{i}.fsample;
+      else
+        Fs = 1/mean(diff(raws{i}.time{1}));
+        om = round(log10(Fs));
+        Fs = round(Fs ./ 10^(om-3)) .* 10^(om-3);      
+      end
+      
+      audiowrite(wfn,v./max(abs(v)),Fs);
       %wavs=[wavs,wfn];
       cmd = [cmd wfn ' '];
     end

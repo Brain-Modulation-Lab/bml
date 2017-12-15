@@ -1,16 +1,16 @@
 function event = bml_read_event(cfg)
 
-% BML_READ_EVENT
+% BML_READ_EVENT reads fieldtrip event structures
 %
 % cfg.name - string: filename
 % cfg.folder - string: path to file
 % cfg.detectflank - 'up', 'down' or 'both'
 %
-% returns fieldtrip event
+% returns fieldtrip event structure
 
 name         = bml_getopt(cfg,'name');
 folder       = bml_getopt(cfg,'folder');
-detectflank  = bml_getopt(cfg,'detectflank','both');
+detectflank  = bml_getopt_single(cfg,'detectflank','both');
 
 assert(numel(name)==1,'single name required');
 if iscell(name); name = name{1}; end
@@ -22,6 +22,7 @@ if iscell(folder); folder = folder{1}; end
 try
   event = ft_read_event(fullfile(folder,name),'detectflank',detectflank);
 catch
+  warning('cound not read events from %s',fullfile(folder,name));
   event = [];
 end
 

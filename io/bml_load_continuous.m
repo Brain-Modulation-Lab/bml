@@ -32,7 +32,6 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %
 % returns a continuous FT_DATATYPE_RAW and optionally a file-raw mapping
 
-
 file_raw_map_vars = {'starts','ends','s1','t1','s2','t2','folder','name','nSamples','Fs'};
 
 if istable(cfg)
@@ -80,6 +79,9 @@ end
 %consolidating chunks of same file when possible
 roi = bml_sync_consolidate(roi);
 
+%removing zero length rois
+roi = roi(roi.duration > 0,:);
+
 %using roi parameters if none specified in call
 if isempty(chantype) && ismember('chantype',roi.Properties.VariableNames)
   chantype  = cellstr(unique(roi.chantype));
@@ -103,7 +105,7 @@ elseif numel(chantype_split) > 2
   ft_error('Use : to specify skipfactor, e.g. analog:10')
 end
 
-%saving mapping between raw and files (original mapping without skipfactor)
+%saving mapping between raw and files 
 file_raw_map=roi(1,file_raw_map_vars);
 [s,e]=bml_crop_idx_valid(roi(1,:));
 file_raw_map.s1=s;
@@ -111,17 +113,24 @@ file_raw_map.s2=e;
 file_raw_map.t1=bml_idx2time(roi(1,:),s);
 file_raw_map.t2=bml_idx2time(roi(1,:),e);
 file_raw_map.raw1=1;
-file_raw_map.raw2=floor((e-s)/skipFactor)+1;
+file_raw_map.raw2=floor((e-s+1)/skipFactor);
+file_raw_map.skipFactor = skipFactor;
 
 %loading first raw
 cfg=[]; cfg.chantype=chantype;
 cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
 cfg.feedback=ft_feedback;
+hdr = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
+
+assert(hdr.Fs*skipFactor==roi.Fs(1),...
+  'File %s chantype %s has Fs %f, not %f as defined in cfg.roi',...
+  roi.name{1},cfg.chantype,hdr.Fs,roi.Fs(1));
+
 if ~dryrun
   raw = ft_preprocessing(cfg);
 else
-  raw = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
+  raw = hdr;
   assert(raw.nSamples>=floor(e/skipFactor),'index overflow s2=%i but nSample=%i',floor(e/skipFactor),raw.nSamples);
 end
 
@@ -144,7 +153,7 @@ end
 
 for i=2:height(roi)
   
-  %saving mapping between raw and files (original mapping without skipfactor)
+  %saving mapping between raw and files 
   row=roi(i,file_raw_map_vars);
   [s,e]=bml_crop_idx_valid(roi(i,:));
   row.s1=s;
@@ -153,7 +162,7 @@ for i=2:height(roi)
   row.t2=bml_idx2time(roi(i,:),e);
   row.raw1=max(file_raw_map.raw2)+1;
   row.raw2=floor((e-s)/skipFactor)+row.raw1;
-  file_raw_map = [file_raw_map;row];
+  row.skipFactor = skipFactor;
   
   %loading next raw
   cfg=[]; cfg.chantype=chantype;
@@ -196,10 +205,16 @@ for i=2:height(roi)
       if ismember(discontinuous,{'warn'})
         warning("concatenating discontinous files %i samples added",delta_s_int);
       end
-      if ~dryrun
+      if ~dryrun             
+        %zero padding the end of the previous raw
         starts = raw.time{1}(1) - 0.5*skipFactor/Fs;
         ends = next_time(1) + 0.5*skipFactor/Fs;
-        raw = bml_pad(raw,starts,ends,0);
+        [raw, ~, post] = bml_pad(raw,starts,ends,0);
+        
+        %correcting raw mapping due to zero padding
+        %the starts of next file in raw coordinates is delayed by post
+        row.raw1=max(file_raw_map.raw2)+1+post;
+        row.raw2=floor((e-s)/skipFactor)+row.raw1;
       else
         time = [time,time(end)+(1:delta_s_int)*skipFactor/Fs];
       end
@@ -216,6 +231,8 @@ for i=2:height(roi)
   else
     time = [time next_time];
   end
+  
+  file_raw_map = [file_raw_map;row];
 end
   
 if dryrun

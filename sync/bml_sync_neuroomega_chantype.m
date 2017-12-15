@@ -10,7 +10,7 @@ function sync = bml_sync_neuroomega_chantype(cfg)
 % analog 2750Hz channel. This function creates registries for other
 % channels (for example 'macro' and 'micro'), based on the synchronized channel. 
 %
-% cfg.roi            - original sync table (normaly with chantype=analog)
+% cfg.roi           - original sync table (normaly with chantype=analog)
 % cfg.chantype      - char, new chantype. Options are 'micro', 'macro', 'analog'
 % cfg.time_channel  - char, channel of new chantype used to extract time
 %                     use 'CRAW_01___Central', etc. 

@@ -11,8 +11,14 @@ function annot = bml_annot_consolidate(cfg, x)
 %             accept a table of candidate annotations to consolidate and 
 %             return a true or false.  
 % cfg.description - string: description of the output annot table
+% cfg.additive - cellstr with names of variables to be treated as additive 
+%             defaults to empty
 %
 % Returns a annotation table with the folloing variables:
+%   cons_duration - sum of the consolidated durations
+%   id_starts - first original id of the consolidated row
+%   id_ends - last original id of the consolidated row
+%   cons_n - number of consolidated rows
 % 
 % EXAMPLES
 % ========
@@ -27,21 +33,23 @@ function annot = bml_annot_consolidate(cfg, x)
 % cfg.criterion = @(x) height(x)<=4
 % grouped_annot = bml_annot_consolidate(cfg,annot);
 
-x=bml_annot_table(x,[],inputname(2));
-description = ft_getopt(cfg,'description', ['cons_' x.Properties.Description]);
-criterion = ft_getopt(cfg,'criterion',[]);
+x = bml_annot_table(x,[],inputname(2));
+
+description = bml_getopt(cfg,'description', ['cons_' x.Properties.Description]);
+criterion   = bml_getopt(cfg,'criterion',[]);
+additive    = bml_getopt(cfg,'additive',{});
 
 if ~isa(criterion, 'function_handle')
   error('''criterion'' should be a function handle');
 end
 
 i=1; j=1;
-tmp=collapse_table_rows(x(1,:));
+tmp=collapse_table_rows(x(1,:),additive);
 annot = cell2table(cell(0,width(tmp))); 
 annot.Properties.VariableNames = tmp.Properties.VariableNames;
 
 if height(x)<=1
-  annot = collapse_table_rows(x);
+  annot = collapse_table_rows(x,additive);
   annot.id=[];
   annot = bml_annot_table(annot,description);
   return
@@ -49,13 +57,13 @@ end
 
 while i<=height(x)
   if j==1 
-    curr_s=collapse_table_rows(x(i,:));
+    curr_s=collapse_table_rows(x(i,:),additive);
   end
   
   merge_s = x(i:(i+j),:);
   
   if criterion(merge_s)
-    curr_s = collapse_table_rows(merge_s);
+    curr_s = collapse_table_rows(merge_s,additive);
     j = j + 1;
     if i + j > height(x)
       annot = [annot; curr_s];
@@ -66,7 +74,7 @@ while i<=height(x)
     i = i + j;
     j = 1;
     if i == height(x) %adding last register
-      curr_s = collapse_table_rows(x(i,:));
+      curr_s = collapse_table_rows(x(i,:),additive);
       annot = [annot; curr_s];
       i = height(x)+1;
     end
@@ -78,9 +86,7 @@ annot = bml_annot_table(annot,description);
 
 
 
-
-
-function collapsed = collapse_table_rows(merge_s)
+function collapsed = collapse_table_rows(merge_s,additive)
 %
 % Private function. Collapses a table to a record
 
@@ -93,7 +99,7 @@ collapsed = table(...
   length(merge_s.id),...
   'VariableNames',{'starts','ends','cons_duration','id_starts','id_ends','cons_n'});
   
-vars = setdiff(merge_s.Properties.VariableNames,collapsed.Properties.VariableNames);
+vars = setdiff(merge_s.Properties.VariableNames,[collapsed.Properties.VariableNames,additive]);
 row=[];
 for i=1:length(vars)
   uval = unique(merge_s.(vars{i}));
@@ -106,6 +112,12 @@ for i=1:length(vars)
   else
     row.(vars{i}) = nan;
   end
+end
+
+%dealing with additive vars
+for i=1:length(additive)
+  uval = sum(merge_s.(additive{i}));
+  row.(vars{i}) = uval;
 end
 
 collapsed = [collapsed, struct2table(row)];

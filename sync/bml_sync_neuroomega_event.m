@@ -17,6 +17,10 @@ function sync_roi = bml_sync_neuroomega_event(cfg)
 %   cfg.timetol - numeric, time tolerance in seconds. Defaults to 1e-6
 %   cfg.min_events - integer. Minimum number of events required to attemp
 %             alingment, defaults to 10. 
+%   cfg.strict - logical. Issue errors if timetol is violated instead of errors. 
+%             Defaults to false. 
+%
+% returns a roi table
 
 scan_step         = bml_getopt(cfg,'scan_step',0.1);
 scan              = bml_getopt(cfg,'scan',100);
@@ -26,16 +30,17 @@ roi               = bml_getopt(cfg,'roi');
 diagnostic_plot   = bml_getopt(cfg,'diagnostic_plot',false);
 timetol           = bml_getopt(cfg,'timetol',1e-6);
 min_events        = bml_getopt(cfg,'min_events',10);
+strict            = bml_getopt(cfg,'strict',false);
 
 assert(~isempty(roi),'roi required');
 assert(~isempty(master_events),'master_events required');
 
 all_slave_dt = zeros(height(roi),1);
 all_warpfactor = ones(height(roi),1);
+all_meanerror = zeros(height(roi),1);
 for i=1:height(roi)
   
   %getting events
-
 	i_slave_events = bml_read_event(roi(i,:));
   if isempty(i_slave_events) || length(i_slave_events) < min_events
     all_slave_dt(i) = nan;
@@ -64,9 +69,16 @@ for i=1:height(roi)
       plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),'r*');
     end
 
-    alignment_error = min_cost/height(i_slave_events);
-    assert(alignment_error < timetol,...
-      'could not time align within timetol. Mean error %f > %f',alignment_error,timetol);
+    all_meanerror(i) = min_cost/height(i_slave_events);
+    if all_meanerror(i) > timetol
+      if strict
+        error('could not time align within timetol. Mean error %f > %f. File %s',all_meanerror(i),timetol,roi.name{i});
+      else
+        warning('could not time align within timetol. Mean error %f > %f. File %s',all_meanerror(i),timetol,roi.name{i});
+        all_slave_dt(i) = nan;
+        all_warpfactor(i) = nan;
+      end
+    end
   end
 end
 
@@ -74,30 +86,41 @@ if ~istrue(timewarp)
   all_slave_dt = repmat(nanmean(all_slave_dt),length(all_slave_dt),1);
 end
 
-if any(ismissing(all_slave_dt))
-  all_slave_dt(ismissing(all_slave_dt)) = nanmean(all_slave_dt);
-end
-if any(ismissing(all_warpfactor))
-  all_warpfactor(ismissing(all_warpfactor)) = nanmean(all_warpfactor);
-end
+%consolidating results
 
+roi.slave_dt = all_slave_dt;
+roi.warpfactor = all_warpfactor;
+roi.alignment_error = all_meanerror;
 
-% %calculating linear fit to delays, to apply sort of time warping
-% p = polyfit(roi.starts,roi.slave_dt,1);
-% roi.starts = roi.starts + polyval(p,roi.starts);
-% roi.ends   = roi.ends   + polyval(p,roi.ends);
-% roi.t1     = roi.t1     + polyval(p,roi.t1);
-% roi.t2     = roi.t2     + polyval(p,roi.t2);
-% roi.warpfactor = ones(height(roi),1) * (1+p(1));
+cfg=[];
+cfg.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
+cont_roi = bml_annot_consolidate(cfg,roi);
+
+consolidated_roi = table();
+for i=1:height(cont_roi)
+  i_roi = roi(roi.id >= cont_roi.id_starts(i) & roi.id <= cont_roi.id_ends(i),:);
+  i_roi.slave_dt(:) = nanmean(i_roi.slave_dt);
+  i_roi.warpfactor(:) = nanmean(i_roi.warpfactor);
+  consolidated_roi = [consolidated_roi; i_roi];
+end
+roi = consolidated_roi;
+
+if any(ismissing(roi.slave_dt))
+  warning('Using mean dt for some files');
+  roi.slave_dt(ismissing(roi.slave_dt)) = nanmean(roi.slave_dt);
+end
+if any(ismissing(roi.warpfactor))
+  warning('Using mean warpfactor for some files');
+  roi.warpfactor(ismissing(roi.warpfactor)) = nanmean(roi.warpfactor);
+end
 
 midpoint_a = (roi.ends + roi.ends) ./ 2;
 midpoint_t = (roi.t1 + roi.t2) ./ 2;
-roi.starts = (roi.starts - midpoint_a) .* all_warpfactor + midpoint_a + all_slave_dt;
-roi.ends = (roi.ends - midpoint_a) .* all_warpfactor + midpoint_a + all_slave_dt;
-roi.t1 = (roi.t1 - midpoint_t) .* all_warpfactor + midpoint_t + all_slave_dt;
-roi.t2 = (roi.t2 - midpoint_t) .* all_warpfactor + midpoint_t + all_slave_dt;
+roi.starts = (roi.starts - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;
+roi.ends = (roi.ends - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;
+roi.t1 = (roi.t1 - midpoint_t) .* roi.warpfactor + midpoint_t + roi.slave_dt;
+roi.t2 = (roi.t2 - midpoint_t) .* roi.warpfactor + midpoint_t + roi.slave_dt;
 
-roi.warpfactor = all_warpfactor;
 roi.chunk_id = (1:height(roi))';
 roi.sync_channel = repmat({'digital'},height(roi),1);
 roi.sync_type = repmat({'slave'},height(roi),1);

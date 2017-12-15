@@ -36,10 +36,17 @@ if istable(cfg)
     time = zeros(1,length(idx));
     for i=1:height(cfg)
       t1=cfg.t1(i);
-      s1=ceil(cfg.s1(i)/skipFactor);
+      s1=cfg.s1(i);
       t2=cfg.t2(i);
-      s2=floor(cfg.s2(i)/skipFactor);
+      s2=cfg.s2(i);
       Fs=(s2-s1)/(t2-t1);  
+      if skipFactor > 1
+        s1=ceil(s1/skipFactor);
+        s2=floor(s2/skipFactor);
+        t1=t1+(skipFactor-1)*0.5/Fs;
+        t2=t2-(skipFactor-1)*0.5/Fs;
+        Fs = (s2-s1)/(t2-t1);
+      end
       idx_filt = idx>=s1 & idx<=s2;
       time(idx_filt) = (1/Fs)*(idx(idx_filt)-0.5+(s2*t1-t2*s1)/(t2-t1));
     end
@@ -51,10 +58,17 @@ end
   
 %dealing with simple sync
 t1=bml_getopt(cfg,'t1');
-s1=ceil(bml_getopt(cfg,'s1')/skipFactor);
+s1=bml_getopt(cfg,'s1');
 t2=bml_getopt(cfg,'t2');
-s2=floor(bml_getopt(cfg,'s2')/skipFactor);
-
-Fs = (s2-s1)/(t2-t1);  
+s2=bml_getopt(cfg,'s2');
+Fs = (s2-s1)/(t2-t1); 
+if skipFactor > 1
+  s1=ceil(s1/skipFactor);
+  s2=floor(s2/skipFactor);
+  t1=t1+(skipFactor-1)*0.5/Fs;
+  t2=t2-(skipFactor-1)*0.5/Fs;
+  Fs = (s2-s1)/(t2-t1);
+end
+ 
 time = (1/Fs)*(idx-0.5+(s2*t1-t2*s1)/(t2-t1));
 

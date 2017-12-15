@@ -41,6 +41,14 @@ if ~exist('description','var') || isempty(description)
   end
 end
 
+if iscellstr(description) 
+  if numel(description)==1
+    description = description{1};
+  else
+    error('The Description property must be a character vector.');
+  end
+end
+
 if ~strcmp('starts',x.Properties.VariableNames)
   if width(x)<=2 
     x.Properties.VariableNames(1)={'starts'};

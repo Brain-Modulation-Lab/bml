@@ -1,7 +1,9 @@
 function env = bml_envelope_binabs(cfg, data)
 
-% BML_ENVELOPE_BINABS Calculate envelope as maximum of abssolute value in
-% bins of 'bin_size' points, repeating each value 'repeat' times
+% BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method
+%
+% The envelope is calculated as the maximum of the absolute value in
+% bins of 'bin_size' samples. 
 %
 % Use as
 %   env = bml_envelope_binabs(data)

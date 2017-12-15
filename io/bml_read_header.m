@@ -1,6 +1,9 @@
 function hdr = bml_read_header(cfg)
 
-% BML_READ_HEADER
+% BML_READ_HEADER reads header of a file
+%
+% Use as
+%   hdr = bml_read_header(cfg)
 %
 % cfg.name - string: filename
 % cfg.folder - string: path to file

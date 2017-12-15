@@ -35,10 +35,15 @@ if isempty(annot)
 end
 
 intersect = bml_annot_intersect(annot,filter_annot(:,1:4));
-intersect = intersect(:,{'annot_id','duration'});
+intersect = intersect(:,{'id','starts','ends','duration','annot_id'});
+cfg=[];
+cfg.criterion = @(x) (length(unique(x.annot_id))==1);
+intersect = bml_annot_consolidate(cfg,intersect);
+intersect = intersect(:,{'annot_id','cons_duration'});
 intersect.Properties.VariableNames = {'id','annot_filter_intersect_duration'};
 
 annot_intersect=join(annot(ismember(annot.id,intersect.id),1:4),intersect);
-annot_intersect=annot_intersect(annot_intersect.duration ./ annot_intersect.annot_filter_intersect_duration > overlap,:);
+duration_ratio = annot_intersect.annot_filter_intersect_duration ./ annot_intersect.duration;
+annot_intersect=annot_intersect((duration_ratio >= overlap) | (isnan(duration_ratio)),:);
 
 filtered = bml_annot_table(annot(ismember(annot.id,annot_intersect.id),:));

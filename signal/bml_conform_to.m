@@ -21,11 +21,13 @@ function conformed = bml_conform_to(master, slave)
 % merged = ft_appenddata(cfg,master,conformed);
 %
 
-t1=master.time{1}(1);
-t2=master.time{1}(end);
+mc = bml_raw2coord(master);
+sc = bml_raw2coord(slave);
+assert(mc.t2 > sc.t1 && mc.t1 < mc.t2, 'can''t conform, raws dont''t overlap');
+
 cfg=[]; cfg.time=master.time; cfg.method='pchip';
 cfg.feedback='no';
-conformed=ft_resampledata(cfg,bml_crop(slave,t1,t2));
+conformed=ft_resampledata(cfg,bml_crop(slave,mc.t1,mc.t2));
 
 if ismember('fsample',fields(master))
   conformed.fsample = master.fsample;

@@ -8,6 +8,7 @@ function annot = bml_coding2annot(cfg)
 % cfg.CodingMatPath    - path to mat file with coding info
 % cfg.EventsPerTrial   - double, defaults depends on CodingAppVersion
 % cfg.roi              - roi table with sessions audio sync information
+% cfg.audio_chanel     - string indicating audio channel (optinal)
 % cfg.CodingAppVersion - char, defines format expected for CodingMatrix
 %                      - accepted values are 'U01_v1' (default), 'pilot'
 %
@@ -34,34 +35,44 @@ roi              = bml_getopt(cfg,'roi');
 CodingAppVersion = bml_getopt(cfg,'CodingAppVersion','U01_v1');
 AudioCoord       = bml_getopt(cfg,'warpcoords');
 praat            = bml_getopt(cfg,'praat');
+audio_channel    = bml_getopt(cfg,'audio_channel');
 
 if isempty(AudioCoord) || praat
   %loading sychronized audio to get the time-mapping
   roi = bml_sync_consolidate(roi);
   sync_audio = bml_load_continuous(roi);
+  
+  if ~isempty(audio_channel)
+    cfg1=[];
+    cfg1.channel = audio_channel;
+    sync_audio = ft_selectdata(cfg1,sync_audio);
+  end
+  
   % unwarping to facilitate correlation with coding_audio
+  loadedAudioCoord = bml_raw2coord(sync_audio);
   sync_audio_time = sync_audio.time;
   sync_audio.time{1} = (1:length(sync_audio.time{1}))./sync_audio.fsample;
-
+  
   %loading coding audio
   cfg1=[]; cfg1.CodingMatPath = CodingMatPath;
   coding_audio = bml_coding2raw(cfg1);
 
   if isempty(AudioCoord)
+    AudioCoord = loadedAudioCoord;
+    
     fprintf('Calculating alignment between coding and roi audios');
     cfg1=[]; cfg1.method='lpf';
     [coding_audio_dt, max_corr] = bml_timealign(cfg1, sync_audio, coding_audio);
-    AudioCoord=[];
-    AudioCoord.t1 = roi.t1(1);
-    AudioCoord.t2 = roi.t2(1);    
-    AudioCoord.s1 = roi.s1(1) - coding_audio_dt*Afs;
-    AudioCoord.s2 = roi.s2(1) - coding_audio_dt*Afs;
+    assert(roi.Fs == Afs, 'roi''s Fs should be equivalent to Coding Aduio Afs');
+    
+    AudioCoord.s1 = AudioCoord.s1 - round(coding_audio_dt*Afs);
+    AudioCoord.s2 = AudioCoord.s2 - round(coding_audio_dt*Afs);
     
     assert(max_corr > 0.95, 'max_cor = %f should be near 1', max_corr);
   end
   if praat
     sync_audio.time = sync_audio_time; %setting sync time
-    coding_audio.time{1} = bml_idx2time(AudioCoord, 1:length(coding_audio.time{1}));
+    coding_audio.time{1} = bml_idx2time(AudioCoord, 1:length(coding_audio.time{1}));    
     bml_praat(sync_audio, bml_conform_to(sync_audio,coding_audio));
   end
 end

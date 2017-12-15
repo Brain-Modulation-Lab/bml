@@ -7,8 +7,12 @@ function annot = bml_event2annot(cfg, event)
 %   annot = bml_event2annot(cfg.roi, event)
 %
 % cfg.roi
-% cfg.event_type - cells of char: event types selected
-% cfg.coord - logical: should file coordinates be appended (defaults false)
+% cfg.event_type  - cells of char: event types selected
+% cfg.coord       - logical: should file coordinates be appended (defaults false)
+% cfg.starts      - float: t0 of the event structure. If empty no time
+%          correction is done
+% cfg.Fs          - sampling frequency in Hz. Defaults to 1. 
+% cfg.warn        - logical: should a warnings be issued. Defaults to true.  
 %
 % returns a annot table
 
@@ -20,12 +24,18 @@ event_type  = bml_getopt(cfg,'event_type');
 coord       = bml_getopt(cfg,'coord',false);
 cfg_starts  = bml_getopt(cfg,'starts');
 cfg_Fs      = bml_getopt(cfg,'Fs',1);
+cfg_warn    = bml_getopt(cfg,'warn',true);
 
 %selecting events
 if isempty(event_type)
   event_type = unique({event.type});
 else
-  event_type = event_type(ismember(event_type,unique({event.type})));
+  present_event_type = ismember(event_type,unique({event.type}));
+  if ~all(present_event_type) && istrue(cfg_warn)
+    warning('selected event type %s not present. Available event types are: %s',...
+      strjoin(event_type(~present_event_type)),strjoin(unique({event.type})));
+  end
+  event_type = event_type(present_event_type);
 end
 
 if ~isempty(roi)
