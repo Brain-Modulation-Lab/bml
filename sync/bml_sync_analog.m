@@ -18,7 +18,9 @@ function sync_roi = bml_sync_analog(cfg)
 %            shorter periods.
 %   cfg.master_filetype - string: filetype that defines filetype used as master time,
 %            to which to align other filetypes
-%
+%   cfg.sync_roi - roi table with previous results of current run. If
+%            provided, the algorithm will skip doing the same
+%            synchronization chunks. Useful for iterative chunking. 
 %
 % cfg - configuration structure (optional fields)
 %   cfg.timewarp - logical: Should slave time be warped? defaults to true.
@@ -101,6 +103,7 @@ master_filetype     = bml_getopt_single(cfg,'master_filetype');
 chunks              = bml_getopt(cfg,'chunks');
 chunk_extend        = bml_getopt(cfg,'chunk_extend',0);
 roi_os              = bml_roi_table(bml_getopt(cfg,'roi'),'roi_os');
+prev_sync_roi       = bml_getopt(cfg,'sync_roi');
 praat               = bml_getopt(cfg,'praat',false);
 resample_freq       = bml_getopt(cfg,'resample_freq',10000);
 dryrun              = bml_getopt(cfg,'dryrun',false);
@@ -118,16 +121,19 @@ ft_feedback         = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous       = bml_getopt(cfg,'discontinuous','warn');
 high_pass           = bml_getopt(cfg,'high_pass',false);
 high_pass_freq      = bml_getopt(cfg,'high_pass_freq',5);
+timetol             = bml_getopt(cfg,'timetol',1e-6);
 
 assert(~ismember('filetype',chunks.Properties.VariableNames),...
   'cfg.chunks should not containt ''filetype'' variable');
 assert(~isempty(chunks),'empty chunks table');
 
-chunks = bml_chunk_sessions(chunks);
-chunks = bml_annot_table(chunks,'chunks');
+
+
+chunks = bml_annot_table(bml_chunk_sessions(chunks),'chunks');
 
 sync_roi = table();
 sync_roi_vars = {'starts','ends','s1','t1','s2','t2','folder','name','nSamples','Fs','session_id','session_part','filetype'};
+sync_roi_vars_out = [sync_roi_vars,{'chantype','chunk_id','warpfactor','sync_channel','sync_type'}];
 
 filetypes=unique(sync_channels.filetype);
 slave_filetypes = setdiff(filetypes,master_filetype);
@@ -136,19 +142,24 @@ master_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,master_fi
 
 extended_chunks = bml_annot_extend(chunks,chunk_extend);
 
-%checking files before commiting to synchronization
-for chunk_i=1:height(chunks)
-  chunk_roi_os = bml_annot_intersect(roi_os, chunks(chunk_i,:));  
-  for filetype_i=1:length(filetypes)
-    cfg=[]; cfg.ft_feedback=ft_feedback;
-    cfg.channel = sync_channels.channel{strcmp(sync_channels.filetype,filetypes(filetype_i))};
-    cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,filetypes(filetype_i))};
-  	cfg.roi=chunk_roi_os(string(chunk_roi_os.filetype)==filetypes(filetype_i),:);
-    cfg.dryrun=true;
-    cfg.discontinuous=discontinuous;
-    assert(height(cfg.roi)>0,'No files for filetype %s and session %i',...
-      filetypes{filetype_i},chunks.id(chunk_i));
-    bml_load_continuous(cfg); %raises error if continuity is violated
+if ~isempty(prev_sync_roi) %previous attempts to sync
+  prev_sync_roi = bml_roi_table(prev_sync_roi,'prev');
+  assert(all(ismember({'sync_type','sync_channel','chantype'},prev_sync_roi.Properties.VariableNames)),...
+    "variables sync_type, sync_channel and chantype required for cfg.sync_roi");
+else %checking files before commiting to first round of synchronization
+  for chunk_i=1:height(chunks)
+    chunk_roi_os = bml_annot_intersect(roi_os, chunks(chunk_i,:));  
+    for filetype_i=1:length(filetypes)
+      cfg=[]; cfg.ft_feedback=ft_feedback;
+      cfg.channel = sync_channels.channel{strcmp(sync_channels.filetype,filetypes(filetype_i))};
+      cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,filetypes(filetype_i))};
+      cfg.roi=chunk_roi_os(string(chunk_roi_os.filetype)==filetypes(filetype_i),:);
+      cfg.dryrun=true;
+      cfg.discontinuous=discontinuous;
+      assert(height(cfg.roi)>0,'No files for filetype %s and session %i',...
+        filetypes{filetype_i},chunks.id(chunk_i));
+      bml_load_continuous(cfg); %raises error if continuity is violated
+    end
   end
 end
 
@@ -160,110 +171,155 @@ for chunk_i=1:height(chunks)
   chunk_roi_os = bml_annot_intersect(roi_os, chunks(chunk_i,:)); 
   master_chunk_roi_os=chunk_roi_os(strcmp(chunk_roi_os.filetype,master_filetype),:);  
   
-  %interseting with extended chunks for slave
+  %intersecting with extended chunks for slave
   extended_chunk_roi_os = bml_annot_intersect(roi_os, extended_chunks(chunk_i,:));  
 
-  cfg=[]; %creating masters raw with sync channel for entire session
-  cfg.channel = master_channel; cfg.chantype = master_chantype; 
-  cfg.roi = master_chunk_roi_os; cfg.ft_feedback=ft_feedback;
-  cfg.dryrun = dryrun;
-  cfg.discontinuous=discontinuous;
-  [master, master_map] = bml_load_continuous(cfg);
   
-  if istrue(high_pass)
-    master.trial{1} = ft_preproc_highpassfilter(master.trial{1},...
-                      master.fsample, high_pass_freq, 4, 'but', 'twopass');
+  do_this_chunk = true;
+  %cheking if this chunk was previously done
+  if ~isempty(prev_sync_roi)
+    cfg=[];
+    cfg.overlap=0.001;
+    prev_chunk_i = bml_annot_filter(cfg,prev_sync_roi,master_chunk_roi_os);
+    prev_chunk_i_master = prev_chunk_i(strcmp(prev_chunk_i.sync_type,'master') &...
+                                       strcmp(prev_chunk_i.sync_channel,master_channel) & ...
+                                       strcmp(prev_chunk_i.chantype,master_chantype),:);
+    %cheking consistency of previous and current syncs
+    if height(prev_chunk_i_master)==height(master_chunk_roi_os) && ...
+       abs(min(prev_chunk_i_master.starts) - min(master_chunk_roi_os.starts)) < timetol && ...
+       abs(max(prev_chunk_i_master.ends) - max(master_chunk_roi_os.ends)) < timetol
+     
+       do_this_chunk = false; %will skip the calculations for this chunk
+       fprintf('skipping chunk %i consistent with chunk %i in cfg.sync_roi \n',chunk_id, unique(prev_chunk_i_master.chunk_id));
+     
+       %adding row info for master
+       row = prev_chunk_i_master(:,sync_roi_vars_out);
+       row.chunk_id(:) = chunk_id;  %replacing chunk info
+       sync_roi = [sync_roi;row];
+       
+       %adding row info for slaves
+       row = prev_chunk_i(ismember(prev_chunk_i.filetype,slave_filetypes) & ...
+              ismember(prev_chunk_i.sync_channel,sync_channels.channel(ismember(sync_channels.filetype,slave_filetypes))) &...
+              prev_chunk_i.chunk_id == unique(prev_chunk_i_master.chunk_id), ...
+              sync_roi_vars_out);
+       row.chunk_id(:) = chunk_id; %replacing chunk info
+       sync_roi = [sync_roi;row];  
+    end
   end
   
-  row = master_chunk_roi_os(:,sync_roi_vars);
-  row.chantype = repmat({master_chantype},height(row),1);
-  row.chunk_id = repmat(chunk_id,height(row),1);
-  row.warpfactor = ones(height(row),1);
-  row.sync_channel = master_channel;
-  row.sync_type = {'master'};
-  sync_roi = [sync_roi;row];
-  
-  if praat && ~dryrun
-  	bml_praat(strcat('c',num2str(chunk_id),'_master_',master_filetype),master);  
-  end
-  
-  for slave_i=1:length(slave_filetypes)
-    filetype_chunk_roi_os=extended_chunk_roi_os(string(extended_chunk_roi_os.filetype)==slave_filetypes(slave_i),:);
-    slave_channel = sync_channels.channel{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
-    slave_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
-    
-    cfg=[]; %creating slave raw with sync channel for entire session
+  if do_this_chunk
+    cfg=[]; %creating masters raw with sync channel for entire session
+    cfg.channel = master_channel; 
+    cfg.chantype = master_chantype; 
+    cfg.roi = master_chunk_roi_os; 
     cfg.ft_feedback=ft_feedback;
-    cfg.channel = slave_channel; 
-    cfg.chantype = slave_chantype;
-    cfg.roi = filetype_chunk_roi_os;
     cfg.dryrun = dryrun;
     cfg.discontinuous=discontinuous;
-    [slave, slave_map] = bml_load_continuous(cfg);  
-    
-    if istrue(high_pass) && ~dryrun
-      slave.trial{1} = ft_preproc_highpassfilter(slave.trial{1},...
-                      slave.fsample, 5, 4, 'but', 'twopass');
-    end
-    
-    %envelope alingment and warping
-    if ~dryrun
-      cfg=[]; cfg.ft_feedback=ft_feedback;
-      cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
-      cfg.method='envelope'; cfg.env_freq=env_freq; cfg.scan=env_scan;
-      cfg.penalty_wt0_min=env_penalty_wt0_min; cfg.penalty_ws1=env_penalty_ws1;
-      wc_env = bml_timewarp(cfg,master,slave);
-      slave.time{1} = bml_idx2time(wc_env, 1:length(slave.time{1}));
-    else  
-      wc_env = [];
-      wc_env.s1 = min(slave_map.raw1);
-      wc_env.s2 = max(slave_map.raw2);
-      wc_env.t1 = min(slave_map.t1);
-      wc_env.t2 = max(slave_map.t2);
-      wc_env.wt0=0; 
-      wc_env.ws1=1; 
+    [master, master_map] = bml_load_continuous(cfg);
+
+    if istrue(high_pass)
+      master.trial{1} = ft_preproc_highpassfilter(master.trial{1},...
+                        master.fsample, high_pass_freq, 4, 'but', 'twopass');
     end
 
-    if lpf && ~dryrun %low-pass frequency filter alignment and warping
+    row = master_chunk_roi_os(:,sync_roi_vars);
+    row.chantype = repmat({master_chantype},height(row),1);
+    row.chunk_id = repmat(chunk_id,height(row),1);
+    row.warpfactor = ones(height(row),1);
+    row.sync_channel = master_channel;
+    row.sync_type = {'master'};
+    sync_roi = [sync_roi;row];
+
+    if praat && ~dryrun
+      bml_praat(strcat('c',num2str(chunk_id),'_master_',master_filetype),master);  
+    end
+
+    for slave_i=1:length(slave_filetypes)
+      filetype_chunk_roi_os=extended_chunk_roi_os(string(extended_chunk_roi_os.filetype)==slave_filetypes(slave_i),:);
+      slave_channel = sync_channels.channel{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
+      slave_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
+
+      cfg=[]; %creating slave raw with sync channel for entire session
+      cfg.ft_feedback=ft_feedback;
+      cfg.channel = slave_channel; 
+      cfg.chantype = slave_chantype;
+      cfg.roi = filetype_chunk_roi_os;
+      cfg.dryrun = dryrun;
+      cfg.discontinuous=discontinuous;
+      [slave, slave_map] = bml_load_continuous(cfg);  
+
+      if istrue(high_pass) && ~dryrun
+        slave.trial{1} = ft_preproc_highpassfilter(slave.trial{1},...
+                        slave.fsample, 5, 4, 'but', 'twopass');
+      end
+
+      %envelope alingment and warping
+      if ~dryrun
         cfg=[]; cfg.ft_feedback=ft_feedback;
         cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
-        cfg.method='low-pass-filter'; cfg.scan=lpf_scan;
-        cfg.lpf_freq=min([master.fsample,slave.fsample,lpf_max_freq]);
-        cfg.penalty_wt0_min=lpf_penalty_wt0_min; cfg.penalty_ws1=lpf_penalty_ws1;
-        wc_lpf = bml_timewarp(cfg,master,slave);
-        slave.time{1} = bml_idx2time(wc_lpf, 1:length(slave.time{1}));
-    else
-        wc_lpf = wc_env;
-        wc_lpf.ws1 = 1;
-    end
-      
-    %saving sync info
-    row = filetype_chunk_roi_os(:,sync_roi_vars);
-    if height(row) ~= height(slave_map)
-      row = row(ismember(row.name,slave_map.name),:);
-    end
-    row.s1 = slave_map.s1;
-    row.s2 = slave_map.s2; 
-    row.t1 = bml_idx2time(wc_lpf,slave_map.raw1);
-    row.t2 = bml_idx2time(wc_lpf,slave_map.raw2);
-    row.starts = row.t1 - 0.5./row.Fs;
-    row.ends = row.t2 + 0.5./row.Fs;
-    row.chantype=repmat({slave_chantype},height(row),1);
-    row.sync_channel = repmat({slave_channel},height(row),1);
-    row.sync_type = repmat({'slave'},height(row),1);
-    row.warpfactor = repmat(wc_env.ws1*wc_lpf.ws1,height(row),1);
-    row.chunk_id = repmat(chunk_id,height(row),1);
-    sync_roi = [sync_roi; row];
-    
-    if praat && ~dryrun
-      slave_crop = bml_conform_to(master,slave);
-      bml_praat(strcat('c',num2str(chunk_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
-    end
+        cfg.method='envelope'; cfg.env_freq=env_freq; cfg.scan=env_scan;
+        cfg.penalty_wt0_min=env_penalty_wt0_min; cfg.penalty_ws1=env_penalty_ws1;
+        wc_env = bml_timewarp(cfg,master,slave);
+        slave.time{1} = bml_idx2time(wc_env, 1:length(slave.time{1}));
+      else  
+        wc_env = [];
+        wc_env.s1 = min(slave_map.raw1);
+        wc_env.s2 = max(slave_map.raw2);
+        wc_env.t1 = min(slave_map.t1);
+        wc_env.t2 = max(slave_map.t2);
+        wc_env.wt0=0; 
+        wc_env.ws1=1; 
+      end
 
+      if lpf && ~dryrun %low-pass frequency filter alignment and warping
+          cfg=[]; cfg.ft_feedback=ft_feedback;
+          cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
+          cfg.method='low-pass-filter'; cfg.scan=lpf_scan;
+          cfg.lpf_freq=min([master.fsample,slave.fsample,lpf_max_freq]);
+          cfg.penalty_wt0_min=lpf_penalty_wt0_min; cfg.penalty_ws1=lpf_penalty_ws1;
+          wc_lpf = bml_timewarp(cfg,master,slave);
+          slave.time{1} = bml_idx2time(wc_lpf, 1:length(slave.time{1}));
+      else
+          wc_lpf = wc_env;
+          wc_lpf.ws1 = 1;
+      end
+
+      %saving sync info
+      row = filetype_chunk_roi_os(:,sync_roi_vars);
+      if height(row) ~= height(slave_map)
+        row = row(ismember(row.name,slave_map.name),:);
+      end
+      row.s1 = slave_map.s1;
+      row.s2 = slave_map.s2; 
+      row.t1 = bml_idx2time(wc_lpf,slave_map.raw1);
+      row.t2 = bml_idx2time(wc_lpf,slave_map.raw2);
+      row.starts = row.t1 - 0.5./row.Fs;
+      row.ends = row.t2 + 0.5./row.Fs;
+      row.chantype=repmat({slave_chantype},height(row),1);
+      row.sync_channel = repmat({slave_channel},height(row),1);
+      row.sync_type = repmat({'slave'},height(row),1);
+      row.warpfactor = repmat(wc_env.ws1*wc_lpf.ws1,height(row),1);
+      row.chunk_id = repmat(chunk_id,height(row),1);
+      sync_roi = [sync_roi; row];
+
+      if praat && ~dryrun
+        slave_crop = bml_conform_to(master,slave);
+        bml_praat(strcat('c',num2str(chunk_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
+      end
+    end
   end
 end
 
 sync_roi = bml_roi_table(sync_roi);
+
+for slave_i=1:length(slave_filetypes)
+  sync_roi_i = sync_roi(strcmp(sync_roi.filetype,slave_filetypes{slave_i}),:);
+  chantype = unique(sync_roi_i.chantype);
+  sync_channel = unique(sync_roi_i.sync_channel);
+  fprintf('Summary for slave filetype %s, chantype %s, sync_channel %s \n.',...
+    slave_filetypes{slave_i},chantype{1},sync_channel{1});
+  sync_roi_i(:,{'id','starts','ends','duration','name','session_id','warpfactor'})
+end
 
 
 

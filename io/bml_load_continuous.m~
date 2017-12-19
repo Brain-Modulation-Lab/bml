@@ -12,7 +12,7 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %   cfg.roi - ROI table with regions of interest to load
 %   cfg.channel - cellstr with channels to be selected
 %   cfg.electrode - ANNOT table with electrodes information. Should contain
-%                   variables 'channel' and 'electrode'. Optional.
+%                   variables 
 %   cfg.folder - overwrites info in cfg.roi
 %   cfg.chantype - overwrites info in cfg.roi
 %   cfg.filetype - overwrites info in cfg.roi
@@ -51,13 +51,12 @@ channel       = bml_getopt(cfg,'channel');
 chantype      = bml_getopt(cfg,'chantype');
 filetype      = bml_getopt(cfg,'filetype');
 Fs            = bml_getopt(cfg,'Fs');
-roi           = bml_annot_table(bml_getopt(cfg,'roi'),'roi');
+roi           = bml_getopt(cfg,'roi');
 timetol       = bml_getopt(cfg,'timetol',1e-5);
 dryrun        = bml_getopt(cfg,'dryrun',false);
 ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous = bml_getopt(cfg,'discontinuous','warn');
 padval        = bml_getopt(cfg,'padval',0);
-electrode     = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
 
 if isempty(roi)
   raw=[];
@@ -105,21 +104,16 @@ assert(length(filetype)==1,'unique filetype required: %s',strjoin(filetype));
 assert(length(chantype)==1,'unique chantype required: %s',strjoin(chantype));
 assert(length(Fs)==1,'unique Fs required: %s',strjoin(string(num2str(Fs))));
 
+%% LOAD FIRST FILE
+
 %dealing with skip factors
 skipFactor=1;
 chantype_split=strsplit(chantype{1},':');
 if numel(chantype_split) == 2
   skipFactor=str2double(chantype_split{2});
 elseif numel(chantype_split) > 2
-  ft_error('Use '':'' to specify skipfactor, e.g. analog:10')
+  ft_error('Use : to specify skipfactor, e.g. analog:10')
 end
-
-%selecting electrodes 
-if ~isempty(electrode)
-  %keyboard
-end
-
-%% LOAD FIRST FILE
 
 %saving mapping between raw and files 
 file_raw_map=roi(1,file_raw_map_vars);
@@ -185,8 +179,7 @@ for i=2:height(roi)
   row.skipFactor = skipFactor;
   
   %loading next raw
-  cfg=[]; 
-  cfg.chantype=chantype;
+  cfg=[]; cfg.chantype=chantype;
   cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
   cfg.feedback=ft_feedback;

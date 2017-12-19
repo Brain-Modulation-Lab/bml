@@ -16,8 +16,7 @@ function annot=bml_annot_table(x, description, x_var_name)
 % variable present in x. Issues a error on inconsistent input. 
 
 if isempty(x) 
-  annot=table();
-  return
+  x=table();
 end
 
 if isnumeric(x)
@@ -47,6 +46,12 @@ if iscellstr(description)
   else
     error('The Description property must be a character vector.');
   end
+end
+
+if isempty(x)
+  annot=table();
+  annot.Properties.Description = description;
+  return
 end
 
 if ~strcmp('starts',x.Properties.VariableNames)

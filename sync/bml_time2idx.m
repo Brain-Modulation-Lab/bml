@@ -17,6 +17,9 @@ function idx=bml_time2idx(cfg, time, skipFactor)
 % cfg.s2
 % cfg.nSamples - double: optional total number of samples in file
 %
+
+pTT = 9; %pTT = pTimeTolerenace = - log10(timetol)
+
 if nargin==2
   skipFactor=1;
 elseif nargin==3
@@ -25,13 +28,13 @@ else
   error('unsupported call to bml_time2idx, see usage');
 end
 
-t1=bml_getopt(cfg,'t1');
+t1=round(bml_getopt(cfg,'t1'),pTT);
 s1=ceil(bml_getopt(cfg,'s1')/skipFactor);
-t2=bml_getopt(cfg,'t2');
+t2=round(bml_getopt(cfg,'t2'),pTT);
 s2=floor(bml_getopt(cfg,'s2')/skipFactor);
 nSamples=bml_getopt(cfg,'nSamples');
 
-idx = round((t2*s1-s2*t1+(s2-s1).*time)/(t2-t1));
+idx = round((t2*s1-s2*t1+(s2-s1).*round(time,pTT))/(t2-t1));
 
 if any(idx<=0); error('negative index'); end
 if ~isempty(nSamples)

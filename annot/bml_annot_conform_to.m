@@ -12,7 +12,13 @@ annot_vars = annot.Properties.VariableNames;
 
 missing_vars = setdiff(template_vars,annot_vars);
 for i=1:length(missing_vars)
-  annot.(missing_vars{i}) = NaN(height(annot),1); 
+  if iscellstr(template.(missing_vars{i}))
+    annot.(missing_vars{i}) = repmat({''},height(annot),1);
+  elseif iscell(template.(missing_vars{i}))
+    annot.(missing_vars{i}) = repmat({nan},height(annot),1);
+  else
+    annot.(missing_vars{i}) = NaN(height(annot),1); 
+  end
 end
 
 conformed = annot(:,template_vars);

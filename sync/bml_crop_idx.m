@@ -27,9 +27,11 @@ function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)
 %   cfg=table2struct(cfg);
 % end
 
+pTT = 9; %pTT = pTimeTolerenace = - log10(timetol)
+
 if nargin==1
-  starts=bml_getopt(cfg,'starts');
-  ends=bml_getopt(cfg,'ends');
+  starts=round(bml_getopt(cfg,'starts'),pTT);
+  ends=round(bml_getopt(cfg,'ends'),pTT);
   samples=bml_getopt(cfg,'samples');
 elseif nargin==3
   samples=[];
@@ -41,9 +43,9 @@ if ~isempty(starts) + ~isempty(ends) + ~isempty(samples) ~= 2
   error('two of the three following parameters are required: ''starts'', ''ends'', ''samples'''); 
 end
 
-t1=bml_getopt(cfg,'t1');
+t1=round(bml_getopt(cfg,'t1'),pTT);
 s1=bml_getopt(cfg,'s1');
-t2=bml_getopt(cfg,'t2');
+t2=round(bml_getopt(cfg,'t2'),pTT);
 s2=bml_getopt(cfg,'s2');
 
 Fs=(s2-s1)/(t2-t1);

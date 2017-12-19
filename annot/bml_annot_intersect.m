@@ -8,6 +8,10 @@ function annot = bml_annot_intersect(cfg, x, y)
 %
 % The first argument cfg is a optional configuration structure, which can contain
 % the following optional fields:
+%
+% cfg.keep - string: 'x','y','none' or 'both'. Indicates which variables to keep
+%                         if 'both' (default), common variable names are prefixed
+%                         with the table's description. 
 % cfg.description - string: description of output annotation
 %
 % x, y - annot tables with fields 'starts' and 'ends'.
@@ -39,6 +43,8 @@ elseif nargin == 3
 else
   error('use as bml_annot_intersect(x, y)')
 end
+
+keep = bml_getopt_single(cfg,'keep','both');
 
 if isempty(x.Properties.Description); x.Properties.Description = 'x'; end
 if isempty(y.Properties.Description); y.Properties.Description = 'y'; end
@@ -111,29 +117,53 @@ if isempty(annot); return; end
 x.starts=[]; x.ends=[]; % x.Properties.VariableNames{1}=xidn;
 y.starts=[]; y.ends=[]; % y.Properties.VariableNames{1}=yidn;
 
-common_vars=intersect(x.Properties.VariableNames,y.Properties.VariableNames);
-common_vars_x=ismember(x.Properties.VariableNames,common_vars);
-common_vars_y=ismember(y.Properties.VariableNames,common_vars);
-unique_vars_x=setdiff(x.Properties.VariableNames,common_vars);
-unique_vars_y=setdiff(y.Properties.VariableNames,common_vars);
+switch keep
+  case 'both'
+    common_vars=intersect(x.Properties.VariableNames,y.Properties.VariableNames);
+    common_vars_x=ismember(x.Properties.VariableNames,common_vars);
+    common_vars_y=ismember(y.Properties.VariableNames,common_vars);
+    unique_vars_x=setdiff(x.Properties.VariableNames,common_vars);
+    unique_vars_y=setdiff(y.Properties.VariableNames,common_vars);
+  case 'none'
+    common_vars_x=[];
+    common_vars_y=[];
+    unique_vars_x=[];
+    unique_vars_y=[];
+  case 'x'
+    common_vars_x={'id','duration'};
+    common_vars_y=[];
+    unique_vars_x=setdiff(x.Properties.VariableNames,common_vars_x);
+    unique_vars_y=[];
+  case 'y'
+    common_vars_x=[];
+    common_vars_y={'id','duration'};
+    unique_vars_x=[];
+    unique_vars_y=setdiff(y.Properties.VariableNames,common_vars_y);
+  otherwise
+    error("unknown value for keep %s. Allowed values are 'both', 'none', 'x' or 'y'",keep);
+end
 
 new_names_common_vars_x = strcat([x.Properties.Description '_'],x.Properties.VariableNames(common_vars_x));
-new_names_common_vars_x_repeated = ismember(new_names_common_vars_x,unique_vars_x);
-if any(new_names_common_vars_x_repeated)
-  rm_vars = new_names_common_vars_x(new_names_common_vars_x_repeated);
-  for i=1:length(rm_vars)
-    warning('Overwriting variable %s of table %s',rm_vars{i},x.Properties.Description)
-    x.(rm_vars{i})=[];
+if ~isempty(new_names_common_vars_x)
+  new_names_common_vars_x_repeated = ismember(new_names_common_vars_x,unique_vars_x);
+  if any(new_names_common_vars_x_repeated)
+    rm_vars = new_names_common_vars_x(new_names_common_vars_x_repeated);
+    for i=1:length(rm_vars)
+      warning('Overwriting variable %s of table %s',rm_vars{i},x.Properties.Description)
+      x.(rm_vars{i})=[];
+    end
   end
 end
 
 new_names_common_vars_y = strcat([y.Properties.Description '_'],y.Properties.VariableNames(common_vars_y));
-new_names_common_vars_y_repeated = ismember(new_names_common_vars_y,unique_vars_y);
-if any(new_names_common_vars_y_repeated)
-  rm_vars = new_names_common_vars_y(new_names_common_vars_y_repeated);
-  for i=1:length(rm_vars)
-    warning('Overwriting variable %s of table %s',rm_vars{i},y.Properties.Description)
-    y.(rm_vars{i})=[];
+if ~isempty(new_names_common_vars_y)
+  new_names_common_vars_y_repeated = ismember(new_names_common_vars_y,unique_vars_y);
+  if any(new_names_common_vars_y_repeated)
+    rm_vars = new_names_common_vars_y(new_names_common_vars_y_repeated);
+    for i=1:length(rm_vars)
+      warning('Overwriting variable %s of table %s',rm_vars{i},y.Properties.Description)
+      y.(rm_vars{i})=[];
+    end
   end
 end
 
@@ -149,8 +179,12 @@ if ismember(xidn,y.Properties.VariableNames)
   y.(xidn)=[];
 end
 
-annot=join(annot,x,'Keys',xidn);
-annot=join(annot,y,'Keys',yidn);
+if ismember(keep,{'x','both'})
+  annot=join(annot,x,'Keys',xidn);
+end
+if ismember(keep,{'y','both'})
+  annot=join(annot,y,'Keys',yidn);
+end
 
 
 

@@ -8,8 +8,9 @@ function consolidated = bml_sync_consolidate(cfg)
 % cfg.contiguous - logical: should time contiguous files of the same type
 %               be consolidated toghether. Defaults to true. 
 %
-% If chunking for consolidation, each file can have several entries in the
-% sync output. This function consolidates those entries into one per file.
+% If chunking for consolidation was done, each file can have several entries in the
+% sync roi table. This function consolidates those entries into one per file.
+% It does this by finding the sync curve that better fits all chunks. 
 
 if istable(cfg)
   cfg = struct('roi',cfg);
@@ -53,7 +54,7 @@ for i_uff=1:length(uff)
       consrow.t1 = polyval(p,consrow.s1);
       consrow.t2 = polyval(p,consrow.s2);
       if ismember('warpfactor',i_roi.Properties.VariableNames)
-        consrow.warpfactor = consrow.Fs * p(1);
+        consrow.warpfactor = 1/(consrow.Fs * p(1));
       end
       i_roi = consrow;      
     else  
@@ -78,7 +79,7 @@ if istrue(contiguous)
     
     %detecting contiguos stretches
     cfg=[];
-    cfg.criterion = @(x) sum(x.duration)-max(x.ends)+min(x.starts) < height(x)*timetol;
+    cfg.criterion = @(x) abs(sum(x.duration)-max(x.ends)+min(x.starts)) < height(x)*timetol;
     i_roi_cont = bml_annot_consolidate(cfg,i_roi);   
     
     for j=1:height(i_roi_cont)
@@ -109,7 +110,7 @@ if istrue(contiguous)
           i_roi_cont_j.t1 = polyval(p,i_roi_cont_j.raw1);
           i_roi_cont_j.t2 = polyval(p,i_roi_cont_j.raw2);
           if ismember('warpfactor',i_roi_cont_j.Properties.VariableNames)
-            i_roi_cont_j.warpfactor = i_roi_cont_j.Fs * p(1);
+            i_roi_cont_j.warpfactor = 1/(i_roi_cont_j.Fs * p(1));
           end
         else  
           warning('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);

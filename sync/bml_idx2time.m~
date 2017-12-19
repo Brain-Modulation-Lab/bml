@@ -71,4 +71,7 @@ if skipFactor > 1
   Fs = round((s2-s1)/round(t2-t1,pTT),pTT,'significant');
 end
  
-time = idx/Fs - 0.5/Fs + (s2*t1-t2*s1)/(s2-s1);
+time = idx/Fs - 0.5/Fs + round((s2*t1-t2*s1)/(s2-s1),7);
+1/mean(diff(time))
+
+

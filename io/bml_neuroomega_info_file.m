@@ -11,6 +11,7 @@ function info = bml_neuroomega_info_file(cfg)
 % the following field:
 % cfg.path - string: path to the folder containing the .mat files. Defauts to '.'
 % cfg.pattern - string: file name pattern (defaults to '*.mat')
+% cfg.moving_files - logical: should Moving Files (MF) be loaded. Defaults to true.  
 % cfg.regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat')
 %
 % Returns a matlab 'table' with the folloing variables:
@@ -23,8 +24,13 @@ function info = bml_neuroomega_info_file(cfg)
 %   depth - double: depth of the electrodes as extracted from the file name
 %   filenum - double: index of the file at the specified depth
 
-cfg.pattern = bml_getopt(cfg,'pattern','*.mat');
-cfg.regexp  = bml_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat');
+cfg.pattern  = bml_getopt(cfg,'pattern','*.mat');
+moving_files = bml_getopt(cfg,'moving_files',true); 
+if istrue(moving_files)
+  cfg.regexp   = bml_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat');
+else
+  cfg.regexp   = bml_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+F\d+\.mat');
+end
 
 info = bml_info_file(cfg);
 

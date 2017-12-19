@@ -40,6 +40,7 @@ while i<=height(annot) && j<=height(annot)
   elseif annot.ends(j) - annot.starts(i) <= timetol
     j=j+1;
   else
+    annot([i j],:)
     error('Unsupported input annotations tables');
   end
 end

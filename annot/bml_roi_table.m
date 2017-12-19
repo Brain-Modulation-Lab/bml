@@ -34,7 +34,7 @@ REQUIRED_VARS = {'folder','name','nSamples','Fs'};
 RETURNED_VARS = {'id','starts','ends','duration','s1','t1','s2','t2',...
                 'folder','name','nSamples','Fs','filetype','chantype'};
 
-assert(istable(x),"Table required as first argumrnt");              
+assert(istable(x),"Table required as first argument");              
               
 if ~exist('description','var') || isempty(description)
   if isempty(x.Properties.Description)
