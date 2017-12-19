@@ -12,7 +12,7 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %   cfg.roi - ROI table with regions of interest to load
 %   cfg.channel - cellstr with channels to be selected
 %   cfg.electrode - ANNOT table with electrodes information. Should contain
-%                   variables 
+%                   variables 'channel' and 'electrode'. Optional.
 %   cfg.folder - overwrites info in cfg.roi
 %   cfg.chantype - overwrites info in cfg.roi
 %   cfg.filetype - overwrites info in cfg.roi
@@ -51,12 +51,13 @@ channel       = bml_getopt(cfg,'channel');
 chantype      = bml_getopt(cfg,'chantype');
 filetype      = bml_getopt(cfg,'filetype');
 Fs            = bml_getopt(cfg,'Fs');
-roi           = bml_getopt(cfg,'roi');
+roi           = bml_annot_table(bml_getopt(cfg,'roi'),'roi');
 timetol       = bml_getopt(cfg,'timetol',1e-5);
 dryrun        = bml_getopt(cfg,'dryrun',false);
 ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous = bml_getopt(cfg,'discontinuous','warn');
 padval        = bml_getopt(cfg,'padval',0);
+electrode     = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
 
 if isempty(roi)
   raw=[];
@@ -104,16 +105,60 @@ assert(length(filetype)==1,'unique filetype required: %s',strjoin(filetype));
 assert(length(chantype)==1,'unique chantype required: %s',strjoin(chantype));
 assert(length(Fs)==1,'unique Fs required: %s',strjoin(string(num2str(Fs))));
 
-%% LOAD FIRST FILE
-
 %dealing with skip factors
 skipFactor=1;
 chantype_split=strsplit(chantype{1},':');
 if numel(chantype_split) == 2
   skipFactor=str2double(chantype_split{2});
 elseif numel(chantype_split) > 2
-  ft_error('Use : to specify skipfactor, e.g. analog:10')
+  ft_error('Use '':'' to specify skipfactor, e.g. analog:10')
 end
+
+%selecting electrodes 
+if ~isempty(electrode)
+  assert(ismember('channel',electrode.Properties.VariableNames),"'channel' variable required in cfg.electrode");
+  assert(ismember('electrode',electrode.Properties.VariableNames),"'electrode' variable required in cfg.electrode");
+  %checking electrodes for time, filetype and chantype
+  cfg1=[];
+  cfg1.keep='x';
+  cfg1.warn=false;
+  electrode = bml_annot_intersect(cfg1,electrode,...
+                  bml_annot_table(table(min(roi.starts),max(roi.ends))));
+  assert(height(electrode)>0,"no electrode for roi time");
+  if ismember('filetype',electrode.Properties.VariableNames)
+    electrode = electrode(strcmp(electrode.filetype,filetype),:);
+    assert(height(electrode)>0,"incorrect filetype for cfg.electrode");
+  end
+  if ismember('chantype',electrode.Properties.VariableNames)
+    electrode = electrode(...  
+      contains(electrode.chantype,{chantype{1}},'IgnoreCase',true)|...
+      strcmp(electrode.chantype,'all')|...
+      strcmp(electrode.chantype,'any')|...
+      strcmp(electrode.chantype,'NA')|...
+      strcmp(electrode.chantype,''),:);
+    assert(height(electrode)>0,"incorrect chantype for cfg.electrode");
+  else
+    fprintf("electrode table has no chantype variable.\n")
+  end
+  
+  assert(numel(electrode.channel)==numel(unique(electrode.channel)),...
+      "repeated electrode entries for time/filetype/chantype");
+
+  if isempty(channel)
+  	channel = electrode.channel;
+  end
+end
+
+%optimizing channel selection for trellis files
+if ~isempty(channel) && contains(filetype,"trellis")
+  chantype = {['^(',strjoin(channel,'|'),')$']};
+  if skipFactor > 1
+    chantype{1} = [chantype{1},':',num2str(skipFactor)];
+  end
+  channel=[];
+end
+
+%% LOAD FIRST FILE
 
 %saving mapping between raw and files 
 file_raw_map=roi(1,file_raw_map_vars);
@@ -179,7 +224,8 @@ for i=2:height(roi)
   row.skipFactor = skipFactor;
   
   %loading next raw
-  cfg=[]; cfg.chantype=chantype;
+  cfg=[]; 
+  cfg.chantype=chantype;
   cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
   cfg.feedback=ft_feedback;
@@ -254,4 +300,13 @@ if dryrun
 end
 
 file_raw_map = bml_roi_table(file_raw_map);
+
+%changing labels from channels to electrodes
+if ~isempty(electrode)
+  bml_map([raw.label;{'dfdf'}],electrode.channel,electrode.electrode)
+  bml_map(raw.label,electrode.channel,electrode.electrode)
+  bml_get_idx(raw.label,electrode.channel)
+  
+end
+
 

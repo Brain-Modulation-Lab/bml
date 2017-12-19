@@ -13,6 +13,8 @@ function annot = bml_annot_intersect(cfg, x, y)
 %                         if 'both' (default), common variable names are prefixed
 %                         with the table's description. 
 % cfg.description - string: description of output annotation
+% cfg.warn - logical: indicates if warnings should be issue if variables
+%           are overwriten
 %
 % x, y - annot tables with fields 'starts' and 'ends'.
 %        'y' should have no overlapping annotations 
@@ -45,6 +47,7 @@ else
 end
 
 keep = bml_getopt_single(cfg,'keep','both');
+warn = bml_getopt(cfg,'warn',true);
 
 if isempty(x.Properties.Description); x.Properties.Description = 'x'; end
 if isempty(y.Properties.Description); y.Properties.Description = 'y'; end
@@ -149,7 +152,9 @@ if ~isempty(new_names_common_vars_x)
   if any(new_names_common_vars_x_repeated)
     rm_vars = new_names_common_vars_x(new_names_common_vars_x_repeated);
     for i=1:length(rm_vars)
-      warning('Overwriting variable %s of table %s',rm_vars{i},x.Properties.Description)
+      if istrue(warn)
+        warning('Overwriting variable %s of table %s',rm_vars{i},x.Properties.Description);
+      end
       x.(rm_vars{i})=[];
     end
   end
@@ -161,7 +166,9 @@ if ~isempty(new_names_common_vars_y)
   if any(new_names_common_vars_y_repeated)
     rm_vars = new_names_common_vars_y(new_names_common_vars_y_repeated);
     for i=1:length(rm_vars)
-      warning('Overwriting variable %s of table %s',rm_vars{i},y.Properties.Description)
+      if istrue(warn)
+        warning('Overwriting variable %s of table %s',rm_vars{i},y.Properties.Description);
+      end
       y.(rm_vars{i})=[];
     end
   end
@@ -171,11 +178,15 @@ x.Properties.VariableNames(common_vars_x) = new_names_common_vars_x;
 y.Properties.VariableNames(common_vars_y) = new_names_common_vars_y;
 
 if ismember(yidn,x.Properties.VariableNames)
-  warning('Overwriting variable %s from table %s',yidn,x.Properties.Description)
+  if istrue(warn)
+    warning('Overwriting variable %s from table %s',yidn,x.Properties.Description);
+  end
   x.(yidn)=[];
 end
 if ismember(xidn,y.Properties.VariableNames)
-  warning('Overwriting variable %s from table %s',xidn,y.Properties.Description)
+  if istrue(warn)
+    warning('Overwriting variable %s from table %s',xidn,y.Properties.Description);
+  end
   y.(xidn)=[];
 end
 

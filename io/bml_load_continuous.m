@@ -116,7 +116,46 @@ end
 
 %selecting electrodes 
 if ~isempty(electrode)
-  %keyboard
+  assert(ismember('channel',electrode.Properties.VariableNames),"'channel' variable required in cfg.electrode");
+  assert(ismember('electrode',electrode.Properties.VariableNames),"'electrode' variable required in cfg.electrode");
+  %checking electrodes for time, filetype and chantype
+  cfg1=[];
+  cfg1.keep='x';
+  cfg1.warn=false;
+  electrode = bml_annot_intersect(cfg1,electrode,...
+                  bml_annot_table(table(min(roi.starts),max(roi.ends))));
+  assert(height(electrode)>0,"no electrode for roi time");
+  if ismember('filetype',electrode.Properties.VariableNames)
+    electrode = electrode(strcmp(electrode.filetype,filetype),:);
+    assert(height(electrode)>0,"incorrect filetype for cfg.electrode");
+  end
+  if ismember('chantype',electrode.Properties.VariableNames)
+    electrode = electrode(...  
+      contains(electrode.chantype,{chantype{1}},'IgnoreCase',true)|...
+      strcmp(electrode.chantype,'all')|...
+      strcmp(electrode.chantype,'any')|...
+      strcmp(electrode.chantype,'NA')|...
+      strcmp(electrode.chantype,''),:);
+    assert(height(electrode)>0,"incorrect chantype for cfg.electrode");
+  else
+    fprintf("electrode table has no chantype variable.\n")
+  end
+  
+  assert(numel(electrode.channel)==numel(unique(electrode.channel)),...
+      "repeated electrode entries for time/filetype/chantype");
+
+  if isempty(channel)
+  	channel = electrode.channel;
+  end
+end
+
+%optimizing channel selection for trellis files
+if ~isempty(channel) && contains(filetype,"trellis")
+  chantype = {['^(',strjoin(channel,'|'),')$']};
+  if skipFactor > 1
+    chantype{1} = [chantype{1},':',num2str(skipFactor)];
+  end
+  channel=[];
 end
 
 %% LOAD FIRST FILE
@@ -255,10 +294,16 @@ for i=2:height(roi)
   
   file_raw_map = [file_raw_map;row];
 end
-  
+
 if dryrun
   raw = [];
+elseif ~isempty(electrode)
+  %changing labels from channels to electrodes
+	raw.label = bml_map(raw.label,electrode.channel,electrode.electrode);
 end
 
 file_raw_map = bml_roi_table(file_raw_map);
+
+
+
 
