@@ -15,6 +15,8 @@ function annot=bml_annot_table(x, description, x_var_name)
 % returns a table with variables 'id', 'starts', 'ends' and any additonal
 % variable present in x. Issues a error on inconsistent input. 
 
+pTT = 9;
+
 if isempty(x) 
   x=table();
 end
@@ -54,21 +56,28 @@ if isempty(x)
   return
 end
 
-if ~strcmp('starts',x.Properties.VariableNames)
+if ~ismember('starts',x.Properties.VariableNames)
   if width(x)<=2 
     x.Properties.VariableNames(1)={'starts'};
   else
     error('x should have variable ''starts''');
   end
 end
-if ~strcmp('ends',x.Properties.VariableNames)
+if(any(ismissing(x.starts)))
+  warning("starts contains nans");
+end
+
+if ~ismember('ends',x.Properties.VariableNames)
   if width(x)==1 
     x.ends = x.starts;
   elseif width(x)==2 
     x.Properties.VariableNames(2)={'ends'};
   else
     error('x should have variable ''ends''');
-  end
+  end  
+end
+if(any(ismissing(x.ends)))
+  warning("ends contains nans");
 end
 
 x=sortrows(x,'starts');
@@ -82,7 +91,7 @@ end
 if any(strcmp('duration',x.Properties.VariableNames))
   x.duration = [];
 end
-x = [x, table(x.ends - x.starts,'VariableNames',{'duration'})];
+x = [x, table(round(x.ends - x.starts,pTT),'VariableNames',{'duration'})];
 
 annot = bml_annot_reorder_vars(x, {'id','starts','ends','duration'});
 annot.Properties.Description = description;

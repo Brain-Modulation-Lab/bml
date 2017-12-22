@@ -37,7 +37,7 @@ function coord = bml_annot2coord(annot, Fs)
     assert(ismember('ends',fields(annot)),"ends required");
     coord = annot2coord(annot.starts,annot.ends,annot.Fs);
   else
-    error('Unknown type for annot. Table of struct accepted.');
+    error('Unknown type for annot. Table or struct accepted.');
   end
 end
 

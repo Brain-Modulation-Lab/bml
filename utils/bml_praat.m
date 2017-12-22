@@ -72,11 +72,9 @@ for i=1:numel(raws)
       v=raws{i}.trial{t}(c,:);
       
       if ismember({'fsample'},fields(raws{i}))
-        Fs = raws{i}.fsample;
+        Fs = round(raws{i}.fsample,9,'significant');
       else
-        Fs = 1/mean(diff(raws{i}.time{1}));
-        om = round(log10(Fs));
-        Fs = round(Fs ./ 10^(om-3)) .* 10^(om-3);      
+        Fs = round(1/mean(diff(raws{i}.time{1})),9,'significant');
       end
       
       audiowrite(wfn,v./max(abs(v)),Fs);

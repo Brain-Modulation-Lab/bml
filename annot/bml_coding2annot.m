@@ -62,13 +62,15 @@ if isempty(AudioCoord) || praat
     
     fprintf('Calculating alignment between coding and roi audios');
     cfg1=[]; cfg1.method='lpf';
+    assert(sync_audio.fsample == Afs, 'roi''s Fs should be equivalent to Coding Audio Afs');      
     [coding_audio_dt, max_corr] = bml_timealign(cfg1, sync_audio, coding_audio);
-    assert(roi.Fs == Afs, 'roi''s Fs should be equivalent to Coding Aduio Afs');
     
     AudioCoord.s1 = AudioCoord.s1 - round(coding_audio_dt*Afs);
     AudioCoord.s2 = AudioCoord.s2 - round(coding_audio_dt*Afs);
     
-    assert(max_corr > 0.95, 'max_cor = %f should be near 1', max_corr);
+    if max_corr < 0.95
+      warning('max_cor = %f should be near 1', max_corr)
+    end    
   end
   if praat
     sync_audio.time = sync_audio_time; %setting sync time

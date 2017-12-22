@@ -1,10 +1,10 @@
 function event = bml_read_event(cfg)
 
-% BML_READ_EVENT reads fieldtrip event structures
+% BML_READ_EVENT reads fieldtrip's event structures from files
 %
 % cfg.name - string: filename
 % cfg.folder - string: path to file
-% cfg.detectflank - 'up', 'down' or 'both'
+% cfg.detectflank - 'up', 'down' or 'both' (default)
 %
 % returns fieldtrip event structure
 

@@ -182,7 +182,7 @@ hdr = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
 %checking nomimal sampling frequencies
 assert(hdr.Fs*skipFactor==roi.Fs(1),...
   'File %s chantype %s has Fs %f, not %f as defined in cfg.roi',...
-  roi.name{1},cfg.chantype,hdr.Fs,roi.Fs(1));
+  roi.name{1},strjoin(cfg.chantype),hdr.Fs,roi.Fs(1));
 
 if ~dryrun
   raw = ft_preprocessing(cfg);

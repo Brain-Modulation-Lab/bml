@@ -11,7 +11,7 @@ function bml_annot_write(annot,filename,varargin)
 
 annot = bml_annot_table(annot,[],inputname(1));
 
-if ~exists('filename','vars')
+if ~exist('filename','var')
   if isempty(annot.Properties.Description)
     error("filename required");
   else

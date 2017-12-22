@@ -1,4 +1,4 @@
-function sync_roi = bml_sync_neuroomega_event(cfg)
+2function sync_roi = bml_sync_neuroomega_event(cfg)
 
 % BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events
 %

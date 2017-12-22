@@ -8,6 +8,8 @@ function raw = bml_event2raw(cfg, event)
 %
 % cfg.roi - roi table: raw is created from s1 to s2
 % cfg.event_type - cells of char: event types selected
+% cfg.sample_type - 'auto' (default'), 'second' or 'sample'. If 'auto', it
+%         asumes 'sample' if event.sample is integer, 'second' otherwise. 
 %
 % returns a raw
 
@@ -16,6 +18,15 @@ if istable(cfg)
 end
 roi         = bml_getopt(cfg,'roi');
 event_type  = bml_getopt(cfg,'event_type');
+sample_type = bml_getopt_single(cfg,'sample_type','auto');
+
+if strcmp(sample_type,'auto')
+  if isinteger([event.sample])
+    sample_type = 'sample';
+  else
+    sample_type = 'second';
+  end
+end
 
 %selecting events
 if isempty(event_type)
@@ -34,7 +45,16 @@ raw.trial={zeros(length(event_type),size(raw.time{1},2))};
 raw.label=event_type;
 raw.fsample=roi.Fs;
 
-for i=1:length(event_type)
-  i_event = event(ismember({event.type},event_type(i)));
-  raw.trial{1}(i,[i_event.sample])=1;
+if strcmp(sample_type,'sample')
+  for i=1:length(event_type)
+    i_event = event(ismember({event.type},event_type(i)));
+    raw.trial{1}(i,[i_event.sample])=1;
+  end
+elseif strcmp(sample_type,'second')
+  for i=1:length(event_type)
+    i_event = event(ismember({event.type},event_type(i)));
+    raw.trial{1}(i,round([i_event.sample].*raw.fsample))=1;
+  end  
+else
+  error("Unknown sample_type %s",sample_type);
 end

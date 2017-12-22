@@ -43,12 +43,12 @@ if ~isempty(starts) + ~isempty(ends) + ~isempty(samples) ~= 2
   error('two of the three following parameters are required: ''starts'', ''ends'', ''samples'''); 
 end
 
-t1=round(bml_getopt(cfg,'t1'),pTT);
+t1=bml_getopt(cfg,'t1');
 s1=bml_getopt(cfg,'s1');
-t2=round(bml_getopt(cfg,'t2'),pTT);
+t2=bml_getopt(cfg,'t2');
 s2=bml_getopt(cfg,'s2');
 
-Fs=(s2-s1)/(t2-t1);
+Fs=(s2-s1)/round(t2-t1,pTT);
 
 tol=bml_getopt(cfg,'tol',1e-2/Fs);
 

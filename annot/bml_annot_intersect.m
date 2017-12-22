@@ -3,8 +3,9 @@ function annot = bml_annot_intersect(cfg, x, y)
 % BML_ANNOT_INTERSECT returns the intersection of two annotation tables
 %
 % Use as
-%   annot = bml_annot_intersect(cfg, x, y);
 %   annot = bml_annot_intersect(x, y);
+%   annot = bml_annot_intersect(cfg, x, y);
+%   annot = bml_annot_intersect(cfg.keep, x, y);
 %
 % The first argument cfg is a optional configuration structure, which can contain
 % the following optional fields:
@@ -38,6 +39,9 @@ if nargin == 2
   cfg=[];
   description = ['intersect_' x.Properties.Description '_' y.Properties.Description];
 elseif nargin == 3
+  if ischar(cfg) || iscellstr(cfg) || isstring(cfg)
+    cfg = struct('keep',cellstr(cfg));
+  end
   x=bml_annot_table(x,[],inputname(2));
   y=bml_annot_table(y,[],inputname(3));
   description = ['intersect_' x.Properties.Description '_' y.Properties.Description];
@@ -121,23 +125,23 @@ x.starts=[]; x.ends=[]; % x.Properties.VariableNames{1}=xidn;
 y.starts=[]; y.ends=[]; % y.Properties.VariableNames{1}=yidn;
 
 switch keep
-  case 'both'
+  case {'both','keepboth','keep both','keep_both'}
     common_vars=intersect(x.Properties.VariableNames,y.Properties.VariableNames);
     common_vars_x=ismember(x.Properties.VariableNames,common_vars);
     common_vars_y=ismember(y.Properties.VariableNames,common_vars);
     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars);
     unique_vars_y=setdiff(y.Properties.VariableNames,common_vars);
-  case 'none'
+  case {'none','keepnone','keep none','keep_none'}
     common_vars_x=[];
     common_vars_y=[];
     unique_vars_x=[];
     unique_vars_y=[];
-  case 'x'
+  case {'x','keepx','keep x','keep_x'}
     common_vars_x={'id','duration'};
     common_vars_y=[];
     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars_x);
     unique_vars_y=[];
-  case 'y'
+  case {'y','keepy','keep y','keep_y'}
     common_vars_x=[];
     common_vars_y={'id','duration'};
     unique_vars_x=[];

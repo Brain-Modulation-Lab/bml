@@ -24,6 +24,10 @@ if nargin==1
   cfg=[];
 end
 
+if ~ismember('fsample',fields(data))
+	data.fsample = round(1/mean(diff(data.time{1})),9,'significant');
+end
+
 freq            = bml_getopt(cfg,'freq',DEFAULT_TARGET_FSAMPLE);
 bin_size        = bml_getopt(cfg,'bin_size',round(data.fsample/freq));
     
@@ -31,18 +35,36 @@ if abs(data.fsample/freq - bin_size) > 0.1
   warning(char(strcat('Specified envelope freq ',num2str(freq),' not possible. Using ',num2str(data.fsample/bin_size))));
 end
 
-n_bins=floor(size(data.trial{1},2)./bin_size);
 env=struct();
-env.trial=cellfun(@(T) reshape(max(...
+env.trial={};
+env.time={};
+
+for i=1:numel(data.trial)
+  
+	n_bins=floor(size(data.trial{i},2)./bin_size);
+  
+  T = data.trial{i};
+  t = data.time{i};
+  
+  env.trial{i} = reshape(max(...
         reshape(abs(T(:,1:n_bins*bin_size)),[size(T,1), bin_size, n_bins]),...
       [],2),...
-    [size(T,1) n_bins]),...
-  data.trial,'UniformOutput',false);
+    [size(T,1) n_bins]);
+  
+	env.time{i} = mean(reshape(t(1:n_bins*bin_size),[bin_size, n_bins]),1);
+  
+end
 
-env.time=cellfun(@(t) mean(...
-    reshape(t(1:n_bins*bin_size),[bin_size, n_bins]),...
-    1),...
-  data.time,'UniformOutput',false);
+% env.trial=cellfun(@(T) reshape(max(...
+%         reshape(abs(T(:,1:n_bins*bin_size)),[size(T,1), bin_size, n_bins]),...
+%       [],2),...
+%     [size(T,1) n_bins]),...
+%   data.trial,'UniformOutput',false);
+% 
+% env.time=cellfun(@(t) mean(...
+%     reshape(t(1:n_bins*bin_size),[bin_size, n_bins]),...
+%     1),...
+%   data.time,'UniformOutput',false);
 
 env.fsample = data.fsample/bin_size;
 env.label = data.label;
