@@ -1,9 +1,9 @@
-function sync = bml_sync_neuroomega_chantype(cfg)
+function sync = bml_sync_transfer_neuroomega_chantype(cfg)
 
-% BML_SYNC_NEUROOMEGA_CHANTYPE transfer sync info from one chantype to another
+% BML_SYNC_TRANSFER_NEUROOMEGA_CHANTYPE transfer sync info from one chantype to another
 %
 % Use as 
-%   sync = bml_sync_neuroomega_chantype(cfg)
+%   sync = bml_sync_transfer_neuroomega_chantype(cfg)
 %
 % This function calculates synchronization rows for neuroomega channels,
 % based on a sync channel. Normally neuroomega files are sync with the
@@ -16,7 +16,7 @@ function sync = bml_sync_neuroomega_chantype(cfg)
 %                     use 'CRAW_01___Central', etc. 
 %                     if not provided uses the first channel of the
 %                     correct chantype from the first entry of cfg.roi
-% cfg.time_channel  - char, channel of original chantype used in sync
+% cfg.sync_time_channel  - char, channel of original chantype used in sync
 %                     use 'CANALOG_IN_1', etc
 %                     if not provided uses the first channel of the
 %                     correct chantype from the first entry of cfg.roi

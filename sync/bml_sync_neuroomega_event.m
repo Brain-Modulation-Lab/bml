@@ -1,4 +1,4 @@
-2function sync_roi = bml_sync_neuroomega_event(cfg)
+function sync_roi = bml_sync_neuroomega_event(cfg)
 
 % BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events
 %
@@ -50,7 +50,7 @@ for i=1:height(roi)
     cfg.starts = roi.starts(i);
     i_slave_events = bml_event2annot(cfg,i_slave_events);
     i_slave_events = bml_annot_table(i_slave_events);
-
+    
     %doing time alingment
     cfg=[]; 
     cfg.scan=scan; 
@@ -126,3 +126,6 @@ roi.sync_channel = repmat({'digital'},height(roi),1);
 roi.sync_type = repmat({'slave'},height(roi),1);
 
 sync_roi = bml_roi_table(roi);
+
+sync_roi(:,{'id','starts','ends','duration','name','warpfactor'})
+

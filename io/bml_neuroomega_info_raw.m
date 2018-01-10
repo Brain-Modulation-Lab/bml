@@ -115,16 +115,31 @@ if ~isempty(info_mpx) %loading date from .mpx OS info if available
   info.datenum=[];
   info.basename = erase(info.name,'.mat');
   
+  %checking that all mat files have correspondent mpx file
+  mat_with_no_mpx = setdiff(info.basename,info_mpx.basename);
+  if numel(mat_with_no_mpx)>0
+    if numel(mat_with_no_mpx)<10
+      warning("the following files don't have correspondent .mpx file: %s", strjoin(mat_with_no_mpx));
+    else
+      warning("%i .mat files don't have correspondent .mpx file", numel(mat_with_no_mpx));      
+    end
+    mat_with_no_mpx=table(mat_with_no_mpx);
+    mat_with_no_mpx.Properties.VariableNames = {'basename'};
+    mat_with_no_mpx.date(:) = {''};
+    mat_with_no_mpx.datenum(:) = NaN;
+    info_mpx = [info_mpx; mat_with_no_mpx];
+  end
+  
   info=join(info,info_mpx,'Keys','basename');
 
   %adjusting time_end to bml_date2sec origin.
-  ends = info.time_end+median(bml_date2sec(info.date)-info.time_end);
+  ends = info.time_end+nanmedian(bml_date2sec(info.date)-info.time_end);
   %NOTE: time_start and time_end are time coordinates of the first and 
   %last data point. Duration is the length of the 'represented' time
   %therefore the correct way of calculating duration is as follows:
   info.duration = info.time_end - info.time_begin + 1./info.Fs; 
   starts = ends - info.duration;
-  info = [table(starts,ends,'VariableNames',{'starts','ends'}) info];
+  info = [table(starts,ends,'VariableNames',{'starts','ends'}), info];
   info.basename = [];
   %info=sortrows(info,'starts');
   info = bml_annot_table(info);

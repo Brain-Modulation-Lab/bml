@@ -55,6 +55,7 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
     cost = sqrt(cost);
   end
 
+  %initial brute force scan
   initial_scan = linspace(-scan,scan,floor(2*scan/scan_step)+1);
   warpfactor = 1;
   slave_delta_t=0;
@@ -67,6 +68,20 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
     end
   end
 
+  %censoring unpaired slave events
+  slave_master_dt = zeros(height(slave),1);
+  for i_slave=1:height(slave)
+    slave_master_dt(i_slave) = min(abs(slave.starts(i_slave) + slave_delta_t - master.starts));
+  end
+  censored_slave = slave_master_dt > scan_step;
+  if sum(censored_slave)>0
+    warning("%i slave events censored in synchronization",sum(censored_slave));
+    slave = slave(~censored_slave,:);
+    slave_starts_mean = mean(slave.starts);
+    slave_starts_minus_mean = slave.starts-slave_starts_mean;
+  end
+  
+  %optimizing
   if istrue(timewarp)
     fitted=fminsearch(@costfun,[slave_delta_t, warpfactor]);
     slave_delta_t=fitted(1);

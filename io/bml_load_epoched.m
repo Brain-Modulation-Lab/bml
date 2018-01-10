@@ -72,7 +72,18 @@ for i=1:height(epoch)
   cfg.roi = bml_sync_consolidate(cfg.roi);
   
   if ~isempty(electrode)
+    %intersecting electrodes with rois
     cfg.electrode = bml_annot_intersect(cfg_keep_x, electrode, cfg.roi);
+    %consolidating electrode rows corresponding to same epoched and channel
+    %(for neuroomega files it can get split because of the chunking)
+    cfg.electrode=sortrows(cfg.electrode,...
+      bml_getidx({'filetype','channel','starts'},cfg.electrode.Properties.VariableNames));
+    cfg.electrode.id=(1:height(cfg.electrode))';
+    cfg1=[];
+    cfg1.criterion = @(x) (length(unique(x.filetype))==1) && ...
+                          (length(unique(x.channel))==1) && ...
+                          (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
+    cfg.electrode=bml_annot_consolidate(cfg1,cfg.electrode);
   else
     cfg.electrode = [];
   end

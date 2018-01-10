@@ -2,6 +2,9 @@ function coord = bml_annot2coord(annot, Fs)
 
 % BML_ANNOT2COORD gets s1,t1,s2,t2 coordinates from annot and Fs
 %
+% Use as 
+%   coord = bml_annot2coord(annot, Fs)
+%
 % annot - ANNOT table with 'starts', 'ends' and optionally 'Fs' variables 
 %        (all other vars ignored)
 % Fs - numeric, exact sampling frequency of returned s1,t1,s2,t2 coords. 

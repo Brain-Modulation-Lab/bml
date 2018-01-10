@@ -126,22 +126,26 @@ y.starts=[]; y.ends=[]; % y.Properties.VariableNames{1}=yidn;
 
 switch keep
   case {'both','keepboth','keep both','keep_both'}
+    keep='both';
     common_vars=intersect(x.Properties.VariableNames,y.Properties.VariableNames);
     common_vars_x=ismember(x.Properties.VariableNames,common_vars);
     common_vars_y=ismember(y.Properties.VariableNames,common_vars);
     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars);
     unique_vars_y=setdiff(y.Properties.VariableNames,common_vars);
   case {'none','keepnone','keep none','keep_none'}
+    keep='none';
     common_vars_x=[];
     common_vars_y=[];
     unique_vars_x=[];
     unique_vars_y=[];
   case {'x','keepx','keep x','keep_x'}
+    keep='x';
     common_vars_x={'id','duration'};
     common_vars_y=[];
     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars_x);
     unique_vars_y=[];
   case {'y','keepy','keep y','keep_y'}
+    keep='y';
     common_vars_x=[];
     common_vars_y={'id','duration'};
     unique_vars_x=[];
