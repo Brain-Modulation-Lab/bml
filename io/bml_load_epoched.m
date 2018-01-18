@@ -76,6 +76,9 @@ for i=1:height(epoch)
     cfg.electrode = bml_annot_intersect(cfg_keep_x, electrode, cfg.roi);
     %consolidating electrode rows corresponding to same epoched and channel
     %(for neuroomega files it can get split because of the chunking)
+    if isempty(cfg.electrode)
+      error("No electrodes left after intersection with roi. Check electrodes starts and ends.")
+    end
     cfg.electrode=sortrows(cfg.electrode,...
       bml_getidx({'filetype','channel','starts'},cfg.electrode.Properties.VariableNames));
     cfg.electrode.id=(1:height(cfg.electrode))';

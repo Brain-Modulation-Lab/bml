@@ -74,7 +74,7 @@ for i=1:height(roi)
       if strict
         error('could not time align within timetol. Mean error %f > %f. File %s',all_meanerror(i),timetol,roi.name{i});
       else
-        warning('could not time align within timetol. Mean error %f > %f. File %s',all_meanerror(i),timetol,roi.name{i});
+        warning('could not time align within timetol. Mean error %f > %f. File %s. Ignoring this file during consolidation.',all_meanerror(i),timetol,roi.name{i});
         all_slave_dt(i) = nan;
         all_warpfactor(i) = nan;
       end
@@ -87,7 +87,6 @@ if ~istrue(timewarp)
 end
 
 %consolidating results
-
 roi.slave_dt = all_slave_dt;
 roi.warpfactor = all_warpfactor;
 roi.alignment_error = all_meanerror;

@@ -34,7 +34,11 @@ end
 
 info = bml_info_file(cfg);
 
-info.depth = cellfun(@(x) str2double(regexp(x,'-?\d+\.\d+','match')), info.name);
-info.filenum = cellfun(@(x) str2double(regexp(x,'F(\d+)\.mat','tokens','once')), info.name);
+if ~isempty(info)
+  info.depth = cellfun(@(x) str2double(regexp(x,'-?\d+\.\d+','match')), info.name);
+  info.filenum = cellfun(@(x) str2double(regexp(x,'F(\d+)\.mat','tokens','once')), info.name);
+else
+  warning("no files found");
+end
 
 

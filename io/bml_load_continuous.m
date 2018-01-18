@@ -195,7 +195,7 @@ end
 if ~isempty(channel)
   channel_selected=ft_channelselection(channel,raw.label);
   if numel(channel_selected)==0
-    error(char(strcat(channel,' not present in raw ',cfg.dataset,' \nAvailable channels are: ',strjoin(raw.label))));
+    error('%s not present in raw %s \nAvailable channels are: %s',strjoin(channel),cfg.dataset,strjoin(raw.label));
   elseif ~dryrun
     cfg=[]; cfg.channel=channel; cfg.feedback=ft_feedback;
     raw = ft_selectdata(cfg,raw);

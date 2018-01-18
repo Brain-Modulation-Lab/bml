@@ -7,6 +7,8 @@ function consolidated = bml_sync_consolidate(cfg)
 %               to 1e-2
 % cfg.contiguous - logical: should time contiguous files of the same type
 %               be consolidated toghether. Defaults to true. 
+% cfg.group - variable indicating grouping criteria. Entries of different groups 
+%               are not consolidated. Defaults to 'session_id'
 %
 % If chunking for consolidation was done, each file can have several entries in the
 % sync roi table. This function consolidates those entries into one per file.
@@ -18,12 +20,21 @@ end
 roi        = bml_roi_table(bml_getopt(cfg,'roi'));
 timetol    = bml_getopt(cfg,'timetol',1e-2);
 contiguous = bml_getopt(cfg,'contiguous',true);
+group      = bml_getopt_single(cfg,'group','session_id');
 
 REQUIRED_VARS = {'s1','t1','s2','t2','folder','name','nSamples','Fs','chantype','filetype'};
 assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
   'Variables %s required',strjoin(REQUIRED_VARS))
 
 roi.fullfile = fullfile(roi.folder,roi.name);
+if ismember(group,roi.Properties.VariableNames)
+  fprintf("grouping by %s \n",group);
+  if isnumeric(roi.(group))
+    roi.fullfile = strcat(roi.fullfile,'_',num2str(roi.(group)));
+  else
+    roi.fullfile = strcat(roi.fullfile,'_',roi.(group));
+  end
+end
 roi.sync_id = roi.id;
 uff = unique(roi.fullfile); %unique fullfile
 consolidated = table();
@@ -110,7 +121,7 @@ if istrue(contiguous)
           i_roi_cont_j.t1 = polyval(p,i_roi_cont_j.raw1);
           i_roi_cont_j.t2 = polyval(p,i_roi_cont_j.raw2);
           if ismember('warpfactor',i_roi_cont_j.Properties.VariableNames)
-            i_roi_cont_j.warpfactor = 1/(i_roi_cont_j.Fs * p(1));
+            i_roi_cont_j.warpfactor = 1 ./ (i_roi_cont_j.Fs .* p(1));
           end
         else  
           warning('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);

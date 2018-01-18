@@ -1,6 +1,6 @@
 function redefined = bml_redefinetrial(cfg, raw)
 
-% BML_REDEFINETRIAL creates new epoching from a raw object
+% BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)
 %
 % raw - FT_DATAYPR_RAW to be re-epoched with time in global coordinates
 % cfg - configuraton structure
@@ -78,6 +78,7 @@ for i=1:height(epoch)
   if height(i_raw_trial)>1
     [~,max_i]=max(i_raw_trial.duration);
     if warn
+      keyboard
       warning("several trials of raw match to epoch %i. Selecting trial %i",i,i_raw_trial.id(max_i));
     end
     i_raw_trial = i_raw_trial(max_i,:);

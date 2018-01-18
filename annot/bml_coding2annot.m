@@ -83,10 +83,14 @@ annot=table();
 if ismember(CodingAppVersion,{'U01_v1'})
   EventsPerTrial   = bml_getopt(cfg,'EventsPerTrial',3);
   N_trials = size(CodingMatrix,2);
+	if SkipEvents + N_trials * EventsPerTrial > length(EventTimes)
+    warning("Less EventTimes than expected based on CodingMatrix.");
+    N_trials = floor((length(EventTimes) - SkipEvents)/EventsPerTrial);
+  end
   for i=1:N_trials
     id=i;
     
-    %initial trial time in Audio secons 
+    %initial trial time in Audio seconds 
     ti = EventTimes(SkipEvents + i * EventsPerTrial);  
 
     %CodingMatrix row 1: Phonetic code in latex
@@ -99,10 +103,13 @@ if ismember(CodingAppVersion,{'U01_v1'})
 
     %CodingMatrix row 3: Syl onset time
     onset_syl=bml_strnumcell2ordvec(CodingMatrix{3,i}); %in Audio seconds
+    if size(onset_syl,2) < 3
+      onset_syl = [onset_syl, nan(1,3-size(onset_syl,2))];
+    end    
     onset_syl1=bml_idx2time(AudioCoord,(onset_syl(1)+ti)*Afs); %in sfm
     onset_syl2=bml_idx2time(AudioCoord,(onset_syl(2)+ti)*Afs); %in sfm
     onset_syl3=bml_idx2time(AudioCoord,(onset_syl(3)+ti)*Afs); %in sfm
-
+    
     %CodingMatrix row 4: Syl offset time  
     offset_syl = bml_strnumcell2ordvec(CodingMatrix{4,i}); %in Audio seconds
     %completing missing offsets
@@ -135,6 +142,9 @@ if ismember(CodingAppVersion,{'U01_v1'})
 
     %CodingMatrix row 5: Vowel onset time
     onset_vowel=bml_strnumcell2ordvec(CodingMatrix{5,i}); %in Audio seconds
+    if size(onset_vowel,2) < 3
+      onset_vowel = [onset_vowel, nan(1,3-size(onset_vowel,2))];
+    end  
     onset_vowel1=bml_idx2time(AudioCoord,(onset_vowel(1)+ti) * Afs);
     onset_vowel2=bml_idx2time(AudioCoord,(onset_vowel(2)+ti) * Afs);
     onset_vowel3=bml_idx2time(AudioCoord,(onset_vowel(3)+ti) * Afs);
@@ -167,6 +177,10 @@ if ismember(CodingAppVersion,{'U01_v1'})
 elseif ismember(CodingAppVersion,{'pilot'})  
   EventsPerTrial   = bml_getopt(cfg,'EventsPerTrial',4);
   N_trials = size(CodingMatrix,2);
+  if SkipEvents + N_trials * EventsPerTrial > length(EventTimes)
+    warning("Less EventTimes than expected based on CodingMatrix.");
+    N_trials = floor((length(EventTimes) - SkipEvents)/EventsPerTrial);
+  end
   for i=1:N_trials
     id=i;
     ti = EventTimes(SkipEvents + i * EventsPerTrial);

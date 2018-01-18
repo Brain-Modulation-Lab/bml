@@ -156,7 +156,7 @@ else %checking files before commiting to first round of synchronization
       cfg.roi=chunk_roi_os(string(chunk_roi_os.filetype)==filetypes(filetype_i),:);
       cfg.dryrun=true;
       cfg.discontinuous=discontinuous;
-      assert(height(cfg.roi)>0,'No files for filetype %s and session %i',...
+      assert(height(cfg.roi)>0,'No files for filetype %s and chunk_id %i',...
         filetypes{filetype_i},chunks.id(chunk_i));
       bml_load_continuous(cfg); %raises error if continuity is violated
     end
