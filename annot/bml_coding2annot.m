@@ -125,14 +125,19 @@ if ismember(CodingAppVersion,{'U01_v1'})
       onset_syl_inf = [onset_syl inf];
       j=1; %offset_syl counter
       for k=1:(length(onset_syl))
-        assert(j <= length(offset_syl),'Inconsistent syl offset times in trial %i',i);  
-        if offset_syl(j) <= onset_syl_inf(k+1)
-          offset_syl_complete(k) = offset_syl(j);
-          offset_syl_coded(k) = 1;
-          j = j + 1;
+        if j <= length(offset_syl) 
+          if offset_syl(j) <= onset_syl_inf(k+1)
+            offset_syl_complete(k) = offset_syl(j);
+            offset_syl_coded(k) = 1;
+            j = j + 1;
+          else
+            offset_syl_complete(k) = onset_syl_inf(k+1);
+            offset_syl_coded(k) = 0;
+          end
         else
-          offset_syl_complete(k) = onset_syl_inf(k+1);
-          offset_syl_coded(k) = 0;
+            offset_syl_complete(k) = NaN;
+            offset_syl_coded(k) = 0;          
+          warning('Inconsistent syl offset times in trial %i',i)
         end
       end
     end
