@@ -112,6 +112,9 @@ if ismember(CodingAppVersion,{'U01_v1'})
     
     %CodingMatrix row 4: Syl offset time  
     offset_syl = bml_strnumcell2ordvec(CodingMatrix{4,i}); %in Audio seconds
+    if isempty(offset_syl)
+      offset_syl = nan;
+    end
     %completing missing offsets
     if length(offset_syl)==length(onset_syl)
       offset_syl_complete = offset_syl;

@@ -19,5 +19,5 @@ end
 if size(ordvec,1) > size(ordvec,2)
   ordvec = ordvec';
 end
-ordvec = sort(ordvec);  
+ordvec = sort(strnumcell);  
   

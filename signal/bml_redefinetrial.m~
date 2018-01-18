@@ -80,11 +80,12 @@ for i=1:height(epoch)
   if height(i_raw_trial)>1
     max_duration=max(i_raw_trial.duration);
     i_raw_trial = i_raw_trial(i_raw_trial.duration == max_duration,:);
-    [~,min_i]=min(abs((i_raw_trial.starts+i_raw_trial.ends)/2 - i_raw_trial.midpoint));
-    i_raw_trial = i_raw_trial(min_i,:);  
+    [~,max_i]=min(abs((i_raw_trial.starts+i_raw_trial.ends)/2 - i_raw_trial.midpoint));
+    i_raw_trial = i_raw_trial(I,:);  
     if warn
-      warning("several trials of raw match to epoch %i. Selecting trial %i",i,i_raw_trial.id(min_i));
+      warning("several trials of raw match to epoch %i. Selecting trial %i",i,i_raw_trial.id(max_i));
     end
+    i_raw_trial = i_raw_trial(max_i,:);
   end
   
   %partial epoch
@@ -103,8 +104,8 @@ for i=1:height(epoch)
 
   %creating trial
   new_row.id = numel(redefined.trial) + 1;
-  redefined.trial{new_row.id} = raw.trial{i_raw_trial.raw_id}(:,s:e);
-  redefined.time{new_row.id} = raw.time{i_raw_trial.raw_id}(:,s:e);
+  redefined.trial{new_row.id} = raw.trial{i}(:,s:e);
+  redefined.time{new_row.id} = raw.time{i}(:,s:e);
   redefined.epoch = [redefined.epoch; new_row];
   %cropped.sampleinfo(i,:) = [s,e];
   
