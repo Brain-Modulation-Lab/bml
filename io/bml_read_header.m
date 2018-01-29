@@ -10,6 +10,10 @@ function hdr = bml_read_header(cfg)
 %
 % returns fieldtrip header
 
+if ~isstruct(cfg)
+  cfg=struct('name',cfg);
+end
+
 name    = bml_getopt_single(cfg,'name');
 folder  = bml_getopt_single(cfg,'folder');
 
