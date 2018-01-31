@@ -21,6 +21,7 @@ roi        = bml_roi_table(bml_getopt(cfg,'roi'));
 timetol    = bml_getopt(cfg,'timetol',1e-2);
 contiguous = bml_getopt(cfg,'contiguous',true);
 group      = bml_getopt_single(cfg,'group','session_id');
+group_specified = ismember("group",fieldnames(cfg));
 
 REQUIRED_VARS = {'s1','t1','s2','t2','folder','name','nSamples','Fs','chantype','filetype'};
 assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
@@ -28,7 +29,9 @@ assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
 
 roi.fullfile = fullfile(roi.folder,roi.name);
 if ismember(group,roi.Properties.VariableNames)
-  fprintf("grouping by %s \n",group);
+  if group_specified
+    fprintf("grouping by %s \n",group);
+  end
   if isnumeric(roi.(group))
     roi.fullfile = strcat(roi.fullfile,'_',num2str(roi.(group)));
   else

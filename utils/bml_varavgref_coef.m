@@ -1,10 +1,18 @@
 function [coef, fitted_COV] = bml_varavgref_coef(COV)
 
-% BML_VARAVGREF_COEF calculated the crosstalk coefficients between electrodes
+% BML_VARAVGREF_COEF calculates the crosstalk coefficients between electrodes
 %
-% Calculates coefficients as defined by electrical crosstalk model
+% Use as
+%   [coef, fitted_COV] = bml_varavgref_coef(COV)
 %
+% Calculates crosstal coefficients as defined by electrical crosstalk model
+%
+% Arguments
 % COV - variance-covariance matrix between channels
+%
+% Returns
+% coef - vector of crosstalk coefficients 0 <= coef <= 1
+% fitted_COV - fitted variance-covariance matrix
 
 
 assert(isnumeric(COV));
@@ -46,7 +54,7 @@ n = size(COV,1);
 
   %cost function
   function [cost, grad] = costfun(p)
-    [~,~,VkVj,~] = varavgref_model(p);
+    [~,~,VkVj,c] = varavgref_model(p);
     %calculating cost
     cost=0;
     for k=1:n
@@ -55,12 +63,16 @@ n = size(COV,1);
       end
     end
     cost = cost / sum(sum(COV.^2));    
+    
+    %ridge regression on crosstalk coefficients
+    cost = cost + (1e-3)*sum(c.^2);
   end
 
-
-  %simplex optimization routine
+  % optimization routine
   p = zeros(1,n); 
   [f_V0V0,f_sigma2_S,f_VkVj,f_c] = varavgref_model(p);
+  
+  %first guess based on solving approximated cuadratic expression
   p1 = zeros(1,n);
   for i=1:n
     a_= -f_sigma2_S(i);
@@ -93,9 +105,11 @@ n = size(COV,1);
     end
   end
   
+  %optimizing from first guess
 	p=fminunc(@costfun,p1,optimoptions('fminunc','MaxFunctionEvaluations',1e9,'OptimalityTolerance',1e-9));  
   [~,~,fitted_COV,coef] = varavgref_model(p);
   
+  %bounding coefficients
   for i=1:n
     if coef(i) > 0.999
       coef(i) = 0.999;

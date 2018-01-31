@@ -1,4 +1,4 @@
-function redefined = bml_redefinetrial(cfg, raw)
+function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 
 % BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)
 %
@@ -51,7 +51,7 @@ end
 redefined = [];
 redefined.trial = {};
 redefined.time = {};
-redefined.epoch = table();
+redefined_epoch = table();
 redefined.label = raw.label;
 if ismember('hdr',fields(raw))
   redefined.hdr = raw.hdr;
@@ -82,9 +82,9 @@ for i=1:height(epoch)
     i_raw_trial = i_raw_trial(i_raw_trial.duration == max_duration,:);
     [~,min_i]=min(abs((i_raw_trial.starts+i_raw_trial.ends)/2 - i_raw_trial.midpoint));
     i_raw_trial = i_raw_trial(min_i,:);  
-    if warn
-      warning("several trials of raw match to epoch %i. Selecting trial %i",i,i_raw_trial.id(min_i));
-    end
+    %if warn
+    %  warning("several trials of raw match to epoch %i. Selecting trial %i",i,i_raw_trial.raw_id(min_i));
+    %end
   end
   
   %partial epoch
@@ -105,7 +105,7 @@ for i=1:height(epoch)
   new_row.id = numel(redefined.trial) + 1;
   redefined.trial{new_row.id} = raw.trial{i_raw_trial.raw_id}(:,s:e);
   redefined.time{new_row.id} = raw.time{i_raw_trial.raw_id}(:,s:e);
-  redefined.epoch = [redefined.epoch; new_row];
+  redefined_epoch = [redefined_epoch; new_row];
   %cropped.sampleinfo(i,:) = [s,e];
   
   %changing time reference if t0 is present
@@ -114,9 +114,6 @@ for i=1:height(epoch)
   end
  
 end
-
-redefined.epoch = bml_annot_table(redefined.epoch,'epoch');
-
 
 
 
