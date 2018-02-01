@@ -10,7 +10,9 @@ function hdr = bml_read_header(cfg)
 %
 % returns fieldtrip header
 
-if ~isstruct(cfg)
+if istable(cfg)
+  assert(height(cfg)==1,"Only one row tables allowed as cfg");
+elseif ~isstruct(cfg)
   cfg=struct('name',cfg);
 end
 
@@ -18,6 +20,6 @@ name    = bml_getopt_single(cfg,'name');
 folder  = bml_getopt_single(cfg,'folder');
 
 assert(~isempty(name),"cfg.name required")
-if isempty(folder); folder = "."; end
+if isempty(folder); folder = '.'; end
 
 hdr = ft_read_header(fullfile(folder,name),'chantype','chaninfo');
