@@ -52,22 +52,6 @@ n = size(COV,1);
     end    
   end
 
-  %cost function
-  function [cost, grad] = costfun(p)
-    [~,~,VkVj,c] = varavgref_model(p);
-    %calculating cost
-    cost=0;
-    for k=1:n
-      for j=1:n
-        cost = cost + (VkVj(k,j)-COV(k,j))^2;
-      end
-    end
-    cost = cost / sum(sum(COV.^2));    
-    
-    %ridge regression on crosstalk coefficients
-    cost = cost + (1e-3)*sum(c.^2);
-  end
-
   % optimization routine
   p = zeros(1,n); 
   [f_V0V0,f_sigma2_S,f_VkVj,f_c] = varavgref_model(p);
@@ -105,10 +89,92 @@ n = size(COV,1);
     end
   end
   
-  %optimizing from first guess
-	p=fminunc(@costfun,p1,optimoptions('fminunc','MaxFunctionEvaluations',1e9,'OptimalityTolerance',1e-9));  
-  [~,~,fitted_COV,coef] = varavgref_model(p);
+	%cost function
+  function [cost, grad] = costfun(p)
+    [~,~,VkVj,c] = varavgref_model(p);
+    
+    %calculating cost in variance metric
+    cost=0;
+    for k=1:n
+      for j=1:n
+        cost = cost + (VkVj(k,j)-COV(k,j))^2;
+      end
+    end
+    cost = cost / sum(sum(COV.^2));       
+    
+    %ridge regression on crosstalk coefficients
+    cost = cost + (1e-3)*sum(c.^2);
+  end
   
+  %optimizing from first guess
+	p=fminunc(@costfun,p1,optimoptions('fminunc','MaxFunctionEvaluations',1e6,'OptimalityTolerance',1e-6));  
+
+%   p=p1;
+%   
+%   %cost function
+%   function [cost, grad] = costfun2(p)
+%     [~,~,VkVj,~] = varavgref_model(p);
+%     
+%     %calculating cost in correlation metric
+%     
+%     %Transformin VkVj to positive semi definte
+%     VkVj(ismissing(VkVj))=0;    
+%     [V,D] = eig(VkVj);
+%     D(D<0)=0;
+%     psd_VkVj = real(V*D/(V));
+%     cor_VkVj = corrcov(psd_VkVj);
+%     cor_COV = corrcov(COV);
+%     
+%     cost=0;
+%     for k=1:n
+%       for j=1:n
+%         cost = cost + (cor_VkVj(k,j)-cor_COV(k,j))^2;
+%         %cost = cost + (clip_inv_sigmoid(cor_VkVj(k,j))-clip_inv_sigmoid(cor_COV(k,j)))^2;
+%       end
+%     end
+%     %cost = cost / sum(sum(COV.^2));     
+%   end
+%   
+% 	p=fminunc(@costfun2,p,optimoptions('fminunc','MaxFunctionEvaluations',1e9,'OptimalityTolerance',1e-9));  
+%   
+% 	function x = clip_inv_sigmoid(y)
+%     if y > 0.999954602131298 % exp(10)/(exp(10)+1)
+%       x = 10;
+%     elseif y < 4.539786870243439e-05 % exp(-10)/(exp(-10)+1)
+%       x = -10;
+%     else
+%       x = log(y/(1-y));
+%     end
+%   end
+% 
+% 	%cost function
+%   function [cost, grad] = costfun3(p)
+%     [~,~,VkVj,~] = varavgref_model(p);
+%     
+%     %calculating cost in correlation metric
+%     
+%     %Transformin VkVj to positive semi definte
+%     VkVj(ismissing(VkVj))=0;    
+%     [V,D] = eig(VkVj);
+%     D(D<0)=0;
+%     psd_VkVj = real(V*D/(V));
+%     cor_VkVj = corrcov(psd_VkVj);
+%     cor_COV = corrcov(COV);
+%     
+%     cost=0;
+%     for k=1:n
+%       for j=1:n
+%         %cost = cost + (cor_VkVj(k,j)-cor_COV(k,j))^2;
+%         cost = cost + (clip_inv_sigmoid(cor_VkVj(k,j))-clip_inv_sigmoid(cor_COV(k,j)))^2;
+%       end
+%     end
+%     %cost = cost / sum(sum(COV.^2));     
+%   end
+%   
+% 	p=fminunc(@costfun3,p,optimoptions('fminunc','MaxFunctionEvaluations',1e9,'OptimalityTolerance',1e-9));  
+
+
+  [~,~,fitted_COV,coef] = varavgref_model(p);
   %bounding coefficients
   for i=1:n
     if coef(i) > 0.999

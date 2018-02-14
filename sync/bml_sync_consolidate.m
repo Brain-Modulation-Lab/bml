@@ -2,6 +2,10 @@ function consolidated = bml_sync_consolidate(cfg)
 
 % BML_SYNC_CONSOLIDATE consolidates file chunks synchronizations
 %
+% Use as
+%   consolidated = bml_sync_consolidate(cfg)
+%   consolidated = bml_sync_consolidate(cfg.roi)
+%
 % cfg.roi - roi table with sync chunks to consolidate
 % cfg.timetol - double: time tolerance allowed in consolidation. Defaults
 %               to 1e-2
@@ -9,6 +13,8 @@ function consolidated = bml_sync_consolidate(cfg)
 %               be consolidated toghether. Defaults to true. 
 % cfg.group - variable indicating grouping criteria. Entries of different groups 
 %               are not consolidated. Defaults to 'session_id'
+% cfg.timewarp - boolean, indicates if linear time warping is allowed in
+%               consolidation. If false, uses nominal Fs value in roi table
 %
 % If chunking for consolidation was done, each file can have several entries in the
 % sync roi table. This function consolidates those entries into one per file.
@@ -17,10 +23,11 @@ function consolidated = bml_sync_consolidate(cfg)
 if istable(cfg)
   cfg = struct('roi',cfg);
 end
-roi        = bml_roi_table(bml_getopt(cfg,'roi'));
-timetol    = bml_getopt(cfg,'timetol',1e-2);
-contiguous = bml_getopt(cfg,'contiguous',true);
-group      = bml_getopt_single(cfg,'group','session_id');
+roi             = bml_roi_table(bml_getopt(cfg,'roi'));
+timetol         = bml_getopt(cfg,'timetol',1e-2);
+contiguous      = bml_getopt(cfg,'contiguous',true);
+group           = bml_getopt_single(cfg,'group','session_id');
+timewarp        = bml_getopt(cfg,'timewarp',true);
 group_specified = ismember("group",fieldnames(cfg));
 
 REQUIRED_VARS = {'s1','t1','s2','t2','folder','name','nSamples','Fs','chantype','filetype'};
@@ -47,15 +54,16 @@ for i_uff=1:length(uff)
   i_roi = roi(strcmp(roi.fullfile,uff(i_uff)),:);
   if height(i_roi)>1
 
-    %keyboard
-    %for i=1:height(i_roi)
-    %  plot([i_roi.s1(i) i_roi.s2(i)],[i_roi.t1(i) i_roi.t2(i)])
-    %end
-
     %doing linear fit to asses if consolidation is plausible
     s = [i_roi.s1; i_roi.s2];
     t = [i_roi.t1; i_roi.t2];
-    p = polyfit(s,t,1);
+    if istrue(timewarp)
+      p = polyfit(s,t,1);
+    else
+      assert(length(unique(i_roi.Fs))==1,"Inconsistent Fs");
+      p1 = 1/unique(i_roi.Fs);
+      p = [p1, mean(t-p1*s)];
+    end
     tfit = polyval(p,s);
     
     max_delta_t = max(abs(t - tfit));
@@ -100,7 +108,6 @@ if istrue(contiguous)
     	i_roi_cont_j = i_roi(i_roi.id>=i_roi_cont.id_starts(j) & i_roi.id<=i_roi_cont.id_ends(j),:);
     
       if height(i_roi_cont_j)>1
-        %todo: use bml_roi2coord
         
         left_complete = i_roi_cont_j.starts(1)<=i_roi_cont_j.t1(1);
         right_complete = i_roi_cont_j.ends(end)>=i_roi_cont_j.t2(end);
@@ -116,7 +123,13 @@ if istrue(contiguous)
         s = [i_roi_cont_j.raw1; i_roi_cont_j.raw2];
         t = [i_roi_cont_j.t1; i_roi_cont_j.t2];
         %plot(s,t,'o')
-        p = polyfit(s,t,1);
+        if istrue(timewarp)
+          p = polyfit(s,t,1);
+        else
+          assert(length(unique(i_roi_cont_j.Fs))==1,"Inconsistent Fs");
+          p1 = 1/unique(i_roi_cont_j.Fs);
+          p = [p1, mean(t-p1*s)];
+        end
         tfit = polyval(p,s);
       
         max_delta_t = max(abs(t - tfit));

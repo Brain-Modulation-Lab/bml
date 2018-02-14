@@ -55,17 +55,6 @@ for i=1:numel(data.trial)
   
 end
 
-% env.trial=cellfun(@(T) reshape(max(...
-%         reshape(abs(T(:,1:n_bins*bin_size)),[size(T,1), bin_size, n_bins]),...
-%       [],2),...
-%     [size(T,1) n_bins]),...
-%   data.trial,'UniformOutput',false);
-% 
-% env.time=cellfun(@(t) mean(...
-%     reshape(t(1:n_bins*bin_size),[bin_size, n_bins]),...
-%     1),...
-%   data.time,'UniformOutput',false);
-
 env.fsample = data.fsample/bin_size;
 env.label = data.label;
 
@@ -73,5 +62,9 @@ env.cfg = struct();
 env.cfg.envelope = "binabs";
 env.cfg.bin_size = bin_size;
 env.cfg.previous = data.cfg;
+
+if ismember('hdr',fieldnames(data))
+  env.hdr = data.hdr;
+end
 
 

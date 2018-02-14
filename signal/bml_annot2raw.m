@@ -39,6 +39,10 @@ else %from trmplate
   roi = bml_raw2coord(raw);
 end
 
+if all(annot.duration==0)
+  annot = bml_annot_extend(annot,mean(diff(raw.time{1}))/2);
+end
+
 description = annot.Properties.Description;
 if isempty(description); description = 'annot'; end
 raw.label={description};

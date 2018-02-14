@@ -13,3 +13,5 @@ for i=1:numel(BML_FOLDERS)
     addpath(i_path);
   end
 end
+
+format long;

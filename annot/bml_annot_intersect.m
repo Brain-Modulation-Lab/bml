@@ -163,6 +163,7 @@ if ~isempty(new_names_common_vars_x)
       if istrue(warn)
         warning('Overwriting variable %s of table %s',rm_vars{i},x.Properties.Description);
       end
+      %common_vars_x(bml_getidx(rm_vars(i),x.Properties.VariableNames))=[];      
       x.(rm_vars{i})=[];
     end
   end
@@ -177,6 +178,7 @@ if ~isempty(new_names_common_vars_y)
       if istrue(warn)
         warning('Overwriting variable %s of table %s',rm_vars{i},y.Properties.Description);
       end
+      %common_vars_y(bml_getidx(rm_vars(i),y.Properties.VariableNames))=[];
       y.(rm_vars{i})=[];
     end
   end

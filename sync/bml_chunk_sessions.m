@@ -1,42 +1,53 @@
-function chunks = bml_chunk_sessions(sessions, split_time)
+function chunks = bml_chunk_sessions(session, split_time)
 
 % BML_CHUNK_SESSIONS breaks up sessions into smaller chunks
 %
 % Use as 
-%   chunks = bml_chunk_sessions(sessions, split_time)
+%   chunks = bml_chunk_sessions(session, split_time)
 %
-% sessions - annot table of sessions or chunks
-% split_time - double: vector of times at which to split the sessions
+% session - annot table of sessions or chunks
+% split_time - double: vector of times at which to split the sessions or 
+%           integer < 10 indicating the number of chuncks each session
+%           should be split into
 %
-% returns a chuked version of sessions
+% returns a chuked version of session
 
 
-sessions = bml_annot_table(sessions);
-assert(isempty(bml_annot_overlap(sessions)),'sessions should not overlap');
-if nargin == 1; split_time = []; end
-
-if ~ismember('session_id',sessions.Properties.VariableNames)
-  sessions.session_id = sessions.id;
-end
-if ~ismember('session_part',sessions.Properties.VariableNames)
-  sessions.session_part = ones(height(sessions),1);
-end
-
-for i=1:length(split_time)
-  session_i=sessions((sessions.starts < split_time(i)) & (sessions.ends > split_time(i)),:);
-  if isempty(session_i)
-    warning("time %d does not belong to any session",split_time(i));
-  else
-    sessions.ends(sessions.id==session_i.id(1)) = split_time(i);
-    session_i.id = max(sessions.id)+1;
-    session_i.starts = split_time(i);
-    session_i.session_part = session_i.session_part + 1;
-    sessions = [sessions; session_i];
+session = bml_annot_table(session);
+assert(isempty(bml_annot_overlap(session)),'sessions should not overlap');
+if nargin == 1 
+  split_time = [];
+elseif nargin == 2 && length(split_time)==1 && abs(split_time-round(split_time,0))<1e-9 && split_time <= 10
+  n_split = split_time;
+  split_time = [];
+  for s=1:height(session)
+    bp  = linspace(session.starts(s),session.ends(s),n_split+1);
+    split_time = [split_time, bp(2:(end-1))];
   end
 end
 
-sessions.id=[];
-chunks=bml_annot_table(sessions);
+if ~ismember('session_id',session.Properties.VariableNames)
+  session.session_id = session.id;
+end
+if ~ismember('session_part',session.Properties.VariableNames)
+  session.session_part = ones(height(session),1);
+end
+
+for i=1:length(split_time)
+  session_i=session((session.starts < split_time(i)) & (session.ends > split_time(i)),:);
+  if isempty(session_i)
+    warning("time %d does not belong to any session",split_time(i));
+  else
+    session.ends(session.id==session_i.id(1)) = split_time(i);
+    session_i.id = max(session.id)+1;
+    session_i.starts = split_time(i);
+    session_i.session_part = session_i.session_part + 1;
+    session = [session; session_i];
+  end
+end
+
+session.id=[];
+chunks=bml_annot_table(session);
 
 
   

@@ -53,7 +53,7 @@ for i=1:numel(env.trial)
       	starts = env.time{i}(zero_cross_ixs(end))-0.5/env.fsample;
         ends = env.time{i}(end)+0.5/env.fsample;
       else
-      	zc_ix = find(diff(sign(zero_cross_ixs-env_max_ix)));
+      	zc_ix = find(diff(sign(zero_cross_ixs-env_max_ix)),1);
         starts = env.time{i}(zero_cross_ixs(zc_ix))-0.5/env.fsample;
         ends = env.time{i}(zero_cross_ixs(zc_ix+1))+0.5/env.fsample;
       end
