@@ -160,7 +160,7 @@ if ~isempty(new_names_common_vars_x)
   if any(new_names_common_vars_x_repeated)
     rm_vars = new_names_common_vars_x(new_names_common_vars_x_repeated);
     for i=1:length(rm_vars)
-      if istrue(warn)
+      if warn
         warning('Overwriting variable %s of table %s',rm_vars{i},x.Properties.Description);
       end
       %common_vars_x(bml_getidx(rm_vars(i),x.Properties.VariableNames))=[];      
@@ -175,7 +175,7 @@ if ~isempty(new_names_common_vars_y)
   if any(new_names_common_vars_y_repeated)
     rm_vars = new_names_common_vars_y(new_names_common_vars_y_repeated);
     for i=1:length(rm_vars)
-      if istrue(warn)
+      if warn
         warning('Overwriting variable %s of table %s',rm_vars{i},y.Properties.Description);
       end
       %common_vars_y(bml_getidx(rm_vars(i),y.Properties.VariableNames))=[];
@@ -188,13 +188,13 @@ x.Properties.VariableNames(common_vars_x) = new_names_common_vars_x;
 y.Properties.VariableNames(common_vars_y) = new_names_common_vars_y;
 
 if ismember(yidn,x.Properties.VariableNames)
-  if istrue(warn)
+  if warn
     warning('Overwriting variable %s from table %s',yidn,x.Properties.Description);
   end
   x.(yidn)=[];
 end
 if ismember(xidn,y.Properties.VariableNames)
-  if istrue(warn)
+  if warn
     warning('Overwriting variable %s from table %s',xidn,y.Properties.Description);
   end
   y.(xidn)=[];

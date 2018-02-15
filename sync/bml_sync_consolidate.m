@@ -57,7 +57,7 @@ for i_uff=1:length(uff)
     %doing linear fit to asses if consolidation is plausible
     s = [i_roi.s1; i_roi.s2];
     t = [i_roi.t1; i_roi.t2];
-    if istrue(timewarp)
+    if timewarp
       p = polyfit(s,t,1);
     else
       assert(length(unique(i_roi.Fs))==1,"Inconsistent Fs");
@@ -91,7 +91,7 @@ roi.fullfile=[];
 consolidated = bml_roi_table(consolidated);
 
 %consolidating several time contiguos files together
-if istrue(contiguous)
+if contiguous
   roi = consolidated;
   consolidated = table();
   roi.filetype_chantype = strcat(roi.filetype,roi.chantype,num2str(roi.Fs));
@@ -123,7 +123,7 @@ if istrue(contiguous)
         s = [i_roi_cont_j.raw1; i_roi_cont_j.raw2];
         t = [i_roi_cont_j.t1; i_roi_cont_j.t2];
         %plot(s,t,'o')
-        if istrue(timewarp)
+        if timewarp
           p = polyfit(s,t,1);
         else
           assert(length(unique(i_roi_cont_j.Fs))==1,"Inconsistent Fs");

@@ -26,7 +26,7 @@ function info = bml_neuroomega_info_file(cfg)
 
 cfg.pattern  = bml_getopt(cfg,'pattern','*.mat');
 moving_files = bml_getopt(cfg,'moving_files',true); 
-if istrue(moving_files)
+if moving_files
   cfg.regexp   = bml_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat');
 else
   cfg.regexp   = bml_getopt(cfg,'regexp','[RL]T[1-5]D[-]{0,1}\d+\.\d+F\d+\.mat');

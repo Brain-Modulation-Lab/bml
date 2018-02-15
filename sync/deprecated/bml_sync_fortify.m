@@ -9,7 +9,7 @@ sync = bml_roi_table(bml_getopt(cfg,'roi'));
 
 rm_moving_files = bml_getopt(cfg,'rm_moving_files',true);
 
-if istrue(rm_moving_files)
+if rm_moving_files
   MF = ~cellfun(@isempty,regexp(sync.name,'[RL]T[1-5]D[-]{0,1}\d+\.\d+[+-]MF\d+\.mat','once'));
   sync = sync(~MF,:); 
 end

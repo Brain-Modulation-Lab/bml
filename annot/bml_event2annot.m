@@ -31,7 +31,7 @@ if isempty(event_type)
   event_type = unique({event.type});
 else
   present_event_type = ismember(event_type,unique({event.type}));
-  if ~all(present_event_type) && istrue(cfg_warn)
+  if ~all(present_event_type) && cfg_warn
     warning('selected event type %s not present. Available event types are: %s',...
       strjoin(event_type(~present_event_type)),strjoin(unique({event.type})));
   end

@@ -94,7 +94,7 @@ end
 if isempty(equalize_times)
   equalize_times = ~all(trial_t0==0) && length(unique(trl(i,2)-trl(i,1)))==1;
 end
-if istrue(equalize_times)
+if equalize_times
   trial_len = unique(trl(i,2)-trl(i,1)+1);
   assert(~all(trial_t0==0) && length(trial_len)==1,...
     'can''t equalize times');

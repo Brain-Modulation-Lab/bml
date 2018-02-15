@@ -17,6 +17,9 @@ function sync = bml_sync_transfer_trellis_filetype(cfg)
 % cfg.sync_filetype - char, original sync filetype (defaults to 'ns5')
 % cfg.sync_chantype - char, original sync chantype (defaults to empty)
 % cfg.timetol       - float, time tolerance. Defaults to 1e-4
+% cfg.delay         - numeric, time delay in seconds of the new filetype with respect
+%                     to the sync_filetype. Can be used to correct for online
+%                     low-passs filtering phase delays. Defaults to 0. 
 %
 % returns an roi table with the new entries for the trellis filetype.
 %
@@ -28,6 +31,7 @@ sync_filetype     = bml_getopt_single(cfg,'sync_filetype','trellis.ns5');
 sync_chantype     = bml_getopt_single(cfg,'sync_chantype');
 roi               = bml_getopt(cfg,'roi');
 timetol           = bml_getopt(cfg,'timetol',1e-4);
+delay             = bml_getopt(cfg,'delay',0);
 
 assert(~isempty(roi),'roi required');
 
@@ -74,8 +78,8 @@ for i=1:height(sync_filetype_roi)
     %new coordinates
     new.s1 = ceil(nFr .* (row.s1 - 0.5));
     new.s2 = ceil(nFr .* (row.s2 - 0.5));
-    new.t1 = t0 + (new.s1 - 0.5)/new_Fs;
-    new.t2 = tf - (new.nSamples - (new.s2 - 0.5))/new_Fs;
+    new.t1 = t0 + (new.s1 - 0.5)/new_Fs - delay;
+    new.t2 = tf - (new.nSamples - (new.s2 - 0.5))/new_Fs - delay;
 
     %completing other variables
     if ismember('nChans',new.Properties.VariableNames)

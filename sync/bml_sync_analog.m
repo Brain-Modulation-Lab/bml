@@ -217,7 +217,7 @@ for chunk_i=1:height(chunks)
     cfg.discontinuous=discontinuous;
     [master, master_map] = bml_load_continuous(cfg);
 
-    if istrue(high_pass)
+    if high_pass
       master.trial{1} = ft_preproc_highpassfilter(master.trial{1},...
                         master.fsample, high_pass_freq, 4, 'but', 'twopass');
     end
@@ -248,7 +248,7 @@ for chunk_i=1:height(chunks)
       cfg.discontinuous=discontinuous;
       [slave, slave_map] = bml_load_continuous(cfg);  
 
-      if istrue(high_pass) && ~dryrun
+      if high_pass && ~dryrun
         slave.trial{1} = ft_preproc_highpassfilter(slave.trial{1},...
                         slave.fsample, 5, 4, 'but', 'twopass');
       end

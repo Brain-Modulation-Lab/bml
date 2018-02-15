@@ -98,7 +98,7 @@ for i=1:height(epoch)
     i_raw = ft_resampledata(cfg_resample,i_raw);
   end
   
-  if istrue(first) %initializing stuff
+  if first %initializing stuff
     if isempty(relabel)
       label = i_raw.label;
     else
@@ -118,7 +118,7 @@ for i=1:height(epoch)
     first = false;
   else
     if ~isequal(label,i_raw.label)
-      if istrue(warn) && isempty(relabel)
+      if warn && isempty(relabel)
         warning('inconsistent channel names. Renaming.')
       end
       i_raw.label = label;

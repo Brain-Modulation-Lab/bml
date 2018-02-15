@@ -66,7 +66,7 @@ end
 roi = bml_roi_table(roi);
 
 if islogical(discontinuous)
-  if istrue(discontinuous)
+  if discontinuous
     discontinuous = {'allow'};
   else
     discontinuous = {'no'};

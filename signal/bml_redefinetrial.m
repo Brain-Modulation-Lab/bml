@@ -22,7 +22,7 @@ t0         = bml_getopt(cfg,'t0');
 regularize = bml_getopt(cfg,'regularize',false);
 warn       = bml_getopt(cfg,'warn',true);
 
-if istrue(regularize)
+if regularize
   keyboard %have to implement this
 end
 
@@ -70,7 +70,7 @@ for i=1:height(epoch)
   
   %if no intersection, move to next epoch
   if isempty(i_raw_trial)
-    if istrue(warn)
+    if warn
       warning("epoch %i not found in raw",i);
     end
     continue
@@ -88,7 +88,7 @@ for i=1:height(epoch)
   end
   
   %partial epoch
-  if (epoch.duration(i) > i_raw_trial.duration) && istrue(warn)
+  if (epoch.duration(i) > i_raw_trial.duration) && warn
     warning('partial epoch %i loaded',i);
   end
   

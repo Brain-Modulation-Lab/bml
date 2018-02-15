@@ -60,7 +60,7 @@ for i=1:height(roi)
     all_slave_dt(i) = slave_dt;
     all_warpfactor(i) = warpfactor;
 
-    if istrue(diagnostic_plot)
+    if diagnostic_plot
       tbar = mean(i_slave_events.starts);
       i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
       figure;
@@ -82,7 +82,7 @@ for i=1:height(roi)
   end
 end
 
-if ~istrue(timewarp)
+if ~timewarp
   all_slave_dt = repmat(nanmean(all_slave_dt),length(all_slave_dt),1);
 end
 

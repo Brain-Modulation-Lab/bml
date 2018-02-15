@@ -82,7 +82,7 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
   end
   
   %optimizing
-  if istrue(timewarp)
+  if timewarp
     fitted=fminsearch(@costfun,[slave_delta_t, warpfactor]);
     slave_delta_t=fitted(1);
     warpfactor = fitted(2);
