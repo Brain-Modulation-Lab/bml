@@ -50,7 +50,7 @@ if istable(cfg)
         Fs = round((s2-s1)/round(t2-t1,pTT),pTT,'significat');  
       end
       idx_filt = idx>=s1 & idx<=s2;
-      time(idx_filt) = idx(idx_filt)/Fs - 0.5/Fs + (s2*t1-t2*s1)/(s2-s1);
+      time(idx_filt) = double(idx(idx_filt))/Fs - 0.5/Fs + (s2*t1-t2*s1)/(s2-s1);
     end
     return
   end
@@ -71,4 +71,4 @@ if skipFactor > 1
   Fs = round((s2-s1)/round(t2-t1,pTT),pTT,'significant');
 end
  
-time = idx/Fs - 0.5/Fs + (s2*t1-t2*s1)/(s2-s1);
+time = double(idx)/Fs - 0.5/Fs + (s2*t1-t2*s1)/(s2-s1);

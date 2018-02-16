@@ -15,6 +15,7 @@ function consolidated = bml_sync_consolidate(cfg)
 %               are not consolidated. Defaults to 'session_id'
 % cfg.timewarp - boolean, indicates if linear time warping is allowed in
 %               consolidation. If false, uses nominal Fs value in roi table
+% cfg.rowisfile - boolean, indicates if row refer to files. Defaults to true.
 %
 % If chunking for consolidation was done, each file can have several entries in the
 % sync roi table. This function consolidates those entries into one per file.
@@ -23,16 +24,30 @@ function consolidated = bml_sync_consolidate(cfg)
 if istable(cfg)
   cfg = struct('roi',cfg);
 end
-roi             = bml_roi_table(bml_getopt(cfg,'roi'));
+roi             = bml_getopt(cfg,'roi');
 timetol         = bml_getopt(cfg,'timetol',1e-2);
 contiguous      = bml_getopt(cfg,'contiguous',true);
 group           = bml_getopt_single(cfg,'group','session_id');
 timewarp        = bml_getopt(cfg,'timewarp',true);
+rowisfile       = bml_getopt(cfg,'rowisfile',true);
 group_specified = ismember("group",fieldnames(cfg));
 
-REQUIRED_VARS = {'s1','t1','s2','t2','folder','name','nSamples','Fs','chantype','filetype'};
-assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
-  'Variables %s required',strjoin(REQUIRED_VARS))
+REQUIRED_VARS2 = {'folder','name','chantype','filetype'};
+if ~all(ismember(REQUIRED_VARS2,roi.Properties.VariableNames))
+  if rowisfile
+    error('Variables %s required',strjoin(REQUIRED_VARS2))
+  else
+    for i=1:length(REQUIRED_VARS2)
+      roi.(REQUIRED_VARS2{i})=repmat({'NA'},height(roi),1);
+    end
+  end
+end
+
+roi = bml_roi_table(roi);
+
+% REQUIRED_VARS = {'s1','t1','s2','t2','nSamples','Fs'};
+% assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
+%   'Variables %s required',strjoin(REQUIRED_VARS))
 
 roi.fullfile = fullfile(roi.folder,roi.name);
 if ismember(group,roi.Properties.VariableNames)

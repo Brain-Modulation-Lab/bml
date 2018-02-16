@@ -32,11 +32,11 @@ if isempty(template) %from roi
   raw.time={bml_idx2time(roi,roi.s1:roi.s2)};
   raw.trial={zeros(1,size(raw.time{1},2))};
   raw.fsample=roi.Fs;
-else %from trmplate
+else %from template
   raw = template;
   raw.time=raw.time(1);
   raw.trial={zeros(1,size(raw.time{1},2))};
-  roi = bml_raw2coord(raw);
+  roi = bml_raw2annot(raw);
 end
 
 if all(annot.duration==0)
@@ -46,6 +46,8 @@ end
 description = annot.Properties.Description;
 if isempty(description); description = 'annot'; end
 raw.label={description};
+
+annot=bml_annot_filter(annot,roi);
 
 for i=1:height(annot)
   [s,e] = bml_crop_idx_valid(roi,annot.starts(i), annot.ends(i));
