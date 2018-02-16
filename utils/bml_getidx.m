@@ -2,6 +2,9 @@ function idx = bml_getidx(element,collection)
 
 % BML_GETIDX gets the first indices of the elements in the domain
 %
+% Use as
+%   idx = bml_getidx(element,collection)
+%
 % index 0 for elements not found
 %
 % Use as

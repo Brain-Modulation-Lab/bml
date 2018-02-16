@@ -2,6 +2,9 @@ function mapped = bml_map(element,domain,codomain)
 
 % BML_MAP maps elements based on given domain and codomain
 %
+% Use as
+%   mapped = bml_map(element,domain,codomain)
+%
 % element - cellstr, cell or array
 % domain - cellstr, cell or array. Possible elements to match with
 % codomain - cellstr, cell or array. Corresponding elements

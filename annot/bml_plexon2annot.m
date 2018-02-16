@@ -6,47 +6,86 @@ function [annot, spike] = bml_plexon2annot(cfg)
 %   annot = bml_plexon2annot(cfg)
 %
 % cfg.roi            - roi table with neuroomega sync information
-% cfg.PlexonPath     - path to plexon file
-% cfg.PlexonSrcPath  - path to preprocessed mat file for plexon
-%                      inferred from cfg.PlexonPath if not given
+% cfg.plexon         - (path/)filename to plexon file
+% cfg.plexon_src     - path to preprocessed mat file for plexon
+%                      inferred from cfg.plaxon_src if not given
 %                      and cfg.FileMapping not provided
-% cfg.FileMapping    - table with file mapping to vector analyzed by
-%                      plexon. Loaded from cfg.PlexonSrcPath if not given
+% cfg.file_mapping   - table with file mapping to vector analyzed by
+%                      plexon. Loaded from cfg.plexon_src->FileMapping if not given
 % cfg.label          - vector of channel names. Extracted from 'channels'
-%                      cell array in cfg.PlexonSrcPath if not provided
+%                      cell array in cfg.plexon_src->Channels if not provided
 % cfg.electrode      - table with variables channel and electrode. used to 
 %                      rename the labels. 
 %
 % Returns
 % annot - annotation table with time of spikes in global time coordinates
-% spike - ft_datatype_spike structure as returned by ft_read_spike
+% spike - ft_datatype_spike structure as returned by ft_read_spike (with
+%         renamed labels)
 
 
-sync          = bml_getopt(cfg,'roi');
+%loading parameters and defaults
+roi           = bml_getopt(cfg,'roi');
+roi           = bml_roi_table(roi);
+assert(~isempty(roi),"roi table required");
 
+plexon        = bml_getopt_single(cfg,'plexon');
+assert(isfile(plexon),"Valid plexon file required");
 
-FileMapping   = bml_getopt(cfg,'FileMapping');
+plexon_src    = strrep(plexon,'.plx','.mat');
+if ~isfile(plexon_src)
+  plexon_src = [];
+end
 
-label         = bml_getopt(cfg,'label',spike.label);
+plexon_src	  = bml_getopt_single(cfg,'plexon_src',plexon_src);
+
+FileMapping = [];
+label = [];
+if ~isempty(plexon_src) && isfile(plexon_src)
+  src = matfile(plexon_src);
+  if ismember('FileMapping',fieldnames(src))
+    FileMapping = src.FileMapping;
+  end
+  if ismember('Channels',fieldnames(src))
+    label = src.Channels;
+  end  
+end
+FileMapping   = bml_getopt(cfg,'FileMapping',FileMapping);
+label         = bml_getopt(cfg,'label',label);
+
+electrode     = bml_getopt(cfg,'electrode');
+if ~isempty(label) && ~isempty(electrode) && ...
+    all(ismember({'electrode','channel'},electrode.Properties.VariableNames))
+  label=bml_map(label,electrode.channel,electrode.electrode);
+end
+
+%loading fieldtrip spike structure from plexon file
+spike= ft_read_spike(plexon);
+
+if isempty(label)
+  label = spike.label;
+end
+if size(label,2) < size(label,1)
+  label = label';
+end
+spike.label = label;
 
 FM_VARS={'name','nSamples','Fs','raw1','raw2'};
 SY_VARS={'starts','ends','t1','s1','t2','s2','name', 'nSamples'};
 
 assert(~isempty(FileMapping),"FileMapping required");
-assert(~isempty(sync),"sync requried");
 assert(length(label)==length(spike.label),"Incorrect label");
 assert(all(ismember(FM_VARS,FileMapping.Properties.VariableNames)),"Invalid FileMapping table");
-assert(all(ismember(SY_VARS,sync.Properties.VariableNames)),"Invalid sync table");
+assert(all(ismember(SY_VARS,roi.Properties.VariableNames)),"Invalid roi table");
 
 annot=table();
-for i=1:length(spike.label)
+for i=1:length(spike.timestamp)
   if ~isempty(spike.timestamp{i})
     
     %creating sync table for the spike data
     assert(max(spike.timestamp{i}) <= max(FileMapping.raw2), "Invalid timestamp");
     
     fm = FileMapping(:,FM_VARS);
-    sy = sync(ismember(sync.name,fm.name),SY_VARS);    
+    sy = roi(ismember(roi.name,fm.name),SY_VARS);    
     syfm=join(sy,fm,'Keys','name');
     
     assert(all(syfm.nSamples_sy==syfm.nSamples_fm), "Inconsistent number of samples");
