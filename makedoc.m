@@ -1,6 +1,6 @@
 %% Creates the html documentation folder doc/
 
-cd('..')
+cd('/Users/brainmodulationlab/git')
 m2html('mfiles',{'bml/bml_defaults.m','bml/annot','bml/io','bml/signal','bml/sync','bml/utils'},...
   'htmldir','bml/doc', 'global','on');
 
