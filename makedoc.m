@@ -1,9 +1,9 @@
 %% Creates the html documentation folder doc/
 
 cd('/Users/brainmodulationlab/git')
+rmdir bml/doc s
 m2html('mfiles',{'bml/bml_defaults.m','bml/annot','bml/io','bml/signal','bml/sync','bml/utils'},...
   'htmldir','bml/doc', 'global','on');
-
 
 fid = fopen('bml/info.xml','wt');
 fprintf(fid,[ ... 
