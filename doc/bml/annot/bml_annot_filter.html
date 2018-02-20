@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_filter</title>
+  <meta name="keywords" content="bml_annot_filter">
+  <meta name="description" content="BML_ANNOT_FILTER returns the annots that intersect with the filter">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_filter.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_filter
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_FILTER returns the annots that intersect with the filter</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function filtered = bml_annot_filter(cfg, annot, filter_annot) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_FILTER returns the annots that intersect with the filter
+
+ Use as
+   filtered = bml_annot_filter(cfg, annot, filter_annot);
+   filtered = bml_annot_filter(annot, filter_annot);
+
+ The first argument cfg is a optional configuration structure, which can contain
+ the following optional fields:
+ cfg.overlap - double: fraction of overla required for filter. Defauls 0
+           (touch)
+ cfg.description - string: description of output annotation
+
+ annot, filter - annot tables with fields 'starts' and 'ends'.
+        'filter' should have no overlapping annotations 
+
+ Returns an annotation table with the folloing variables:</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a raw of zeros with ones at annot times</li><li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function filtered = bml_annot_filter(cfg, annot, filter_annot)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_FILTER returns the annots that intersect with the filter</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   filtered = bml_annot_filter(cfg, annot, filter_annot);</span>
+0007 <span class="comment">%   filtered = bml_annot_filter(annot, filter_annot);</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% The first argument cfg is a optional configuration structure, which can contain</span>
+0010 <span class="comment">% the following optional fields:</span>
+0011 <span class="comment">% cfg.overlap - double: fraction of overla required for filter. Defauls 0</span>
+0012 <span class="comment">%           (touch)</span>
+0013 <span class="comment">% cfg.description - string: description of output annotation</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% annot, filter - annot tables with fields 'starts' and 'ends'.</span>
+0016 <span class="comment">%        'filter' should have no overlapping annotations</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Returns an annotation table with the folloing variables:</span>
+0019 
+0020 <span class="keyword">if</span> nargin == 2
+0021   overlap = 0;
+0022   filter_annot=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,<span class="string">'filter_annot'</span>);
+0023   annot=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cfg);
+0024 <span class="keyword">elseif</span> nargin == 3
+0025   overlap = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'overlap'</span>,0);
+0026   annot=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0027   filter_annot=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(filter_annot,<span class="string">'filter_annot'</span>);
+0028 <span class="keyword">else</span>
+0029   error(<span class="string">'use as bml_annot_filter(annot, filter_annot)'</span>);
+0030 <span class="keyword">end</span>
+0031 annot.Properties.Description = <span class="string">'annot'</span>;
+0032 
+0033 <span class="keyword">if</span> isempty(annot)
+0034   <span class="keyword">return</span>
+0035 <span class="keyword">end</span>
+0036 
+0037 intersect = <a href="bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(annot,filter_annot(:,1:4));
+0038 <span class="keyword">if</span> isempty(intersect)
+0039   filtered = table();
+0040   <span class="keyword">return</span>
+0041 <span class="keyword">end</span>
+0042 intersect = intersect(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'annot_id'</span>});
+0043 <span class="keyword">if</span> overlap&gt;0
+0044   cfg=[];
+0045   cfg.criterion = @(x) (length(unique(x.annot_id))==1);
+0046   intersect = <a href="bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg,intersect);
+0047   intersect = intersect(:,{<span class="string">'annot_id'</span>,<span class="string">'cons_duration'</span>});
+0048   intersect.Properties.VariableNames = {<span class="string">'id'</span>,<span class="string">'annot_filter_intersect_duration'</span>};
+0049 
+0050   annot_intersect=join(annot(ismember(annot.id,intersect.id),1:4),intersect);
+0051   duration_ratio = annot_intersect.annot_filter_intersect_duration ./ annot_intersect.duration;
+0052   annot_intersect=annot_intersect((duration_ratio &gt;= overlap) | (isnan(duration_ratio)),:);
+0053 
+0054   filtered = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot(ismember(annot.id,annot_intersect.id),:));
+0055 <span class="keyword">else</span>
+0056   filtered = annot(ismember(annot.id,intersect.annot_id),:);
+0057 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

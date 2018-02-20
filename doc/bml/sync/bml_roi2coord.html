@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_roi2coord</title>
+  <meta name="keywords" content="bml_roi2coord">
+  <meta name="description" content="BML_ROI2COORD calculates raw coordinates for entries in roi">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_roi2coord.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_roi2coord
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ROI2COORD calculates raw coordinates for entries in roi</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function coord = bml_roi2coord(cfg, roi) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ROI2COORD calculates raw coordinates for entries in roi
+
+ Use as
+   coord = bml_roi2coord(roi)
+   coord = bml_roi2coord(cfg, roi)
+
+ roi - roi table with one or several rows for contiguous files (e.g.
+       neuroomega)
+ cfg.timetol - double, time tolerance in seconds, defaults to 1e-3
+
+ returns a coord struct with elements s1, s2, t1, t2, nSamples</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function coord = bml_roi2coord(cfg, roi)</a>
+0002 
+0003 <span class="comment">% BML_ROI2COORD calculates raw coordinates for entries in roi</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   coord = bml_roi2coord(roi)</span>
+0007 <span class="comment">%   coord = bml_roi2coord(cfg, roi)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% roi - roi table with one or several rows for contiguous files (e.g.</span>
+0010 <span class="comment">%       neuroomega)</span>
+0011 <span class="comment">% cfg.timetol - double, time tolerance in seconds, defaults to 1e-3</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% returns a coord struct with elements s1, s2, t1, t2, nSamples</span>
+0014 
+0015 <span class="keyword">if</span> nargin==1
+0016   <span class="keyword">if</span> istable(cfg)
+0017     cfg = struct(<span class="string">'roi'</span>,cfg);
+0018   <span class="keyword">end</span>
+0019 <span class="keyword">elseif</span> nargin~=2
+0020   error(<span class="string">'incorrect number of arguments'</span>);
+0021 <span class="keyword">end</span>
+0022   
+0023 roi      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0024 timetol  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-3);
+0025 
+0026 assert(~isempty(roi),<span class="string">'non-empty roi required'</span>);
+0027 
+0028 roi.filetype_chantype = strcat(roi.filetype,roi.chantype,num2str(roi.Fs));
+0029 assert(length(unique(roi.filetype_chantype))==1,<span class="keyword">...</span>
+0030   <span class="string">'rows in roi belong to files of different type'</span>);
+0031 
+0032 <span class="comment">%detecting contiguos stretches</span>
+0033 cfg=[];
+0034 cfg.criterion = @(x) sum(x.duration)-max(x.ends)+min(x.starts) &lt; height(x)*timetol;
+0035 roi_cont = <a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg,roi);   
+0036 
+0037 assert(height(roi_cont)==1,<span class="string">'files in roi are not time contiguous'</span>);
+0038 
+0039 <span class="keyword">if</span> height(roi)&gt;1
+0040         
+0041   <span class="comment">%calculating raw samples of contiguous file</span>
+0042   cs = cumsum(roi.s2-roi.s1) + roi.s1(1);
+0043   cs = cs + (0:(height(roi)-1))';
+0044   cs = [0; cs(1:end-1)];
+0045   roi.raw1 = roi.s1 + cs;
+0046   roi.raw2 = roi.s2 + cs;
+0047 
+0048   <span class="comment">%doing linear fit to asses if consolidation is plausible</span>
+0049   s = [roi.raw1; roi.raw2];
+0050   t = [roi.t1; roi.t2];
+0051   p = polyfit(s,t,1);
+0052   tfit = polyval(p,s);
+0053 
+0054   <span class="keyword">if</span> max(abs(t - tfit)) &lt;= timetol <span class="comment">%consolidating</span>
+0055     roi.t1 = polyval(p,roi.raw1);
+0056     roi.t2 = polyval(p,roi.raw2);
+0057   <span class="keyword">else</span>  
+0058     warning(<span class="string">'can''t consolidate within tolerance'</span>);
+0059   <span class="keyword">end</span>
+0060 
+0061 <span class="keyword">else</span>
+0062   roi.raw1 = roi.s1;
+0063   roi.raw2 = roi.s2;
+0064 <span class="keyword">end</span>
+0065 
+0066 coord = [];
+0067 coord.s1 = min(roi.raw1);
+0068 coord.s2 = max(roi.raw2);
+0069 coord.t1 = min(roi.t1);
+0070 coord.t2 = max(roi.t2);
+0071 coord.nSamples = sum(roi.raw2 - roi.raw1 + 1);
+0072 
+0073 assert(coord.nSamples == coord.s2 - coord.s1 + 1, <span class="string">'inconsistent coord'</span>);
+0074 
+0075 
+0076 
+0077 
+0078</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

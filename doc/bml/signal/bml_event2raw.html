@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_event2raw</title>
+  <meta name="keywords" content="bml_event2raw">
+  <meta name="description" content="BML_EVENT2RAW creates a raw of zeros with ones at event times">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_event2raw.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_event2raw
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_EVENT2RAW creates a raw of zeros with ones at event times</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function raw = bml_event2raw(cfg, event) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_EVENT2RAW creates a raw of zeros with ones at event times
+
+ Use as
+   raw = bml_event2raw(cfg, event)
+   raw = bml_event2raw(roi, event)
+
+ cfg.roi - roi table: raw is created from s1 to s2
+ cfg.event_type - cells of char: event types selected
+ cfg.sample_type - 'auto' (default'), 'second' or 'sample'. If 'auto', it
+         asumes 'sample' if event.sample is integer, 'second' otherwise. 
+
+ returns a raw</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_roi_confluence.html" class="code" title="function confluent = bml_roi_confluence(cfg)">bml_roi_confluence</a>	BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function raw = bml_event2raw(cfg, event)</a>
+0002 
+0003 <span class="comment">% BML_EVENT2RAW creates a raw of zeros with ones at event times</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   raw = bml_event2raw(cfg, event)</span>
+0007 <span class="comment">%   raw = bml_event2raw(roi, event)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg.roi - roi table: raw is created from s1 to s2</span>
+0010 <span class="comment">% cfg.event_type - cells of char: event types selected</span>
+0011 <span class="comment">% cfg.sample_type - 'auto' (default'), 'second' or 'sample'. If 'auto', it</span>
+0012 <span class="comment">%         asumes 'sample' if event.sample is integer, 'second' otherwise.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% returns a raw</span>
+0015 
+0016 <span class="keyword">if</span> istable(cfg)
+0017   cfg = struct(<span class="string">'roi'</span>,cfg);
+0018 <span class="keyword">end</span>
+0019 roi         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0020 event_type  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'event_type'</span>);
+0021 sample_type = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'sample_type'</span>,<span class="string">'auto'</span>);
+0022 
+0023 <span class="keyword">if</span> strcmp(sample_type,<span class="string">'auto'</span>)
+0024   <span class="keyword">if</span> isinteger([event.sample])
+0025     sample_type = <span class="string">'sample'</span>;
+0026   <span class="keyword">else</span>
+0027     sample_type = <span class="string">'second'</span>;
+0028   <span class="keyword">end</span>
+0029 <span class="keyword">end</span>
+0030 
+0031 <span class="comment">%selecting events</span>
+0032 <span class="keyword">if</span> isempty(event_type)
+0033   event_type = unique({event.type});
+0034 <span class="keyword">else</span>
+0035   event_type = event_type(ismember(event_type,unique({event.type})));
+0036 <span class="keyword">end</span>
+0037 
+0038 <span class="comment">%creating raw</span>
+0039 roi = <a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(<a href="../../bml/annot/bml_roi_confluence.html" class="code" title="function confluent = bml_roi_confluence(cfg)">bml_roi_confluence</a>(roi));
+0040 assert(height(roi)==1,&quot;can't deal with more than one sync chunk after consolidation <span class="keyword">for</span> now&quot;);
+0041 
+0042 raw=[];
+0043 raw.time={<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi,roi.s1:roi.s2)};
+0044 raw.trial={zeros(length(event_type),size(raw.time{1},2))};
+0045 raw.label=event_type;
+0046 raw.fsample=roi.Fs;
+0047 
+0048 <span class="keyword">if</span> strcmp(sample_type,<span class="string">'sample'</span>)
+0049   <span class="keyword">for</span> i=1:length(event_type)
+0050     i_event = event(ismember({event.type},event_type(i)));
+0051     raw.trial{1}(i,[i_event.sample])=1;
+0052   <span class="keyword">end</span>
+0053 <span class="keyword">elseif</span> strcmp(sample_type,<span class="string">'second'</span>)
+0054   <span class="keyword">for</span> i=1:length(event_type)
+0055     i_event = event(ismember({event.type},event_type(i)));
+0056     raw.trial{1}(i,round([i_event.sample].*raw.fsample))=1;
+0057   <span class="keyword">end</span>  
+0058 <span class="keyword">else</span>
+0059   error(&quot;Unknown sample_type <span class="comment">%s&quot;,sample_type);</span>
+0060 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,44 @@
+%% Creates the html documentation folder doc/
+
+cd('..')
+m2html('mfiles',{'bml/bml_defaults.m','bml/annot','bml/io','bml/signal','bml/sync','bml/utils'},...
+  'htmldir','bml/doc', 'global','on');
+
+
+fid = fopen('bml/doc/info.xml','wt');
+fprintf(fid,[ ... 
+'<productinfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance xsi:noNamespaceSchemaLocation="optional">\n'... 
+'<?xml-stylesheet type="text/xsl"href="optional"?>\n'... 
+'<matlabrelease>R2017b</matlabrelease>\n'... 
+'<name>BML</name>\n'... 
+'<type>toolbox</type>\n'... 
+'<icon></icon>\n'... 
+'<help_location>doc</help_location>\n'... 
+'</productinfo>\n'... 
+]);
+fclose(fid);
+
+
+    
+'<?xml version='1.0' encoding="utf-8"?>
+'<toc version="2.0">
+'    <tocitem target="mytoolbox.html">My Toolbox
+        <tocitem target="funclist.html">Functions 
+            <tocitem target="firstfx.html">first</tocitem>
+            <tocitem target="secondfx.html">second</tocitem>
+            <tocitem target="thirdfx.html">third</tocitem>
+        </tocitem>
+        <tocitem target="myexample.html">My Example
+        </tocitem>
+    </tocitem>
+
+</toc>   
+     
+    
+    
+    
+    
+    
+  
+
+

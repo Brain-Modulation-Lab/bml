@@ -17,15 +17,15 @@ end
 
 if iscellstr(element)
   assert(iscellstr(domain),'incompatible elements and domain');  
-  assert(iscellstr(codomain),'incompatible elements and codomain');  
+  %assert(iscellstr(codomain),'incompatible elements and codomain');  
   mapped = cellfun(@(x) codomain(find(strcmp(domain,x),1)),element,'UniformOutput',true);
 elseif iscell(element)
   assert(iscell(domain),'incompatible elements and domain');
-  assert(iscell(codomain),'incompatible elements and codomain');  
+  %assert(iscell(codomain),'incompatible elements and codomain');  
   mapped = cellfun(@(x) codomain(find(domain==x,1)),element,'UniformOutput',true);  
 elseif isnumeric(element)
   assert(isnumeric(domain),'incompatible elements and domain');   
-  assert(isnumeric(codomain),'incompatible elements and codomain');
+  %assert(isnumeric(codomain),'incompatible elements and codomain');
   mapped = arrayfun(@(x) codomain(find(domain==x,1)),element); 
 else 
   error('unknown type for element');

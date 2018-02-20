@@ -26,6 +26,7 @@ assert(~isempty(roi) || ~isempty(template),'cfg.roi or cfg.template required');
 
 %creating raw
 if ~isempty(roi) %from roi
+  roi = bml_sync_consolidate(bml_roi_confluence(roi));
   raw=[];
   raw.time=cell(1,height(roi));
   raw.trial=cell(1,height(roi));

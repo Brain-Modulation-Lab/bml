@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_extend</title>
+  <meta name="keywords" content="bml_annot_extend">
+  <meta name="description" content="BML_ANNOT_EXTEND extends the annotation times">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_extend.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_extend
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_EXTEND extends the annotation times</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function extended = bml_annot_extend(annot,ext1,ext2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_EXTEND extends the annotation times
+
+ Use as
+   extended = bml_annot_extend(annot,ext1,ext2)
+   extended = bml_annot_extend(annot,[ext1,ext2])
+   extended = bml_annot_extend(annot,ext1)
+
+ Positive ext1 extends the begging of the annotation (starts at an earlier
+ time). Negative ext1 contracts the begging, i.e. starts at a later time.
+ Likewise, positive ext2 ext ends the end of the annotation (ends at a later time)
+ and negative ext2 contracts the end (ends at an earlier time).
+
+ If ext2 is not specified, it is set to ext1</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function extended = bml_annot_extend(annot,ext1,ext2)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_EXTEND extends the annotation times</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   extended = bml_annot_extend(annot,ext1,ext2)</span>
+0007 <span class="comment">%   extended = bml_annot_extend(annot,[ext1,ext2])</span>
+0008 <span class="comment">%   extended = bml_annot_extend(annot,ext1)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Positive ext1 extends the begging of the annotation (starts at an earlier</span>
+0011 <span class="comment">% time). Negative ext1 contracts the begging, i.e. starts at a later time.</span>
+0012 <span class="comment">% Likewise, positive ext2 ext ends the end of the annotation (ends at a later time)</span>
+0013 <span class="comment">% and negative ext2 contracts the end (ends at an earlier time).</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% If ext2 is not specified, it is set to ext1</span>
+0016 
+0017 <span class="keyword">if</span> nargin == 2
+0018   <span class="keyword">if</span> length(ext1)==2
+0019     ext2=ext1(2);
+0020     ext1=ext1(1);
+0021   <span class="keyword">elseif</span> length(ext1)==1
+0022     ext2=ext1;
+0023   <span class="keyword">else</span> 
+0024     error(<span class="string">'incorrect call. See usage'</span>)
+0025   <span class="keyword">end</span>
+0026 <span class="keyword">elseif</span> nargin ~= 3
+0027   error(<span class="string">'incorrect call. See usage'</span>)
+0028 <span class="keyword">end</span>
+0029 
+0030 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0031 annot.starts = annot.starts - ext1;
+0032 annot.ends = annot.ends + ext2;
+0033 
+0034 extended = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0035 
+0036 
+0037 
+0038</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

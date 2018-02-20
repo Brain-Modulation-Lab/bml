@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_roi_table</title>
+  <meta name="keywords" content="bml_roi_table">
+  <meta name="description" content="BML_ROI_TABLE transforms a table into an ROI table [internal]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_roi_table.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_roi_table
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ROI_TABLE transforms a table into an ROI table [internal]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function roi=bml_roi_table(x, description, x_var_name) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ROI_TABLE transforms a table into an ROI table [internal]
+
+ Use as
+   annot=bml_roi_table(x)
+   annot=bml_roi_table(x, description)
+   annot=bml_roi_table(x, [], x_var_name)
+
+ ROI or Regions Of Interest are annotations with file coordinates.
+
+ x - table: should contains 'starts','ends','folder','name','nSamples','Fs' 
+ description - string: description of the ROI table
+ x_var_name - string: name of the variable used for the ROI table, as
+     returned by inputname(). Useful for anidated calls.
+
+ returns a table with variables:
+   id: integer identification number of the synchronized file chunk
+   starts: start time in seconds from midnight of the represented signal
+   ends: end time in seconds from midnight of the represented signal
+   duration: duration in seconds as calculated by ends - starts
+   s1: first sample number of synchronization coordinate
+   t1: midpoint time of sample s1. Note that if s1==1 =&gt; t1=starts+0.5/Fs
+   s2: last sample number of synchronization coordinate
+   t2: midpoint time of sample s2. Note that if s2==end =&gt; t2=ends-0.5/Fs
+   folder: path to folder with file
+   name: file name. Note that several each file can have several file
+         chunks, i.e. several rows in this table 
+   nSamples: integer total number of samples of the file
+   filetype: 
+   chantype:</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>	BML_EVENT2ANNOT creates a annot table from a events structure</li><li><a href="bml_plexon2annot.html" class="code" title="function [annot, spike] = bml_plexon2annot(cfg)">bml_plexon2annot</a>	BML_PLEXON2ANNOT loads spike events from plexon file</li><li><a href="bml_roi_confluence.html" class="code" title="function confluent = bml_roi_confluence(cfg)">bml_roi_confluence</a>	BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/io/bml_load_epoched.html" class="code" title="function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)">bml_load_epoched</a>	BML_LOAD_EPOCHED loads an epoched raw from one or more files</li><li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li><li><a href="../../bml/sync/bml_sync_check.html" class="code" title="function bml_sync_check(cfg)">bml_sync_check</a>	BML_SYNC_CHECK loads files in a synchronization roi table into praat</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/sync/bml_sync_neuroomega_event.html" class="code" title="function sync_roi = bml_sync_neuroomega_event(cfg)">bml_sync_neuroomega_event</a>	BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function roi=bml_roi_table(x, description, x_var_name)</a>
+0002 
+0003 <span class="comment">% BML_ROI_TABLE transforms a table into an ROI table [internal]</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot=bml_roi_table(x)</span>
+0007 <span class="comment">%   annot=bml_roi_table(x, description)</span>
+0008 <span class="comment">%   annot=bml_roi_table(x, [], x_var_name)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% ROI or Regions Of Interest are annotations with file coordinates.</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% x - table: should contains 'starts','ends','folder','name','nSamples','Fs'</span>
+0013 <span class="comment">% description - string: description of the ROI table</span>
+0014 <span class="comment">% x_var_name - string: name of the variable used for the ROI table, as</span>
+0015 <span class="comment">%     returned by inputname(). Useful for anidated calls.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% returns a table with variables:</span>
+0018 <span class="comment">%   id: integer identification number of the synchronized file chunk</span>
+0019 <span class="comment">%   starts: start time in seconds from midnight of the represented signal</span>
+0020 <span class="comment">%   ends: end time in seconds from midnight of the represented signal</span>
+0021 <span class="comment">%   duration: duration in seconds as calculated by ends - starts</span>
+0022 <span class="comment">%   s1: first sample number of synchronization coordinate</span>
+0023 <span class="comment">%   t1: midpoint time of sample s1. Note that if s1==1 =&gt; t1=starts+0.5/Fs</span>
+0024 <span class="comment">%   s2: last sample number of synchronization coordinate</span>
+0025 <span class="comment">%   t2: midpoint time of sample s2. Note that if s2==end =&gt; t2=ends-0.5/Fs</span>
+0026 <span class="comment">%   folder: path to folder with file</span>
+0027 <span class="comment">%   name: file name. Note that several each file can have several file</span>
+0028 <span class="comment">%         chunks, i.e. several rows in this table</span>
+0029 <span class="comment">%   nSamples: integer total number of samples of the file</span>
+0030 <span class="comment">%   filetype:</span>
+0031 <span class="comment">%   chantype:</span>
+0032 
+0033 REQUIRED_VARS = {<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>};
+0034 RETURNED_VARS = {<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'s1'</span>,<span class="string">'t1'</span>,<span class="string">'s2'</span>,<span class="string">'t2'</span>,<span class="keyword">...</span>
+0035                 <span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'filetype'</span>,<span class="string">'chantype'</span>};
+0036 
+0037 assert(istable(x),&quot;Table required as first argument&quot;);              
+0038               
+0039 <span class="keyword">if</span> ~exist(<span class="string">'description'</span>,<span class="string">'var'</span>) || isempty(description)
+0040   <span class="keyword">if</span> isempty(x.Properties.Description)
+0041     <span class="keyword">if</span> exist(<span class="string">'x_var_name'</span>,<span class="string">'var'</span>)
+0042       description=x_var_name;
+0043     <span class="keyword">else</span>
+0044       description=inputname(1);
+0045     <span class="keyword">end</span>
+0046   <span class="keyword">else</span>
+0047     description=x.Properties.Description;
+0048   <span class="keyword">end</span>
+0049 <span class="keyword">end</span>
+0050 
+0051 roi=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(x,description);
+0052 
+0053 <span class="keyword">if</span> ~all(ismember(REQUIRED_VARS, roi.Properties.VariableNames))
+0054   error([<span class="string">'table ''x'' requires variables '</span> strjoin(REQUIRED_VARS,<span class="string">', '</span>)])
+0055 <span class="keyword">end</span>
+0056 
+0057 <span class="keyword">if</span> ~all(ismember({<span class="string">'s1'</span>,<span class="string">'t1'</span>}, roi.Properties.VariableNames))
+0058   roi.s1=ones(height(roi),1);
+0059   roi.t1=roi.starts + 0.5 ./ roi.Fs;
+0060 <span class="keyword">end</span>
+0061 <span class="keyword">if</span> ~all(ismember({<span class="string">'s2'</span>,<span class="string">'t2'</span>}, roi.Properties.VariableNames))
+0062   roi.s2=roi.nSamples;
+0063   roi.t2=roi.ends - 0.5 ./ roi.Fs;
+0064 <span class="keyword">end</span>
+0065 
+0066 <span class="keyword">if</span> ~ismember(<span class="string">'chantype'</span>, roi.Properties.VariableNames)
+0067   roi.chantype=repmat({<span class="string">'all'</span>},height(roi),1);
+0068 <span class="keyword">end</span>
+0069 
+0070 <span class="keyword">if</span> ~ismember(<span class="string">'filetype'</span>, roi.Properties.VariableNames)
+0071   <span class="comment">%ToDo should probably identify filetype from filename</span>
+0072   roi.chantype=repmat({<span class="string">'unknown'</span>},height(roi),1);
+0073 <span class="keyword">end</span>
+0074 roi = bml_annot_reorder_vars(roi, RETURNED_VARS);</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

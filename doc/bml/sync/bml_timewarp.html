@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_timewarp</title>
+  <meta name="keywords" content="bml_timewarp">
+  <meta name="description" content="BML_TIMEWARP aligns and linearly warps slave to master">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_timewarp.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_timewarp
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_TIMEWARP aligns and linearly warps slave to master</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function warpedcoords = bml_timewarp(cfg, master, slave) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_TIMEWARP aligns and linearly warps slave to master 
+
+ Use as
+   warpedcoords = bml_timealign(master, slave)
+   warpedcoords = bml_timealign(cfg, master, slave)
+   
+ This function first aligns slave to master by calling BML_TIMEALIGN and
+ then applies a constrained linear time-warp to slave, in order to
+ maximize the correlation with master. The time-warping is done with the
+ raws pre-processed by BML_TIMEALIGN.
+
+ The time-warping is done by optimizing the cost function below using
+ the 'simplex' method
+
+ w(t) = wt0 + pivot_time + (t - pivot_time) ws1
+ s = f(w(t))
+ cost = -s*p/sqrt(s*s p*p) + (wt0/penalty_wt0)^2 + ((ws1-1)/penalty_ws1)^4
+
+ where pivot_time is the midpoint of the intersection of master and
+ slave after initial alignment, f(t) is a interpolation function
+ constructed from the slave's data and time points (after alingment) and 
+ '*' is the dot product .
+ wt0 and ws1 are the time shifting and stretching paramenters,
+ respectiveley. penalty_wt0 and penalty_ws1 are used to constrain their
+ value by adding a penalty cost. penalty_wt0 is set to the max between
+ penalty_wt0_min and abs(ws1-1)*duration to avoid the optimization 
+ algorithm to missalign the signals in the first iterations.
+
+ Parameters
+ ----------
+ cfg is a configuration structure
+ see BML_TIMEALIGN parameters
+ cfg.penalty_wt0_min - double: see details above. Defaults to 1e-6. 
+ cfg.penalty_ws1 - double: see details above. Defaults to 1e-3. 
+ cfg.timewarp - logical: defaults to true. If false no warping is done
+
+ master - FT_DATATYPE_RAW continuous with single channel and trial
+ slave - FT_DATATYPE_RAW continuous with single channel and trial
+
+ Returns
+ -------
+ warpedcoords structure with fields
+ warpedcoords.s1 - integer: first coordinate sample
+ warpedcoords.t1 - double: first coordinate time in seconds
+ warpedcoords.s2 - integer: second coordinate sample
+ warpedcoords.t2 - double: second coordinate time in seconds
+ warpedcoords.wt0 - double: fitted parameter
+ warpedcoords.ws1 - double: fitted parameter</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function cost = costfun(param)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function warpedcoords = bml_timewarp(cfg, master, slave)</a>
+0002 
+0003   <span class="comment">% BML_TIMEWARP aligns and linearly warps slave to master</span>
+0004   <span class="comment">%</span>
+0005   <span class="comment">% Use as</span>
+0006   <span class="comment">%   warpedcoords = bml_timealign(master, slave)</span>
+0007   <span class="comment">%   warpedcoords = bml_timealign(cfg, master, slave)</span>
+0008   <span class="comment">%</span>
+0009   <span class="comment">% This function first aligns slave to master by calling BML_TIMEALIGN and</span>
+0010   <span class="comment">% then applies a constrained linear time-warp to slave, in order to</span>
+0011   <span class="comment">% maximize the correlation with master. The time-warping is done with the</span>
+0012   <span class="comment">% raws pre-processed by BML_TIMEALIGN.</span>
+0013   <span class="comment">%</span>
+0014   <span class="comment">% The time-warping is done by optimizing the cost function below using</span>
+0015   <span class="comment">% the 'simplex' method</span>
+0016   <span class="comment">%</span>
+0017   <span class="comment">% w(t) = wt0 + pivot_time + (t - pivot_time) ws1</span>
+0018   <span class="comment">% s = f(w(t))</span>
+0019   <span class="comment">% cost = -s*p/sqrt(s*s p*p) + (wt0/penalty_wt0)^2 + ((ws1-1)/penalty_ws1)^4</span>
+0020   <span class="comment">%</span>
+0021   <span class="comment">% where pivot_time is the midpoint of the intersection of master and</span>
+0022   <span class="comment">% slave after initial alignment, f(t) is a interpolation function</span>
+0023   <span class="comment">% constructed from the slave's data and time points (after alingment) and</span>
+0024   <span class="comment">% '*' is the dot product .</span>
+0025   <span class="comment">% wt0 and ws1 are the time shifting and stretching paramenters,</span>
+0026   <span class="comment">% respectiveley. penalty_wt0 and penalty_ws1 are used to constrain their</span>
+0027   <span class="comment">% value by adding a penalty cost. penalty_wt0 is set to the max between</span>
+0028   <span class="comment">% penalty_wt0_min and abs(ws1-1)*duration to avoid the optimization</span>
+0029   <span class="comment">% algorithm to missalign the signals in the first iterations.</span>
+0030   <span class="comment">%</span>
+0031   <span class="comment">% Parameters</span>
+0032   <span class="comment">% ----------</span>
+0033   <span class="comment">% cfg is a configuration structure</span>
+0034   <span class="comment">% see BML_TIMEALIGN parameters</span>
+0035   <span class="comment">% cfg.penalty_wt0_min - double: see details above. Defaults to 1e-6.</span>
+0036   <span class="comment">% cfg.penalty_ws1 - double: see details above. Defaults to 1e-3.</span>
+0037   <span class="comment">% cfg.timewarp - logical: defaults to true. If false no warping is done</span>
+0038   <span class="comment">%</span>
+0039   <span class="comment">% master - FT_DATATYPE_RAW continuous with single channel and trial</span>
+0040   <span class="comment">% slave - FT_DATATYPE_RAW continuous with single channel and trial</span>
+0041   <span class="comment">%</span>
+0042   <span class="comment">% Returns</span>
+0043   <span class="comment">% -------</span>
+0044   <span class="comment">% warpedcoords structure with fields</span>
+0045   <span class="comment">% warpedcoords.s1 - integer: first coordinate sample</span>
+0046   <span class="comment">% warpedcoords.t1 - double: first coordinate time in seconds</span>
+0047   <span class="comment">% warpedcoords.s2 - integer: second coordinate sample</span>
+0048   <span class="comment">% warpedcoords.t2 - double: second coordinate time in seconds</span>
+0049   <span class="comment">% warpedcoords.wt0 - double: fitted parameter</span>
+0050   <span class="comment">% warpedcoords.ws1 - double: fitted parameter</span>
+0051   
+0052   <span class="keyword">if</span> nargin == 2
+0053     slave = master;
+0054     master = cfg;
+0055     cfg = [];
+0056   <span class="keyword">elseif</span> nargin ~=3
+0057     error(<span class="string">'incorrect number of arguments'</span>);
+0058   <span class="keyword">end</span>
+0059   
+0060   penalty_wt0_min   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'penalty_wt0_min'</span>, 60);
+0061   penalty_ws1       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'penalty_ws1'</span>, 1e-3); 
+0062   timewarp          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timewarp'</span>, true); 
+0063 
+0064   mc=[]; sc=[]; <span class="comment">%original master and slave time coordinates</span>
+0065   mc.s1=1; mc.s2=length(master.time{1});
+0066   mc.t1=master.time{1}(1); mc.t2=master.time{1}(end);
+0067   sc.s1=1; sc.s2=length(slave.time{1});
+0068   sc.t1=slave.time{1}(1); sc.t2=slave.time{1}(end);  
+0069   
+0070   <span class="comment">%aligning and transforming raws</span>
+0071   [slave_delta_t, ~, master, slave] = <a href="bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>(cfg, master, slave);
+0072   sc.t1 = sc.t1 + slave_delta_t; sc.t2 = sc.t2 + slave_delta_t;
+0073   
+0074   <span class="comment">%calculating pivot time</span>
+0075   ovlp = [max(mc.t1,sc.t1),min(sc.t2,sc.t2)];
+0076   pivot_time = mean(ovlp);
+0077 
+0078   <span class="comment">%saving cropped start and end indices of original slave raw</span>
+0079   crop_sc=[]; <span class="comment">%cropped slave coordinates</span>
+0080   [crop_sc.s1, crop_sc.s2]=<a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(sc,ovlp(1),ovlp(2));
+0081   crop_sc.t1=<a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(sc,crop_sc.s1);
+0082   crop_sc.t2=<a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(sc,crop_sc.s2);
+0083   
+0084   <span class="comment">%cropping raws to overlap region</span>
+0085   master = <a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(master, ovlp(1), ovlp(2));
+0086   slave = <a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave, ovlp(1), ovlp(2));
+0087   ovlp_duration = ovlp(2) - ovlp(1);
+0088   
+0089   <span class="comment">%linear warping - wt0, ws1</span>
+0090   f = @(t) interp1(slave.time{1}(1,:),slave.trial{1}(1,:),t,<span class="string">'PCHIP'</span>,0);
+0091   p = master.trial{1}(1,:);
+0092   t = master.time{1}(1,:);
+0093   s0 = f(t);
+0094   dot0 = sqrt(dot(s0,s0) * dot(p,p)); 
+0095   
+0096   <a name="_sub1" href="#_subfunctions" class="code">function cost = costfun(param) </a><span class="comment">% [wt0, ws1]</span>
+0097     s = f(param(1) + pivot_time + (t - pivot_time) .* param(2));
+0098     penalty_wt0_dur = max([penalty_wt0_min, ovlp_duration*abs(param(2)-1)]);
+0099     cost = -dot(s,p)/dot0 + (param(1)/penalty_wt0_dur)^2 + ((param(2)-1)/penalty_ws1)^4;
+0100   <span class="keyword">end</span>
+0101 
+0102   wt0=0; ws1=1;
+0103   <span class="keyword">if</span> timewarp
+0104     fited=fminsearch(@<a href="#_sub1" class="code" title="subfunction cost = costfun(param) ">costfun</a>,[wt0,ws1]);
+0105     wt0=fited(1); ws1=fited(2);
+0106   <span class="keyword">end</span>
+0107   
+0108   warpedcoords=[];
+0109   warpedcoords.t1 = pivot_time - wt0 - (1/ws1)*(crop_sc.t2 - crop_sc.t1)/2;
+0110   warpedcoords.t2 = pivot_time - wt0 + (1/ws1)*(crop_sc.t2 - crop_sc.t1)/2;
+0111   warpedcoords.s1 = crop_sc.s1;
+0112   warpedcoords.s2 = crop_sc.s2;
+0113   warpedcoords.wt0 = wt0;
+0114   warpedcoords.ws1 = ws1;
+0115 
+0116 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_getidx</title>
+  <meta name="keywords" content="bml_getidx">
+  <meta name="description" content="BML_GETIDX gets the first indices of the elements in the domain">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">utils</a> &gt; bml_getidx.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/utils&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_getidx
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_GETIDX gets the first indices of the elements in the domain</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function idx = bml_getidx(element,collection) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_GETIDX gets the first indices of the elements in the domain
+
+ Use as
+   idx = bml_getidx(element,collection)
+
+ index 0 for elements not found
+
+ Use as
+   index = bml_get_index(element,collection)
+
+ elements - array or cell
+ domain - collection of elements from where to extract the index
+
+ returns an array of natural indices</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/io/bml_load_epoched.html" class="code" title="function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)">bml_load_epoched</a>	BML_LOAD_EPOCHED loads an epoched raw from one or more files</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function y = zero_if_empty(x)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function idx = bml_getidx(element,collection)</a>
+0002 
+0003 <span class="comment">% BML_GETIDX gets the first indices of the elements in the domain</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   idx = bml_getidx(element,collection)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% index 0 for elements not found</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Use as</span>
+0011 <span class="comment">%   index = bml_get_index(element,collection)</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% elements - array or cell</span>
+0014 <span class="comment">% domain - collection of elements from where to extract the index</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% returns an array of natural indices</span>
+0017 
+0018   <span class="keyword">if</span> ischar(element)
+0019     element = {element};
+0020   <span class="keyword">end</span>
+0021 
+0022   <span class="keyword">if</span> iscellstr(element)
+0023     assert(iscellstr(collection),<span class="string">'incompatible elements and collection'</span>);  
+0024     idx = cellfun(@(x) <a href="#_sub1" class="code" title="subfunction y = zero_if_empty(x)">zero_if_empty</a>(find(strcmp(collection,x),1)),element,<span class="string">'UniformOutput'</span>,true);
+0025   <span class="keyword">elseif</span> iscell(element)
+0026     assert(iscell(collection),<span class="string">'incompatible elements and collection'</span>);
+0027     idx = cellfun(@(x) <a href="#_sub1" class="code" title="subfunction y = zero_if_empty(x)">zero_if_empty</a>(find(collection==x,1)),element,<span class="string">'UniformOutput'</span>,true);  
+0028   <span class="keyword">elseif</span> isnumeric(element)
+0029     assert(isnumeric(collection),<span class="string">'incompatible elements and collection'</span>);   
+0030     idx = arrayfun(@(x) <a href="#_sub1" class="code" title="subfunction y = zero_if_empty(x)">zero_if_empty</a>(find(collection==x,1)),element); 
+0031   <span class="keyword">else</span> 
+0032     error(<span class="string">'unknown type for element'</span>);
+0033   <span class="keyword">end</span>
+0034 
+0035   <span class="keyword">if</span> size(idx,1) &gt; size(idx,2)
+0036     idx = idx';
+0037   <span class="keyword">end</span>
+0038 <span class="keyword">end</span>
+0039 
+0040 <a name="_sub1" href="#_subfunctions" class="code">function y = zero_if_empty(x)</a>
+0041   <span class="keyword">if</span> isempty(x)
+0042     y = 0;
+0043   <span class="keyword">else</span>
+0044     y = x;
+0045   <span class="keyword">end</span>
+0046 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

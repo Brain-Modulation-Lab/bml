@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_defaults</title>
+  <meta name="keywords" content="bml_defaults">
+  <meta name="description" content="BML_DEFAULTS loads requried directories to Matlab's path">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">bml</a> &gt; bml_defaults.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>bml_defaults
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>BML_DEFAULTS loads requried directories to Matlab's path</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function bml_defaults </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_DEFAULTS loads requried directories to Matlab's path</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bml_defaults</a>
+0002 
+0003 <span class="comment">% BML_DEFAULTS loads requried directories to Matlab's path</span>
+0004 
+0005 BML_FOLDERS = {<span class="string">'signal'</span>,<span class="string">'annot'</span>,<span class="string">'sync'</span>,<span class="string">'io'</span>,<span class="string">'utils'</span>};
+0006 
+0007 bmlPath = fileparts(mfilename(<span class="string">'fullpath'</span>)); <span class="comment">% get the full path to this function, strip away 'ft_defaults'</span>
+0008 <span class="comment">%bmlPath = strrep(bmlPath, '\', '\\');</span>
+0009 
+0010 <span class="keyword">for</span> i=1:numel(BML_FOLDERS)
+0011   i_path = [bmlPath filesep BML_FOLDERS{i}];
+0012   <span class="keyword">if</span> isempty(regexp(path, i_path, <span class="string">'once'</span>))
+0013     addpath(i_path);
+0014   <span class="keyword">end</span>
+0015 <span class="keyword">end</span>
+0016 
+0017 format long;</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_detect</title>
+  <meta name="keywords" content="bml_annot_detect">
+  <meta name="description" content="BML_ANNOT_DETECT identifies annotations thresholding an envelope signal">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_detect.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_detect
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_DETECT identifies annotations thresholding an envelope signal</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function annot = bml_annot_detect(cfg, env) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_DETECT identifies annotations thresholding an envelope signal
+
+ Use as
+   annot = bml_annot_detect(cfg, raw)
+
+ cfg.threshold - double len 1 or 2: lower/upper threshold for the segmentation
+ cfg.max_annots - integer: maximun number of regions of interest in a
+       envelope
+
+ returns an annotation table</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/sync/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_detect(cfg, env)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_DETECT identifies annotations thresholding an envelope signal</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_annot_detect(cfg, raw)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% cfg.threshold - double len 1 or 2: lower/upper threshold for the segmentation</span>
+0009 <span class="comment">% cfg.max_annots - integer: maximun number of regions of interest in a</span>
+0010 <span class="comment">%       envelope</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% returns an annotation table</span>
+0013 
+0014 max_annots        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'max_annots'</span>, inf);
+0015 threshold         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'threshold'</span>);
+0016 <span class="keyword">if</span> ~isempty(threshold)
+0017   assert(length(threshold)&lt;=2,&quot;threshold should be of length 1 or 2&quot;);
+0018   lower_threshold = threshold(1);
+0019   upper_threshold = threshold(end);
+0020 <span class="keyword">else</span>
+0021   lower_threshold = [];
+0022   upper_threshold = [];
+0023 <span class="keyword">end</span>
+0024 upper_threshold   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'upper_threshold'</span>, upper_threshold);
+0025 lower_threshold   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'lower_threshold'</span>, lower_threshold);
+0026 assert(~isempty(upper_threshold) &amp; ~isempty(lower_threshold),&quot;cfg.threshold required&quot;);
+0027 
+0028 assert(numel(env.label)==1,&quot;One channel in env expected <span class="keyword">for</span> detection&quot;);
+0029 
+0030 annot = table();
+0031 <span class="keyword">for</span> i=1:numel(env.trial)
+0032   i_env = ft_selectdata(struct(<span class="string">'trial'</span>,i,<span class="string">'feedback'</span>,<span class="string">'no'</span>), env);
+0033   env_coord = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(i_env);
+0034   
+0035   zero_cross_ixs = find(abs(diff(sign(env.trial{i}-lower_threshold)))&gt;=1);
+0036   reset_value=min([min(env.trial{i}),0]);
+0037   search_detect = true;
+0038   loop_count = 0;
+0039   <span class="keyword">while</span> search_detect
+0040       loop_count = loop_count + 1;
+0041     [env_max, env_max_ix] = max(env.trial{i});       
+0042     assert(loop_count &lt;= max_annots, &quot;More annots detected than max_annots&quot;);
+0043         
+0044     <span class="keyword">if</span> env_max &gt; upper_threshold
+0045         <span class="comment">%finding start and end of current annot</span>
+0046       <span class="keyword">if</span> isempty(zero_cross_ixs)
+0047         starts = env.time{i}(1)-0.5/env.fsample;
+0048         ends = env.time{i}(end)+0.5/env.fsample;
+0049       <span class="keyword">elseif</span> env_max_ix &lt;= zero_cross_ixs(1)
+0050         starts = env.time{i}(1)-0.5/env.fsample;
+0051         ends = env.time{i}(zero_cross_ixs(1))+0.5/env.fsample;
+0052       <span class="keyword">elseif</span> env_max_ix &gt; zero_cross_ixs(end)
+0053           starts = env.time{i}(zero_cross_ixs(end))-0.5/env.fsample;
+0054         ends = env.time{i}(end)+0.5/env.fsample;
+0055       <span class="keyword">else</span>
+0056           zc_ix = find(diff(sign(zero_cross_ixs-env_max_ix)),1);
+0057         starts = env.time{i}(zero_cross_ixs(zc_ix))-0.5/env.fsample;
+0058         ends = env.time{i}(zero_cross_ixs(zc_ix+1))+0.5/env.fsample;
+0059       <span class="keyword">end</span>
+0060             
+0061       overlaps = false;
+0062       <span class="keyword">for</span> j=1:height(annot)
+0063         row = annot(j,:);
+0064         <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
+0065           overlaps = true;
+0066         <span class="keyword">end</span>
+0067       <span class="keyword">end</span>
+0068       <span class="keyword">if</span> ~overlaps
+0069         annot = [annot; table(starts,ends,env_max,i)];
+0070       <span class="keyword">end</span>
+0071       [s,e] = <a href="../../bml/sync/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(env_coord,starts,ends);
+0072       env.trial{i}(1,s:e)=reset_value;
+0073     <span class="keyword">else</span>
+0074         search_detect = false;
+0075     <span class="keyword">end</span>
+0076   <span class="keyword">end</span>
+0077 <span class="keyword">end</span>
+0078 
+0079 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

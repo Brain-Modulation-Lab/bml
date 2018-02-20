@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_idx2time</title>
+  <meta name="keywords" content="bml_idx2time">
+  <meta name="description" content="BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_idx2time.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_idx2time
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function time=bml_idx2time(cfg, idx, skipFactor) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates
+
+ Use as 
+   time=bml_idx2time(cfg, idx)
+   time=bml_idx2time(cfg, idx, skipFactor)
+
+ idx - numeric vector of indices to transform to time
+ skipFactor - numeric, integer indicating skip factor as used by blackrock
+     NPMK package. Defaults to 1.
+
+ where cfg is a configuration structure or roi table 
+ cfg.t1
+ cfg.s1
+ cfg.t2
+ cfg.s2
+ cfg.nSamples - double: optional total number of samples in file
+
+ if cfg has more than one row, (s1, s2) should be non-overlaping</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>	BML_ANNOT_OVERLAP calculates overlapping segments between annotations</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a raw of zeros with ones at annot times</li><li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li><li><a href="../../bml/annot/bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>	BML_EVENT2ANNOT creates a annot table from a events structure</li><li><a href="../../bml/annot/bml_plexon2annot.html" class="code" title="function [annot, spike] = bml_plexon2annot(cfg)">bml_plexon2annot</a>	BML_PLEXON2ANNOT loads spike events from plexon file</li><li><a href="../../bml/annot/bml_roi_confluence.html" class="code" title="function confluent = bml_roi_confluence(cfg)">bml_roi_confluence</a>	BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_event2raw.html" class="code" title="function raw = bml_event2raw(cfg, event)">bml_event2raw</a>	BML_EVENT2RAW creates a raw of zeros with ones at event times</li><li><a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>	BML_PAD returns a padded version of the raw (crops if necessary)</li><li><a href="bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li><li><a href="bml_sync_transfer_neuroomega_chantype.html" class="code" title="function sync = bml_sync_transfer_neuroomega_chantype(cfg)">bml_sync_transfer_neuroomega_chantype</a>	BML_SYNC_TRANSFER_NEUROOMEGA_CHANTYPE transfer sync info from one chantype to another</li><li><a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function time=bml_idx2time(cfg, idx, skipFactor)</a>
+0002 
+0003 <span class="comment">% BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   time=bml_idx2time(cfg, idx)</span>
+0007 <span class="comment">%   time=bml_idx2time(cfg, idx, skipFactor)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% idx - numeric vector of indices to transform to time</span>
+0010 <span class="comment">% skipFactor - numeric, integer indicating skip factor as used by blackrock</span>
+0011 <span class="comment">%     NPMK package. Defaults to 1.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% where cfg is a configuration structure or roi table</span>
+0014 <span class="comment">% cfg.t1</span>
+0015 <span class="comment">% cfg.s1</span>
+0016 <span class="comment">% cfg.t2</span>
+0017 <span class="comment">% cfg.s2</span>
+0018 <span class="comment">% cfg.nSamples - double: optional total number of samples in file</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% if cfg has more than one row, (s1, s2) should be non-overlaping</span>
+0021 
+0022 pTT = 9; <span class="comment">%pTT = pTimeTolerenace = - log10(timetol)</span>
+0023 
+0024 <span class="keyword">if</span> nargin==2
+0025   skipFactor=1;
+0026 <span class="keyword">elseif</span> nargin==3
+0027   skipFactor=round(skipFactor);
+0028 <span class="keyword">else</span>
+0029   error(<span class="string">'unsupported call to bml_idx2time, see usage'</span>);
+0030 <span class="keyword">end</span>
+0031 
+0032 <span class="keyword">if</span> istable(cfg)
+0033   <span class="keyword">if</span> height(cfg) &gt; 1
+0034     <span class="comment">%dealing with split sync</span>
+0035     assert(isempty(<a href="../../bml/annot/bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>(cfg(:,{<span class="string">'s1'</span>,<span class="string">'s2'</span>}))),<span class="keyword">...</span>
+0036       &quot;cfg table contains overlapping segments of samples&quot;);
+0037     
+0038     time = zeros(1,length(idx));
+0039     <span class="keyword">for</span> i=1:height(cfg)
+0040       t1=round(cfg.t1(i),pTT);
+0041       s1=cfg.s1(i);
+0042       t2=round(cfg.t2(i),pTT);
+0043       s2=cfg.s2(i);
+0044       Fs=round((s2-s1)/round(t2-t1,pTT),pTT,<span class="string">'significat'</span>);  
+0045       <span class="keyword">if</span> skipFactor &gt; 1
+0046         s1=ceil(s1/skipFactor);
+0047         s2=floor(s2/skipFactor);
+0048         t1=t1+(skipFactor-1)*0.5/Fs;
+0049         t2=t2-(skipFactor-1)*0.5/Fs;
+0050         Fs = round((s2-s1)/round(t2-t1,pTT),pTT,<span class="string">'significat'</span>);  
+0051       <span class="keyword">end</span>
+0052       idx_filt = idx&gt;=s1 &amp; idx&lt;=s2;
+0053       time(idx_filt) = double(idx(idx_filt))/Fs - 0.5/Fs + (s2*t1-t2*s1)/(s2-s1);
+0054     <span class="keyword">end</span>
+0055     <span class="keyword">return</span>
+0056   <span class="keyword">end</span>
+0057   cfg=table2struct(cfg);
+0058 <span class="keyword">end</span>
+0059   
+0060 <span class="comment">%dealing with simple sync</span>
+0061 t1=round(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t1'</span>),pTT);
+0062 s1=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'s1'</span>);
+0063 t2=round(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t2'</span>),pTT);
+0064 s2=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'s2'</span>);
+0065 Fs = round((s2-s1)/round(t2-t1,pTT),pTT,<span class="string">'significant'</span>); 
+0066 <span class="keyword">if</span> skipFactor &gt; 1
+0067   s1=ceil(s1/skipFactor);
+0068   s2=floor(s2/skipFactor);
+0069   t1=t1+(skipFactor-1)*0.5/Fs;
+0070   t2=t2-(skipFactor-1)*0.5/Fs;
+0071   Fs = round((s2-s1)/round(t2-t1,pTT),pTT,<span class="string">'significant'</span>);
+0072 <span class="keyword">end</span>
+0073  
+0074 time = double(idx)/Fs - 0.5/Fs + (s2*t1-t2*s1)/(s2-s1);</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

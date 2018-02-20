@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_envelope_binabs</title>
+  <meta name="keywords" content="bml_envelope_binabs">
+  <meta name="description" content="BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_envelope_binabs.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_envelope_binabs
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function env = bml_envelope_binabs(cfg, data) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method
+
+ The envelope is calculated as the maximum of the absolute value in
+ bins of 'bin_size' samples. 
+
+ Use as
+   env = bml_envelope_binabs(data)
+   env = bml_envelope_binabs(cfg, data)
+
+ cfg is a configureation struct with the following fields
+ cfg.freq - integer: intended output sampling frequency (default 100Hz)
+ cfg.bin_size - integer: size of the bin. If given overwrites cfg.target_fsample
+
+ data - FT_DATATYPE_RAW
+ 
+ Returns a FT_DATATYPE_RAW</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function env = bml_envelope_binabs(cfg, data)</a>
+0002 
+0003 <span class="comment">% BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% The envelope is calculated as the maximum of the absolute value in</span>
+0006 <span class="comment">% bins of 'bin_size' samples.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Use as</span>
+0009 <span class="comment">%   env = bml_envelope_binabs(data)</span>
+0010 <span class="comment">%   env = bml_envelope_binabs(cfg, data)</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% cfg is a configureation struct with the following fields</span>
+0013 <span class="comment">% cfg.freq - integer: intended output sampling frequency (default 100Hz)</span>
+0014 <span class="comment">% cfg.bin_size - integer: size of the bin. If given overwrites cfg.target_fsample</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% data - FT_DATATYPE_RAW</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Returns a FT_DATATYPE_RAW</span>
+0019 
+0020 DEFAULT_TARGET_FSAMPLE=100;
+0021 
+0022 <span class="keyword">if</span> nargin==1
+0023   data=cfg;
+0024   cfg=[];
+0025 <span class="keyword">end</span>
+0026 
+0027 <span class="keyword">if</span> ~ismember(<span class="string">'fsample'</span>,fields(data))
+0028     data.fsample = round(1/mean(diff(data.time{1})),9,<span class="string">'significant'</span>);
+0029 <span class="keyword">end</span>
+0030 
+0031 freq            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'freq'</span>,DEFAULT_TARGET_FSAMPLE);
+0032 bin_size        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'bin_size'</span>,round(data.fsample/freq));
+0033     
+0034 <span class="keyword">if</span> abs(data.fsample/freq - bin_size) &gt; 0.1
+0035   warning(char(strcat(<span class="string">'Specified envelope freq '</span>,num2str(freq),<span class="string">' not possible. Using '</span>,num2str(data.fsample/bin_size))));
+0036 <span class="keyword">end</span>
+0037 
+0038 env=struct();
+0039 env.trial={};
+0040 env.time={};
+0041 
+0042 <span class="keyword">for</span> i=1:numel(data.trial)
+0043   
+0044     n_bins=floor(size(data.trial{i},2)./bin_size);
+0045   
+0046   T = data.trial{i};
+0047   t = data.time{i};
+0048   
+0049   env.trial{i} = reshape(max(<span class="keyword">...</span>
+0050         reshape(abs(T(:,1:n_bins*bin_size)),[size(T,1), bin_size, n_bins]),<span class="keyword">...</span>
+0051       [],2),<span class="keyword">...</span>
+0052     [size(T,1) n_bins]);
+0053   
+0054     env.time{i} = mean(reshape(t(1:n_bins*bin_size),[bin_size, n_bins]),1);
+0055   
+0056 <span class="keyword">end</span>
+0057 
+0058 env.fsample = data.fsample/bin_size;
+0059 env.label = data.label;
+0060 
+0061 env.cfg = struct();
+0062 env.cfg.envelope = &quot;binabs&quot;;
+0063 env.cfg.bin_size = bin_size;
+0064 env.cfg.previous = data.cfg;
+0065 
+0066 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fieldnames(data))
+0067   env.hdr = data.hdr;
+0068 <span class="keyword">end</span>
+0069 
+0070</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

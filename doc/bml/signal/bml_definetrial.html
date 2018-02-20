@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_definetrial</title>
+  <meta name="keywords" content="bml_definetrial">
+  <meta name="description" content="BML_DEFINETRIAL transforms a continuous raw into a trialed raw">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_definetrial.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_definetrial
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_DEFINETRIAL transforms a continuous raw into a trialed raw</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function trl_raw = bml_definetrial(cfg,raw) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_DEFINETRIAL transforms a continuous raw into a trialed raw 
+
+ Use as
+   trl_raw = bml_definetrial(cfg,raw)
+   trl_raw = bml_definetrial(cfg.annot,raw)
+
+ raw - continuous raw file, with time consistent with annot stars/ends
+
+ cfg.annot - annotation table
+ cfg.fixsamples - number of samples for each trial, or 
+       false to allow different length trials, or
+       'auto' to use fixsamples if duration of all annots is the same 
+ cfg.trial_t0 - defines the time reference for the trials
+       if false, the same time reference for all files is maintained
+       if true each trial gets its own time reference, at the begging of the trial
+       if char or cellstr or string, it is used to select a variable from 
+         annot to use as time reference for each trial
+       if table or numeric, and length matched trials, these values are
+         used as time reference for each trial
+ cfg.equalize_times - logical. if true times all trials get the same time vector
+       defaults to true if duration of all annots is the same and trial_t0
+       is not false
+ cfg.timetol - double. time tolerance in seconds. Defaults to 1e-6
+
+ returns a FT_DATATYPE_RAW with the trials defined by cfg.annot</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>	BML_TIME2IDX calculates sample indices from a time vector and file coordinates</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function trl_raw = bml_definetrial(cfg,raw)</a>
+0002 
+0003 <span class="comment">% BML_DEFINETRIAL transforms a continuous raw into a trialed raw</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   trl_raw = bml_definetrial(cfg,raw)</span>
+0007 <span class="comment">%   trl_raw = bml_definetrial(cfg.annot,raw)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% raw - continuous raw file, with time consistent with annot stars/ends</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% cfg.annot - annotation table</span>
+0012 <span class="comment">% cfg.fixsamples - number of samples for each trial, or</span>
+0013 <span class="comment">%       false to allow different length trials, or</span>
+0014 <span class="comment">%       'auto' to use fixsamples if duration of all annots is the same</span>
+0015 <span class="comment">% cfg.trial_t0 - defines the time reference for the trials</span>
+0016 <span class="comment">%       if false, the same time reference for all files is maintained</span>
+0017 <span class="comment">%       if true each trial gets its own time reference, at the begging of the trial</span>
+0018 <span class="comment">%       if char or cellstr or string, it is used to select a variable from</span>
+0019 <span class="comment">%         annot to use as time reference for each trial</span>
+0020 <span class="comment">%       if table or numeric, and length matched trials, these values are</span>
+0021 <span class="comment">%         used as time reference for each trial</span>
+0022 <span class="comment">% cfg.equalize_times - logical. if true times all trials get the same time vector</span>
+0023 <span class="comment">%       defaults to true if duration of all annots is the same and trial_t0</span>
+0024 <span class="comment">%       is not false</span>
+0025 <span class="comment">% cfg.timetol - double. time tolerance in seconds. Defaults to 1e-6</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">% returns a FT_DATATYPE_RAW with the trials defined by cfg.annot</span>
+0028 
+0029 <span class="keyword">if</span> istable(cfg)
+0030   cfg = struct(<span class="string">'annot'</span>,cfg);
+0031 <span class="keyword">end</span>
+0032 annot            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'annot'</span>);
+0033 fixsamples       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'fixsamples'</span>,<span class="string">'auto'</span>);
+0034 trial_t0         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'trial_t0'</span>,false);
+0035 equalize_times   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'equalize_times'</span>);
+0036 timetol          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-6);
+0037 
+0038 assert(~isempty(annot),<span class="string">'annot required'</span>);
+0039 assert(~isempty(raw),<span class="string">'raw required'</span>);
+0040 assert(isstruct(raw),<span class="string">'ivalid raw'</span>);
+0041 assert(all(ismember({<span class="string">'label'</span>,<span class="string">'time'</span>,<span class="string">'trial'</span>},fields(raw))),<span class="string">'ivalid raw'</span>);
+0042 assert(numel(raw.trial)==1,<span class="string">'raw should have single trial (continuous)'</span>);
+0043 
+0044 <span class="keyword">if</span> islogical(trial_t0)
+0045   <span class="keyword">if</span> trial_t0
+0046     trial_t0 = annot.starts;
+0047   <span class="keyword">else</span>
+0048     trial_t0 = zeros(height(annot),1);
+0049   <span class="keyword">end</span>
+0050 <span class="keyword">elseif</span> ischar(trial_t0) || isstring(trial_t0) || iscellstr(trial_t0)
+0051   trial_t0 = cellstr(trial_t0);
+0052   <span class="keyword">if</span> ismember(trial_t0,annot.Properties.VariableNames)
+0053     trial_t0 = annot.(trial_t0{1});
+0054   <span class="keyword">else</span>
+0055     error(<span class="string">'specified trial_t0 doesn''t coincide with annot''s variable names'</span>);
+0056   <span class="keyword">end</span>
+0057 <span class="keyword">elseif</span> istable(trial_t0)
+0058   <span class="keyword">if</span> width(trial_t0)==1 &amp;&amp; height(trial_t0)==height(annot)
+0059     trial_t0 = trial_t0{:,1};
+0060   <span class="keyword">else</span>
+0061     error(<span class="string">'invalid trial_t0'</span>);
+0062   <span class="keyword">end</span>
+0063 <span class="keyword">elseif</span> isnumeric(trial_t0)
+0064   <span class="keyword">if</span> size(trial_t0,1) &lt;  size(trial_t0,2)
+0065     trial_t0 = trial_t0';
+0066   <span class="keyword">end</span>
+0067   assert(size(trial_t0,1) == height(annot),<span class="string">'invalid trial_t0'</span>);    
+0068 <span class="keyword">else</span>
+0069   error(<span class="string">'invalid trial_t0'</span>);
+0070 <span class="keyword">end</span>
+0071   
+0072 coord = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(raw);
+0073 trl = [<a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(coord,annot.starts), <a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(coord,annot.ends)];
+0074 
+0075 <span class="keyword">if</span> isnumeric(fixsamples)
+0076   trl(:,2) = trl(:,1) + fixsamples;
+0077 <span class="keyword">elseif</span> islogical(fixsamples) &amp;&amp; ~fixsamples
+0078   <span class="comment">%do nothing</span>
+0079 <span class="keyword">elseif</span> strcmp(fixsamples,<span class="string">'auto'</span>)
+0080   <span class="keyword">if</span> length(unique(annot.duration))==1
+0081     trl(:,2) = trl(:,1) + min(trl(:,2)-trl(:,1));
+0082   <span class="keyword">end</span>
+0083 <span class="keyword">end</span>
+0084 
+0085 trl_raw=raw;
+0086 trl_raw.trial = cell(1,size(trl,1));
+0087 trl_raw.time = cell(1,size(trl,1));
+0088 trl_raw.sampleinfo = trl;
+0089 <span class="keyword">for</span> i=1:size(trl,1)
+0090   trl_raw.trial{i}=raw.trial{1}(:,trl(i,1):trl(i,2));
+0091   trl_raw.time{i}=raw.time{1}(:,trl(i,1):trl(i,2)) - trial_t0(i);
+0092 <span class="keyword">end</span>
+0093 
+0094 <span class="keyword">if</span> isempty(equalize_times)
+0095   equalize_times = ~all(trial_t0==0) &amp;&amp; length(unique(trl(i,2)-trl(i,1)))==1;
+0096 <span class="keyword">end</span>
+0097 <span class="keyword">if</span> equalize_times
+0098   trial_len = unique(trl(i,2)-trl(i,1)+1);
+0099   assert(~all(trial_t0==0) &amp;&amp; length(trial_len)==1,<span class="keyword">...</span>
+0100     <span class="string">'can''t equalize times'</span>);
+0101   period = cellfun(@(x)  mean(diff(x)),trl_raw.time); 
+0102   period = uniquetol(period,timetol);
+0103   assert(length(period)==1,<span class="string">'inconsistent sampling frequencies'</span>);
+0104   t0 = mean(cellfun(@(x)x(1),trl_raw.time));
+0105   t0 = round(t0,max([-ceil(log10(timetol)),0]));
+0106   time_eq = t0 + (0:(trial_len-1))*period;
+0107   <span class="keyword">for</span> i=1:numel(trl_raw.time)
+0108     trl_raw.time{i} = time_eq;
+0109   <span class="keyword">end</span>
+0110 <span class="keyword">end</span>
+0111 
+0112 trl_raw = ft_checkdata(trl_raw);
+0113 
+0114 
+0115 
+0116</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

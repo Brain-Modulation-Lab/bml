@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_time2idx</title>
+  <meta name="keywords" content="bml_time2idx">
+  <meta name="description" content="BML_TIME2IDX calculates sample indices from a time vector and file coordinates">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_time2idx.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_time2idx
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_TIME2IDX calculates sample indices from a time vector and file coordinates</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function idx=bml_time2idx(cfg, time, skipFactor) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_TIME2IDX calculates sample indices from a time vector and file coordinates
+
+ Use as 
+   idx=bml_time2idx(cfg, time)
+   idx=bml_time2idx(cfg, time, skipFactor)
+
+ time - numeric vector of times to transform to indices
+ skipFactor - numeric, integer indicating skip factor as used by blackrock
+     NPMK package. Defaults to 1. 
+
+ where cfg is a configuration structure or roi table row
+ cfg.t1
+ cfg.s1
+ cfg.t2
+ cfg.s2
+ cfg.nSamples - double: optional total number of samples in file</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/signal/bml_definetrial.html" class="code" title="function trl_raw = bml_definetrial(cfg,raw)">bml_definetrial</a>	BML_DEFINETRIAL transforms a continuous raw into a trialed raw</li><li><a href="bml_sync_transfer_neuroomega_chantype.html" class="code" title="function sync = bml_sync_transfer_neuroomega_chantype(cfg)">bml_sync_transfer_neuroomega_chantype</a>	BML_SYNC_TRANSFER_NEUROOMEGA_CHANTYPE transfer sync info from one chantype to another</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function idx=bml_time2idx(cfg, time, skipFactor)</a>
+0002 
+0003 <span class="comment">% BML_TIME2IDX calculates sample indices from a time vector and file coordinates</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   idx=bml_time2idx(cfg, time)</span>
+0007 <span class="comment">%   idx=bml_time2idx(cfg, time, skipFactor)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% time - numeric vector of times to transform to indices</span>
+0010 <span class="comment">% skipFactor - numeric, integer indicating skip factor as used by blackrock</span>
+0011 <span class="comment">%     NPMK package. Defaults to 1.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% where cfg is a configuration structure or roi table row</span>
+0014 <span class="comment">% cfg.t1</span>
+0015 <span class="comment">% cfg.s1</span>
+0016 <span class="comment">% cfg.t2</span>
+0017 <span class="comment">% cfg.s2</span>
+0018 <span class="comment">% cfg.nSamples - double: optional total number of samples in file</span>
+0019 <span class="comment">%</span>
+0020 
+0021 pTT = 9; <span class="comment">%pTT = pTimeTolerenace = - log10(timetol)</span>
+0022 
+0023 <span class="keyword">if</span> nargin==2
+0024   skipFactor=1;
+0025 <span class="keyword">elseif</span> nargin==3
+0026   skipFactor=round(skipFactor);
+0027 <span class="keyword">else</span>
+0028   error(<span class="string">'unsupported call to bml_time2idx, see usage'</span>);
+0029 <span class="keyword">end</span>
+0030 
+0031 t1=round(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t1'</span>),pTT);
+0032 s1=ceil(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'s1'</span>)/skipFactor);
+0033 t2=round(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t2'</span>),pTT);
+0034 s2=floor(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'s2'</span>)/skipFactor);
+0035 nSamples=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'nSamples'</span>);
+0036 
+0037 idx = round((t2*s1-s2*t1+(s2-s1).*round(time,pTT))/(t2-t1));
+0038 
+0039 <span class="keyword">if</span> any(idx&lt;=0); error(<span class="string">'negative index'</span>); <span class="keyword">end</span>
+0040 <span class="keyword">if</span> ~isempty(nSamples)
+0041   <span class="keyword">if</span> any(idx&gt;nSamples); error(<span class="string">'index exceeds number of samples in file'</span>); <span class="keyword">end</span>
+0042 <span class="keyword">end</span>
+0043   
+0044   
+0045   
+0046</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

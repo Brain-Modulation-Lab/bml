@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_praat</title>
+  <meta name="keywords" content="bml_praat">
+  <meta name="description" content="BML_PRAAT opens FT_DATATYPE_RAWs in praat">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">utils</a> &gt; bml_praat.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/utils&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_praat
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_PRAAT opens FT_DATATYPE_RAWs in praat</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function bml_praat(varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_PRAAT opens FT_DATATYPE_RAWs in praat
+
+ Use as
+   bml_praat(raw1, raw2)
+   bml_praat('name1', raw1, 'name2', raw2)
+
+ where raw1, raw2 ... rawN are the FT_DATATYPE_RAWs you wanto to open 
+
+ If no name is provided, the praat objects will be named r&lt;R&gt;t&lt;T&gt;_&lt;channel_name&gt;, where &lt;R&gt; is the
+ index of the FT_DATATYPE_RAW in the call to bml_praat, &lt;T&gt; is the trial 
+ number and &lt;channel_name&gt; is the name of the label of the channel.
+
+ If a name is provided, the praat objects will be named &lt;name&gt;_t&lt;T&gt;_&lt;channel_name&gt;. 
+
+ Opens a new praat window</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li><li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li><li><a href="../../bml/sync/bml_sync_check.html" class="code" title="function bml_sync_check(cfg)">bml_sync_check</a>	BML_SYNC_CHECK loads files in a synchronization roi table into praat</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bml_praat(varargin)</a>
+0002 
+0003 <span class="comment">% BML_PRAAT opens FT_DATATYPE_RAWs in praat</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   bml_praat(raw1, raw2)</span>
+0007 <span class="comment">%   bml_praat('name1', raw1, 'name2', raw2)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% where raw1, raw2 ... rawN are the FT_DATATYPE_RAWs you wanto to open</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% If no name is provided, the praat objects will be named r&lt;R&gt;t&lt;T&gt;_&lt;channel_name&gt;, where &lt;R&gt; is the</span>
+0012 <span class="comment">% index of the FT_DATATYPE_RAW in the call to bml_praat, &lt;T&gt; is the trial</span>
+0013 <span class="comment">% number and &lt;channel_name&gt; is the name of the label of the channel.</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% If a name is provided, the praat objects will be named &lt;name&gt;_t&lt;T&gt;_&lt;channel_name&gt;.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% Opens a new praat window</span>
+0018 <span class="comment">%</span>
+0019 
+0020 <span class="comment">%saving files to temp directory</span>
+0021 recycle(<span class="string">'off'</span>);
+0022 tdir=[tempdir <span class="string">'bml_praat'</span>];
+0023 
+0024 <span class="comment">%deleting previous wavs if any</span>
+0025 <span class="keyword">if</span>(exist(tdir,<span class="string">'dir'</span>)==7) <span class="comment">%7 -&gt; folder</span>
+0026   wavs = dir(fullfile(tdir, <span class="string">'*.wav'</span>));
+0027   <span class="keyword">for</span> k = 1 : length(wavs)
+0028     delete(fullfile(tdir, wavs(k).name));
+0029   <span class="keyword">end</span>
+0030 <span class="keyword">else</span>
+0031   mkdir(tdir);
+0032 <span class="keyword">end</span>
+0033 
+0034 <span class="comment">%sorting raws and names from varargin</span>
+0035 names={};
+0036 raws={};
+0037 waslastname=false;
+0038 <span class="keyword">for</span> i=1:numel(varargin)
+0039   <span class="keyword">if</span> isa(varargin{i},<span class="string">'string'</span>) || isa(varargin{i},<span class="string">'char'</span>) 
+0040     assert(~waslastname,<span class="string">'two consecutive names in argument %i'</span>, i);
+0041     names = [names {strcat(varargin{i},<span class="string">'_'</span>)}];
+0042     waslastname=true;  
+0043   <span class="keyword">elseif</span> iscellstr(varargin{i})
+0044     assert(numel(varargin{i})==1,<span class="string">'invalid name parameter %i'</span>,i);
+0045     assert(~waslastname,<span class="string">'two consecutive names in argument %i'</span>, i);
+0046     names = [names {strcat(varargin{i}{1},<span class="string">'_'</span>)}];
+0047     waslastname=true; 
+0048   <span class="keyword">elseif</span> isstruct(varargin{i})
+0049     <span class="keyword">if</span> ~waslastname; names = {names{:} <span class="string">''</span>}; <span class="keyword">end</span>
+0050     raws = [raws {varargin{i}}];   
+0051     waslastname=false;
+0052   <span class="keyword">else</span>
+0053     error(<span class="string">'unknown type for argument %i'</span>,i);
+0054   <span class="keyword">end</span>
+0055 <span class="keyword">end</span>
+0056 
+0057 names = strrep(deblank(names),<span class="string">' '</span>,<span class="string">'_'</span>);
+0058 
+0059 <span class="comment">%wavs={};</span>
+0060 rf=[<span class="string">'%0'</span> num2str(ceil(log10(numel(raws)))+1) <span class="string">'d'</span>]; 
+0061 cmd =<span class="string">''</span>;
+0062 <span class="keyword">for</span> i=1:numel(raws)
+0063   tf=[<span class="string">'%0'</span> num2str(ceil(log10(numel(raws{i}.trial)))+1) <span class="string">'d'</span>]; 
+0064   <span class="keyword">for</span> t=1:numel(raws{i}.trial)
+0065     <span class="keyword">for</span> c=1:numel(raws{i}.label)
+0066       wfn=char(strrep(raws{i}.label{c},&quot; &quot;,&quot;_&quot;));
+0067       <span class="keyword">if</span> isempty(char(names{i}))
+0068         wfn=[tdir filesep <span class="string">'r'</span> num2str(i,rf) <span class="string">'t'</span> num2str(t,tf) <span class="string">'_'</span> wfn <span class="string">'.wav'</span>];
+0069       <span class="keyword">else</span>
+0070         wfn=[tdir filesep char(names{i}) <span class="string">'t'</span> num2str(t,tf) <span class="string">'_'</span> wfn <span class="string">'.wav'</span>];
+0071       <span class="keyword">end</span>
+0072       v=raws{i}.trial{t}(c,:);
+0073       
+0074       <span class="keyword">if</span> ismember({<span class="string">'fsample'</span>},fields(raws{i}))
+0075         Fs = round(raws{i}.fsample,0);
+0076       <span class="keyword">else</span>
+0077         Fs = round(1/mean(diff(raws{i}.time{1})),0);
+0078       <span class="keyword">end</span>
+0079       
+0080       audiowrite(wfn,v./max(abs(v)),Fs);
+0081       <span class="comment">%wavs=[wavs,wfn];</span>
+0082       cmd = [cmd wfn <span class="string">' '</span>];
+0083     <span class="keyword">end</span>
+0084   <span class="keyword">end</span>
+0085 <span class="keyword">end</span>
+0086 
+0087 
+0088 <span class="comment">%os specific determination of praat path</span>
+0089 <span class="keyword">if</span> ismac()
+0090   <span class="comment">%using open command in mac</span>
+0091   cmd = [<span class="string">'open -a praat '</span> cmd];
+0092 <span class="keyword">elseif</span> isunix()
+0093   search_dirs={<span class="string">'/usr/local/bin'</span>};
+0094   [~,cmdout]=system(<span class="string">'which praat'</span>);
+0095   <span class="keyword">if</span> isempty(cmdout)  
+0096     <span class="comment">%cheking for praat in seach_dirs</span>
+0097     indx=find(cellfun(@(x)exist([x filesep <span class="string">'praat'</span>],<span class="string">'file'</span>)==2,search_dirs),1);
+0098     <span class="keyword">if</span> isempty(indx)
+0099       warning(<span class="string">'make sure praat is in your path'</span>)    
+0100     <span class="keyword">else</span>
+0101       setenv(<span class="string">'PATH'</span>, [search_dirs{indx} <span class="string">':'</span> getenv(<span class="string">'PATH'</span>)]);   
+0102     <span class="keyword">end</span>
+0103   <span class="keyword">end</span>
+0104   cmd = [<span class="string">'praat --open '</span> cmd <span class="string">'&amp;'</span>];
+0105 <span class="keyword">else</span>
+0106   cmd = [<span class="string">'praat --open '</span> cmd <span class="string">'&amp;'</span>];  
+0107   warning(<span class="string">'make sure praat is in your path. !echo $PATH'</span>)
+0108 <span class="keyword">end</span>
+0109 
+0110 system(cmd);
+0111 
+0112</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

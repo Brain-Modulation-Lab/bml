@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_pad</title>
+  <meta name="keywords" content="bml_pad">
+  <meta name="description" content="BML_PAD returns a padded version of the raw (crops if necessary)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_pad.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_pad
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_PAD returns a padded version of the raw (crops if necessary)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_PAD returns a padded version of the raw (crops if necessary)
+
+ Use as
+   padded = bml_pad(raw, starts, ends, padval)
+   padded = bml_pad(cfg, raw)
+   [padded, presamples, postsamples] = bml_pad(___)
+
+ raw     - FT_DATATYPE_RAW to be padded and/or cropped
+ starts  - double: global time at which to start
+ ends    - double: global time at which to end
+ padval  - double: value used for padding, defaults to zero
+
+ padded  - FT_DATATYPE_RAW: padded version of raw
+ presamples - integer: number of padval samples added at the begging 
+ postsamples - integer: number of padval samples added at the end</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="../../bml/sync/bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)</a>
+0002 
+0003 <span class="comment">% BML_PAD returns a padded version of the raw (crops if necessary)</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   padded = bml_pad(raw, starts, ends, padval)</span>
+0007 <span class="comment">%   padded = bml_pad(cfg, raw)</span>
+0008 <span class="comment">%   [padded, presamples, postsamples] = bml_pad(___)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% raw     - FT_DATATYPE_RAW to be padded and/or cropped</span>
+0011 <span class="comment">% starts  - double: global time at which to start</span>
+0012 <span class="comment">% ends    - double: global time at which to end</span>
+0013 <span class="comment">% padval  - double: value used for padding, defaults to zero</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% padded  - FT_DATATYPE_RAW: padded version of raw</span>
+0016 <span class="comment">% presamples - integer: number of padval samples added at the begging</span>
+0017 <span class="comment">% postsamples - integer: number of padval samples added at the end</span>
+0018 
+0019 <span class="keyword">if</span> nargin==2
+0020   cfg=raw;
+0021   raw=starts;
+0022   <span class="keyword">if</span> istable(cfg)
+0023     <span class="keyword">if</span> height(cfg) &gt; 1; error(<span class="string">'cfg should be a 1 row table'</span>); <span class="keyword">end</span>
+0024     cfg=table2struct(cfg);
+0025   <span class="keyword">end</span>
+0026   starts = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'starts'</span>);
+0027   ends = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'ends'</span>);
+0028   padval = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'padval'</span>);
+0029 <span class="keyword">elseif</span> nargin==3
+0030   padval = 0;
+0031 <span class="keyword">elseif</span> nargin ~=4
+0032   error(<span class="string">'invalid use of bml_pad'</span>);
+0033 <span class="keyword">end</span>
+0034 
+0035 <span class="keyword">if</span> numel(raw.time) &gt; 1; error(<span class="string">'single trial continuous raw required'</span>); <span class="keyword">end</span>
+0036 nSamples = length(raw.time{1});
+0037 
+0038 <span class="comment">% tc=[];</span>
+0039 <span class="comment">% tc.s1=1; tc.s2=length(raw.time{1});</span>
+0040 <span class="comment">% tc.t1=raw.time{1}(1); tc.t2=raw.time{1}(end);</span>
+0041 tc = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(raw);
+0042 [s,e]=<a href="../../bml/sync/bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(tc,starts,ends);
+0043 
+0044 padded = <a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(raw,starts,ends);
+0045 presamples = max([1-s, 0]);
+0046 postsamples = max([e-nSamples, 0]);
+0047 
+0048 <span class="keyword">if</span> presamples&gt;0 
+0049   padded.trial{1} = padarray(padded.trial{1},[0 presamples],padval,<span class="string">'pre'</span>);
+0050 <span class="keyword">end</span>
+0051 <span class="keyword">if</span> postsamples &gt; 0
+0052   padded.trial{1} = padarray(padded.trial{1},[0 postsamples],padval,<span class="string">'post'</span>);
+0053 <span class="keyword">end</span>
+0054 padded.time{1} = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(tc,s:e);
+0055 
+0056 padded.sampleinfo = [s,e];
+0057</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

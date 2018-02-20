@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_t0</title>
+  <meta name="keywords" content="bml_annot_t0">
+  <meta name="description" content="BML_ANNOT_T0 changes the time reference of an annot table">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_t0.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_t0
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_T0 changes the time reference of an annot table</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function shifted = bml_annot_t0(cfg,annot) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_T0 changes the time reference of an annot table
+
+ Use as 
+   shifted = bml_annot_t0(cfg,annot)
+   shifted = bml_annot_t0(t0,annot)
+
+ cfg.t0
+ cfg.starts
+ cfg.roi</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function shifted = bml_annot_t0(cfg,annot)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_T0 changes the time reference of an annot table</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   shifted = bml_annot_t0(cfg,annot)</span>
+0007 <span class="comment">%   shifted = bml_annot_t0(t0,annot)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg.t0</span>
+0010 <span class="comment">% cfg.starts</span>
+0011 <span class="comment">% cfg.roi</span>
+0012 
+0013 <span class="keyword">if</span> isa(cfg,<span class="string">'double'</span>)
+0014   cfg = struct(<span class="string">'t0'</span>,cfg);
+0015 <span class="keyword">elseif</span> istable(cfg)
+0016   cfg = struct(<span class="string">'roi'</span>,cfg);
+0017 <span class="keyword">end</span>
+0018 
+0019 t0      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t0'</span>);
+0020 starts  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'starts'</span>);
+0021 roi     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0022 
+0023 <span class="keyword">if</span> ~isempty(starts)
+0024   t0 = starts;
+0025 <span class="keyword">elseif</span> ~isempty(roi)
+0026   t0 = min(roi.starts);
+0027 <span class="keyword">end</span>
+0028 
+0029 annot.starts = annot.starts - t0;
+0030 annot.ends = annot.ends - t0;
+0031 <span class="keyword">if</span> all(ismember({<span class="string">'t1'</span>,<span class="string">'t2'</span>},annot.Properties.VariableNames))
+0032     annot.t1 = annot.t1 - t0;
+0033   annot.t2 = annot.t2 - t0;
+0034 <span class="keyword">end</span>
+0035 
+0036 shifted = annot;
+0037 
+0038 
+0039 
+0040</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

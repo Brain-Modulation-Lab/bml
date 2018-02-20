@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_roi_confluence</title>
+  <meta name="keywords" content="bml_roi_confluence">
+  <meta name="description" content="BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_roi_confluence.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_roi_confluence
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function confluent = bml_roi_confluence(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file
+
+ Use as
+   confluent = bml_roi_confluence(roi)
+   confluent = bml_roi_confluence(cfg)
+
+ cfg.roi - roi table
+ cfg.complete - logical: should the file coverage be completed at begging
+   and end. Defaults to true.
+
+ Modifies starts and ends of roi to cover all the file, for each file.
+ Requires variable nSamples and Fs. Doesn't modify file coords</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>	BML_EVENT2ANNOT creates a annot table from a events structure</li><li><a href="../../bml/signal/bml_event2raw.html" class="code" title="function raw = bml_event2raw(cfg, event)">bml_event2raw</a>	BML_EVENT2RAW creates a raw of zeros with ones at event times</li><li><a href="../../bml/sync/bml_sync_confluence.html" class="code" title="function confluent = bml_sync_confluence(cfg)">bml_sync_confluence</a>	BML_SYNC_CONFLUENCE is an alias for BML_ROI_CONFLUENCE</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function confluent = bml_roi_confluence(cfg)</a>
+0002 
+0003 <span class="comment">% BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   confluent = bml_roi_confluence(roi)</span>
+0007 <span class="comment">%   confluent = bml_roi_confluence(cfg)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg.roi - roi table</span>
+0010 <span class="comment">% cfg.complete - logical: should the file coverage be completed at begging</span>
+0011 <span class="comment">%   and end. Defaults to true.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Modifies starts and ends of roi to cover all the file, for each file.</span>
+0014 <span class="comment">% Requires variable nSamples and Fs. Doesn't modify file coords</span>
+0015 
+0016 <span class="keyword">if</span> istable(cfg)
+0017   cfg = struct(<span class="string">'roi'</span>,cfg);
+0018 <span class="keyword">end</span>
+0019 complete = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'complete'</span>,true);
+0020 
+0021 roi = <a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>));
+0022 
+0023 roi.fullfile = fullfile(roi.folder,roi.name);
+0024 uff = unique(roi.fullfile); <span class="comment">%unique fullfile</span>
+0025 confluent = table();
+0026 
+0027 <span class="keyword">for</span> i_uff=1:length(uff)
+0028   i_roi = roi(strcmp(roi.fullfile,uff(i_uff)),:);
+0029   
+0030   <span class="comment">%first</span>
+0031   <span class="keyword">if</span> complete
+0032     i_roi.starts(1) = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(i_roi(1,:),1) - 0.5 ./ i_roi.Fs(1);
+0033   <span class="keyword">end</span>
+0034 
+0035   <span class="comment">%middle</span>
+0036   <span class="keyword">for</span> i=1:(height(i_roi)-1)
+0037     midpoint = (i_roi.t2(i) + i_roi.t1(i+1))/2;
+0038     i_roi.ends(i) = midpoint;
+0039     i_roi.starts(i+1) = midpoint;
+0040   <span class="keyword">end</span>
+0041 
+0042   <span class="comment">%last</span>
+0043   <span class="keyword">if</span> complete
+0044     i_roi.ends(end) = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(i_roi(<span class="keyword">end</span>,:),i_roi.nSamples(end)) + 0.5 ./ i_roi.Fs(end);
+0045   <span class="keyword">end</span>
+0046   
+0047   confluent = [confluent; i_roi];
+0048 <span class="keyword">end</span>
+0049 
+0050 confluent = <a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(confluent);
+0051</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

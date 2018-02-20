@@ -1,0 +1,251 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_varavgref_coef</title>
+  <meta name="keywords" content="bml_varavgref_coef">
+  <meta name="description" content="BML_VARAVGREF_COEF calculates the crosstalk coefficients between electrodes">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">utils</a> &gt; bml_varavgref_coef.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/utils&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_varavgref_coef
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_VARAVGREF_COEF calculates the crosstalk coefficients between electrodes</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [coef, fitted_COV] = bml_varavgref_coef(COV) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_VARAVGREF_COEF calculates the crosstalk coefficients between electrodes
+
+ Use as
+   [coef, fitted_COV] = bml_varavgref_coef(COV)
+
+ Calculates crosstal coefficients as defined by electrical crosstalk model
+
+ Arguments
+ COV - variance-covariance matrix between channels
+
+ Returns
+ coef - vector of crosstalk coefficients 0 &lt;= coef &lt;= 1
+ fitted_COV - fitted variance-covariance matrix</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_varavgref_matrix.html" class="code" title="function U=bml_varavgref_matrix(COV)">bml_varavgref_matrix</a>	BML_VARAVGREF_MATRIX creates a variable average referencing matrix</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [V0V0,sigma2_S,VkVj,c] = varavgref_model(p)</a></li><li><a href="#_sub2" class="code">function [cost, grad] = costfun(p)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [coef, fitted_COV] = bml_varavgref_coef(COV)</a>
+0002 
+0003 <span class="comment">% BML_VARAVGREF_COEF calculates the crosstalk coefficients between electrodes</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   [coef, fitted_COV] = bml_varavgref_coef(COV)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Calculates crosstal coefficients as defined by electrical crosstalk model</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Arguments</span>
+0011 <span class="comment">% COV - variance-covariance matrix between channels</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Returns</span>
+0014 <span class="comment">% coef - vector of crosstalk coefficients 0 &lt;= coef &lt;= 1</span>
+0015 <span class="comment">% fitted_COV - fitted variance-covariance matrix</span>
+0016 
+0017 
+0018 assert(isnumeric(COV));
+0019 assert(size(COV,1)==size(COV,2));
+0020 
+0021 n = size(COV,1);
+0022 
+0023   <span class="comment">%calculate model values from crosstalk parameters</span>
+0024   <a name="_sub1" href="#_subfunctions" class="code">function [V0V0,sigma2_S,VkVj,c] = varavgref_model(p)</a>
+0025     
+0026     <span class="comment">%p=zeros(1,n)</span>
+0027     VkVj=diag(diag(COV)); <span class="comment">% matrix of predicted variances-covariances</span>
+0028     sigma2_S = zeros(1,n); <span class="comment">%initializing singal variance</span>
+0029     c = exp(p)./(exp(p)+1); <span class="comment">% vector of crosstalk coefficients</span>
+0030     sum_c = sum(c);
+0031     
+0032     <span class="comment">%calculating V0 variance</span>
+0033     V0V0=0; 
+0034     <span class="keyword">for</span> l=1:n
+0035       <span class="keyword">for</span> j=1:n
+0036         V0V0 = V0V0 + exp(p(l)+p(j))*COV(l,j);
+0037       <span class="keyword">end</span>
+0038     <span class="keyword">end</span>
+0039     V0V0 = V0V0*(sum(exp(p))^(-2));
+0040     
+0041     <span class="comment">%calculating signal variances sigma2_S</span>
+0042     <span class="keyword">for</span> k=1:n
+0043       sigma2_S(k) = (COV(k,k)-(c(k)^2)*V0V0)/(((1-c(k))^2)+2*(c(k)^2)*(1-c(k))/sum_c);
+0044     <span class="keyword">end</span>
+0045     
+0046     <span class="comment">%completing predicted variance-covariance matrix</span>
+0047     <span class="keyword">for</span> k=1:(n-1)
+0048       <span class="keyword">for</span> j=(k+1):n
+0049         VkVj(k,j)= c(k)*c(j)*( (1-c(k))*sigma2_S(k)/sum_c + (1-c(j))*sigma2_S(j)/sum_c + V0V0);
+0050         VkVj(j,k)=VkVj(k,j);
+0051       <span class="keyword">end</span>
+0052     <span class="keyword">end</span>    
+0053   <span class="keyword">end</span>
+0054 
+0055   <span class="comment">% optimization routine</span>
+0056   p = zeros(1,n); 
+0057   [f_V0V0,f_sigma2_S,f_VkVj,f_c] = <a href="#_sub1" class="code" title="subfunction [V0V0,sigma2_S,VkVj,c] = varavgref_model(p)">varavgref_model</a>(p);
+0058   
+0059   <span class="comment">%first guess based on solving approximated cuadratic expression</span>
+0060   p1 = zeros(1,n);
+0061   <span class="keyword">for</span> i=1:n
+0062     a_= -f_sigma2_S(i);
+0063     b_= f_sigma2_S(i); 
+0064     b_= b_ + (sum(f_c .* (1-f_c) .* f_sigma2_S)-f_c(i)*(1-f_c(i))*f_sigma2_S(i))/sum(f_c);
+0065     b_= b_ + f_V0V0*sum(f_c);
+0066     c_= -sum(COV(i,:))+COV(i,i);
+0067    
+0068     d_ = b_^2-4*a_*c_;
+0069     <span class="keyword">if</span> d_ &gt;= 0
+0070       c_k1=(-b_ + sqrt(d_))/(2*a_);
+0071       c_k2=(-b_ - sqrt(d_))/(2*a_);
+0072       <span class="keyword">if</span> 0&lt;=c_k1 &amp;&amp; c_k1&lt;=1
+0073         c_k=c_k1;
+0074       <span class="keyword">elseif</span> 0&lt;=c_k2 &amp;&amp; c_k2&lt;=1
+0075         c_k=c_k2;    
+0076       <span class="keyword">else</span>
+0077         c_k=(-b_/(2*a_));  
+0078       <span class="keyword">end</span>
+0079     <span class="keyword">else</span>
+0080       c_k=(-b_/(2*a_));      
+0081     <span class="keyword">end</span>
+0082     
+0083     <span class="keyword">if</span> c_k &lt;=0 
+0084       p1(i) = -10;
+0085     <span class="keyword">elseif</span> c_k &gt;= 1
+0086       p1(i) = 10;
+0087     <span class="keyword">else</span>
+0088       p1(i) = log(abs(c_k/(1-c_k)));
+0089     <span class="keyword">end</span>
+0090   <span class="keyword">end</span>
+0091   
+0092     <span class="comment">%cost function</span>
+0093   <a name="_sub2" href="#_subfunctions" class="code">function [cost, grad] = costfun(p)</a>
+0094     [~,~,VkVj,c] = <a href="#_sub1" class="code" title="subfunction [V0V0,sigma2_S,VkVj,c] = varavgref_model(p)">varavgref_model</a>(p);
+0095     
+0096     <span class="comment">%calculating cost in variance metric</span>
+0097     cost=0;
+0098     <span class="keyword">for</span> k=1:n
+0099       <span class="keyword">for</span> j=1:n
+0100         cost = cost + (VkVj(k,j)-COV(k,j))^2;
+0101       <span class="keyword">end</span>
+0102     <span class="keyword">end</span>
+0103     cost = cost / sum(sum(COV.^2));       
+0104     
+0105     <span class="comment">%ridge regression on crosstalk coefficients</span>
+0106     cost = cost + (1e-3)*sum(c.^2);
+0107   <span class="keyword">end</span>
+0108   
+0109   <span class="comment">%optimizing from first guess</span>
+0110     p=fminunc(@<a href="#_sub2" class="code" title="subfunction [cost, grad] = costfun(p)">costfun</a>,p1,optimoptions(<span class="string">'fminunc'</span>,<span class="string">'MaxFunctionEvaluations'</span>,1e6,<span class="string">'OptimalityTolerance'</span>,1e-6));  
+0111 
+0112 <span class="comment">%   p=p1;</span>
+0113 <span class="comment">%</span>
+0114 <span class="comment">%   %cost function</span>
+0115 <span class="comment">%   function [cost, grad] = costfun2(p)</span>
+0116 <span class="comment">%     [~,~,VkVj,~] = varavgref_model(p);</span>
+0117 <span class="comment">%</span>
+0118 <span class="comment">%     %calculating cost in correlation metric</span>
+0119 <span class="comment">%</span>
+0120 <span class="comment">%     %Transformin VkVj to positive semi definte</span>
+0121 <span class="comment">%     VkVj(ismissing(VkVj))=0;</span>
+0122 <span class="comment">%     [V,D] = eig(VkVj);</span>
+0123 <span class="comment">%     D(D&lt;0)=0;</span>
+0124 <span class="comment">%     psd_VkVj = real(V*D/(V));</span>
+0125 <span class="comment">%     cor_VkVj = corrcov(psd_VkVj);</span>
+0126 <span class="comment">%     cor_COV = corrcov(COV);</span>
+0127 <span class="comment">%</span>
+0128 <span class="comment">%     cost=0;</span>
+0129 <span class="comment">%     for k=1:n</span>
+0130 <span class="comment">%       for j=1:n</span>
+0131 <span class="comment">%         cost = cost + (cor_VkVj(k,j)-cor_COV(k,j))^2;</span>
+0132 <span class="comment">%         %cost = cost + (clip_inv_sigmoid(cor_VkVj(k,j))-clip_inv_sigmoid(cor_COV(k,j)))^2;</span>
+0133 <span class="comment">%       end</span>
+0134 <span class="comment">%     end</span>
+0135 <span class="comment">%     %cost = cost / sum(sum(COV.^2));</span>
+0136 <span class="comment">%   end</span>
+0137 <span class="comment">%</span>
+0138 <span class="comment">%     p=fminunc(@costfun2,p,optimoptions('fminunc','MaxFunctionEvaluations',1e9,'OptimalityTolerance',1e-9));</span>
+0139 <span class="comment">%</span>
+0140 <span class="comment">%     function x = clip_inv_sigmoid(y)</span>
+0141 <span class="comment">%     if y &gt; 0.999954602131298 % exp(10)/(exp(10)+1)</span>
+0142 <span class="comment">%       x = 10;</span>
+0143 <span class="comment">%     elseif y &lt; 4.539786870243439e-05 % exp(-10)/(exp(-10)+1)</span>
+0144 <span class="comment">%       x = -10;</span>
+0145 <span class="comment">%     else</span>
+0146 <span class="comment">%       x = log(y/(1-y));</span>
+0147 <span class="comment">%     end</span>
+0148 <span class="comment">%   end</span>
+0149 <span class="comment">%</span>
+0150 <span class="comment">%     %cost function</span>
+0151 <span class="comment">%   function [cost, grad] = costfun3(p)</span>
+0152 <span class="comment">%     [~,~,VkVj,~] = varavgref_model(p);</span>
+0153 <span class="comment">%</span>
+0154 <span class="comment">%     %calculating cost in correlation metric</span>
+0155 <span class="comment">%</span>
+0156 <span class="comment">%     %Transformin VkVj to positive semi definte</span>
+0157 <span class="comment">%     VkVj(ismissing(VkVj))=0;</span>
+0158 <span class="comment">%     [V,D] = eig(VkVj);</span>
+0159 <span class="comment">%     D(D&lt;0)=0;</span>
+0160 <span class="comment">%     psd_VkVj = real(V*D/(V));</span>
+0161 <span class="comment">%     cor_VkVj = corrcov(psd_VkVj);</span>
+0162 <span class="comment">%     cor_COV = corrcov(COV);</span>
+0163 <span class="comment">%</span>
+0164 <span class="comment">%     cost=0;</span>
+0165 <span class="comment">%     for k=1:n</span>
+0166 <span class="comment">%       for j=1:n</span>
+0167 <span class="comment">%         %cost = cost + (cor_VkVj(k,j)-cor_COV(k,j))^2;</span>
+0168 <span class="comment">%         cost = cost + (clip_inv_sigmoid(cor_VkVj(k,j))-clip_inv_sigmoid(cor_COV(k,j)))^2;</span>
+0169 <span class="comment">%       end</span>
+0170 <span class="comment">%     end</span>
+0171 <span class="comment">%     %cost = cost / sum(sum(COV.^2));</span>
+0172 <span class="comment">%   end</span>
+0173 <span class="comment">%</span>
+0174 <span class="comment">%     p=fminunc(@costfun3,p,optimoptions('fminunc','MaxFunctionEvaluations',1e9,'OptimalityTolerance',1e-9));</span>
+0175 
+0176 
+0177   [~,~,fitted_COV,coef] = <a href="#_sub1" class="code" title="subfunction [V0V0,sigma2_S,VkVj,c] = varavgref_model(p)">varavgref_model</a>(p);
+0178   <span class="comment">%bounding coefficients</span>
+0179   <span class="keyword">for</span> i=1:n
+0180     <span class="keyword">if</span> coef(i) &gt; 0.999
+0181       coef(i) = 0.999;
+0182     <span class="keyword">end</span>
+0183   <span class="keyword">end</span>
+0184   
+0185 <span class="comment">%   figure</span>
+0186 <span class="comment">%   pcolor(fitted_COV)</span>
+0187 <span class="comment">%   figure</span>
+0188 <span class="comment">%     pcolor(COV)</span>
+0189 
+0190 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

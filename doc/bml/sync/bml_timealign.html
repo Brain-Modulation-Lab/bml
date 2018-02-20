@@ -1,0 +1,271 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_timealign</title>
+  <meta name="keywords" content="bml_timealign">
+  <meta name="description" content="BML_TIMEALIGN aligns slave to master and returns the slave's delta t">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_timealign.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_timealign
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_TIMEALIGN aligns slave to master and returns the slave's delta t</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_TIMEALIGN aligns slave to master and returns the slave's delta t
+
+ Use as
+   slave_delta_t = bml_timealign(master, slave)
+   slave_delta_t = bml_timealign(cfg, master, slave)
+   [slave_delta_t, max_corr] = bml_timealign(cfg, master, slave)
+   [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)
+
+
+ cfg is a configuration structure with fields:
+ cfg.resample_freq - double: frequency to resample and aligned master and
+            slave (Hz). Defaults to 10000.
+ cfg.method - string: method use for preprocessing master and slave
+            'env' or 'envelope' (default) - see BML_ENVELOPE_BINABS
+            'lpf' or 'low-pass-filter' - see ft_preproc_lowpassfilter
+ cfg.env_freq - double: frequency of the envelope. Defaults to 100Hz
+ cfg.lpf_freq - double: cut-frequency of the low-pass filter. Defaults to
+            4000Hz. 
+ cfg.scan - double: time window in which to scan for a maximal correlation
+            if a scalar is given the time window is [-scan, scan]
+            if a length 2 vector is given it should be [-a, b], where 'a'
+            and 'b' are positive numbers in seconds. 
+ cfg.freqreltol - double: frequency relative tolerance. defaults to 1e-5
+ cfg.penalty_tau - double: penalty time use to weight the correlation.
+            This allows to bound slave_delta_t (as with cfg.scan) but in
+            a continuous way. If empty (default) no penalty is applied.
+ cfg.penalty_n - double: penalty 'hill-coefficient' use to weight the
+            correlation. Defines how abrupt is the penalty increase when
+            slave_delta_t &gt; cfg.penalty_tau. Defaults to 2. 
+ cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
+            functions 
+
+ master - FT_DATATYPE_RAW continuous with single channel and trial
+ slave - FT_DATATYPE_RAW continuous with single channel and trial
+
+ returns
+ slave_delta_t - double: time in seconds by which to shift the slave to 
+           align it to master
+ max_corr - double: maximum correlation coefficient achieved for the shift
+           slave_delta_t
+ master - FT_DATATYPE_RAW: master raw after applying the preprocessing
+ slave - FT_DATATYPE_RAW: slave raw after applying the preprocessing</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>	BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method</li><li><a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>	BML_PAD returns a padded version of the raw (crops if necessary)</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li><li><a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)</a>
+0002 
+0003   <span class="comment">% BML_TIMEALIGN aligns slave to master and returns the slave's delta t</span>
+0004   <span class="comment">%</span>
+0005   <span class="comment">% Use as</span>
+0006   <span class="comment">%   slave_delta_t = bml_timealign(master, slave)</span>
+0007   <span class="comment">%   slave_delta_t = bml_timealign(cfg, master, slave)</span>
+0008   <span class="comment">%   [slave_delta_t, max_corr] = bml_timealign(cfg, master, slave)</span>
+0009   <span class="comment">%   [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)</span>
+0010   <span class="comment">%</span>
+0011   <span class="comment">%</span>
+0012   <span class="comment">% cfg is a configuration structure with fields:</span>
+0013   <span class="comment">% cfg.resample_freq - double: frequency to resample and aligned master and</span>
+0014   <span class="comment">%            slave (Hz). Defaults to 10000.</span>
+0015   <span class="comment">% cfg.method - string: method use for preprocessing master and slave</span>
+0016   <span class="comment">%            'env' or 'envelope' (default) - see BML_ENVELOPE_BINABS</span>
+0017   <span class="comment">%            'lpf' or 'low-pass-filter' - see ft_preproc_lowpassfilter</span>
+0018   <span class="comment">% cfg.env_freq - double: frequency of the envelope. Defaults to 100Hz</span>
+0019   <span class="comment">% cfg.lpf_freq - double: cut-frequency of the low-pass filter. Defaults to</span>
+0020   <span class="comment">%            4000Hz.</span>
+0021   <span class="comment">% cfg.scan - double: time window in which to scan for a maximal correlation</span>
+0022   <span class="comment">%            if a scalar is given the time window is [-scan, scan]</span>
+0023   <span class="comment">%            if a length 2 vector is given it should be [-a, b], where 'a'</span>
+0024   <span class="comment">%            and 'b' are positive numbers in seconds.</span>
+0025   <span class="comment">% cfg.freqreltol - double: frequency relative tolerance. defaults to 1e-5</span>
+0026   <span class="comment">% cfg.penalty_tau - double: penalty time use to weight the correlation.</span>
+0027   <span class="comment">%            This allows to bound slave_delta_t (as with cfg.scan) but in</span>
+0028   <span class="comment">%            a continuous way. If empty (default) no penalty is applied.</span>
+0029   <span class="comment">% cfg.penalty_n - double: penalty 'hill-coefficient' use to weight the</span>
+0030   <span class="comment">%            correlation. Defines how abrupt is the penalty increase when</span>
+0031   <span class="comment">%            slave_delta_t &gt; cfg.penalty_tau. Defaults to 2.</span>
+0032   <span class="comment">% cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip</span>
+0033   <span class="comment">%            functions</span>
+0034   <span class="comment">%</span>
+0035   <span class="comment">% master - FT_DATATYPE_RAW continuous with single channel and trial</span>
+0036   <span class="comment">% slave - FT_DATATYPE_RAW continuous with single channel and trial</span>
+0037   <span class="comment">%</span>
+0038   <span class="comment">% returns</span>
+0039   <span class="comment">% slave_delta_t - double: time in seconds by which to shift the slave to</span>
+0040   <span class="comment">%           align it to master</span>
+0041   <span class="comment">% max_corr - double: maximum correlation coefficient achieved for the shift</span>
+0042   <span class="comment">%           slave_delta_t</span>
+0043   <span class="comment">% master - FT_DATATYPE_RAW: master raw after applying the preprocessing</span>
+0044   <span class="comment">% slave - FT_DATATYPE_RAW: slave raw after applying the preprocessing</span>
+0045   
+0046   <span class="keyword">if</span> nargin == 2
+0047     slave = master;
+0048     master = cfg;
+0049     cfg = [];
+0050   <span class="keyword">elseif</span> nargin ~=3
+0051     error(<span class="string">'incorrect number of arguments in call'</span>);
+0052   <span class="keyword">end</span>
+0053   
+0054   resample_freq     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'resample_freq'</span>, 10000);
+0055   scan              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'scan'</span>);
+0056   freqreltol        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'freqreltol'</span>, 1e-5);
+0057   method            = string(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'method'</span>, <span class="string">'envelope'</span>));
+0058   env_freq          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_freq'</span>, 100);
+0059   lpf_freq          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_freq'</span>, 4000);
+0060   penalty_tau       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'penalty_tau'</span>);
+0061   penalty_n         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'penalty_n'</span>, 2); 
+0062   ft_feedback       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'ft_feedback'</span>,<span class="string">'no'</span>);
+0063   ft_feedback       = ft_feedback{1};
+0064 
+0065   <span class="comment">%assert single trial and channel</span>
+0066   <span class="keyword">if</span> numel(master.trial) &gt; 1; error(<span class="string">'master should be single trial raw'</span>); <span class="keyword">end</span>
+0067   <span class="keyword">if</span> numel(slave.trial) &gt; 1; error(<span class="string">'slave should be single trial raw'</span>); <span class="keyword">end</span>
+0068   <span class="keyword">if</span> numel(master.label) &gt; 1; error(<span class="string">'master should be single channel raw'</span>); <span class="keyword">end</span>
+0069   <span class="keyword">if</span> numel(slave.label) &gt; 1; error(<span class="string">'slave should be single channel raw'</span>); <span class="keyword">end</span>
+0070 
+0071   <span class="comment">%calculating scan range</span>
+0072   mc=[]; sc=[]; <span class="comment">%master and slave time coordinates</span>
+0073   mc.s1=1; mc.s2=length(master.time{1});
+0074   mc.t1=master.time{1}(1); mc.t2=master.time{1}(end);
+0075   sc.s1=1; sc.s2=length(slave.time{1});
+0076   sc.t1=slave.time{1}(1); sc.t2=slave.time{1}(end);
+0077   max_scan_range = [mc.t1 - sc.t2, mc.t2 - sc.t1];
+0078   <span class="keyword">if</span> prod(max_scan_range) &gt; 0 <span class="comment">% if files do not overlap</span>
+0079     slave_delta_t=nan;
+0080     max_corr=nan;
+0081     <span class="keyword">return</span>
+0082   <span class="keyword">end</span>
+0083   <span class="keyword">if</span> isempty(scan)
+0084     scan = max_scan_range;
+0085   <span class="keyword">elseif</span> length(scan)==1
+0086     scan=[max(-scan,max_scan_range(1)), min(scan,max_scan_range(2))];
+0087   <span class="keyword">elseif</span> length(scan)==2
+0088     scan=[max(scan(1),max_scan_range(1)), min(scan(2),max_scan_range(2))];  
+0089   <span class="keyword">else</span>
+0090     error(<span class="string">'invalid use of cfg.scan argument'</span>);
+0091   <span class="keyword">end</span>
+0092 
+0093   <span class="comment">%robust estimation of mean and std</span>
+0094   master_median = median(master.trial{1});
+0095   slave_median = median(slave.trial{1});
+0096   master_std = robust_std(master.trial{1});
+0097   slave_std = robust_std(slave.trial{1});
+0098   <span class="keyword">if</span> master_std==0; error(<span class="string">'master can''t be correlated'</span>); <span class="keyword">end</span>
+0099   <span class="keyword">if</span> slave_std==0; error(<span class="string">'slave can''t be correlated'</span>); <span class="keyword">end</span>
+0100 
+0101   <span class="comment">%cropping and padding to correlation time window</span>
+0102   ctw = [sc.t1+scan(1), sc.t2+scan(2)];
+0103   master = <a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>(master, ctw(1), ctw(2), 0);
+0104   slave = <a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>(slave, master.time{1}(1), master.time{1}(end), 0);
+0105 
+0106   <span class="comment">%common resample frequency</span>
+0107   cfg=[]; cfg.feedback=ft_feedback;
+0108   cfg.resamplefs=resample_freq;
+0109   master = ft_resampledata(cfg, master);
+0110   cfg=[]; cfg.feedback=ft_feedback;
+0111   cfg.time=master.time; cfg.method=<span class="string">'linear'</span>;
+0112   slave = ft_resampledata(cfg, slave);
+0113 
+0114   <span class="comment">%checking slave resampling</span>
+0115   <span class="keyword">if</span> abs(slave.fsample/master.fsample-1) &lt; freqreltol
+0116     slave.fsample = master.fsample;
+0117   <span class="keyword">else</span>
+0118     error(<span class="string">'failed to resample slave to master''s time'</span>);
+0119   <span class="keyword">end</span>
+0120   is_nan=isnan(slave.trial{1});
+0121   <span class="keyword">if</span> sum(is_nan)&gt;0
+0122     master.trial{1} = master.trial{1}(:,~is_nan);
+0123     master.time{1} = master.time{1}(:,~is_nan);
+0124     slave.trial{1} = slave.trial{1}(:,~is_nan);
+0125     slave.time{1} = slave.time{1}(:,~is_nan);
+0126   <span class="keyword">end</span>
+0127 
+0128   <span class="comment">%methods</span>
+0129   <span class="keyword">if</span> ismember(lower(method),{<span class="string">'env'</span>,<span class="string">'envelope'</span>})  <span class="comment">%envelope correlation</span>
+0130     cfg=[]; cfg.freq = env_freq; <span class="comment">%calculating envelops</span>
+0131     master = <a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(cfg,master);
+0132     slave = <a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(cfg,slave);
+0133     try_polarity=false;
+0134 
+0135   <span class="keyword">elseif</span> ismember(lower(method),{<span class="string">'lpf'</span>,<span class="string">'low-pass-filter'</span>})  <span class="comment">%low-pass-filter</span>
+0136     master.trial{1} = ft_preproc_lowpassfilter(master.trial{1},<span class="keyword">...</span>
+0137                       master.fsample, lpf_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);
+0138     slave.trial{1} = ft_preproc_lowpassfilter(slave.trial{1},<span class="keyword">...</span>
+0139                       slave.fsample, lpf_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);              
+0140     try_polarity=true;                
+0141 
+0142   <span class="keyword">else</span>
+0143     error(<span class="string">'unknown method'</span>);
+0144   <span class="keyword">end</span>
+0145 
+0146   <span class="comment">%normalizing data</span>
+0147   master.trial{1} = (master.trial{1} - master_median) / master_std;
+0148   slave.trial{1} = (slave.trial{1} - slave_median) / slave_std;
+0149 
+0150   <span class="comment">%correlation</span>
+0151   [corr,lag]=xcorr(master.trial{1}(1,:), slave.trial{1}(1,:),<span class="keyword">...</span>
+0152                     floor(max(abs(scan))*master.fsample),<span class="string">'coeff'</span>);
+0153   [max_corr_idx,max_corr] = <a href="#_sub1" class="code" title="subfunction [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)">find_delta_corr</a>(corr,lag,penalty_tau,penalty_n);  
+0154 
+0155   <span class="keyword">if</span> try_polarity                              
+0156     [corr_m,lag_m]=xcorr(master.trial{1}(1,:), (-1).* slave.trial{1}(1,:),<span class="keyword">...</span>
+0157                       floor(max(abs(scan))*master.fsample),<span class="string">'coeff'</span>);                 
+0158     [max_corr_idx_m,max_corr_m] = <a href="#_sub1" class="code" title="subfunction [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)">find_delta_corr</a>(corr_m,lag_m,penalty_tau,penalty_n);   
+0159     <span class="keyword">if</span> max_corr_m &gt; max_corr
+0160       slave.trial{1}=(-1).* slave.trial{1};
+0161       max_corr_idx = max_corr_idx_m;
+0162       max_corr = max_corr_m;
+0163       lag=lag_m;
+0164     <span class="keyword">end</span>
+0165   <span class="keyword">end</span>
+0166 
+0167   slave_delta_t = lag(max_corr_idx)/master.fsample;
+0168   slave.time{1} = slave.time{1} + slave_delta_t;
+0169 
+0170 <span class="keyword">end</span>
+0171 
+0172 <span class="comment">% private function</span>
+0173 <a name="_sub1" href="#_subfunctions" class="code">function [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)</a>
+0174   <span class="keyword">if</span> ~isempty(penalty_tau)
+0175     [~,max_corr_idx]=max(corr./((penalty_tau*master.fsample)^penalty_n + abs(lag).^penalty_n));
+0176     max_corr=corr(max_corr_idx);
+0177   <span class="keyword">else</span>
+0178     [max_corr,max_corr_idx]=max(corr);
+0179   <span class="keyword">end</span>
+0180 
+0181 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,6 +1,6 @@
 function consolidated = bml_sync_consolidate(cfg)
 
-% BML_SYNC_CONSOLIDATE consolidates file chunks synchronizations
+% BML_SYNC_CONSOLIDATE consolidates file synchronization chunks 
 %
 % Use as
 %   consolidated = bml_sync_consolidate(cfg)

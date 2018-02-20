@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_info_raw</title>
+  <meta name="keywords" content="bml_info_raw">
+  <meta name="description" content="BML_INFO_RAW return a annot table with OS and header info of each raw file in a folder.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">io</a> &gt; bml_info_raw.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/io&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_info_raw
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_INFO_RAW return a annot table with OS and header info of each raw file in a folder.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function info = bml_info_raw(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_INFO_RAW return a annot table with OS and header info of each raw file in a folder. 
+
+ Use as
+   tab = bml_info_raw(cfg);
+
+ 'raw' files are those that can be read by ft_read_header.
+
+ The first argument cfg is a configuration structure, which can contain
+ the following field:
+ cfg.path - string: path to the folder containing the files. Defauts to '.'
+ cfg.has_channel - cell of strings: channels required 
+
+ Returns a matlab 'table' with the folloing variables:
+   starts - double: time in seconds 
+   ends - double: time in seconds 
+   name - cell array of char: filename
+   folder - cell array of char: path
+   date - cell array of char: data of file modification 
+   bytes - double: Size of the file in bytes
+   isdir - logical: 1 if name is a folder; 0 if name is a file
+   datenum - double: Modification date as serial date number.
+   chantype
+   Fs
+   nSamples
+   nChans
+   nTrials
+   chantype
+   chanunit
+   duration</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_info_file.html" class="code" title="function info = bml_info_file(cfg)">bml_info_file</a>	BML_INFO_FILE returns table with OS info of each file in a folder</li><li><a href="../../bml/utils/bml_date2sec.html" class="code" title="function sec=bml_date2sec(date,t0)">bml_date2sec</a>	BML_DATE2SEC transforms a cell-array of date strings to seconds from</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function info = bml_info_raw(cfg)</a>
+0002 
+0003 <span class="comment">% BML_INFO_RAW return a annot table with OS and header info of each raw file in a folder.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   tab = bml_info_raw(cfg);</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% 'raw' files are those that can be read by ft_read_header.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% The first argument cfg is a configuration structure, which can contain</span>
+0011 <span class="comment">% the following field:</span>
+0012 <span class="comment">% cfg.path - string: path to the folder containing the files. Defauts to '.'</span>
+0013 <span class="comment">% cfg.has_channel - cell of strings: channels required</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% Returns a matlab 'table' with the folloing variables:</span>
+0016 <span class="comment">%   starts - double: time in seconds</span>
+0017 <span class="comment">%   ends - double: time in seconds</span>
+0018 <span class="comment">%   name - cell array of char: filename</span>
+0019 <span class="comment">%   folder - cell array of char: path</span>
+0020 <span class="comment">%   date - cell array of char: data of file modification</span>
+0021 <span class="comment">%   bytes - double: Size of the file in bytes</span>
+0022 <span class="comment">%   isdir - logical: 1 if name is a folder; 0 if name is a file</span>
+0023 <span class="comment">%   datenum - double: Modification date as serial date number.</span>
+0024 <span class="comment">%   chantype</span>
+0025 <span class="comment">%   Fs</span>
+0026 <span class="comment">%   nSamples</span>
+0027 <span class="comment">%   nChans</span>
+0028 <span class="comment">%   nTrials</span>
+0029 <span class="comment">%   chantype</span>
+0030 <span class="comment">%   chanunit</span>
+0031 <span class="comment">%   duration</span>
+0032 
+0033 chantype    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'chantype'</span>, {}); 
+0034 path        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'path'</span>);
+0035 has_channel = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'has_channel'</span>); 
+0036 
+0037 info        = <a href="bml_info_file.html" class="code" title="function info = bml_info_file(cfg)">bml_info_file</a>(cfg);
+0038 
+0039 <span class="keyword">if</span> isempty(info); <span class="keyword">return</span>; <span class="keyword">end</span>
+0040 info = info(info.bytes &gt; 0,:);  
+0041   
+0042 hdr_vars={<span class="string">'chantype'</span>,<span class="string">'Fs'</span>,<span class="string">'nSamples'</span>,<span class="string">'nChans'</span>,<span class="string">'nTrials'</span>,<span class="string">'chanunit'</span>};
+0043 hdr_table = cell2table(cell(height(info),length(hdr_vars)));
+0044 hdr_table.Properties.VariableNames = hdr_vars;
+0045 
+0046 <span class="keyword">for</span> i=1:height(info)
+0047     hdr = ft_read_header(fullfile(info.folder{i},info.name{i}),<span class="string">'chantype'</span>,chantype);
+0048     <span class="keyword">if</span> ~isempty(has_channel)
+0049       <span class="keyword">if</span> ~all(ismember(has_channel,hdr.label))
+0050         <span class="keyword">continue</span>
+0051       <span class="keyword">end</span>
+0052     <span class="keyword">end</span>      
+0053     hdr_table.chantype(i) = {strjoin(unique(hdr.chantype))};
+0054     hdr_table.Fs(i) = {hdr.Fs};
+0055     hdr_table.nSamples(i) = {hdr.nSamples};
+0056     hdr_table.nChans(i) = {hdr.nChans};  
+0057     hdr_table.nTrials(i) = {hdr.nTrials};    
+0058     hdr_table.chanunit(i) = {strjoin(unique(hdr.chanunit))}; 
+0059 <span class="keyword">end</span>
+0060 
+0061 filtvec = ~cellfun(@isempty,hdr_table.nChans);
+0062 hdr_table = hdr_table(filtvec,:);
+0063 
+0064 hdr_table.Fs = cell2mat(hdr_table.Fs);
+0065 hdr_table.nSamples = cell2mat(hdr_table.nSamples);
+0066 hdr_table.nChans = cell2mat(hdr_table.nChans);
+0067 hdr_table.nTrials = cell2mat(hdr_table.nTrials);
+0068 
+0069 info = [info(filtvec,:) hdr_table];
+0070 info.duration = info.nSamples ./ info.Fs;
+0071 ends=<a href="../../bml/utils/bml_date2sec.html" class="code" title="function sec=bml_date2sec(date,t0)">bml_date2sec</a>(info{:,<span class="string">'date'</span>});
+0072 starts = ends-info.duration;
+0073 
+0074 info=[table(starts,ends,<span class="string">'VariableNames'</span>,{<span class="string">'starts'</span>,<span class="string">'ends'</span>}) info];
+0075 <span class="comment">% info=sortrows(info,'starts');</span>
+0076 info=<a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(info,<span class="string">'raw_info'</span>);
+0077 
+0078 
+0079</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

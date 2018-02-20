@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_neuroomega_info_raw</title>
+  <meta name="keywords" content="bml_neuroomega_info_raw">
+  <meta name="description" content="BML_NEUROOMEGA_INFO_RAW returns table with OS and header info of raw neuroomega.mat (.mpx) files.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">io</a> &gt; bml_neuroomega_info_raw.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/io&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_neuroomega_info_raw
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_NEUROOMEGA_INFO_RAW returns table with OS and header info of raw neuroomega.mat (.mpx) files.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function info = bml_neuroomega_info_raw(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_NEUROOMEGA_INFO_RAW returns table with OS and header info of raw neuroomega.mat (.mpx) files.
+
+ Use as
+   tab = bml_neuroomega_info_raw(cfg);
+
+ 'raw' files can be read by ft_read_header.
+
+ The first argument cfg is a configuration structure, which can contain
+ the following field:
+ cfg.chantype - string: channel type. Required (see table below)
+ cfg.path - string: path to the folder containing the .mat files. Defauts to '.'
+ cfg.pattern - string: file name pattern (defaults to '*.mat')
+ cfg.regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat')
+ cfg.time_channel - string: channel to use for TimeBegin and TimeEnd 
+               defaults to first channel of indicated chantype in first
+               file detected.
+ cfg.rm_vars - cell of char with variables names to be removed if present
+               defaults to {'time_end','time_begin','filenum'}
+ cfg.mpx_path - string: path to the folder containing the .mpx_ files. Defauts to cfg.path
+ cfg.mpx_pattern - string: file name pattern (defaults to '*.mpx')
+ cfg.mpx_regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx')
+
+
+ Returns a matlab 'table' with the folloing variables:
+   start - double: time in seconds (calculated if mpx files are found in cfg.mpx_path)  
+   end - double: time in seconds (calculated if mpx files are found in cfg.mpx_path)
+   name - cell array of char: filename
+   folder - cell array of char: path
+   date - cell array of char: data of file modification 
+   bytes - double: Size of the file in bytes
+   isdir - logical: 1 if name is a folder; 0 if name is a file
+   datenum - double: Modification date as serial date number.
+   chantype
+   Fs
+   nSamples
+   nChans
+   nTrials
+   chantype
+   chanunit
+   duration
+
+
+
+ ----------------------------------------
+ chantype     |   example channel
+ ----------------------------------------
+ 'macro'      | 'CMacro_RAW_01___Central'
+ 'micro'      | 'CRAW_01___Central'
+ 'micro_hp'   | 'CSPK_01___Central'
+ 'analog'     | 'CANALOG_IN_1'
+ 'add_analog' | 'CADD_ANALOG_IN_1'
+ 'micro_lfp'  | 'CLFP_01___Central'
+ 'macro_lfp'  | 'CMacro_LFP_01___Central
+ ----------------------------------------</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_info_file.html" class="code" title="function info = bml_info_file(cfg)">bml_info_file</a>	BML_INFO_FILE returns table with OS info of each file in a folder</li><li><a href="bml_neuroomega_info_file.html" class="code" title="function info = bml_neuroomega_info_file(cfg)">bml_neuroomega_info_file</a>	BML_NEUROOMEGA_INFO_FILE returns table with OS info of each neuroomega.mat file in a folder</li><li><a href="../../bml/utils/bml_date2sec.html" class="code" title="function sec=bml_date2sec(date,t0)">bml_date2sec</a>	BML_DATE2SEC transforms a cell-array of date strings to seconds from</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function info = bml_neuroomega_info_raw(cfg)</a>
+0002 
+0003 <span class="comment">% BML_NEUROOMEGA_INFO_RAW returns table with OS and header info of raw neuroomega.mat (.mpx) files.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   tab = bml_neuroomega_info_raw(cfg);</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% 'raw' files can be read by ft_read_header.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% The first argument cfg is a configuration structure, which can contain</span>
+0011 <span class="comment">% the following field:</span>
+0012 <span class="comment">% cfg.chantype - string: channel type. Required (see table below)</span>
+0013 <span class="comment">% cfg.path - string: path to the folder containing the .mat files. Defauts to '.'</span>
+0014 <span class="comment">% cfg.pattern - string: file name pattern (defaults to '*.mat')</span>
+0015 <span class="comment">% cfg.regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mat')</span>
+0016 <span class="comment">% cfg.time_channel - string: channel to use for TimeBegin and TimeEnd</span>
+0017 <span class="comment">%               defaults to first channel of indicated chantype in first</span>
+0018 <span class="comment">%               file detected.</span>
+0019 <span class="comment">% cfg.rm_vars - cell of char with variables names to be removed if present</span>
+0020 <span class="comment">%               defaults to {'time_end','time_begin','filenum'}</span>
+0021 <span class="comment">% cfg.mpx_path - string: path to the folder containing the .mpx_ files. Defauts to cfg.path</span>
+0022 <span class="comment">% cfg.mpx_pattern - string: file name pattern (defaults to '*.mpx')</span>
+0023 <span class="comment">% cfg.mpx_regexp - string: regular expression to filter files (defaults to '[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx')</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Returns a matlab 'table' with the folloing variables:</span>
+0027 <span class="comment">%   start - double: time in seconds (calculated if mpx files are found in cfg.mpx_path)</span>
+0028 <span class="comment">%   end - double: time in seconds (calculated if mpx files are found in cfg.mpx_path)</span>
+0029 <span class="comment">%   name - cell array of char: filename</span>
+0030 <span class="comment">%   folder - cell array of char: path</span>
+0031 <span class="comment">%   date - cell array of char: data of file modification</span>
+0032 <span class="comment">%   bytes - double: Size of the file in bytes</span>
+0033 <span class="comment">%   isdir - logical: 1 if name is a folder; 0 if name is a file</span>
+0034 <span class="comment">%   datenum - double: Modification date as serial date number.</span>
+0035 <span class="comment">%   chantype</span>
+0036 <span class="comment">%   Fs</span>
+0037 <span class="comment">%   nSamples</span>
+0038 <span class="comment">%   nChans</span>
+0039 <span class="comment">%   nTrials</span>
+0040 <span class="comment">%   chantype</span>
+0041 <span class="comment">%   chanunit</span>
+0042 <span class="comment">%   duration</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">%</span>
+0045 <span class="comment">%</span>
+0046 <span class="comment">% ----------------------------------------</span>
+0047 <span class="comment">% chantype     |   example channel</span>
+0048 <span class="comment">% ----------------------------------------</span>
+0049 <span class="comment">% 'macro'      | 'CMacro_RAW_01___Central'</span>
+0050 <span class="comment">% 'micro'      | 'CRAW_01___Central'</span>
+0051 <span class="comment">% 'micro_hp'   | 'CSPK_01___Central'</span>
+0052 <span class="comment">% 'analog'     | 'CANALOG_IN_1'</span>
+0053 <span class="comment">% 'add_analog' | 'CADD_ANALOG_IN_1'</span>
+0054 <span class="comment">% 'micro_lfp'  | 'CLFP_01___Central'</span>
+0055 <span class="comment">% 'macro_lfp'  | 'CMacro_LFP_01___Central</span>
+0056 <span class="comment">% ----------------------------------------</span>
+0057 <span class="comment">%</span>
+0058 
+0059 chantype       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'chantype'</span>);   
+0060 time_channel   = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'time_channel'</span>);
+0061 
+0062 info = <a href="bml_neuroomega_info_file.html" class="code" title="function info = bml_neuroomega_info_file(cfg)">bml_neuroomega_info_file</a>(cfg);
+0063 
+0064 cfg_mpx=[];
+0065 cfg_mpx.path    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'mpx_path'</span>,ft_getopt(cfg,<span class="string">'path'</span>,<span class="string">'.'</span>));
+0066 cfg_mpx.pattern = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'mpx_pattern'</span>,<span class="string">'*.mpx'</span>);
+0067 cfg_mpx.regexp  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'mpx_regexp'</span>,<span class="string">'[RL]T[1-5]D[-]{0,1}\d+\.\d+([+-]M){0,1}F\d+\.mpx'</span>);
+0068 rm_vars         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'rm_vars'</span>,{<span class="string">'time_end'</span>,<span class="string">'time_begin'</span>,<span class="string">'filenum'</span>});
+0069 
+0070 info_mpx=<a href="bml_info_file.html" class="code" title="function info = bml_info_file(cfg)">bml_info_file</a>(cfg_mpx);
+0071 
+0072 hdr_vars={<span class="string">'chantype'</span>,<span class="string">'Fs'</span>,<span class="string">'nSamples'</span>,<span class="string">'nChans'</span>,<span class="string">'nTrials'</span>,<span class="string">'chanunit'</span>,<span class="string">'time_begin'</span>,<span class="string">'time_end'</span>};
+0073 hdr_table = cell2table(cell(size(info,1),length(hdr_vars)));
+0074 hdr_table.Properties.VariableNames = hdr_vars;
+0075 
+0076 assert(~isempty(chantype),<span class="string">'cfg.chantype required'</span>);
+0077 <span class="keyword">if</span> isempty(time_channel)
+0078   hdr1 = ft_read_header(fullfile(info.folder{1},info.name{1}),<span class="string">'chantype'</span>,<span class="string">'chaninfo'</span>);
+0079   time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,chantype),:).channel{1};
+0080 <span class="keyword">end</span>
+0081 time_begin     = strcat(time_channel,<span class="string">'_TimeBegin'</span>);
+0082 time_end       = strcat(time_channel,<span class="string">'_TimeEnd'</span>);
+0083 
+0084 <span class="keyword">for</span> i=1:height(info)
+0085   hdr = ft_read_header(fullfile(info.folder{i},info.name{i}),<span class="string">'chantype'</span>,chantype);
+0086   hdr_table.chantype(i) = {strjoin(unique(hdr.chantype))};
+0087   hdr_table.Fs(i) = {hdr.Fs};
+0088   hdr_table.nSamples(i) = {hdr.nSamples};
+0089   hdr_table.nChans(i) = {hdr.nChans};  
+0090   hdr_table.nTrials(i) = {hdr.nTrials};    
+0091   hdr_table.chanunit(i) = {strjoin(unique(hdr.chanunit))}; 
+0092 
+0093   <span class="keyword">if</span> ismember(time_begin,fields(hdr.orig))
+0094     hdr_table.time_begin(i) = {hdr.orig.(time_begin)};
+0095     hdr_table.time_end(i) = {hdr.orig.(time_end)};
+0096   <span class="keyword">else</span>
+0097     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
+0098       time_begin,fullfile(cfg.path,info.name{i}), strjoin(hdr.label));
+0099   <span class="keyword">end</span>
+0100 <span class="keyword">end</span>
+0101 hdr_table.Fs = cell2mat(hdr_table.Fs);
+0102 hdr_table.nSamples = cell2mat(hdr_table.nSamples);
+0103 hdr_table.nChans = cell2mat(hdr_table.nChans);
+0104 hdr_table.nTrials = cell2mat(hdr_table.nTrials);
+0105 hdr_table.time_begin = cell2mat(hdr_table.time_begin);
+0106 hdr_table.time_end = cell2mat(hdr_table.time_end);
+0107 
+0108 info = [info hdr_table];
+0109 
+0110 <span class="keyword">if</span> ~isempty(info_mpx) <span class="comment">%loading date from .mpx OS info if available</span>
+0111   info_mpx.basename = erase(info_mpx.name,<span class="string">'.mpx'</span>);
+0112   info_mpx=info_mpx(:,{<span class="string">'basename'</span>,<span class="string">'date'</span>,<span class="string">'datenum'</span>});
+0113   
+0114   info.date=[];
+0115   info.datenum=[];
+0116   info.basename = erase(info.name,<span class="string">'.mat'</span>);
+0117   
+0118   <span class="comment">%checking that all mat files have correspondent mpx file</span>
+0119   mat_with_no_mpx = setdiff(info.basename,info_mpx.basename);
+0120   <span class="keyword">if</span> numel(mat_with_no_mpx)&gt;0
+0121     <span class="keyword">if</span> numel(mat_with_no_mpx)&lt;10
+0122       warning(&quot;the following files don't have correspondent .mpx file: <span class="comment">%s&quot;, strjoin(mat_with_no_mpx));</span>
+0123     <span class="keyword">else</span>
+0124       warning(&quot;<span class="comment">%i .mat files don't have correspondent .mpx file&quot;, numel(mat_with_no_mpx));</span>
+0125     <span class="keyword">end</span>
+0126     mat_with_no_mpx=table(mat_with_no_mpx);
+0127     mat_with_no_mpx.Properties.VariableNames = {<span class="string">'basename'</span>};
+0128     mat_with_no_mpx.date(:) = {<span class="string">''</span>};
+0129     mat_with_no_mpx.datenum(:) = NaN;
+0130     info_mpx = [info_mpx; mat_with_no_mpx];
+0131   <span class="keyword">end</span>
+0132   
+0133   info=join(info,info_mpx,<span class="string">'Keys'</span>,<span class="string">'basename'</span>);
+0134 
+0135   <span class="comment">%adjusting time_end to bml_date2sec origin.</span>
+0136   ends = info.time_end+nanmedian(<a href="../../bml/utils/bml_date2sec.html" class="code" title="function sec=bml_date2sec(date,t0)">bml_date2sec</a>(info.date)-info.time_end);
+0137   <span class="comment">%NOTE: time_start and time_end are time coordinates of the first and</span>
+0138   <span class="comment">%last data point. Duration is the length of the 'represented' time</span>
+0139   <span class="comment">%therefore the correct way of calculating duration is as follows:</span>
+0140   info.duration = info.time_end - info.time_begin + 1./info.Fs; 
+0141   starts = ends - info.duration;
+0142   info = [table(starts,ends,<span class="string">'VariableNames'</span>,{<span class="string">'starts'</span>,<span class="string">'ends'</span>}), info];
+0143   info.basename = [];
+0144   <span class="comment">%info=sortrows(info,'starts');</span>
+0145   info = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(info);
+0146 <span class="keyword">else</span>
+0147   warning(<span class="string">'Specify cfg.mpx_path for starts/ends calculation'</span>)
+0148   info=sortrows(info,<span class="string">'time_begin'</span>);
+0149 <span class="keyword">end</span>
+0150 
+0151 <span class="keyword">for</span> i=1:numel(rm_vars)
+0152   <span class="keyword">if</span> ismember(rm_vars(i),info.Properties.VariableNames)
+0153     info.(rm_vars{i}) = [];
+0154   <span class="keyword">end</span>
+0155 <span class="keyword">end</span>  
+0156   
+0157 
+0158 
+0159 
+0160</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

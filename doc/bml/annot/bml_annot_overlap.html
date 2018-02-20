@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_overlap</title>
+  <meta name="keywords" content="bml_annot_overlap">
+  <meta name="description" content="BML_ANNOT_OVERLAP calculates overlapping segments between annotations">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_overlap.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_overlap
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_OVERLAP calculates overlapping segments between annotations</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function overlap=bml_annot_overlap(cfg, annot) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_OVERLAP calculates overlapping segments between annotations
+
+ Use as
+   overlap=bml_annot_overlap(cfg, annot)
+   overlap=bml_annot_overlap(annot)
+
+ cfg is a configuration structure
+ cfg.timetol = time tolerance in seconds. Defaults to 1e-5.
+               useful to avoid detecting contiguity as overlaps due to
+               numeric issues.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a raw of zeros with ones at annot times</li><li><a href="bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="bml_annot_shadow.html" class="code" title="function shadow = bml_annot_shadow(cfg,annot)">bml_annot_shadow</a>	BML_ANNOT_SHADOW creates annotations that 'shadow' the ones in annot</li><li><a href="../../bml/sync/bml_chunk_sessions.html" class="code" title="function chunks = bml_chunk_sessions(session, split_time)">bml_chunk_sessions</a>	BML_CHUNK_SESSIONS breaks up sessions into smaller chunks</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function overlap=bml_annot_overlap(cfg, annot)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_OVERLAP calculates overlapping segments between annotations</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   overlap=bml_annot_overlap(cfg, annot)</span>
+0007 <span class="comment">%   overlap=bml_annot_overlap(annot)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg is a configuration structure</span>
+0010 <span class="comment">% cfg.timetol = time tolerance in seconds. Defaults to 1e-5.</span>
+0011 <span class="comment">%               useful to avoid detecting contiguity as overlaps due to</span>
+0012 <span class="comment">%               numeric issues.</span>
+0013 
+0014 <span class="keyword">if</span> nargin == 1
+0015   annot = cfg;
+0016   cfg=[];
+0017 <span class="keyword">elseif</span> nargin ~= 2
+0018   error(<span class="string">'incorrect number of arguments'</span>);
+0019 <span class="keyword">end</span>
+0020 
+0021 timetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-5);
+0022 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0023 
+0024 i=1; j=2;
+0025 overlap = cell2table(cell(0,4)); 
+0026 overlap.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'id1'</span>,<span class="string">'id2'</span>};
+0027 <span class="keyword">while</span> i&lt;=height(annot) &amp;&amp; j&lt;=height(annot)
+0028   <span class="comment">%if annot.starts(i) &lt; annot.ends(j) &amp;&amp; annot.ends(i) &gt; annot.starts(j)</span>
+0029   <span class="keyword">if</span> annot.ends(j) - annot.starts(i) &gt; timetol &amp;&amp; <span class="keyword">...</span>
+0030      annot.ends(i) - annot.starts(j) &gt; timetol
+0031     overlap = [overlap;{<span class="keyword">...</span>
+0032       max(annot.starts(i),annot.starts(j)),<span class="keyword">...</span>
+0033       min(annot.ends(i),annot.ends(j)),<span class="keyword">...</span>
+0034       annot.id(i),<span class="keyword">...</span>
+0035       annot.id(j)}];
+0036       j = j + 1;
+0037   <span class="keyword">elseif</span> annot.ends(i) - annot.starts(j) &lt;= timetol
+0038     i=i+1;
+0039     j=i+1;
+0040   <span class="keyword">elseif</span> annot.ends(j) - annot.starts(i) &lt;= timetol
+0041     j=j+1;
+0042   <span class="keyword">else</span>
+0043     annot([i j],:)
+0044     error(<span class="string">'Unsupported input annotations tables'</span>);
+0045   <span class="keyword">end</span>
+0046 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

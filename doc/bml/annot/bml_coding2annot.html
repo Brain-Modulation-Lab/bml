@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_coding2annot</title>
+  <meta name="keywords" content="bml_coding2annot">
+  <meta name="description" content="BML_CODING2ANNOT creates annot table from CodingMatrix">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_coding2annot.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_coding2annot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_CODING2ANNOT creates annot table from CodingMatrix</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function annot = bml_coding2annot(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_CODING2ANNOT creates annot table from CodingMatrix 
+
+ Use as
+   annot = bml_codingmatrix2annot(cfg)
+
+ cfg.CodingMatPath    - path to mat file with coding info
+ cfg.EventsPerTrial   - double, defaults depends on CodingAppVersion
+ cfg.roi              - roi table with sessions audio sync information
+ cfg.audio_chanel     - string indicating audio channel (optinal)
+ cfg.CodingAppVersion - char, defines format expected for CodingMatrix
+                      - accepted values are 'U01_v1' (default), 'pilot'
+
+ returns annot table with one row per trial (syllable triplet)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_coding2raw.html" class="code" title="function raw = bml_coding2raw(cfg)">bml_coding2raw</a>	BML_CODING2RAW creates a raw from the audio in the Coding file</li><li><a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>	BML_CONFORM_TO conforms salve to master</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>	BML_PRAAT opens FT_DATATYPE_RAWs in praat</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function default = default_str(input)</a></li><li><a href="#_sub2" class="code">function default = default_int(input)</a></li><li><a href="#_sub3" class="code">function default = default_nan(input)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_coding2annot(cfg)</a>
+0002 
+0003 <span class="comment">% BML_CODING2ANNOT creates annot table from CodingMatrix</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_codingmatrix2annot(cfg)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% cfg.CodingMatPath    - path to mat file with coding info</span>
+0009 <span class="comment">% cfg.EventsPerTrial   - double, defaults depends on CodingAppVersion</span>
+0010 <span class="comment">% cfg.roi              - roi table with sessions audio sync information</span>
+0011 <span class="comment">% cfg.audio_chanel     - string indicating audio channel (optinal)</span>
+0012 <span class="comment">% cfg.CodingAppVersion - char, defines format expected for CodingMatrix</span>
+0013 <span class="comment">%                      - accepted values are 'U01_v1' (default), 'pilot'</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% returns annot table with one row per trial (syllable triplet)</span>
+0016 
+0017 <span class="comment">% Todo: take sync table as input, read audio files, use them to sync the</span>
+0018 <span class="comment">% Audio variable of the mat and, with that, get the times in master</span>
+0019 <span class="comment">% coordinates.</span>
+0020 <span class="comment">%</span>
+0021 
+0022 <span class="keyword">if</span> nargin ~= 1
+0023   error(<span class="string">'Use as bml_coding2annot(cfg)'</span>);
+0024 <span class="keyword">end</span>
+0025 
+0026 CodingMatPath = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'CodingMatPath'</span>);
+0027 assert(~isempty(CodingMatPath),<span class="string">'cfg.CodingMatPath required in single argument call'</span>);
+0028 load(CodingMatPath,<span class="string">'CodingMatrix'</span>);
+0029 load(CodingMatPath,<span class="string">'EventTimes'</span>);
+0030 load(CodingMatPath,<span class="string">'SkipEvents'</span>);
+0031 load(CodingMatPath,<span class="string">'WordList'</span>);
+0032 load(CodingMatPath,<span class="string">'Afs'</span>);
+0033 
+0034 roi              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0035 CodingAppVersion = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'CodingAppVersion'</span>,<span class="string">'U01_v1'</span>);
+0036 AudioCoord       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warpcoords'</span>);
+0037 praat            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'praat'</span>);
+0038 audio_channel    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'audio_channel'</span>);
+0039 
+0040 <span class="keyword">if</span> isempty(AudioCoord) || praat
+0041   <span class="comment">%loading sychronized audio to get the time-mapping</span>
+0042   roi = <a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(roi);
+0043   sync_audio = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(roi);
+0044   
+0045   <span class="keyword">if</span> ~isempty(audio_channel)
+0046     cfg1=[];
+0047     cfg1.channel = audio_channel;
+0048     sync_audio = ft_selectdata(cfg1,sync_audio);
+0049   <span class="keyword">end</span>
+0050   
+0051   <span class="comment">% unwarping to facilitate correlation with coding_audio</span>
+0052   loadedAudioCoord = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(sync_audio);
+0053   sync_audio_time = sync_audio.time;
+0054   sync_audio.time{1} = (1:length(sync_audio.time{1}))./sync_audio.fsample;
+0055   
+0056   <span class="comment">%loading coding audio</span>
+0057   cfg1=[]; cfg1.CodingMatPath = CodingMatPath;
+0058   coding_audio = <a href="../../bml/signal/bml_coding2raw.html" class="code" title="function raw = bml_coding2raw(cfg)">bml_coding2raw</a>(cfg1);
+0059 
+0060   <span class="keyword">if</span> isempty(AudioCoord)
+0061     AudioCoord = loadedAudioCoord;
+0062     
+0063     fprintf(<span class="string">'Calculating alignment between coding and roi audios'</span>);
+0064     cfg1=[]; cfg1.method=<span class="string">'lpf'</span>;
+0065     assert(sync_audio.fsample == Afs, <span class="string">'roi''s Fs should be equivalent to Coding Audio Afs'</span>);      
+0066     [coding_audio_dt, max_corr] = <a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>(cfg1, sync_audio, coding_audio);
+0067     
+0068     AudioCoord.s1 = AudioCoord.s1 - round(coding_audio_dt*Afs);
+0069     AudioCoord.s2 = AudioCoord.s2 - round(coding_audio_dt*Afs);
+0070     
+0071     <span class="keyword">if</span> max_corr &lt; 0.95
+0072       warning(<span class="string">'max_cor = %f should be near 1'</span>, max_corr)
+0073     <span class="keyword">end</span>    
+0074   <span class="keyword">end</span>
+0075   <span class="keyword">if</span> praat
+0076     sync_audio.time = sync_audio_time; <span class="comment">%setting sync time</span>
+0077     coding_audio.time{1} = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord, 1:length(coding_audio.time{1}));    
+0078     <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(sync_audio, <a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>(sync_audio,coding_audio));
+0079   <span class="keyword">end</span>
+0080 <span class="keyword">end</span>
+0081 
+0082 annot=table();
+0083 <span class="keyword">if</span> ismember(CodingAppVersion,{<span class="string">'U01_v1'</span>})
+0084   EventsPerTrial   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'EventsPerTrial'</span>,3);
+0085   N_trials = size(CodingMatrix,2);
+0086     <span class="keyword">if</span> SkipEvents + N_trials * EventsPerTrial &gt; length(EventTimes)
+0087     warning(&quot;Less EventTimes than expected based on CodingMatrix.&quot;);
+0088     N_trials = floor((length(EventTimes) - SkipEvents)/EventsPerTrial);
+0089   <span class="keyword">end</span>
+0090   <span class="keyword">for</span> i=1:N_trials
+0091     id=i;
+0092     
+0093     <span class="comment">%initial trial time in Audio seconds</span>
+0094     ti = EventTimes(SkipEvents + i * EventsPerTrial);  
+0095 
+0096     <span class="comment">%CodingMatrix row 1: Phonetic code in latex</span>
+0097     phoneticCode=CodingMatrix(1,i);
+0098 
+0099     <span class="comment">%CodingMatrix row 2: Syllable errors</span>
+0100     err_syl1=CodingMatrix{2,i}(1);
+0101     err_syl2=CodingMatrix{2,i}(2);
+0102     err_syl3=CodingMatrix{2,i}(3);
+0103 
+0104     <span class="comment">%CodingMatrix row 3: Syl onset time</span>
+0105     onset_syl=bml_strnumcell2ordvec(CodingMatrix{3,i}); <span class="comment">%in Audio seconds</span>
+0106     <span class="keyword">if</span> size(onset_syl,2) &lt; 3
+0107       onset_syl = [onset_syl, nan(1,3-size(onset_syl,2))];
+0108     <span class="keyword">end</span>    
+0109     onset_syl1=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(onset_syl(1)+ti)*Afs); <span class="comment">%in sfm</span>
+0110     onset_syl2=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(onset_syl(2)+ti)*Afs); <span class="comment">%in sfm</span>
+0111     onset_syl3=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(onset_syl(3)+ti)*Afs); <span class="comment">%in sfm</span>
+0112     
+0113     <span class="comment">%CodingMatrix row 4: Syl offset time</span>
+0114     offset_syl = bml_strnumcell2ordvec(CodingMatrix{4,i}); <span class="comment">%in Audio seconds</span>
+0115     <span class="keyword">if</span> isempty(offset_syl)
+0116       offset_syl = nan;
+0117     <span class="keyword">end</span>
+0118     <span class="comment">%completing missing offsets</span>
+0119     <span class="keyword">if</span> length(offset_syl)==length(onset_syl)
+0120       offset_syl_complete = offset_syl;
+0121       offset_syl_coded = ones(1,length(offset_syl_complete));
+0122     <span class="keyword">else</span>
+0123       offset_syl_complete = zeros(1,length(onset_syl));
+0124       offset_syl_coded = zeros(1,length(onset_syl));
+0125       onset_syl_inf = [onset_syl inf];
+0126       j=1; <span class="comment">%offset_syl counter</span>
+0127       <span class="keyword">for</span> k=1:(length(onset_syl))
+0128         <span class="keyword">if</span> j &lt;= length(offset_syl) 
+0129           <span class="keyword">if</span> offset_syl(j) &lt;= onset_syl_inf(k+1)
+0130             offset_syl_complete(k) = offset_syl(j);
+0131             offset_syl_coded(k) = 1;
+0132             j = j + 1;
+0133           <span class="keyword">else</span>
+0134             offset_syl_complete(k) = onset_syl_inf(k+1);
+0135             offset_syl_coded(k) = 0;
+0136           <span class="keyword">end</span>
+0137         <span class="keyword">else</span>
+0138             offset_syl_complete(k) = NaN;
+0139             offset_syl_coded(k) = 0;          
+0140           warning(<span class="string">'Inconsistent syl offset times in trial %i'</span>,i)
+0141         <span class="keyword">end</span>
+0142       <span class="keyword">end</span>
+0143     <span class="keyword">end</span>
+0144     offset_syl1=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(offset_syl_complete(1)+ti) * Afs);<span class="comment">%in sfm</span>
+0145     offset_syl2=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(offset_syl_complete(2)+ti) * Afs);<span class="comment">%in sfm</span>
+0146     offset_syl3=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(offset_syl_complete(3)+ti) * Afs);<span class="comment">%in sfm</span>
+0147     offset_coded_syl1=offset_syl_coded(1);
+0148     offset_coded_syl2=offset_syl_coded(2);
+0149     offset_coded_syl3=offset_syl_coded(3); 
+0150 
+0151     <span class="comment">%CodingMatrix row 5: Vowel onset time</span>
+0152     onset_vowel=bml_strnumcell2ordvec(CodingMatrix{5,i}); <span class="comment">%in Audio seconds</span>
+0153     <span class="keyword">if</span> size(onset_vowel,2) &lt; 3
+0154       onset_vowel = [onset_vowel, nan(1,3-size(onset_vowel,2))];
+0155     <span class="keyword">end</span>  
+0156     onset_vowel1=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(onset_vowel(1)+ti) * Afs);
+0157     onset_vowel2=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(onset_vowel(2)+ti) * Afs);
+0158     onset_vowel3=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(onset_vowel(3)+ti) * Afs);
+0159 
+0160     <span class="comment">%CodingMatrix row 6: Vowel offsets, not coded</span>
+0161     <span class="comment">%CodingMatrix row 7: Preword onset times</span>
+0162     <span class="comment">%CodingMatrix row 8: Preword offset times</span>
+0163     <span class="comment">%CodingMatrix row 9: Post word onset times</span>
+0164     <span class="comment">%CodingMatrix row 10: Post word offset times</span>
+0165     <span class="comment">%CodingMatrix row 11: Other onset times</span>
+0166     <span class="comment">%CodingMatrix row 12: Other offset times</span>
+0167 
+0168     <span class="comment">%CodingMatrix row 13: Note for current trial</span>
+0169     comment=CodingMatrix(13,i);
+0170 
+0171     <span class="comment">%CodingMatrix row 14: Stressors binary</span>
+0172 
+0173     word_triplet = WordList(i);
+0174 
+0175     starts = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(min(onset_syl)+ti) * Afs);
+0176     ends = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(max(offset_syl)+ti) * Afs);
+0177 
+0178     annot = [annot; table(id, starts, ends, phoneticCode, err_syl1, err_syl2, err_syl3,<span class="keyword">...</span>
+0179       onset_syl1, offset_syl1, onset_syl2, offset_syl2, onset_syl3, offset_syl3,<span class="keyword">...</span>
+0180       onset_vowel1, onset_vowel2, onset_vowel3,<span class="keyword">...</span>
+0181       offset_coded_syl1, offset_coded_syl2, offset_coded_syl3, word_triplet, comment)];
+0182 
+0183   <span class="keyword">end</span>
+0184   
+0185 <span class="keyword">elseif</span> ismember(CodingAppVersion,{<span class="string">'pilot'</span>})  
+0186   EventsPerTrial   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'EventsPerTrial'</span>,4);
+0187   N_trials = size(CodingMatrix,2);
+0188   <span class="keyword">if</span> SkipEvents + N_trials * EventsPerTrial &gt; length(EventTimes)
+0189     warning(&quot;Less EventTimes than expected based on CodingMatrix.&quot;);
+0190     N_trials = floor((length(EventTimes) - SkipEvents)/EventsPerTrial);
+0191   <span class="keyword">end</span>
+0192   <span class="keyword">for</span> i=1:N_trials
+0193     id=i;
+0194     ti = EventTimes(SkipEvents + i * EventsPerTrial);
+0195     
+0196     <span class="comment">%CodingMatrix row 1. phonetic code in LaTex separated by '/'.</span>
+0197     phoneticCode = <a href="#_sub1" class="code" title="subfunction default = default_str(input)">default_str</a>(CodingMatrix(1,i));
+0198 
+0199     <span class="comment">%CodingMatrix row 2. 1st Consonant errors</span>
+0200     err_cons1 = CodingMatrix(2,i);
+0201 
+0202     <span class="comment">%CodingMatrix row 3. Vowel errors</span>
+0203     err_vowel = CodingMatrix(3,i);
+0204 
+0205     <span class="comment">%CodingMatrix row 4. 2nd Consonant error</span>
+0206     err_cons2 = CodingMatrix(4,i);
+0207     
+0208     <span class="comment">%CodingMatrix row 5. Word onset time</span>
+0209     onset_word=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(<a href="#_sub3" class="code" title="subfunction default = default_nan(input)">default_nan</a>(CodingMatrix{5,i}) + ti) * Afs);
+0210 
+0211     <span class="comment">%CodingMatrix row 6. Word offset time</span>
+0212     offset_word=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(<a href="#_sub3" class="code" title="subfunction default = default_nan(input)">default_nan</a>(CodingMatrix{6,i}) + ti) * Afs);
+0213     
+0214     <span class="comment">%CodingMatrix row 7. 1 if actual task presentation was revealed</span>
+0215     unveil=<a href="#_sub2" class="code" title="subfunction default = default_int(input)">default_int</a>(CodingMatrix{7,i});
+0216     
+0217     <span class="comment">%CodingMatrix row 8. Notes for current trial</span>
+0218     comment=CodingMatrix(8,i);    
+0219     
+0220     <span class="comment">%CodingMatrix row 9. Onset of vowel</span>
+0221     onset_vowel=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(<a href="#_sub3" class="code" title="subfunction default = default_nan(input)">default_nan</a>(CodingMatrix{9,i}) + ti) * Afs);    
+0222     
+0223     <span class="comment">%CodingMatrix row 10. Offset of vowel</span>
+0224     offset_vowel=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(AudioCoord,(<a href="#_sub3" class="code" title="subfunction default = default_nan(input)">default_nan</a>(CodingMatrix{10,i}) + ti) * Afs);        
+0225  
+0226     word = WordList(i);
+0227 
+0228     starts = onset_word;
+0229     ends = offset_word;
+0230 
+0231     annot = [annot; table(id, starts, ends, phoneticCode,<span class="keyword">...</span>
+0232       err_cons1, err_vowel, err_cons2, onset_word, offset_word, <span class="keyword">...</span>
+0233       unveil, comment, onset_vowel, offset_vowel, word)];
+0234     
+0235   <span class="keyword">end</span>
+0236 <span class="keyword">else</span>
+0237   error(<span class="string">'unknown CodingAppVersion'</span>)
+0238 <span class="keyword">end</span>
+0239   
+0240 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0241 annot.trial_id = annot.id;
+0242 <span class="keyword">end</span>
+0243 
+0244 
+0245 
+0246 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0247 <span class="comment">%%% Private functions %%%</span>
+0248 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0249 
+0250 <a name="_sub1" href="#_subfunctions" class="code">function default = default_str(input)</a>
+0251   <span class="keyword">if</span> isempty(input)
+0252     default = {<span class="string">''</span>};
+0253   <span class="keyword">else</span>
+0254     default = input;
+0255   <span class="keyword">end</span>
+0256 <span class="keyword">end</span>
+0257 
+0258 <a name="_sub2" href="#_subfunctions" class="code">function default = default_int(input)</a>
+0259   <span class="keyword">if</span> isempty(input)
+0260     default = 0;
+0261   <span class="keyword">else</span>
+0262     default = input;
+0263   <span class="keyword">end</span>
+0264 <span class="keyword">end</span>
+0265 
+0266 <a name="_sub3" href="#_subfunctions" class="code">function default = default_nan(input)</a>
+0267   <span class="keyword">if</span> isempty(input)
+0268     default = nan;
+0269   <span class="keyword">else</span>
+0270     default = input;
+0271   <span class="keyword">end</span>
+0272 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

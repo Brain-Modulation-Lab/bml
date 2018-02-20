@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_getopt</title>
+  <meta name="keywords" content="bml_getopt">
+  <meta name="description" content="BML_GETOPT gets the value from a configuration structure [internal]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">utils</a> &gt; bml_getopt.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/utils&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_getopt
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_GETOPT gets the value from a configuration structure [internal]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function val = bml_getopt(opt, key, default, emptymeaningful) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_GETOPT gets the value from a configuration structure [internal]
+
+ Use as
+   val = bml_getopt(s, key, default, emptymeaningful)
+ where the input values are
+   s               = structure or cell-array
+   key             = string
+   default         = any valid MATLAB data type (optional, default = [])
+   emptymeaningful = boolean value (optional, default = 0)
+
+ If the key is present as field in the structure, or as key-value pair in the
+ cell-array, the corresponding value will be returned.
+
+ If the key is not present, bml_getopt will return the default, or an empty array
+ when no default was specified.
+
+ If the key is present but has an empty value, then the emptymeaningful flag
+ specifies whether the empty value or the default value should be returned.
+ If emptymeaningful==true, then the empty array will be returned.
+ If emptymeaningful==false, then the specified default will be returned.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a raw of zeros with ones at annot times</li><li><a href="../../bml/annot/bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/annot/bml_annot_detect.html" class="code" title="function annot = bml_annot_detect(cfg, env)">bml_annot_detect</a>	BML_ANNOT_DETECT identifies annotations thresholding an envelope signal</li><li><a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>	BML_ANNOT_OVERLAP calculates overlapping segments between annotations</li><li><a href="../../bml/annot/bml_annot_plot.html" class="code" title="function bml_annot_plot(cfg, annot, varargin)">bml_annot_plot</a>	BML_ANNOT_PLOT plots an annotation table</li><li><a href="../../bml/annot/bml_annot_shadow.html" class="code" title="function shadow = bml_annot_shadow(cfg,annot)">bml_annot_shadow</a>	BML_ANNOT_SHADOW creates annotations that 'shadow' the ones in annot</li><li><a href="../../bml/annot/bml_annot_t0.html" class="code" title="function shifted = bml_annot_t0(cfg,annot)">bml_annot_t0</a>	BML_ANNOT_T0 changes the time reference of an annot table</li><li><a href="../../bml/annot/bml_annot_transfer.html" class="code" title="function transfered = bml_annot_transfer(cfg, annot, transfer)">bml_annot_transfer</a>	BML_ANNOT_TRANSFER copies information of transfer to annot</li><li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li><li><a href="../../bml/annot/bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>	BML_EVENT2ANNOT creates a annot table from a events structure</li><li><a href="../../bml/annot/bml_plexon2annot.html" class="code" title="function [annot, spike] = bml_plexon2annot(cfg)">bml_plexon2annot</a>	BML_PLEXON2ANNOT loads spike events from plexon file</li><li><a href="../../bml/annot/bml_roi_confluence.html" class="code" title="function confluent = bml_roi_confluence(cfg)">bml_roi_confluence</a>	BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file</li><li><a href="../../bml/io/bml_info_file.html" class="code" title="function info = bml_info_file(cfg)">bml_info_file</a>	BML_INFO_FILE returns table with OS info of each file in a folder</li><li><a href="../../bml/io/bml_info_raw.html" class="code" title="function info = bml_info_raw(cfg)">bml_info_raw</a>	BML_INFO_RAW return a annot table with OS and header info of each raw file in a folder.</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/io/bml_load_epoched.html" class="code" title="function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)">bml_load_epoched</a>	BML_LOAD_EPOCHED loads an epoched raw from one or more files</li><li><a href="../../bml/io/bml_neuroomega_info_file.html" class="code" title="function info = bml_neuroomega_info_file(cfg)">bml_neuroomega_info_file</a>	BML_NEUROOMEGA_INFO_FILE returns table with OS info of each neuroomega.mat file in a folder</li><li><a href="../../bml/io/bml_neuroomega_info_raw.html" class="code" title="function info = bml_neuroomega_info_raw(cfg)">bml_neuroomega_info_raw</a>	BML_NEUROOMEGA_INFO_RAW returns table with OS and header info of raw neuroomega.mat (.mpx) files.</li><li><a href="../../bml/io/bml_read_event.html" class="code" title="function event = bml_read_event(cfg)">bml_read_event</a>	BML_READ_EVENT reads fieldtrip's event structures from files</li><li><a href="../../bml/signal/bml_check_contiguity.html" class="code" title="function are_contiguous = bml_check_contiguity(cfg, varargin)">bml_check_contiguity</a>	BML_CHECK_CONTIGUITY returns true if raws are time-contiguous</li><li><a href="../../bml/signal/bml_coding2raw.html" class="code" title="function raw = bml_coding2raw(cfg)">bml_coding2raw</a>	BML_CODING2RAW creates a raw from the audio in the Coding file</li><li><a href="../../bml/signal/bml_definetrial.html" class="code" title="function trl_raw = bml_definetrial(cfg,raw)">bml_definetrial</a>	BML_DEFINETRIAL transforms a continuous raw into a trialed raw</li><li><a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>	BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method</li><li><a href="../../bml/signal/bml_event2raw.html" class="code" title="function raw = bml_event2raw(cfg, event)">bml_event2raw</a>	BML_EVENT2RAW creates a raw of zeros with ones at event times</li><li><a href="../../bml/signal/bml_hstack.html" class="code" title="function [data] = bml_hstack(cfg, varargin)">bml_hstack</a>	BML_HSTACK concatenates multiple raw data structures by time</li><li><a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>	BML_PAD returns a padded version of the raw (crops if necessary)</li><li><a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li><li><a href="../../bml/signal/bml_reorder_channels.html" class="code" title="function reordered = bml_reorder_channels(cfg,data)">bml_reorder_channels</a>	BML_REORDER_CHANNELS changes the order of the channels of a raw</li><li><a href="../../bml/signal/bml_rereference.html" class="code" title="function [ref,U] = bml_rereference(cfg,raw)">bml_rereference</a>	BML_REREFERENCE applies re-referencing scheme to raw</li><li><a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="../../bml/sync/bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_roi2coord.html" class="code" title="function coord = bml_roi2coord(cfg, roi)">bml_roi2coord</a>	BML_ROI2COORD calculates raw coordinates for entries in roi</li><li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li><li><a href="../../bml/sync/bml_sync_check.html" class="code" title="function bml_sync_check(cfg)">bml_sync_check</a>	BML_SYNC_CHECK loads files in a synchronization roi table into praat</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/sync/bml_sync_neuroomega_event.html" class="code" title="function sync_roi = bml_sync_neuroomega_event(cfg)">bml_sync_neuroomega_event</a>	BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events</li><li><a href="../../bml/sync/bml_sync_transfer_neuroomega_chantype.html" class="code" title="function sync = bml_sync_transfer_neuroomega_chantype(cfg)">bml_sync_transfer_neuroomega_chantype</a>	BML_SYNC_TRANSFER_NEUROOMEGA_CHANTYPE transfer sync info from one chantype to another</li><li><a href="../../bml/sync/bml_sync_transfer_trellis_filetype.html" class="code" title="function sync = bml_sync_transfer_trellis_filetype(cfg)">bml_sync_transfer_trellis_filetype</a>	BML_SYNC_TRANSFER_TRELLIS_FILETYPE transfer sync info between trellis filetypes</li><li><a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>	BML_TIME2IDX calculates sample indices from a time vector and file coordinates</li><li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/sync/bml_timealign_annot.html" class="code" title="function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master, slave)">bml_timealign_annot</a>	BML_TIMEALIGN_ANNOT aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/sync/bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li><li><a href="bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function val = bml_getopt(opt, key, default, emptymeaningful)</a>
+0002 
+0003 <span class="comment">% BML_GETOPT gets the value from a configuration structure [internal]</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   val = bml_getopt(s, key, default, emptymeaningful)</span>
+0007 <span class="comment">% where the input values are</span>
+0008 <span class="comment">%   s               = structure or cell-array</span>
+0009 <span class="comment">%   key             = string</span>
+0010 <span class="comment">%   default         = any valid MATLAB data type (optional, default = [])</span>
+0011 <span class="comment">%   emptymeaningful = boolean value (optional, default = 0)</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% If the key is present as field in the structure, or as key-value pair in the</span>
+0014 <span class="comment">% cell-array, the corresponding value will be returned.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% If the key is not present, bml_getopt will return the default, or an empty array</span>
+0017 <span class="comment">% when no default was specified.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% If the key is present but has an empty value, then the emptymeaningful flag</span>
+0020 <span class="comment">% specifies whether the empty value or the default value should be returned.</span>
+0021 <span class="comment">% If emptymeaningful==true, then the empty array will be returned.</span>
+0022 <span class="comment">% If emptymeaningful==false, then the specified default will be returned.</span>
+0023 
+0024 <span class="comment">% 2017.10.27 AB: adapted from fieldtrip</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Copyright (C) 2011-2012, Robert Oostenveld</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% This file is part of FieldTrip, see http://www.fieldtriptoolbox.org</span>
+0029 <span class="comment">% for the documentation and details.</span>
+0030 <span class="comment">%</span>
+0031 <span class="comment">%    FieldTrip is free software: you can redistribute it and/or modify</span>
+0032 <span class="comment">%    it under the terms of the GNU General Public License as published by</span>
+0033 <span class="comment">%    the Free Software Foundation, either version 3 of the License, or</span>
+0034 <span class="comment">%    (at your option) any later version.</span>
+0035 <span class="comment">%</span>
+0036 <span class="comment">%    FieldTrip is distributed in the hope that it will be useful,</span>
+0037 <span class="comment">%    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+0038 <span class="comment">%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+0039 <span class="comment">%    GNU General Public License for more details.</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">%    You should have received a copy of the GNU General Public License</span>
+0042 <span class="comment">%    along with FieldTrip. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">% $Id$</span>
+0045 
+0046 <span class="keyword">if</span> nargin&lt;3
+0047   default = [];
+0048 <span class="keyword">end</span>
+0049 
+0050 <span class="keyword">if</span> nargin &lt; 4
+0051   emptymeaningful = 0;
+0052 <span class="keyword">end</span>
+0053 
+0054 <span class="keyword">if</span> isa(opt, <span class="string">'struct'</span>) || isa(opt, <span class="string">'config'</span>)
+0055   <span class="comment">% get the key-value from the structure</span>
+0056   fn = fieldnames(opt);
+0057   <span class="keyword">if</span> ~any(strcmp(key, fn))
+0058     val = default;
+0059   <span class="keyword">else</span>
+0060     val = opt.(key);
+0061   <span class="keyword">end</span>
+0062   
+0063 <span class="keyword">elseif</span> istable(opt)
+0064   assert(height(opt)==1,<span class="string">'configuration tables should be a 1 row high'</span>);
+0065   <span class="keyword">if</span> ~any(strcmp(key, opt.Properties.VariableNames))
+0066     val = default;
+0067   <span class="keyword">else</span>
+0068     val = opt.(key);
+0069     <span class="keyword">if</span> iscell(val)
+0070       val = val{:};
+0071     <span class="keyword">end</span>
+0072   <span class="keyword">end</span>
+0073   
+0074 <span class="keyword">elseif</span> isa(opt, <span class="string">'cell'</span>)
+0075   <span class="comment">% get the key-value from the cell-array</span>
+0076   <span class="keyword">if</span> mod(length(opt),2)
+0077     error(<span class="string">'optional input arguments should come in key-value pairs, i.e. there should be an even number'</span>);
+0078   <span class="keyword">end</span>
+0079   
+0080   <span class="comment">% the 1st, 3rd, etc. contain the keys, the 2nd, 4th, etc. contain the values</span>
+0081   keys = opt(1:2:end);
+0082   vals = opt(2:2:end);
+0083   
+0084   <span class="comment">% the following may be faster than cellfun(@ischar, keys)</span>
+0085   valid = false(size(keys));
+0086   <span class="keyword">for</span> i=1:numel(keys)
+0087     valid(i) = ischar(keys{i});
+0088   <span class="keyword">end</span>
+0089   
+0090   <span class="keyword">if</span> ~all(valid)
+0091     error(<span class="string">'optional input arguments should come in key-value pairs, the optional input argument %d is invalid (should be a string)'</span>, i);
+0092   <span class="keyword">end</span>
+0093   
+0094   hit = find(strcmpi(key, keys));
+0095   <span class="keyword">if</span> isempty(hit)
+0096     <span class="comment">% the requested key was not found</span>
+0097     val = default;
+0098   <span class="keyword">elseif</span> length(hit)==1
+0099     <span class="comment">% the requested key was found</span>
+0100     val = vals{hit};
+0101   <span class="keyword">else</span>
+0102     error(<span class="string">'multiple input arguments with the same name'</span>);
+0103   <span class="keyword">end</span>
+0104   
+0105 <span class="keyword">elseif</span> isempty(opt)
+0106   <span class="comment">% no options are specified, return default</span>
+0107   val = default;
+0108 <span class="keyword">end</span> <span class="comment">% isstruct or iscell or isempty</span>
+0109 
+0110 <span class="keyword">if</span> isempty(val) &amp;&amp; ~isempty(default) &amp;&amp; ~emptymeaningful
+0111   <span class="comment">% use the default value instead of the empty input that was specified:</span>
+0112   <span class="comment">% this applies for example if you do functionname('key', []), where</span>
+0113   <span class="comment">% the empty is meant to indicate that the user does not know or care</span>
+0114   <span class="comment">% what the value is</span>
+0115   val = default;
+0116 <span class="keyword">end</span>
+0117 
+0118 <span class="comment">%returning cell of char instead of strings for compatibility with fieldtrip</span>
+0119 <span class="keyword">if</span> isstring(val) || iscellstr(val) || ischar(val)
+0120   val = cellstr(val);
+0121 <span class="keyword">end</span>
+0122 
+0123</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

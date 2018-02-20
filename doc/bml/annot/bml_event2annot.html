@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_event2annot</title>
+  <meta name="keywords" content="bml_event2annot">
+  <meta name="description" content="BML_EVENT2ANNOT creates a annot table from a events structure">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_event2annot.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_event2annot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_EVENT2ANNOT creates a annot table from a events structure</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function annot = bml_event2annot(cfg, event) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_EVENT2ANNOT creates a annot table from a events structure
+
+ Use as
+   annot = bml_event2annot(cfg, event)
+   annot = bml_event2annot(cfg.roi, event)
+
+ cfg.roi
+ cfg.event_type  - cells of char: event types selected
+ cfg.coord       - logical: should file coordinates be appended (defaults false)
+ cfg.starts      - float: t0 of the event structure. If empty no time
+          correction is done
+ cfg.Fs          - sampling frequency in Hz. Defaults to 1. 
+ cfg.warn        - logical: should a warnings be issued. Defaults to true.  
+
+ returns a annot table</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_roi_confluence.html" class="code" title="function confluent = bml_roi_confluence(cfg)">bml_roi_confluence</a>	BML_ROI_CONFLUENCE expands entries in a roi table to cover all the file</li><li><a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/sync/bml_sync_neuroomega_event.html" class="code" title="function sync_roi = bml_sync_neuroomega_event(cfg)">bml_sync_neuroomega_event</a>	BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_event2annot(cfg, event)</a>
+0002 
+0003 <span class="comment">% BML_EVENT2ANNOT creates a annot table from a events structure</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_event2annot(cfg, event)</span>
+0007 <span class="comment">%   annot = bml_event2annot(cfg.roi, event)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg.roi</span>
+0010 <span class="comment">% cfg.event_type  - cells of char: event types selected</span>
+0011 <span class="comment">% cfg.coord       - logical: should file coordinates be appended (defaults false)</span>
+0012 <span class="comment">% cfg.starts      - float: t0 of the event structure. If empty no time</span>
+0013 <span class="comment">%          correction is done</span>
+0014 <span class="comment">% cfg.Fs          - sampling frequency in Hz. Defaults to 1.</span>
+0015 <span class="comment">% cfg.warn        - logical: should a warnings be issued. Defaults to true.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% returns a annot table</span>
+0018 
+0019 <span class="keyword">if</span> istable(cfg)
+0020   cfg = struct(<span class="string">'roi'</span>,cfg);
+0021 <span class="keyword">end</span>
+0022 roi         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0023 event_type  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'event_type'</span>);
+0024 coord       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'coord'</span>,false);
+0025 cfg_starts  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'starts'</span>);
+0026 cfg_Fs      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'Fs'</span>,1);
+0027 cfg_warn    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
+0028 
+0029 <span class="comment">%selecting events</span>
+0030 <span class="keyword">if</span> isempty(event_type)
+0031   event_type = unique({event.type});
+0032 <span class="keyword">else</span>
+0033   present_event_type = ismember(event_type,unique({event.type}));
+0034   <span class="keyword">if</span> ~all(present_event_type) &amp;&amp; cfg_warn
+0035     warning(<span class="string">'selected event type %s not present. Available event types are: %s'</span>,<span class="keyword">...</span>
+0036       strjoin(event_type(~present_event_type)),strjoin(unique({event.type})));
+0037   <span class="keyword">end</span>
+0038   event_type = event_type(present_event_type);
+0039 <span class="keyword">end</span>
+0040 
+0041 <span class="keyword">if</span> ~isempty(roi)
+0042   <span class="comment">%creating raw</span>
+0043   roi = <a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(<a href="bml_roi_confluence.html" class="code" title="function confluent = bml_roi_confluence(cfg)">bml_roi_confluence</a>(roi));
+0044   assert(height(roi)==1,&quot;can't deal with more than one sync chunk after consolidation <span class="keyword">for</span> now&quot;);
+0045 
+0046   annot=table();
+0047   <span class="keyword">for</span> i=1:length(event_type)
+0048     i_event = event(ismember({event.type},event_type(i)));
+0049     starts = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi,[i_event.sample])';
+0050     ends = starts;
+0051     type = {i_event.type}';
+0052     value = [i_event.value]';  
+0053     offset = [i_event.offset]';
+0054     duration = [i_event.duration]';  
+0055     sample = [i_event.sample]'; 
+0056     i_annot = table(starts,ends,type,value,sample);
+0057     <span class="comment">%if ~isempty(offset)</span>
+0058     <span class="comment">%  i_annot = [i_annot, offset];</span>
+0059     <span class="comment">%end</span>
+0060     <span class="comment">%if ~isempty(duration)</span>
+0061     <span class="comment">%  i_annot = [i_annot, duration];</span>
+0062     <span class="comment">%end</span>
+0063     annot = [annot; i_annot];
+0064   <span class="keyword">end</span>
+0065 
+0066   <span class="keyword">if</span> coord
+0067     annot = [annot repmat(roi(1,{<span class="string">'s1'</span>,<span class="string">'t1'</span>,<span class="string">'s2'</span>,<span class="string">'t2'</span>,<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>}),height(annot),1)];
+0068     annot = <a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(annot);
+0069   <span class="keyword">else</span>
+0070     annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0071   <span class="keyword">end</span>
+0072   
+0073 <span class="keyword">elseif</span> ~isempty(cfg_starts) &amp;&amp; ~isempty(cfg_Fs)
+0074 
+0075   annot=table();
+0076   <span class="keyword">for</span> i=1:length(event_type)
+0077     i_event = event(ismember({event.type},event_type(i)));
+0078     starts = (cfg_starts+[i_event.sample] ./ cfg_Fs)';
+0079     ends = starts;
+0080     type = {i_event.type}';
+0081     value = [i_event.value]';  
+0082     offset = [i_event.offset]';
+0083     duration = [i_event.duration]';  
+0084     sample = [i_event.sample]'; 
+0085     i_annot = table(starts,ends,type,value,sample);
+0086     annot = [annot; i_annot];
+0087   <span class="keyword">end</span>
+0088 
+0089 <span class="keyword">else</span>
+0090   error(<span class="string">'Either roi or starts/Fs should be given'</span>);
+0091   
+0092 <span class="keyword">end</span>
+0093 
+0094 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

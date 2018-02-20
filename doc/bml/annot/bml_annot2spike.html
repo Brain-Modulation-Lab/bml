@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot2spike</title>
+  <meta name="keywords" content="bml_annot2spike">
+  <meta name="description" content="BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot2spike.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot2spike
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function spike = bml_annot2spike(cfg, annot, raw) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table
+
+ Use as
+   spike = bml_annot2spike(cfg, annot)
+   spike = bml_annot2spike(cfg, annot, raw)
+   spike = bml_annot2spike(cfg, annot, spike_waveform)
+ 
+ cfg.roi - roi table used to transform the times in annot.starts to
+       timestamps (ie, samples). Required if raw is not provided. 
+ cfg.waveform_extract - boolean indicating if waveforms whould be cropped
+       from raw. Defaults to false. 
+ cfg.waveform_samples - integer indicating number of sample for the
+       waveforms. Defauls to 44. 
+
+ annot - annotation table to transform to spike timestamps. Only the
+         starts vector is used. Normally obtained from bml_plexon2annot
+ raw - ft_datatype_raw from where to use as template for the spikes
+       timestamps and to crop the snippets from. 
+ spike_waveform - ft_datatype_spike as returned by ft_read_spike or
+       bml_plexon2annot. waveforms are extracted from here if available. 
+       should contain fields 'waveform' and 'label'. 
+
+ returns a ft_datatype_spike structure. Each label correspons to an
+ individual unit named as &lt;channel&gt;_&lt;unit&gt;. 
+
+ If spike_waveform is provided, a waveform field will be present in the 
+ output, where the mapping of units to waveform is based on annot.channel,
+ annot.spike_idx, spike_waveform.label and spike_waveform.waveform. 
+
+ If raw is provided, a waveform field will be present in the output, where the 
+ mapping of snippets are extracted from the raw vector. The labels of raw
+ must match annot.channel.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>	BML_TIME2IDX calculates sample indices from a time vector and file coordinates</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the domain</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function spike = bml_annot2spike(cfg, annot, raw)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   spike = bml_annot2spike(cfg, annot)</span>
+0007 <span class="comment">%   spike = bml_annot2spike(cfg, annot, raw)</span>
+0008 <span class="comment">%   spike = bml_annot2spike(cfg, annot, spike_waveform)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% cfg.roi - roi table used to transform the times in annot.starts to</span>
+0011 <span class="comment">%       timestamps (ie, samples). Required if raw is not provided.</span>
+0012 <span class="comment">% cfg.waveform_extract - boolean indicating if waveforms whould be cropped</span>
+0013 <span class="comment">%       from raw. Defaults to false.</span>
+0014 <span class="comment">% cfg.waveform_samples - integer indicating number of sample for the</span>
+0015 <span class="comment">%       waveforms. Defauls to 44.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% annot - annotation table to transform to spike timestamps. Only the</span>
+0018 <span class="comment">%         starts vector is used. Normally obtained from bml_plexon2annot</span>
+0019 <span class="comment">% raw - ft_datatype_raw from where to use as template for the spikes</span>
+0020 <span class="comment">%       timestamps and to crop the snippets from.</span>
+0021 <span class="comment">% spike_waveform - ft_datatype_spike as returned by ft_read_spike or</span>
+0022 <span class="comment">%       bml_plexon2annot. waveforms are extracted from here if available.</span>
+0023 <span class="comment">%       should contain fields 'waveform' and 'label'.</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% returns a ft_datatype_spike structure. Each label correspons to an</span>
+0026 <span class="comment">% individual unit named as &lt;channel&gt;_&lt;unit&gt;.</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% If spike_waveform is provided, a waveform field will be present in the</span>
+0029 <span class="comment">% output, where the mapping of units to waveform is based on annot.channel,</span>
+0030 <span class="comment">% annot.spike_idx, spike_waveform.label and spike_waveform.waveform.</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% If raw is provided, a waveform field will be present in the output, where the</span>
+0033 <span class="comment">% mapping of snippets are extracted from the raw vector. The labels of raw</span>
+0034 <span class="comment">% must match annot.channel.</span>
+0035 
+0036 <span class="keyword">if</span> nargin == 3
+0037   assert(isstruct(raw), &quot;Invalid third argument&quot;);
+0038   <span class="keyword">if</span> all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(raw)))
+0039     <span class="comment">% Usage spike = bml_annot2spike(cfg, annot, raw)</span>
+0040     spike_waveform = [];
+0041   <span class="keyword">elseif</span>    all(ismember({<span class="string">'waveform'</span>,<span class="string">'label'</span>},fieldnames(raw)))
+0042     <span class="comment">% Usage spike = bml_annot2spike(cfg, annot, spike_waveform)</span>
+0043     spike_waveform = raw;
+0044     raw = [];
+0045   <span class="keyword">else</span>
+0046     error(&quot;invalid third argument&quot;);
+0047   <span class="keyword">end</span>  
+0048 <span class="keyword">elseif</span> nargin == 2
+0049   spike_waveform = [];  
+0050     raw = [];
+0051 <span class="keyword">else</span>
+0052   error(&quot;Incorrect number of arguments&quot;);
+0053 <span class="keyword">end</span>
+0054 
+0055 roi = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0056 <span class="keyword">if</span> isempty(roi) 
+0057   <span class="keyword">if</span> ~isempty(raw)
+0058     roi = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(raw);
+0059   <span class="keyword">else</span>
+0060     error(&quot;cfg.roi or raw required&quot;);
+0061   <span class="keyword">end</span>
+0062 <span class="keyword">end</span>
+0063 
+0064 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0065 assert(all(ismember({<span class="string">'channel'</span>,<span class="string">'unit'</span>},annot.Properties.VariableNames)),<span class="keyword">...</span>
+0066   &quot;channel and unit columns required in annot&quot;);
+0067 
+0068 waveform_extract = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'waveform_extract'</span>,false);
+0069 waveform_samples = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'waveform_samples'</span>,44);
+0070 
+0071 has_spike_idx = ismember({<span class="string">'spike_idx'</span>},annot.Properties.VariableNames);
+0072 
+0073 spike=struct();
+0074 spike.timestamp=[];
+0075 spike.label=[];
+0076 spike_idx=[];
+0077 channel=[];
+0078 
+0079 lev_channel = unique(annot.channel);
+0080 <span class="keyword">for</span> i_ch=1:length(lev_channel)
+0081   ch_annot = annot(strcmp(annot.channel,lev_channel(i_ch)),:);
+0082   lev_unit = unique(ch_annot.unit);
+0083   <span class="keyword">for</span> i_u=1:length(lev_unit)
+0084     u_ch_annot = ch_annot(ch_annot.unit==lev_unit(i_u),:);
+0085     spike.timestamp = {spike.timestamp, <a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(roi,u_ch_annot.starts)};
+0086     spike.label = {spike.timestamp, strcat(lev_unit(i_ch),<span class="string">'_'</span>,u_ch_annot(i_u))};
+0087     <span class="keyword">if</span> has_spike_idx
+0088       spike_idx = {spike_idx, u_ch_annot.spike_idx};
+0089       channel = {channel, lev_unit(i_ch)};
+0090     <span class="keyword">end</span>
+0091   <span class="keyword">end</span>
+0092 <span class="keyword">end</span>
+0093 
+0094 <span class="keyword">if</span> has_spike_idx &amp;&amp; ~isempty(spike_waveform)
+0095   <span class="comment">%getting waveforms from spike_waveform</span>
+0096   spike.waveform=cell(1,length(spike_idx));
+0097   <span class="keyword">for</span> i_wf=1:length(spike_idx)
+0098     orig_wf_idx = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(channel(i_wf),spike_waveform.label);
+0099     spike.waveform(1,i_wf) = spike_waveform.waveform{orig_wf_idx}(spike_idx{i_wf},:);
+0100   <span class="keyword">end</span>
+0101 <span class="keyword">end</span>
+0102 
+0103 <span class="keyword">if</span> ~isempty(raw) &amp;&amp; waveform_extract
+0104   error(&quot;waveform extraction not implemented yet&quot;);
+0105 <span class="keyword">end</span>
+0106 
+0107 
+0108 
+0109 
+0110 
+0111 
+0112 
+0113</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

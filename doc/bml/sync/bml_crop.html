@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_crop</title>
+  <meta name="keywords" content="bml_crop">
+  <meta name="description" content="BML_CROP returns a time-cropped raw [INTERNAL]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_crop.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_crop
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_CROP returns a time-cropped raw [INTERNAL]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function cropped = bml_crop(raw, starts, ends) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_CROP returns a time-cropped raw [INTERNAL]
+
+ Use as
+   croped = bml_crop(raw, starts, ends)
+   croped = bml_crop(cfg, raw)
+
+ raw - FT_DATATYPE_RAW data to be cropped
+ starts - double array: time in seconds for begging of each trial
+          length of starts should coincide with number of trials of raw
+ ends - double array: time in seconds for the end of each trial 
+          length of ends should coincide with number of trials of raw
+
+ This function was designed to crop continuous files and is mailny used as
+ an internal function. Use BML_REDEFINETRIAL to re-epoch a RAW.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>	BML_CONFORM_TO conforms salve to master</li><li><a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>	BML_PAD returns a padded version of the raw (crops if necessary)</li><li><a href="bml_sync_check.html" class="code" title="function bml_sync_check(cfg)">bml_sync_check</a>	BML_SYNC_CHECK loads files in a synchronization roi table into praat</li><li><a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function cropped = bml_crop(raw, starts, ends)</a>
+0002 
+0003 <span class="comment">% BML_CROP returns a time-cropped raw [INTERNAL]</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   croped = bml_crop(raw, starts, ends)</span>
+0007 <span class="comment">%   croped = bml_crop(cfg, raw)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% raw - FT_DATATYPE_RAW data to be cropped</span>
+0010 <span class="comment">% starts - double array: time in seconds for begging of each trial</span>
+0011 <span class="comment">%          length of starts should coincide with number of trials of raw</span>
+0012 <span class="comment">% ends - double array: time in seconds for the end of each trial</span>
+0013 <span class="comment">%          length of ends should coincide with number of trials of raw</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% This function was designed to crop continuous files and is mailny used as</span>
+0016 <span class="comment">% an internal function. Use BML_REDEFINETRIAL to re-epoch a RAW.</span>
+0017 
+0018 <span class="keyword">if</span> nargin==2
+0019   cfg=raw;
+0020   raw=starts;
+0021   <span class="keyword">if</span> istable(cfg)
+0022     starts = cfg.starts;
+0023     ends = cfg.ends;
+0024   <span class="keyword">elseif</span> isstruct(cfg)
+0025     starts = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'starts'</span>);
+0026     ends = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'ends'</span>);    
+0027   <span class="keyword">end</span>
+0028 <span class="keyword">elseif</span> nargin~=3
+0029   error(<span class="string">'invalid use of bml_crop'</span>);
+0030 <span class="keyword">end</span>
+0031 
+0032 assert(length(starts)==numel(raw.trial),<span class="keyword">...</span>
+0033   &quot;length of starts (<span class="comment">%i) doesn't match number of trials (%i)&quot;,length(starts),numel(raw.trial));</span>
+0034 assert(length(ends)==numel(raw.trial),<span class="keyword">...</span>
+0035   &quot;length of ends (<span class="comment">%i) doesn't match number of trials (%i)&quot;,length(ends),numel(raw.trial));</span>
+0036 
+0037 cropped=raw;
+0038 <span class="keyword">for</span> i=1:numel(raw.trial)
+0039   nSamples = length(raw.time{i});
+0040 
+0041   tc=<a href="bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(raw,i);
+0042   [s,e]=<a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(tc,starts(i),ends(i));
+0043 
+0044   <span class="keyword">if</span> s &lt; 1; s=1; <span class="keyword">end</span>
+0045   <span class="keyword">if</span> e &gt; nSamples; e = nSamples; <span class="keyword">end</span>
+0046 
+0047   cropped.trial{i} = raw.trial{i}(:,s:e);
+0048   cropped.time{i} = raw.time{i}(:,s:e);
+0049   cropped.sampleinfo(i,:) = [s,e];
+0050 <span class="keyword">end</span>
+0051</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

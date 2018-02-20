@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_sync_neuroomega_event</title>
+  <meta name="keywords" content="bml_sync_neuroomega_event">
+  <meta name="description" content="BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_sync_neuroomega_event.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_sync_neuroomega_event
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function sync_roi = bml_sync_neuroomega_event(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events
+
+ Use as 
+    sync_roi = bml_sync_neuroomega_event(cfg)
+
+   cfg.master_events - events to align to in annot table in master time
+   cfg.roi - roi table for neuroomega files to be synchronized
+   cfg.timewarp - logical: Should slave time be warped? defaults to 
+            true.
+   cfg.scan - double: number of seconds to scan for optimal alignment 
+             (defaults to 100)
+   cfg.scan_step - double: step size of initial scan for alignment
+             (defaults to 0.1)
+   cfg.diagnostic_plot - logical
+   cfg.timetol - numeric, time tolerance in seconds. Defaults to 1e-6
+   cfg.min_events - integer. Minimum number of events required to attemp
+             alingment, defaults to 10. 
+   cfg.strict - logical. Issue errors if timetol is violated instead of errors. 
+             Defaults to false. 
+
+ returns a roi table</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>	BML_EVENT2ANNOT creates a annot table from a events structure</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_read_event.html" class="code" title="function event = bml_read_event(cfg)">bml_read_event</a>	BML_READ_EVENT reads fieldtrip's event structures from files</li><li><a href="bml_timealign_annot.html" class="code" title="function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master, slave)">bml_timealign_annot</a>	BML_TIMEALIGN_ANNOT aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function sync_roi = bml_sync_neuroomega_event(cfg)</a>
+0002 
+0003 <span class="comment">% BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%    sync_roi = bml_sync_neuroomega_event(cfg)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%   cfg.master_events - events to align to in annot table in master time</span>
+0009 <span class="comment">%   cfg.roi - roi table for neuroomega files to be synchronized</span>
+0010 <span class="comment">%   cfg.timewarp - logical: Should slave time be warped? defaults to</span>
+0011 <span class="comment">%            true.</span>
+0012 <span class="comment">%   cfg.scan - double: number of seconds to scan for optimal alignment</span>
+0013 <span class="comment">%             (defaults to 100)</span>
+0014 <span class="comment">%   cfg.scan_step - double: step size of initial scan for alignment</span>
+0015 <span class="comment">%             (defaults to 0.1)</span>
+0016 <span class="comment">%   cfg.diagnostic_plot - logical</span>
+0017 <span class="comment">%   cfg.timetol - numeric, time tolerance in seconds. Defaults to 1e-6</span>
+0018 <span class="comment">%   cfg.min_events - integer. Minimum number of events required to attemp</span>
+0019 <span class="comment">%             alingment, defaults to 10.</span>
+0020 <span class="comment">%   cfg.strict - logical. Issue errors if timetol is violated instead of errors.</span>
+0021 <span class="comment">%             Defaults to false.</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% returns a roi table</span>
+0024 
+0025 scan_step         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'scan_step'</span>,0.1);
+0026 scan              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'scan'</span>,100);
+0027 timewarp          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timewarp'</span>,false);
+0028 master_events     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'master_events'</span>);
+0029 roi               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0030 diagnostic_plot   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'diagnostic_plot'</span>,false);
+0031 timetol           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-6);
+0032 min_events        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'min_events'</span>,10);
+0033 strict            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'strict'</span>,false);
+0034 
+0035 assert(~isempty(roi),<span class="string">'roi required'</span>);
+0036 assert(~isempty(master_events),<span class="string">'master_events required'</span>);
+0037 
+0038 all_slave_dt = zeros(height(roi),1);
+0039 all_warpfactor = ones(height(roi),1);
+0040 all_meanerror = zeros(height(roi),1);
+0041 <span class="keyword">for</span> i=1:height(roi)
+0042   
+0043   <span class="comment">%getting events</span>
+0044     i_slave_events = <a href="../../bml/io/bml_read_event.html" class="code" title="function event = bml_read_event(cfg)">bml_read_event</a>(roi(i,:));
+0045   <span class="keyword">if</span> isempty(i_slave_events) || length(i_slave_events) &lt; min_events
+0046     all_slave_dt(i) = nan;
+0047     all_warpfactor(i) = nan;
+0048   <span class="keyword">else</span>
+0049     cfg=[]; cfg.Fs = 1; <span class="comment">%already in seconds</span>
+0050     cfg.starts = roi.starts(i);
+0051     i_slave_events = <a href="../../bml/annot/bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>(cfg,i_slave_events);
+0052     i_slave_events = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(i_slave_events);
+0053     
+0054     <span class="comment">%doing time alingment</span>
+0055     cfg=[]; 
+0056     cfg.scan=scan; 
+0057     cfg.scan_step=scan_step; 
+0058     cfg.timewarp = timewarp; 
+0059     [slave_dt, min_cost, warpfactor]=<a href="bml_timealign_annot.html" class="code" title="function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master, slave)">bml_timealign_annot</a>(cfg,master_events,i_slave_events);
+0060     all_slave_dt(i) = slave_dt;
+0061     all_warpfactor(i) = warpfactor;
+0062 
+0063     <span class="keyword">if</span> diagnostic_plot
+0064       tbar = mean(i_slave_events.starts);
+0065       i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
+0066       figure;
+0067       plot(master_events.starts,ones(1,height(master_events)),<span class="string">'bo'</span>);
+0068       hold on;
+0069       plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),<span class="string">'r*'</span>);
+0070     <span class="keyword">end</span>
+0071 
+0072     all_meanerror(i) = min_cost/height(i_slave_events);
+0073     <span class="keyword">if</span> all_meanerror(i) &gt; timetol
+0074       <span class="keyword">if</span> strict
+0075         error(<span class="string">'could not time align within timetol. Mean error %f &gt; %f. File %s'</span>,all_meanerror(i),timetol,roi.name{i});
+0076       <span class="keyword">else</span>
+0077         warning(<span class="string">'could not time align within timetol. Mean error %f &gt; %f. File %s. Ignoring this file during consolidation.'</span>,all_meanerror(i),timetol,roi.name{i});
+0078         all_slave_dt(i) = nan;
+0079         all_warpfactor(i) = nan;
+0080       <span class="keyword">end</span>
+0081     <span class="keyword">end</span>
+0082   <span class="keyword">end</span>
+0083 <span class="keyword">end</span>
+0084 
+0085 <span class="keyword">if</span> ~timewarp
+0086   all_slave_dt = repmat(nanmean(all_slave_dt),length(all_slave_dt),1);
+0087 <span class="keyword">end</span>
+0088 
+0089 <span class="comment">%consolidating results</span>
+0090 roi.slave_dt = all_slave_dt;
+0091 roi.warpfactor = all_warpfactor;
+0092 roi.alignment_error = all_meanerror;
+0093 
+0094 cfg=[];
+0095 cfg.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))&lt;10e-3);
+0096 cont_roi = <a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg,roi);
+0097 
+0098 consolidated_roi = table();
+0099 <span class="keyword">for</span> i=1:height(cont_roi)
+0100   i_roi = roi(roi.id &gt;= cont_roi.id_starts(i) &amp; roi.id &lt;= cont_roi.id_ends(i),:);
+0101   i_roi.slave_dt(:) = nanmean(i_roi.slave_dt);
+0102   i_roi.warpfactor(:) = nanmean(i_roi.warpfactor);
+0103   consolidated_roi = [consolidated_roi; i_roi];
+0104 <span class="keyword">end</span>
+0105 roi = consolidated_roi;
+0106 
+0107 <span class="keyword">if</span> any(ismissing(roi.slave_dt))
+0108   warning(<span class="string">'Using mean dt for some files'</span>);
+0109   roi.slave_dt(ismissing(roi.slave_dt)) = nanmean(roi.slave_dt);
+0110 <span class="keyword">end</span>
+0111 <span class="keyword">if</span> any(ismissing(roi.warpfactor))
+0112   warning(<span class="string">'Using mean warpfactor for some files'</span>);
+0113   roi.warpfactor(ismissing(roi.warpfactor)) = nanmean(roi.warpfactor);
+0114 <span class="keyword">end</span>
+0115 
+0116 midpoint_a = (roi.ends + roi.ends) ./ 2;
+0117 midpoint_t = (roi.t1 + roi.t2) ./ 2;
+0118 roi.starts = (roi.starts - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;
+0119 roi.ends = (roi.ends - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;
+0120 roi.t1 = (roi.t1 - midpoint_t) .* roi.warpfactor + midpoint_t + roi.slave_dt;
+0121 roi.t2 = (roi.t2 - midpoint_t) .* roi.warpfactor + midpoint_t + roi.slave_dt;
+0122 
+0123 roi.chunk_id = (1:height(roi))';
+0124 roi.sync_channel = repmat({<span class="string">'digital'</span>},height(roi),1);
+0125 roi.sync_type = repmat({<span class="string">'slave'</span>},height(roi),1);
+0126 
+0127 sync_roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
+0128 
+0129 sync_roi(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'name'</span>,<span class="string">'warpfactor'</span>})
+0130</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

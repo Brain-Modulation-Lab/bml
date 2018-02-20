@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_check_contiguity</title>
+  <meta name="keywords" content="bml_check_contiguity">
+  <meta name="description" content="BML_CHECK_CONTIGUITY returns true if raws are time-contiguous">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_check_contiguity.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_check_contiguity
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_CHECK_CONTIGUITY returns true if raws are time-contiguous</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function are_contiguous = bml_check_contiguity(cfg, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_CHECK_CONTIGUITY returns true if raws are time-contiguous
+
+ Use as
+   are_contiguous = bml_check_contiguity(cfg, raw1, raw2, ..., rawN)
+
+ cfg.timetol - double: time tolerance in seconds. Defaults to 1e-5
+
+ returns true or false</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_hstack.html" class="code" title="function [data] = bml_hstack(cfg, varargin)">bml_hstack</a>	BML_HSTACK concatenates multiple raw data structures by time</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function are_contiguous = bml_check_contiguity(cfg, varargin)</a>
+0002 
+0003 <span class="comment">% BML_CHECK_CONTIGUITY returns true if raws are time-contiguous</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   are_contiguous = bml_check_contiguity(cfg, raw1, raw2, ..., rawN)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% cfg.timetol - double: time tolerance in seconds. Defaults to 1e-5</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% returns true or false</span>
+0011 
+0012 <span class="keyword">if</span> numel(varargin)&lt;2
+0013   are_contiguous = true;
+0014   <span class="keyword">return</span>
+0015 <span class="keyword">end</span>
+0016 
+0017 timetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'timetol'</span>, 1e-5);
+0018 Fs = nan(1,numel(varargin));
+0019 ti = nan(1,numel(varargin));
+0020 tf = nan(1,numel(varargin));
+0021 
+0022 <span class="keyword">for</span> i=1:numel(varargin)
+0023   Fs(i)=varargin{i}.fsample;
+0024   ti(i)=varargin{i}.time{1}(1);
+0025   tf(i)=varargin{i}.time{1}(end);  
+0026 <span class="keyword">end</span>
+0027 
+0028 <span class="keyword">if</span> length(unique(Fs))&gt;1; error(<span class="string">'Different Fs'</span>); <span class="keyword">end</span>
+0029 
+0030 are_contiguous=all(ti(2:end) - tf(1:(end-1)) - 1/unique(Fs) &lt; timetol);
+0031</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_rereference</title>
+  <meta name="keywords" content="bml_rereference">
+  <meta name="description" content="BML_REREFERENCE applies re-referencing scheme to raw">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_rereference.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_rereference
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_REREFERENCE applies re-referencing scheme to raw</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [ref,U] = bml_rereference(cfg,raw) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_REREFERENCE applies re-referencing scheme to raw
+
+ Use as
+   [ref,U] = bml_rereference(cfg,raw)
+
+ cfg.label - Nx1 cellstr with labels. Defaults to raw.label
+ cfg.group - Nx1 integer array identifying groups of electrodes
+   contacts of same group are re-referenced together
+   values &lt;=0 and nans are not re-referenced. 
+   If not specified, groups are defined by string before underscore '_'
+   (i.e. ecog_*, micro_*, macro_*, audio_*, envaudio_*, etc)
+ cfg.method - string, method to be implemented
+   'CAR' or 'common', common average referencing (default)
+   'LAR' or 'local', local average referencing
+   'VAR' or 'variable', variable average referencing
+
+ raw - ft_datatype_raw to be re-referenced
+ 
+ Returns
+ ref - ft_datatype_raw with re-referenced data
+ U - double, unmixing matrix. ref = U * raw</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data)">bml_apply</a>	BML_APPLY applies a function to the data of each trial</li><li><a href="../../bml/utils/bml_comavgref_matrix.html" class="code" title="function U=bml_comavgref_matrix(n,alpha)">bml_comavgref_matrix</a>	BML_COMAVGREF_MATRIX creates a common average referencing matrix</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_locavgref_matrix.html" class="code" title="function U=bml_locavgref_matrix(n,alpha)">bml_locavgref_matrix</a>	BML_LOCAVGREF_MATRIX creates a local average referencing matrix</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li><li><a href="../../bml/utils/bml_varavgref_matrix.html" class="code" title="function U=bml_varavgref_matrix(COV)">bml_varavgref_matrix</a>	BML_VARAVGREF_MATRIX creates a variable average referencing matrix</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ref,U] = bml_rereference(cfg,raw)</a>
+0002 
+0003 <span class="comment">% BML_REREFERENCE applies re-referencing scheme to raw</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   [ref,U] = bml_rereference(cfg,raw)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% cfg.label - Nx1 cellstr with labels. Defaults to raw.label</span>
+0009 <span class="comment">% cfg.group - Nx1 integer array identifying groups of electrodes</span>
+0010 <span class="comment">%   contacts of same group are re-referenced together</span>
+0011 <span class="comment">%   values &lt;=0 and nans are not re-referenced.</span>
+0012 <span class="comment">%   If not specified, groups are defined by string before underscore '_'</span>
+0013 <span class="comment">%   (i.e. ecog_*, micro_*, macro_*, audio_*, envaudio_*, etc)</span>
+0014 <span class="comment">% cfg.method - string, method to be implemented</span>
+0015 <span class="comment">%   'CAR' or 'common', common average referencing (default)</span>
+0016 <span class="comment">%   'LAR' or 'local', local average referencing</span>
+0017 <span class="comment">%   'VAR' or 'variable', variable average referencing</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% raw - ft_datatype_raw to be re-referenced</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% Returns</span>
+0022 <span class="comment">% ref - ft_datatype_raw with re-referenced data</span>
+0023 <span class="comment">% U - double, unmixing matrix. ref = U * raw</span>
+0024 
+0025 assert(isstruct(raw),&quot;invalid raw&quot;);
+0026 assert(all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(raw))),&quot;invalid raw&quot;);
+0027 
+0028 label     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
+0029 group     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'group'</span>);
+0030 method    = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'method'</span>,<span class="string">'CAR'</span>);
+0031 
+0032 <span class="comment">%inferring groups from labels</span>
+0033 <span class="keyword">if</span> isempty(group)
+0034   sl=split(label,<span class="string">'_'</span>);
+0035   sl=sl(:,1);
+0036   usl=unique(sl);
+0037   group = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain)">bml_map</a>(sl,usl,1:length(usl));
+0038 <span class="keyword">end</span>
+0039 
+0040 <span class="comment">%assigning orphan raw labels to null group</span>
+0041 in=ismember(raw.label,label);
+0042 <span class="keyword">if</span> ~all(in)
+0043   label = [label;raw.label(~in)];
+0044   group = [group; zeros(sum(~in),1)];
+0045 <span class="keyword">end</span>
+0046 
+0047 <span class="comment">%re-ordering group to match raw.label</span>
+0048 group = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain)">bml_map</a>(raw.label,label,group);
+0049 label = raw.label;
+0050 
+0051 <span class="comment">%creating null group</span>
+0052 group(ismissing(group))=0;
+0053 group(group&lt;=0)=0;
+0054 g0 = sum(group&lt;=0);
+0055 
+0056 <span class="comment">%keeping original order</span>
+0057 [g,g_idx]=sort(group);
+0058 ug = unique(g);
+0059 [N,~] = histc(g,ug);
+0060 
+0061 <span class="comment">%creating blocks</span>
+0062 <span class="keyword">if</span> ismember(method,{<span class="string">'CAR'</span>,<span class="string">'common'</span>})
+0063   U_blocks=cellfun(@<a href="../../bml/utils/bml_comavgref_matrix.html" class="code" title="function U=bml_comavgref_matrix(n,alpha)">bml_comavgref_matrix</a>,num2cell(N),<span class="string">'UniformOutput'</span>,false);
+0064 <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>,<span class="string">'local'</span>})
+0065   U_blocks=cellfun(@<a href="../../bml/utils/bml_locavgref_matrix.html" class="code" title="function U=bml_locavgref_matrix(n,alpha)">bml_locavgref_matrix</a>,num2cell(N),<span class="string">'UniformOutput'</span>,false);
+0066 <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>,<span class="string">'variable'</span>})
+0067   warning(<span class="string">'Using experimental method VAR, susceptible to high amplitude artifacts'</span>)
+0068   
+0069   <span class="comment">%calculating variance-covariance matrix</span>
+0070   cfg=[];
+0071   cfg.covariance = <span class="string">'yes'</span>;
+0072   cfg.vartrllength = 2;
+0073   tl_raw=ft_timelockanalysis(cfg,raw);
+0074   
+0075   <span class="comment">%grouping matrix into blocks</span>
+0076   COVs = cell(length(ug),1);
+0077   <span class="keyword">for</span> i=1:length(ug)
+0078     COVs{i,1}=tl_raw.cov(g_idx(g==ug(i)),g_idx(g==ug(i)));
+0079   <span class="keyword">end</span>
+0080   
+0081   <span class="comment">%creating blocks</span>
+0082   U_blocks=cellfun(@<a href="../../bml/utils/bml_varavgref_matrix.html" class="code" title="function U=bml_varavgref_matrix(COV)">bml_varavgref_matrix</a>,COVs,<span class="string">'UniformOutput'</span>,false);
+0083   
+0084 <span class="keyword">else</span>
+0085   error(<span class="string">'unknown method'</span>)
+0086 <span class="keyword">end</span>
+0087 
+0088 <span class="comment">%replacing block by identity for null group</span>
+0089 <span class="keyword">if</span> g0 &gt; 0
+0090   U_blocks{1} = eye(N(1));
+0091 <span class="keyword">end</span>
+0092 
+0093 <span class="comment">%joining blocks</span>
+0094 U = blkdiag(U_blocks{:});
+0095 U(g_idx,g_idx) = U;
+0096 <span class="comment">%image(U,'CDataMapping','scaled')</span>
+0097   
+0098 <span class="comment">%applying unmixing matrix to data</span>
+0099 ref = <a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data)">bml_apply</a>(@(x) U*x, raw);
+0100   
+0101</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

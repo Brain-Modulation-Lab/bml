@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_coding2raw</title>
+  <meta name="keywords" content="bml_coding2raw">
+  <meta name="description" content="BML_CODING2RAW creates a raw from the audio in the Coding file">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_coding2raw.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_coding2raw
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_CODING2RAW creates a raw from the audio in the Coding file</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function raw = bml_coding2raw(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_CODING2RAW creates a raw from the audio in the Coding file
+
+ Use as
+   annot = bml_coding2raw(cfg)
+
+ cfg.CodingMatPath    - path to mat file with coding info
+ cfg.t0               - Time origin of audio file in coding mat file
+
+ returns a raw with the audio</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function raw = bml_coding2raw(cfg)</a>
+0002 
+0003 <span class="comment">% BML_CODING2RAW creates a raw from the audio in the Coding file</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_coding2raw(cfg)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% cfg.CodingMatPath    - path to mat file with coding info</span>
+0009 <span class="comment">% cfg.t0               - Time origin of audio file in coding mat file</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% returns a raw with the audio</span>
+0012 
+0013 <span class="keyword">if</span> nargin == 1
+0014   CodingMatPath = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'CodingMatPath'</span>);
+0015   assert(~isempty(CodingMatPath),<span class="string">'cfg.CodingMatPath required in single argument call'</span>);
+0016   load(CodingMatPath,<span class="string">'Audio'</span>);
+0017   load(CodingMatPath,<span class="string">'Afs'</span>);
+0018 <span class="keyword">else</span> 
+0019   error(<span class="string">'Use as bml_codingmatrix2raw(cfg)'</span>);
+0020 <span class="keyword">end</span>
+0021 
+0022 t0               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t0'</span>,0);
+0023 
+0024 <span class="keyword">if</span> size(Audio,1) &gt; size(Audio,2)
+0025   Audio = Audio';
+0026 <span class="keyword">end</span>
+0027 
+0028 raw=[];
+0029 raw.trial = {Audio};
+0030 raw.label = {<span class="string">'CodingAudio'</span>};
+0031 raw.time  = {t0 + (1:length(Audio)) ./ Afs};
+0032 raw.fsample = Afs;
+0033 
+0034 
+0035 
+0036</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_neuroomega_info_depth</title>
+  <meta name="keywords" content="bml_neuroomega_info_depth">
+  <meta name="description" content="BML_NEUROOMEGA_INFO_DEPTH returns a table with .mat file information">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">io</a> &gt; bml_neuroomega_info_depth.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/io&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_neuroomega_info_depth
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_NEUROOMEGA_INFO_DEPTH returns a table with .mat file information</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function info = bml_neuroomega_info_depth(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_NEUROOMEGA_INFO_DEPTH returns a table with .mat file information
+ aggregated by depth. Useful to select relevant depths
+
+ Use as
+   info = bml_neuroomega_info_depth(cfg)
+
+ where cfg is a configureation struct with the following fields
+ cfg.path - string: path where to look for the .mat files
+ cfg.sort - string: variable by which to sort the output table
+ cfg.direction - string: either 'descend' (default) or 'ascend'
+
+ Returns a table with variables
+   depth - double: position of the record in mm
+   files - double: number of files at this depth
+   size - double: aggregated size of all files in MB</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_neuroomega_info_file.html" class="code" title="function info = bml_neuroomega_info_file(cfg)">bml_neuroomega_info_file</a>	BML_NEUROOMEGA_INFO_FILE returns table with OS info of each neuroomega.mat file in a folder</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function info = bml_neuroomega_info_depth(cfg)</a>
+0002 
+0003 <span class="comment">% BML_NEUROOMEGA_INFO_DEPTH returns a table with .mat file information</span>
+0004 <span class="comment">% aggregated by depth. Useful to select relevant depths</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Use as</span>
+0007 <span class="comment">%   info = bml_neuroomega_info_depth(cfg)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% where cfg is a configureation struct with the following fields</span>
+0010 <span class="comment">% cfg.path - string: path where to look for the .mat files</span>
+0011 <span class="comment">% cfg.sort - string: variable by which to sort the output table</span>
+0012 <span class="comment">% cfg.direction - string: either 'descend' (default) or 'ascend'</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Returns a table with variables</span>
+0015 <span class="comment">%   depth - double: position of the record in mm</span>
+0016 <span class="comment">%   files - double: number of files at this depth</span>
+0017 <span class="comment">%   size - double: aggregated size of all files in MB</span>
+0018 
+0019 <span class="comment">% 2017.10.13 AB</span>
+0020 
+0021 sortvar = ft_getopt(cfg,<span class="string">'sort'</span>,<span class="string">'depth'</span>);
+0022 direction = ft_getopt(cfg,<span class="string">'direction'</span>,<span class="string">'descend'</span>);
+0023 
+0024 files = <a href="bml_neuroomega_info_file.html" class="code" title="function info = bml_neuroomega_info_file(cfg)">bml_neuroomega_info_file</a>(cfg);
+0025 files.size = files{:,<span class="string">'bytes'</span>}/1e6;
+0026 
+0027 info=varfun(@(x)round(sum(x),1),files,<span class="string">'InputVariables'</span>,<span class="string">'size'</span>,<span class="keyword">...</span>
+0028        <span class="string">'GroupingVariables'</span>,<span class="string">'depth'</span>);
+0029 <span class="keyword">if</span> ismember(<span class="string">'time_begin'</span>, files.Properties.VariableNames)
+0030   info=join(info,<span class="keyword">...</span>
+0031     varfun(@min,files,<span class="string">'InputVariables'</span>,<span class="string">'time_begin'</span>,<span class="keyword">...</span>
+0032        <span class="string">'GroupingVariables'</span>,<span class="string">'depth'</span>)<span class="keyword">...</span>
+0033     ,<span class="string">'Keys'</span>,<span class="string">'depth'</span>);
+0034 <span class="keyword">end</span>
+0035 <span class="keyword">if</span> ismember(<span class="string">'time_end'</span>, files.Properties.VariableNames)
+0036   info=join(info,<span class="keyword">...</span>
+0037     varfun(@max,files,<span class="string">'InputVariables'</span>,<span class="string">'time_end'</span>,<span class="keyword">...</span>
+0038        <span class="string">'GroupingVariables'</span>,<span class="string">'depth'</span>)<span class="keyword">...</span>
+0039     ,<span class="string">'Keys'</span>,<span class="string">'depth'</span>);
+0040 <span class="keyword">end</span>
+0041 <span class="keyword">if</span> all(ismember({<span class="string">'time_begin'</span>,<span class="string">'time_end'</span>}, files.Properties.VariableNames))
+0042   files.file_duration=files.time_end-files.time_begin;
+0043   info=join(info,<span class="keyword">...</span>
+0044     varfun(@sum,files,<span class="string">'InputVariables'</span>,<span class="string">'file_duration'</span>,<span class="keyword">...</span>
+0045        <span class="string">'GroupingVariables'</span>,<span class="string">'depth'</span>)<span class="keyword">...</span>
+0046     ,<span class="string">'Keys'</span>,<span class="string">'depth'</span>);
+0047   info.duration=info.max_time_end-info.min_time_begin;
+0048   info.contiguous=info.sum_file_duration &gt; 0.99 * info.duration;
+0049 <span class="keyword">end</span>
+0050 
+0051 <span class="keyword">if</span> ismember(<span class="string">'GroupCount_info'</span>, info.Properties.VariableNames)
+0052   info.Properties.VariableNames{<span class="string">'GroupCount_info'</span>} = <span class="string">'files'</span>;
+0053 <span class="keyword">elseif</span> ismember(<span class="string">'GroupCount'</span>, info.Properties.VariableNames)
+0054   info.Properties.VariableNames{<span class="string">'GroupCount'</span>} = <span class="string">'files'</span>;  
+0055 <span class="keyword">end</span>
+0056 
+0057 <span class="comment">%Eliminating GroupCounts</span>
+0058 info(:,strncmp(<span class="string">'GroupCount'</span>,info.Properties.VariableNames,10))=[]
+0059 
+0060 info.Properties.VariableNames{<span class="string">'Fun_size'</span>} = <span class="string">'size'</span>;
+0061 <span class="comment">%info.Properties.VariableUnits = {'mm' '#' 'MB'};</span>
+0062 
+0063 info=sortrows(info,sortvar,direction);
+0064 
+0065 
+0066 
+0067 
+0068 
+0069 
+0070</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

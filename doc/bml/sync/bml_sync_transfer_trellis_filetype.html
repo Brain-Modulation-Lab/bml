@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_sync_transfer_trellis_filetype</title>
+  <meta name="keywords" content="bml_sync_transfer_trellis_filetype">
+  <meta name="description" content="BML_SYNC_TRANSFER_TRELLIS_FILETYPE transfer sync info between trellis filetypes">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_sync_transfer_trellis_filetype.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_sync_transfer_trellis_filetype
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_SYNC_TRANSFER_TRELLIS_FILETYPE transfer sync info between trellis filetypes</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function sync = bml_sync_transfer_trellis_filetype(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_SYNC_TRANSFER_TRELLIS_FILETYPE transfer sync info between trellis filetypes
+
+ Use as 
+   sync = bml_sync_transfer_trellis_filetype(cfg)
+
+ This function calculates synchronization rows for trellis filetypes,
+ based on another filetype. Normally trellis files are sync using the ns5 file.
+ This function creates registries for files at different sampling rate,
+ such as ns2 files. 
+
+ cfg.roi           - original sync table (normaly with filetype='trellis.ns5')
+ cfg.filetype      - char, new filetype. Defaults to 'trellis.ns2'
+ cfg.extension     - char, extension of new filetype to transfer sync.
+                     Default is determined from filetype (e.g. 'ns2')
+ cfg.sync_filetype - char, original sync filetype (defaults to 'ns5')
+ cfg.sync_chantype - char, original sync chantype (defaults to empty)
+ cfg.timetol       - float, time tolerance. Defaults to 1e-4
+ cfg.delay         - numeric, time delay in seconds of the new filetype with respect
+                     to the sync_filetype. Can be used to correct for online
+                     low-passs filtering phase delays. Defaults to 0. 
+
+ returns an roi table with the new entries for the trellis filetype.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function sync = bml_sync_transfer_trellis_filetype(cfg)</a>
+0002 
+0003 <span class="comment">% BML_SYNC_TRANSFER_TRELLIS_FILETYPE transfer sync info between trellis filetypes</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   sync = bml_sync_transfer_trellis_filetype(cfg)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% This function calculates synchronization rows for trellis filetypes,</span>
+0009 <span class="comment">% based on another filetype. Normally trellis files are sync using the ns5 file.</span>
+0010 <span class="comment">% This function creates registries for files at different sampling rate,</span>
+0011 <span class="comment">% such as ns2 files.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% cfg.roi           - original sync table (normaly with filetype='trellis.ns5')</span>
+0014 <span class="comment">% cfg.filetype      - char, new filetype. Defaults to 'trellis.ns2'</span>
+0015 <span class="comment">% cfg.extension     - char, extension of new filetype to transfer sync.</span>
+0016 <span class="comment">%                     Default is determined from filetype (e.g. 'ns2')</span>
+0017 <span class="comment">% cfg.sync_filetype - char, original sync filetype (defaults to 'ns5')</span>
+0018 <span class="comment">% cfg.sync_chantype - char, original sync chantype (defaults to empty)</span>
+0019 <span class="comment">% cfg.timetol       - float, time tolerance. Defaults to 1e-4</span>
+0020 <span class="comment">% cfg.delay         - numeric, time delay in seconds of the new filetype with respect</span>
+0021 <span class="comment">%                     to the sync_filetype. Can be used to correct for online</span>
+0022 <span class="comment">%                     low-passs filtering phase delays. Defaults to 0.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% returns an roi table with the new entries for the trellis filetype.</span>
+0025 <span class="comment">%</span>
+0026 
+0027 filetype          = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'filetype'</span>,<span class="string">'trellis.ns2'</span>);
+0028 [~,~,extension]   = fileparts(filetype);
+0029 extension         = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'extension'</span>,extension);
+0030 sync_filetype     = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'sync_filetype'</span>,<span class="string">'trellis.ns5'</span>);
+0031 sync_chantype     = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'sync_chantype'</span>);
+0032 roi               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0033 timetol           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-4);
+0034 delay             = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'delay'</span>,0);
+0035 
+0036 assert(~isempty(roi),<span class="string">'roi required'</span>);
+0037 
+0038 <span class="comment">% hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),'chantype','chaninfo');</span>
+0039 
+0040 REQUIRED_VARS = {<span class="string">'s1'</span>,<span class="string">'t1'</span>,<span class="string">'s2'</span>,<span class="string">'t2'</span>,<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'chantype'</span>,<span class="string">'filetype'</span>};
+0041 assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),<span class="keyword">...</span>
+0042   <span class="string">'Variables %s required'</span>,strjoin(REQUIRED_VARS))
+0043 
+0044 sync_filetype_roi = roi(strcmp(roi.filetype,sync_filetype),:);
+0045 
+0046 sync=table();
+0047 <span class="keyword">for</span> i=1:height(sync_filetype_roi)
+0048   row=sync_filetype_roi(i,:);
+0049   
+0050   <span class="comment">%reading header</span>
+0051   [~,n,~]=fileparts(row.name{1});
+0052   fn=fullfile(row.folder{1},[n,extension]);
+0053   <span class="keyword">if</span> ~exist(fn,<span class="string">'file'</span>)
+0054     warning(&quot;<span class="comment">%s doesn't exist&quot;,fn);</span>
+0055   <span class="keyword">else</span>
+0056     hdr = ft_read_header(fn,<span class="string">'chantype'</span>,sync_chantype);
+0057     
+0058     <span class="comment">%checking consistent length between files</span>
+0059     <span class="keyword">if</span> abs(row.nSamples ./ row.Fs - hdr.nSamples ./ hdr.Fs) &gt; timetol
+0060       warning(&quot;<span class="comment">%s has a different time duration than %s&quot;,fn,row.name{1});</span>
+0061     <span class="keyword">end</span>
+0062     
+0063     Fs = (row.s2-row.s1)/(row.t2-row.t1); <span class="comment">%real sampling rate from coordinates</span>
+0064     nFr = hdr.Fs/row.Fs; <span class="comment">%nominal sampling rate ratio nFs/nFs'</span>
+0065     new_Fs = nFr .* Fs; <span class="comment">%new real sampling rate</span>
+0066     
+0067     <span class="comment">%assuming same file beggining and end times</span>
+0068     t0 = row.t1 - (row.s1-0.5)/Fs; <span class="comment">%time of begging of file</span>
+0069     tf = row.t2 + (row.nSamples-(row.s2-0.5))/Fs; <span class="comment">%time of end of file</span>
+0070     
+0071     <span class="comment">%creating new row</span>
+0072     new=row;
+0073     new.Fs = hdr.Fs;
+0074     new.nSamples = hdr.nSamples;
+0075     new.filetype = {filetype};
+0076     new.name = {[n,extension]};
+0077     
+0078     <span class="comment">%new coordinates</span>
+0079     new.s1 = ceil(nFr .* (row.s1 - 0.5));
+0080     new.s2 = ceil(nFr .* (row.s2 - 0.5));
+0081     new.t1 = t0 + (new.s1 - 0.5)/new_Fs - delay;
+0082     new.t2 = tf - (new.nSamples - (new.s2 - 0.5))/new_Fs - delay;
+0083 
+0084     <span class="comment">%completing other variables</span>
+0085     <span class="keyword">if</span> ismember(<span class="string">'nChans'</span>,new.Properties.VariableNames)
+0086         new.nChans(:) = hdr.nChans;
+0087     <span class="keyword">end</span>
+0088     <span class="keyword">if</span> ismember(<span class="string">'nTrials'</span>,new.Properties.VariableNames)
+0089         new.nTrials(:) = hdr.nTrials;
+0090     <span class="keyword">end</span>    
+0091     <span class="keyword">if</span> ismember(<span class="string">'chanunit'</span>,new.Properties.VariableNames)
+0092         new.chanunit = {strjoin(unique(hdr.chanunit))};
+0093     <span class="keyword">end</span> 
+0094     
+0095     sync = [sync; new];
+0096   <span class="keyword">end</span>
+0097 <span class="keyword">end</span>
+0098 
+0099 <span class="comment">%completing common variables</span>
+0100 <span class="keyword">if</span> ismember(<span class="string">'sync_type'</span>,sync.Properties.VariableNames)
+0101   sync.sync_type(:)={<span class="string">'slave'</span>};
+0102 <span class="keyword">end</span>
+0103 <span class="keyword">if</span> ismember(<span class="string">'bytes'</span>,sync.Properties.VariableNames)
+0104   sync.bytes(:)=nan;
+0105 <span class="keyword">end</span>
+0106 
+0107 sync = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(sync,<span class="string">'sync'</span>);
+0108 
+0109</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

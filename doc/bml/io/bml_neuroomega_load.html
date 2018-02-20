@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_neuroomega_load</title>
+  <meta name="keywords" content="bml_neuroomega_load">
+  <meta name="description" content="BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as FT_DATATYPE_RAW data structure.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">io</a> &gt; bml_neuroomega_load.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml/io&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_neuroomega_load
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as FT_DATATYPE_RAW data structure.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [Rec] =  bml_neuroomega_load(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as FT_DATATYPE_RAW data structure. 
+
+ Use as
+   rec = bml_load_neuroomega(cfg);
+
+ The first argument cfg is a configuration structure, which may contain
+ the following fields:
+ cfg.path - string: path to the folder containing the .mat files. Defauts to '.'
+ cfg.depth - double: depths to be loaded. If empty (defaults) all depths
+             are loaded
+ cfg.files_table - table: compatible with output of bml_neuroomega_info_file
+             should conatin vars 'depth', 'name', 'folder'
+ cfg.chantype - cell array of strings: defines channel types to be loaded.
+                use an invalid channel as '?' to get a table of available
+                channels and chantypes printed out. An error will stop
+                further analysis. 
+
+ Returns a struct.array, where each element contains the following fields
+ Rec(i).files - cell array of strings: .mat filenames
+ Rec(i).depth - float: depth of the record
+ Rec(i).&lt;chantype1&gt; - FT_DATATYPE_RAW containing the data of &lt;chantype1&gt;
+ Rec(i).&lt;chantype2&gt; - FT_DATATYPE_RAW containing the data of &lt;chantype2&gt;
+
+ chantypes can be any of the following
+   micro - high impedance microelectrode raw signal
+   macro - low impedance &quot;ring&quot; electrode raw signal
+   analog - analog input, usually audio
+   micro_lfp - low-pass filtered and downsampled version of micro
+   micro_hf - high-pass filtered version of micro
+   macro_lfp - low-pass filtered and downsampled version of macro
+   digital - digital input (up and down)
+   add_analog - additional analog channels</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_neuroomega_info_file.html" class="code" title="function info = bml_neuroomega_info_file(cfg)">bml_neuroomega_info_file</a>	BML_NEUROOMEGA_INFO_FILE returns table with OS info of each neuroomega.mat file in a folder</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Rec] =  bml_neuroomega_load(cfg)</a>
+0002 
+0003 <span class="comment">% BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as FT_DATATYPE_RAW data structure.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   rec = bml_load_neuroomega(cfg);</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% The first argument cfg is a configuration structure, which may contain</span>
+0009 <span class="comment">% the following fields:</span>
+0010 <span class="comment">% cfg.path - string: path to the folder containing the .mat files. Defauts to '.'</span>
+0011 <span class="comment">% cfg.depth - double: depths to be loaded. If empty (defaults) all depths</span>
+0012 <span class="comment">%             are loaded</span>
+0013 <span class="comment">% cfg.files_table - table: compatible with output of bml_neuroomega_info_file</span>
+0014 <span class="comment">%             should conatin vars 'depth', 'name', 'folder'</span>
+0015 <span class="comment">% cfg.chantype - cell array of strings: defines channel types to be loaded.</span>
+0016 <span class="comment">%                use an invalid channel as '?' to get a table of available</span>
+0017 <span class="comment">%                channels and chantypes printed out. An error will stop</span>
+0018 <span class="comment">%                further analysis.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Returns a struct.array, where each element contains the following fields</span>
+0021 <span class="comment">% Rec(i).files - cell array of strings: .mat filenames</span>
+0022 <span class="comment">% Rec(i).depth - float: depth of the record</span>
+0023 <span class="comment">% Rec(i).&lt;chantype1&gt; - FT_DATATYPE_RAW containing the data of &lt;chantype1&gt;</span>
+0024 <span class="comment">% Rec(i).&lt;chantype2&gt; - FT_DATATYPE_RAW containing the data of &lt;chantype2&gt;</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% chantypes can be any of the following</span>
+0027 <span class="comment">%   micro - high impedance microelectrode raw signal</span>
+0028 <span class="comment">%   macro - low impedance &quot;ring&quot; electrode raw signal</span>
+0029 <span class="comment">%   analog - analog input, usually audio</span>
+0030 <span class="comment">%   micro_lfp - low-pass filtered and downsampled version of micro</span>
+0031 <span class="comment">%   micro_hf - high-pass filtered version of micro</span>
+0032 <span class="comment">%   macro_lfp - low-pass filtered and downsampled version of macro</span>
+0033 <span class="comment">%   digital - digital input (up and down)</span>
+0034 <span class="comment">%   add_analog - additional analog channels</span>
+0035 <span class="comment">%</span>
+0036 <span class="comment">%</span>
+0037 
+0038 <span class="comment">%2017.10.12 AB Based on Ahmad's function ReadNeuroOmega_AA.m, adapted for</span>
+0039 <span class="comment">%fieltrip</span>
+0040 REQUIRED_VARS = {<span class="string">'depth'</span>,<span class="string">'name'</span>,<span class="string">'folder'</span>};
+0041 
+0042 depth = ft_getopt(cfg,<span class="string">'depth'</span>,[]);
+0043 files = ft_getopt(cfg,<span class="string">'files_table'</span>,[]);
+0044 chantype = ft_getopt(cfg,<span class="string">'chantype'</span>,{<span class="string">'micro'</span>,<span class="string">'macro'</span>,<span class="string">'analog'</span>});
+0045 <span class="keyword">if</span> ~iscell(chantype); chantype={chantype}; <span class="keyword">end</span>
+0046 
+0047 <span class="keyword">if</span> isempty(files)
+0048   files = <a href="bml_neuroomega_info_file.html" class="code" title="function info = bml_neuroomega_info_file(cfg)">bml_neuroomega_info_file</a>(cfg);
+0049 <span class="keyword">elseif</span> ~all(ismember(REQUIRED_VARS,files.Properties.VariableNames))
+0050   error([<span class="string">'variables '</span> strjoin(REQUIRED_VARS,<span class="string">', '</span>) <span class="string">' required in cfg.files_table'</span>]);
+0051 <span class="keyword">end</span>
+0052 
+0053 depth_all = unique([files.depth]);
+0054 <span class="keyword">if</span> isempty(depth); depth=depth_all; <span class="keyword">end</span>
+0055 
+0056 depth_sel=intersect(depth,depth_all);
+0057 <span class="keyword">if</span> isempty(depth_sel)
+0058   error([<span class="string">'No depth selected. Available depths are : '</span>,strjoin(depth_all,<span class="string">' '</span>)]);
+0059 <span class="keyword">end</span>
+0060 
+0061 N=numel(depth_sel);
+0062 Rec(N)=struct();
+0063 <span class="keyword">for</span> m=1:N <span class="comment">%cycling through depths</span>
+0064     fprintf(<span class="string">'\n--- Processing Depth %f ---\n'</span>, depth_sel(m));
+0065     db = files([files.depth]==depth_sel(m),:);
+0066     db = sortrows(db,<span class="string">'name'</span>);
+0067     Rec(m).folder=db.folder;    
+0068     Rec(m).filename=db.name;
+0069     Rec(m).depth=depth_sel(m);
+0070    
+0071     <span class="keyword">for</span> i=1:numel(chantype) <span class="comment">%cycling through chantypes</span>
+0072       tmp=cellfun(@(x) ft_preprocessing(<span class="keyword">...</span>
+0073           struct(<span class="string">'dataset'</span>,x,<span class="string">'chantype'</span>,chantype{i})),<span class="keyword">...</span>
+0074           fullfile(Rec(m).folder,Rec(m).filename),<span class="string">'UniformOutput'</span>,false);
+0075       Rec(m).(chantype{i})=ft_appenddata(struct(<span class="string">'appenddim'</span>,<span class="string">'time'</span>),tmp{:});       
+0076     <span class="keyword">end</span>   
+0077 <span class="keyword">end</span>
+0078</pre></div>
+<hr><address>Generated on Tue 20-Feb-2018 13:18:04 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
