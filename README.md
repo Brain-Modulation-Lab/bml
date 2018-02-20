@@ -7,4 +7,4 @@ and Audio data acquired in the Brain Modulation Laboratory (University of Pittsb
 These functions depend on, and extend, fieldtrip (http://www.fieldtriptoolbox.org/).
 They operate on FT_DATATYPE_RAW data structures and 'annotations tables'.
 
-[Index](http://htmlpreview.github.io/?https://github.com/Brain-Modulation-Lab/bml/blob/master/doc/index.html)
+[Index](https://cdn.rawgit.com/Brain-Modulation-Lab/bml/5491fc46/doc/index.html)
