@@ -41,10 +41,10 @@ function [data] = bml_hstack(cfg, varargin)
 % $Id$
 
 % check if the input data is valid for this function
-for i=1:length(varargin)
-  % FIXME: raw+comp is not always dealt with correctly
-  varargin{i} = ft_checkdata(varargin{i}, 'datatype', {'raw', 'raw+comp'}, 'feedback', 'no');
-end
+% for i=1:length(varargin)
+%   % FIXME: raw+comp is not always dealt with correctly
+%   varargin{i} = ft_checkdata(varargin{i}, 'datatype', {'raw', 'raw+comp'}, 'feedback', 'no');
+% end
 
 % set the defaults
 cfg.appenddim  = 'time';
@@ -83,17 +83,8 @@ for i=1:numel(varargin)
   dummy{i}.dummydimord = 'chan';
 end
 
-% don't do any data appending inside the common function
-cfg.parameter = {};
-% use a low-level function that is shared with the other ft_appendxxx functions
-% this will handle the trialinfo/sampleinfo/grad/elec/opto
-data = append_common(cfg, dummy{:});
-% this is the actual data field that will be appended further down
-
-
-%AB 2017.10.11
 if ~isequallabel
-  if issamlabel
+  if issamelabel
     for i=2:length(varargin)
       cfg1=[];
       cfg1.label = varargin{1}.label;
@@ -102,7 +93,8 @@ if ~isequallabel
   elseif issamenchan && ~match_labels
     ft_warning('concatenating raws with different channel names. Keeping labels of first raw.')
     for i=2:length(varargin)
-      varargin{i}.label = varargin{i}.label;
+      varargin{i}.label = varargin{1}.label;
+      dummy{i}.label = varargin{1}.label;
     end
   else
   	ft_error('Same channels required to append data by time')
@@ -115,10 +107,17 @@ if ~isequalfreq
     ft_error('Same Fs required to append data by time')        
 end
 
-if ismember('fsample',fields(varargin{1}))
+% don't do any data appending inside the common function
+cfg.parameter = {};
+% use a low-level function that is shared with the other ft_appendxxx functions
+% this will handle the trialinfo/sampleinfo/grad/elec/opto
+data = append_common(cfg, dummy{:});
+% this is the actual data field that will be appended further down
+
+if ismember('fsample',fieldnames(varargin{1}))
   data.fsample=varargin{1}.fsample;
 end
-if ismember('hdr',fields(varargin{1}))
+if ismember('hdr',fieldnames(varargin{1}))
   data.hdr=varargin{1}.hdr;
 end
 %data.sampleinfo=[]; 
@@ -146,7 +145,6 @@ if strcmp(timeref,'independent')
     end
     dat = cat(2, dat, trial_dat);
     tim = cat(2, tim, trial_tim);
-
   end
   data.trial = dat;
   data.time  = tim;      
