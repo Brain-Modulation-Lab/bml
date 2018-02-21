@@ -27,6 +27,9 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %           the gap with zero-padding, if possible within timetol.
 %           * false or 'no' to issue an error if discontinous files are found
 %           * 'warn' to allow with a warning
+%   cfg.match_labels - logical, indicates if labels of all files should be
+%           the same. Defaulst to true. If false a warning will be issued
+%           when concatenating files with different labels. 
 %   cfg.padval - value with which to pad if discontinuous files are loaded.
 %           Defualts to zero
 %
@@ -58,6 +61,7 @@ ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous = bml_getopt(cfg,'discontinuous','warn');
 padval        = bml_getopt(cfg,'padval',0);
 electrode     = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
+match_labels  = bml_getopt(cfg,'match_labels',true);
 
 if isempty(roi)
   raw=[];
@@ -72,13 +76,6 @@ if islogical(discontinuous)
     discontinuous = {'no'};
   end
 end
-
-% %assert for no time overlaps between rows
-% cfg1=[]; cfg1.timetol = timetol;
-% if ~isempty(bml_annot_overlap(cfg1,roi))
-%   roi %printing table for user
-%   error('annotations in roi table overlap');
-% end
 
 %consolidating chunks of same file when possible
 roi = bml_sync_consolidate(roi);
@@ -259,7 +256,7 @@ for i=2:height(roi)
     
     delta_s = delta_t*Fs/skipFactor;
     delta_s_int = round(delta_s);
-    assert(delta_s>0,"overlaping rois can't be concatenated"); 
+    assert(delta_s>0,"rois overlap by %f > tolerance = %f correct or increase tolerance",delta_t,timetol); 
 
     if abs(delta_s_int - delta_s) < timetol*Fs/skipFactor
       if ismember(discontinuous,{'warn'})
@@ -285,7 +282,10 @@ for i=2:height(roi)
   end
     
   if ~dryrun
-    cfg1=[]; cfg1.timetol = timetol; cfg1.timeref = 'common';
+    cfg1=[]; 
+    cfg1.timetol = timetol; 
+    cfg1.timeref = 'common';
+    cfg1.match_labels = match_labels;
     raw = bml_hstack(cfg1, raw, next_raw);
     time = raw.time{1};
   else

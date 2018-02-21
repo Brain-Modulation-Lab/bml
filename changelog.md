@@ -13,9 +13,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - changelog.md
 - automatic documentation with m2html
 
+
+
 ### Changed
 - bml_annor2raw no longer applies bml_annot_confluence and bml_annot_consolidate to input roi tables
 - bml_map now allows different domain and codomain types
+- bml_hstack allows concatenating raws with non-matching labels
+- bml_load_continuous allows concatenating raws with non-matching labels
+- bml_reorder_channels gets new argument cfg.label
 
 ## [0.0.0] - 2018-02-20
 ### Added

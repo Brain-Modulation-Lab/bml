@@ -1,6 +1,6 @@
 function conformed = bml_conform_to(master, slave)
 
-% BML_CONFORM_TO conforms salve to master
+% BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time
 %
 % Use as
 %    conformed = bml_conform_to(master, slave)
@@ -10,7 +10,7 @@ function conformed = bml_conform_to(master, slave)
 %
 % returns the data of salve, resampled to the times of master
 %
-% --- examples ---
+% EXAMPLES:
 %
 % % merge slave to master in a single merged FT_DATATYPE_RAW
 %
@@ -44,7 +44,7 @@ end
 if ismember('hdr',fields(slave))
   conformed.hdr=slave.hdr;  
 end
-% if ismember('hdr',fields(master))
+% if ismember('hdr',fieldnames(master))
 %   conformed.hdr=master.hdr;  
 % end
 

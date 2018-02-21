@@ -1,6 +1,7 @@
 %% Creates the html documentation folder doc/
+GIT_PATH = '/Users/brainmodulationlab/git';
 
-cd('/Users/brainmodulationlab/git')
+cd(GIT_PATH)
 rmdir bml/doc s
 m2html('mfiles',{'bml/bml_defaults.m','bml/annot','bml/io','bml/signal','bml/sync','bml/utils'},...
   'htmldir','bml/doc', 'global','on');
@@ -18,7 +19,6 @@ fprintf(fid,[ ...
 ]);
 fclose(fid);
 
-
 fid = fopen('bml/doc/helptoc.xml','wt');
 fprintf(fid,[ ... 
 '<?xml version="1.0" encoding="utf-8"?>\n'... 
@@ -28,7 +28,7 @@ fprintf(fid,[ ...
 ]);
 fclose(fid);   
     
-    
+builddocsearchdb([GIT_PATH '/bml/doc')    
     
     
     

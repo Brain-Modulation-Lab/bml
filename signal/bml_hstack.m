@@ -9,6 +9,10 @@ function [data] = bml_hstack(cfg, varargin)
 % cfg.timetol - double: time tolerance in seconds
 % cfg.timeref - string: either 'common', 'independent' or 'auto'
 %               if 'auto' it is set to common if raws are time contiguous
+% cfg.match_labels - logical: indicates if same labels (channel names)
+%               should be enforced for concatenation. If false and all
+%               raws have the same number of labels, concatenation will
+%               proceed with a warning. Defaults to true. 
 %
 % returns a time-concatenated raw
 
@@ -44,22 +48,24 @@ end
 
 % set the defaults
 cfg.appenddim  = 'time';
-timetol = bml_getopt(cfg, 'timetol', 1e-5);
-timeref = bml_getopt(cfg, 'timeref', 'auto');
+timetol       = bml_getopt(cfg, 'timetol', 1e-5);
+timeref       = bml_getopt(cfg, 'timeref', 'auto');
+match_labels  = bml_getopt(cfg, 'match_labels', true);
 
 isequaltime  = true;
 isequallabel = true;
 issamelabel  = true;
+issamenchan = true;
 isequaltrial = true;
 isequalfreq  = true;
 for i=2:numel(varargin)
   isequaltime  = isequaltime  && isequal(varargin{i}.time , varargin{1}.time );
   isequallabel = isequallabel && isequal(varargin{i}.label, varargin{1}.label);
   issamelabel  = issamelabel  && isempty(setxor(varargin{i}.label, varargin{1}.label));
+  issamenchan  = issamenchan && (length(varargin{i}.label) == length(varargin{1}.label));
   isequaltrial = isequaltrial && isequal(numel(varargin{i}.trial),numel(varargin{1}.trial));
   isequalfreq  = isequalfreq && length(uniquetol([varargin{i}.fsample,varargin{1}.fsample],timetol))==1;
 end
-
 
 % ft_selectdata cannot create the union of the data contained in cell-arrays
 % make a dummy without the actual data, but keep trialinfo/sampleinfo/grad/elec/opto
@@ -87,7 +93,20 @@ data = append_common(cfg, dummy{:});
 
 %AB 2017.10.11
 if ~isequallabel
-    ft_error('Same channels in same order required to append data by time')
+  if issamlabel
+    for i=2:length(varargin)
+      cfg1=[];
+      cfg1.label = varargin{1}.label;
+      varargin{i} = bml_reorder_channels(cfg1,varargin{i});
+    end
+  elseif issamenchan && ~match_labels
+    ft_warning('concatenating raws with different channel names. Keeping labels of first raw.')
+    for i=2:length(varargin)
+      varargin{i}.label = varargin{i}.label;
+    end
+  else
+  	ft_error('Same channels required to append data by time')
+  end
 end
 if ~isequaltrial
     ft_error('Same number of trials required to append data by time')
@@ -113,7 +132,6 @@ if strcmp(timeref,'auto')
 end
 
 if strcmp(timeref,'independent')
-
   dat = cell(1,0);
   tim = cell(1,0);
   for t=1:numel(varargin{1}.trial)
@@ -132,9 +150,7 @@ if strcmp(timeref,'independent')
   end
   data.trial = dat;
   data.time  = tim;      
-  
 elseif strcmp(timeref,'common')
-
   dat = cell(1,0);
   tim = cell(1,0);
   for t=1:numel(varargin{1}.trial)
@@ -146,7 +162,6 @@ elseif strcmp(timeref,'common')
     end
     dat = cat(2, dat, trial_dat);
     tim = cat(2, tim, trial_tim);
-
   end
   data.trial = dat;
   data.time  = tim; 
