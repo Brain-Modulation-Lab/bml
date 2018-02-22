@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - bml_robust_std
 - changelog.md
 - automatic documentation with m2html
-
+- bml_annot2spike
 
 
 ### Changed
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - bml_hstack allows concatenating raws with non-matching labels
 - bml_load_continuous allows concatenating raws with non-matching labels
 - bml_reorder_channels gets new argument cfg.label
+
 
 ## [0.0.0] - 2018-02-20
 ### Added
