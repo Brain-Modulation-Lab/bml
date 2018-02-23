@@ -277,7 +277,8 @@ for i=2:height(roi)
       end
     else
     	roi
-      error('can''t concatenate discontinuous files within timetol');
+      error("can't concatenate discontinuous files with sample snap error of %f seconds within timetol of %f seconds",...
+        abs(delta_s_int - delta_s)*skipFactor/Fs, timetol);
     end 
   end
     

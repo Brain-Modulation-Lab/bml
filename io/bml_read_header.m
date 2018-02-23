@@ -4,7 +4,9 @@ function hdr = bml_read_header(cfg)
 %
 % Use as
 %   hdr = bml_read_header(cfg)
+%   hdr = bml_read_header(cfg.roi)
 %
+% cfg.roi - table of height 1 with folder and name variables
 % cfg.name - string: filename
 % cfg.folder - string: path to file
 %
@@ -12,7 +14,11 @@ function hdr = bml_read_header(cfg)
 
 if istable(cfg)
   assert(height(cfg)==1,"Only one row tables allowed as cfg");
-elseif ~isstruct(cfg)
+elseif isstruct(cfg)
+  if ismember('roi',fieldnames(cfg)) && istable(cfg.roi) && height(cfg.roi)==1
+    cfg = cfg.roi;
+  end
+else
   cfg=struct('name',cfg);
 end
 

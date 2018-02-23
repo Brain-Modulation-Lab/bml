@@ -8,6 +8,8 @@ function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)
 %
 % cfg.roi - ROI table with file synchronization information
 % cfg.epoch - ANNOT table with epochs of interest. 
+% cfg.allow_missing - logical, indicating if missing epochs should be
+%           allowed
 % cfg.electrode - ANNOT table with electrodes of interest. Must contain
 %           'channel' and 'eletrode' variables.
 % cfg.relabel - optinbal cellstr with new names of channels. 
@@ -27,15 +29,16 @@ function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)
 % file_raw_map is the mapping between files and samples in trials
 % loaded_epoch are the efectively loaded epochs
 
-roi        = bml_roi_table(bml_getopt(cfg,'roi'),'roi');
-epoch      = bml_annot_table(bml_getopt(cfg,'epoch'),'epoch');
-resamplefs = bml_getopt(cfg,'resamplefs');
-detrend    = bml_getopt_single(cfg,'detrend','no');
-demean     = bml_getopt_single(cfg,'demean','no');
-feedback   = bml_getopt_single(cfg,'feedback','no');
-electrode  = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
-relabel    = bml_getopt(cfg,'relabel');
-warn       = bml_getopt(cfg,'warn',true);
+roi           = bml_roi_table(bml_getopt(cfg,'roi'),'roi');
+epoch         = bml_annot_table(bml_getopt(cfg,'epoch'),'epoch');
+resamplefs    = bml_getopt(cfg,'resamplefs');
+detrend       = bml_getopt_single(cfg,'detrend','no');
+demean        = bml_getopt_single(cfg,'demean','no');
+feedback      = bml_getopt_single(cfg,'feedback','no');
+electrode     = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
+relabel       = bml_getopt(cfg,'relabel');
+warn          = bml_getopt(cfg,'warn',true);
+allow_missing = bml_getopt(cfg,'allow_missing',false);
 
 cfg.roi = [];
 cfg.epoch = [];
@@ -68,69 +71,78 @@ for i=1:height(epoch)
   i_loaded_epoch = epoch(i,:);
   cfg_keep_x = struct('keep','x');
   cfg.roi = bml_annot_intersect(cfg_keep_x, roi, epoch(i,:));
-  assert(height(cfg.roi)>0,"No roi info for current epoch");
-  cfg.roi = bml_sync_consolidate(cfg.roi);
-  
-  if ~isempty(electrode)
-    %intersecting electrodes with rois
-    cfg.electrode = bml_annot_intersect(cfg_keep_x, electrode, cfg.roi);
-    %consolidating electrode rows corresponding to same epoched and channel
-    %(for neuroomega files it can get split because of the chunking)
-    if isempty(cfg.electrode)
-      error("No electrodes left after intersection with roi. Check electrodes starts and ends.")
-    end
-    cfg.electrode=sortrows(cfg.electrode,...
-      bml_getidx({'filetype','channel','starts'},cfg.electrode.Properties.VariableNames));
-    cfg.electrode.id=(1:height(cfg.electrode))';
-    cfg1=[];
-    cfg1.criterion = @(x) (length(unique(x.filetype))==1) && ...
-                          (length(unique(x.channel))==1) && ...
-                          (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
-    cfg.electrode=bml_annot_consolidate(cfg1,cfg.electrode);
-  else
-    cfg.electrode = [];
-  end
-  
-  [i_raw,i_file_raw_map] = bml_load_continuous(cfg);
-  i_file_raw_map.epoch_id(:) = epoch.id(i);
-  
-  if ~isempty(cfg_resample)
-    i_raw = ft_resampledata(cfg_resample,i_raw);
-  end
-  
-  if first %initializing stuff
-    if isempty(relabel)
-      label = i_raw.label;
-    else
-      assert(numel(relabel)==numel(i_raw.label), "incorrect length for relabel");
-      label = relabel;
-      i_raw.label = label;
-    end
-    raw = {i_raw};
-    i_file_raw_map.trial(:) = 1;
-    file_raw_map = i_file_raw_map;
-    if ismember('hdr',fields(i_raw))
-      hdr=i_raw.hdr;
-    else
-      hdr=[];
-    end
-    i_loaded_epoch.id=1;
-    first = false;
-  else
-    if ~isequal(label,i_raw.label)
-      if warn && isempty(relabel)
-        warning('inconsistent channel names. Renaming.')
+  if height(cfg.roi)>0
+    cfg.roi = bml_sync_consolidate(cfg.roi);
+
+    if ~isempty(electrode)
+      %intersecting electrodes with rois
+      cfg.electrode = bml_annot_intersect(cfg_keep_x, electrode, cfg.roi);
+      %consolidating electrode rows corresponding to same epoched and channel
+      %(for neuroomega files it can get split because of the chunking)
+      if isempty(cfg.electrode)
+        error("No electrodes left after intersection with roi. Check electrodes starts and ends.")
       end
-      i_raw.label = label;
-    end   
-    raw = [raw, i_raw];
-    i_trial = max(file_raw_map.trial)+1;
-    i_file_raw_map.trial(:) = i_trial;
-    file_raw_map = [file_raw_map; i_file_raw_map];
-    i_loaded_epoch.id=i_trial;
+      cfg.electrode=sortrows(cfg.electrode,...
+        bml_getidx({'filetype','channel','starts'},cfg.electrode.Properties.VariableNames));
+      cfg.electrode.id=(1:height(cfg.electrode))';
+      cfg1=[];
+  %     cfg1.criterion = @(x) (length(unique(x.filetype))==1) && ...
+  %                           (length(unique(x.channel))==1) && ...
+  %                           (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
+      cfg1.criterion = @(x) (length(unique(x.filetype))==1) && ...
+                            (length(unique(x.channel))==1);                        
+      cfg.electrode=bml_annot_consolidate(cfg1,cfg.electrode);
+    else
+      cfg.electrode = [];
+    end
+
+    [i_raw,i_file_raw_map] = bml_load_continuous(cfg);
+    i_file_raw_map.epoch_id(:) = epoch.id(i);
+
+    if ~isempty(cfg_resample)
+      i_raw = ft_resampledata(cfg_resample,i_raw);
+    end
+
+    if first %initializing stuff
+      if isempty(relabel)
+        label = i_raw.label;
+      else
+        assert(numel(relabel)==numel(i_raw.label), "incorrect length for relabel");
+        label = relabel;
+        i_raw.label = label;
+      end
+      raw = {i_raw};
+      i_file_raw_map.trial(:) = 1;
+      file_raw_map = i_file_raw_map;
+      if ismember('hdr',fields(i_raw))
+        hdr=i_raw.hdr;
+      else
+        hdr=[];
+      end
+      i_loaded_epoch.id=1;
+      first = false;
+    else
+      if ~isequal(label,i_raw.label)
+        if warn && isempty(relabel)
+          warning('inconsistent channel names. Renaming.')
+        end
+        i_raw.label = label;
+      end   
+      raw = [raw, i_raw];
+      i_trial = max(file_raw_map.trial)+1;
+      i_file_raw_map.trial(:) = i_trial;
+      file_raw_map = [file_raw_map; i_file_raw_map];
+      i_loaded_epoch.id=i_trial;
+    end
+
+    loaded_epoch = [loaded_epoch; i_loaded_epoch];
+  else
+    if warn && allow_missing
+      warning("No roi info for epoch %i (epoch_id = %i)",i,epoch.epoch_id(i));
+    elseif ~allow_missing
+      error("No roi info for epoch %i (epoch_id = %i)",i,epoch.epoch_id(i));
+    end
   end
-  
-  loaded_epoch = [loaded_epoch; i_loaded_epoch];
 end
 
 cfg=[];

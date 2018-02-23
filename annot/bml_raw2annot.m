@@ -8,13 +8,13 @@ function annot = bml_raw2annot(raw)
 %   'id' corresponds to the trial
 %   'starts' time represented by the trial
 % 	'ends' time represented by the trial
-%   'duration'
-%   's1'
-%   't1'
-%   's2'
-%   't2'
-%   'Fs'
-%   'nSamples'
+%   'duration' in seconds
+%   's1' double, first sample sync coord
+%   't1' double, time of first sample sample sync coord
+%   's2' double, second sample sync coord
+%   't2' double, time of second sample sample sync coord
+%   'Fs' double, sampling rate
+%   'nSamples' double, number of samples in raw
 
 annot = table();
 for i=1:numel(raw.trial)
@@ -47,4 +47,4 @@ for i=1:numel(raw.trial)
   
 end
 
-annot = bml_annot_table(annot,'raw');
+annot = bml_annot_table(annot,inputname(1));
