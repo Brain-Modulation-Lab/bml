@@ -8,28 +8,29 @@ function conformed = bml_conform_to(master, slave)
 % master - FT_DATATYPE_RAW
 % slave  - FT_DATATYPE_RAW
 %
-% returns the data of slave, resampled to the times of master
+% returns the data of slave, resampled to the times of master.
+% Asumes that master and slave are synchronized to same time origin.
 %
 % EXAMPLES:
 %
 % % merge slave to master in a single merged FT_DATATYPE_RAW
 %
 % conformed = bml_conform_to(master, slave)
-% 
+%
 % cfg=[];
 % cfg.appenddim  = 'chan';
 % merged = ft_appenddata(cfg,master,conformed);
 %
 
-assert(isstruct(master) && all(ismember({'trial','time','label'},fieldnames(master))),"Invalid master");  
-assert(isstruct(slave) && all(ismember({'trial','time','label'},fieldnames(slave))),"Invalid slave");  
+assert(isstruct(master) && all(ismember({'trial','time','label'},fieldnames(master))),"Invalid master");
+assert(isstruct(slave) && all(ismember({'trial','time','label'},fieldnames(slave))),"Invalid slave");
 
 master_N = length(master.trial);
 nChans = length(slave.label);
 
 %calculating mapping between master and slave trials
 annot_master = bml_raw2annot(master);
-annot_slave  = bml_raw2annot(slave); 
+annot_slave  = bml_raw2annot(slave);
 master_slave = bml_annot_intersect(annot_master,annot_slave);
 assert(~isempty(master_slave), "Can't conform. No master trials correspond to any slave trials.");
 master_slave.master_frac = master_slave.duration/master_slave.master_duration;
@@ -62,7 +63,7 @@ for i=1:master_N
     warning("Master trial %i has no corresponding Slave trial. Adding empty trial.",i);
   else
     starts(sub_slave_i) = mc.t1;
-    ends(sub_slave_i) = mc.t2;    
+    ends(sub_slave_i) = mc.t2;
     sub_ms_map(i) = sub_slave_i;
     sub_slave.trial{sub_slave_i} = slave.trial{ms_map(i)};
     sub_slave.time{sub_slave_i} = slave.time{ms_map(i)};
@@ -71,7 +72,18 @@ for i=1:master_N
   end
 end
 
-%conforming subset slave trials to master times
+%cheking if sampling rates of slave and master are similar.
+%If fs_slave >> fs_master, then apply lowpass filter to slave before interpolating
+% if slave.fs > 1.1 * master.fs %1.1 is a tolerance factor
+%   cfg=[]; cfg.lpfilter='yes'; cfg.lpfreq=master.fs/2; %such that new slave will be sampled at Nyquist rate
+%   cfg.lpfilttype = 'but'; cfg.lpfiltord = 6; %sixth order butterworth lowpass filter
+%   cfg.lpfiltdir = 'twopass'; %for zero lag
+%   cfg.lpinstabilityfix = 'no';
+%   cfg.lpfiltwintype = 'hamming';
+%   slave = ft_preprocessing(cfg,slave);
+% end
+
+%interpolating subset of slave trials to master times
 cfg=[]; cfg.time=sub_master_time; cfg.method='pchip';
 cfg.feedback='no';
 sub_conformed=ft_resampledata(cfg,bml_crop(sub_slave,starts,ends));
@@ -92,7 +104,7 @@ for i=1:master_N
 end
 
 if ismember('hdr',fields(slave))
-  conformed.hdr=slave.hdr;  
+  conformed.hdr=slave.hdr;
 else
   conformed.hdr=[];
 end
@@ -114,6 +126,5 @@ end
 
 
 % if ismember('hdr',fieldnames(master))
-%   conformed.hdr=master.hdr;  
+%   conformed.hdr=master.hdr;
 % end
-
