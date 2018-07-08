@@ -74,14 +74,15 @@ end
 
 %cheking if sampling rates of slave and master are similar.
 %If fs_slave >> fs_master, then apply lowpass filter to slave before interpolating
-% if slave.fs > 1.1 * master.fs %1.1 is a tolerance factor
-%   cfg=[]; cfg.lpfilter='yes'; cfg.lpfreq=master.fs/2; %such that new slave will be sampled at Nyquist rate
-%   cfg.lpfilttype = 'but'; cfg.lpfiltord = 6; %sixth order butterworth lowpass filter
-%   cfg.lpfiltdir = 'twopass'; %for zero lag
-%   cfg.lpinstabilityfix = 'no';
-%   cfg.lpfiltwintype = 'hamming';
-%   slave = ft_preprocessing(cfg,slave);
-% end
+if annot_slave.Fs(1) > 1.01 * annot_master.Fs(1) % 1% tolerance factor in freq comparison
+  fprintf("low-pass filtering slave [%f Hz] to half the master's sampling rate [%f Hz], using 6th order Butterworth\n",annot_slave.Fs(1),annot_master.Fs(1)/2);
+  cfg=[]; cfg.lpfilter='yes'; cfg.lpfreq=annot_master.Fs(1)/2; %such that new slave will be sampled at Nyquist rate
+  cfg.lpfilttype = 'but'; cfg.lpfiltord = 6; %sixth order butterworth lowpass filter
+  cfg.lpfiltdir = 'twopass'; %for zero lag
+  cfg.lpinstabilityfix = 'no';
+  cfg.lpfiltwintype = 'hamming';
+  slave = ft_preprocessing(cfg,slave);
+end
 
 %interpolating subset of slave trials to master times
 cfg=[]; cfg.time=sub_master_time; cfg.method='pchip';
