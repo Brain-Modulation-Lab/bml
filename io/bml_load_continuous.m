@@ -185,7 +185,7 @@ if ~dryrun
   raw = ft_preprocessing(cfg);
 else
   raw = hdr;
-  assert(raw.nSamples>=floor(e/skipFactor),'index overflow s2=%i but nSample=%i',floor(e/skipFactor),raw.nSamples);
+  assert(max(raw.nSamples)>=floor(e/skipFactor),'index overflow s2=%i but nSample=%i',floor(e/skipFactor),raw.nSamples);
 end
 
 %selecting channels
