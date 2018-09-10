@@ -27,8 +27,10 @@ elseif nargin == 2
             split_time = [split_time, bp(2:(end-1))];
         end
     end
-elseif nargin == 3 && isempty(split_time)
-	split_time = [];
+elseif nargin == 3
+    if isempty(split_time)
+        split_time = [];
+    end
     for s=1:height(session)
         n_split = round(session.duration(s)/chunk_duration);
         bp  = linspace(session.starts(s),session.ends(s),n_split+1);
@@ -45,6 +47,7 @@ if ~ismember('session_part',session.Properties.VariableNames)
   session.session_part = ones(height(session),1);
 end
 
+split_time = sort(split_time);
 for i=1:length(split_time)
   session_i=session((session.starts < split_time(i)) & (session.ends > split_time(i)),:);
   if isempty(session_i)
