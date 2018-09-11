@@ -14,7 +14,8 @@ function consolidated = bml_sync_consolidate(cfg)
 % cfg.group - variable indicating grouping criteria. Entries of different groups 
 %               are not consolidated. Defaults to 'session_id'
 % cfg.timewarp - boolean, indicates if linear time warping is allowed in
-%               consolidation. If false, uses nominal Fs value in roi table
+%               consolidation. If false, uses nominal Fs value in roi
+%               table. Defaults to true.
 % cfg.rowisfile - boolean, indicates if row refer to files. Defaults to true.
 %
 % If chunking for consolidation was done, each file can have several entries in the
@@ -69,7 +70,7 @@ for i_uff=1:length(uff)
   i_roi = roi(strcmp(roi.fullfile,uff(i_uff)),:);
   if height(i_roi)>1
 
-    %doing linear fit to asses if consolidation is plausible
+    %doing linear fit to assess if consolidation is plausible
     s = [i_roi.s1; i_roi.s2];
     t = [i_roi.t1; i_roi.t2];
     if timewarp
@@ -95,7 +96,7 @@ for i_uff=1:length(uff)
       end
       i_roi = consrow;      
     else  
-      warning('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);
+      error('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol)
     end
   end
   consolidated = [consolidated; i_roi];
@@ -113,7 +114,12 @@ if contiguous
   ufc = unique(roi.filetype_chantype);
   for i_ufc=1:length(ufc)
   	i_roi = roi(strcmp(roi.filetype_chantype,ufc(i_ufc)),:);
-    
+    if  height(i_roi)>1 && length(unique(i_roi.name))<=1
+      %probably the first consolidation failed. Returning with a warning
+      error('multiple chunks for single file after per file consolidation');
+      consolidated = bml_roi_table(roi);
+      return
+    end
     %detecting contiguos stretches
     cfg=[];
     cfg.criterion = @(x) abs(sum(x.duration)-max(x.ends)+min(x.starts)) < height(x)*timetol;
@@ -155,7 +161,7 @@ if contiguous
             i_roi_cont_j.warpfactor = 1 ./ (i_roi_cont_j.Fs .* p(1));
           end
         else  
-          warning('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);
+          error('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);
         end
         i_roi_cont_j.raw1=[];
         i_roi_cont_j.raw2=[];          
