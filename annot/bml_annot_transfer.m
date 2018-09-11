@@ -4,6 +4,7 @@ function transfered = bml_annot_transfer(cfg, annot, transfer)
 %
 % Use as
 %   transfered = bml_annot_transfer(cfg, annot, transfer)
+%   transfered = bml_annot_transfer(cfg.select, annot, transfer)
 %   transfered = bml_annot_transfer(annot, transfer)  
 %
 % The first argument cfg is a optional configuration structure, which can contain
@@ -11,11 +12,11 @@ function transfered = bml_annot_transfer(cfg, annot, transfer)
 % cfg.overlap - double: fraction of overla required for filter. Defauls 0
 %           (touch)
 % cfg.description - string: description of output annotation
-% cfg.select - cellstr. Names of variables to transfer (afeter name
+% cfg.select - cellstr. Names of variables to transfer (after name
 %           modification)
 %
 % annot, transfer - annot tables with fields 'starts' and 'ends'.
-%        'filter' should have no overlapping annotations 
+%        'transfer' should have no overlapping annotations 
 
 if nargin == 2
   overlap = 0;
@@ -23,9 +24,14 @@ if nargin == 2
   annot = bml_annot_table(cfg,[],inputname(1));
   cfg=[];
 elseif nargin == 3
-  overlap = bml_getopt(cfg,'overlap',0);
-  annot = bml_annot_table(annot,[],inputname(2));
-  transfer = bml_annot_table(transfer,[],inputname(3));
+    if isstruct(cfg)
+      overlap = bml_getopt(cfg,'overlap',0);
+    else %case cfg.select is first argument
+      overlap = 0;
+      cfg=struct('select',cfg);
+    end
+	annot = bml_annot_table(annot,[],inputname(2));
+	transfer = bml_annot_table(transfer,[],inputname(3));
 else
   error('use as bml_annot_transfer(annot, filter_annot)');
 end
@@ -58,7 +64,7 @@ select = bml_getopt(cfg,'select',[]);
 if ~isempty(select)
   select_members = ismember(select,intersect.Properties.VariableNames);
   if ~all(select_members)
-    warning('%s variables not found. Avilabl evars are %s',...
+    warning('%s variables not found. Available vars are %s',...
       strjoin(select(~select_members)),strjoin(intersect.Properties.VariableNames));
   end
   intersect = intersect(:,[{'id'},select(select_members)]);
