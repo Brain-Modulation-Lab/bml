@@ -9,7 +9,7 @@ function transfered = bml_annot_transfer(cfg, annot, transfer)
 %
 % The first argument cfg is a optional configuration structure, which can contain
 % the following optional fields:
-% cfg.overlap - double: fraction of overla required for filter. Defauls 0
+% cfg.overlap - double: fraction of overlap required for filter. Defauls 0
 %           (touch)
 % cfg.description - string: description of output annotation
 % cfg.select - cellstr. Names of variables to transfer (after name

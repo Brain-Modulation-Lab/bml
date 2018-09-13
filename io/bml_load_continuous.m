@@ -14,11 +14,10 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %   cfg.electrode - ANNOT table with electrodes information. Should contain
 %                   variables 'channel' and 'electrode'. Optional.
 %   cfg.folder - overwrites info in cfg.roi
-%   cfg.chantype - overwrites info in cfg.roi
+%   cfg.chantype - string, overwrites info in cfg.roi
 %   cfg.filetype - overwrites info in cfg.roi
 %   cfg.Fs - overwrites info in cfg.roi
 %   cfg.timetol - double: time tolerance in seconds per sample. Defaults to 1e-6
-%   cfg.chantype - string
 %   cfg.dryrun - logical: should a dry-run test be performed? Defaults to false
 %   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
 %           functions 

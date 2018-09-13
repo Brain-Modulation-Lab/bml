@@ -9,9 +9,12 @@ function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)
 % cfg.roi - ROI table with file synchronization information
 % cfg.epoch - ANNOT table with epochs of interest. 
 % cfg.allow_missing - logical, indicating if missing epochs should be
-%           allowed
+%           allowed. Defaults to false.
 % cfg.electrode - ANNOT table with electrodes of interest. Must contain
 %           'channel' and 'eletrode' variables.
+% cfg.load_empty - logical, indicates how to proceed if a the
+%           electrode annotation for a channel doesn't span the entire 
+%           epoch. In this case the channel is 'empty'. defaults to true.
 % cfg.relabel - optinbal cellstr with new names of channels. 
 % cfg.warn - logical indicating if warnings should be issued
 %
@@ -39,6 +42,7 @@ electrode     = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
 relabel       = bml_getopt(cfg,'relabel');
 warn          = bml_getopt(cfg,'warn',true);
 allow_missing = bml_getopt(cfg,'allow_missing',false);
+load_empty    = bml_getopt(cfg,'load_empty',true);
 
 cfg.roi = [];
 cfg.epoch = [];
@@ -75,22 +79,25 @@ for i=1:height(epoch)
     cfg.roi = bml_sync_consolidate(cfg.roi);
 
     if ~isempty(electrode)
-      %intersecting electrodes with rois
-      cfg.electrode = bml_annot_intersect(cfg_keep_x, electrode, cfg.roi);
-      %consolidating electrode rows corresponding to same epoched and channel
-      %(for neuroomega files it can get split because of the chunking)
-      if isempty(cfg.electrode)
-        error("No electrodes left after intersection with roi. Check electrodes starts and ends.")
+      if load_empty
+        cfg.electrode = electrode;
+        cfg.electrode.starts(:) = min(cfg.roi.starts);
+        cfg.electrode.ends(:) = max(cfg.roi.ends);
+      else
+        %intersecting electrodes with ROIs
+        cfg.electrode = bml_annot_intersect(cfg_keep_x, electrode, cfg.roi);
+        %consolidating electrode rows corresponding to same epoched and channel
+        %(for neuroomega files it can get split because of the chunking)
+        if isempty(cfg.electrode)
+          error("No electrodes left after intersection with roi. Check electrodes starts and ends, or use load_empty = true.")
+        end
       end
       cfg.electrode=sortrows(cfg.electrode,...
         bml_getidx({'filetype','channel','starts'},cfg.electrode.Properties.VariableNames));
       cfg.electrode.id=(1:height(cfg.electrode))';
+      
       cfg1=[];
-  %     cfg1.criterion = @(x) (length(unique(x.filetype))==1) && ...
-  %                           (length(unique(x.channel))==1) && ...
-  %                           (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
-      cfg1.criterion = @(x) (length(unique(x.filetype))==1) && ...
-                            (length(unique(x.channel))==1);                        
+      cfg1.criterion = @(x) (length(unique(x.filetype))==1) && (length(unique(x.channel))==1);                        
       cfg.electrode=bml_annot_consolidate(cfg1,cfg.electrode);
     else
       cfg.electrode = [];
