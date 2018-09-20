@@ -61,7 +61,9 @@ env.label = data.label;
 env.cfg = struct();
 env.cfg.envelope = "binabs";
 env.cfg.bin_size = bin_size;
-env.cfg.previous = data.cfg;
+if isfield(data,'cfg')
+  env.cfg.previous = data.cfg;
+end
 
 if ismember('hdr',fieldnames(data))
   env.hdr = data.hdr;
