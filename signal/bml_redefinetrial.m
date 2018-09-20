@@ -8,10 +8,11 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 % raw - FT_DATAYPR_RAW to be re-epoched with time in global coordinates
 % cfg - configuraton structure
 % cfg.epoch - ANNOT table with new epoching
-% cfg.t0 - reference time for each epoch. If not given the time is kept in
-%          global time coordinates. Can be string or char is given that matches a 
-%          variable of cfg.epoch or a numeric vector of the same length than cfg.epoch
-% cfg.regularize - if true, resulting times are forced to be equal. 
+% cfg.t0 - reference time for each epoch. If not specified the time is kept in
+%          global time coordinates. Can be string or char that matches a 
+%          variable of cfg.epoch, or a numeric vector of the same length than cfg.epoch
+% cfg.regularize - if true, resulting times are forced to be equal.
+%          Defaults to false
 % cfg.warn - logical indicating if warnings should be issued. Defaults to true
 %
 % returns a raw with new trials. The epoch ANNOT is added as a new field in the 
