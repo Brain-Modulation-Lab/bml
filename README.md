@@ -10,4 +10,4 @@ To open all raw formats make sure to add the following to matlab's path:
 https://github.com/Brain-Modulation-Lab/fieldtrip/tree/bml-read
 https://github.com/Brain-Modulation-Lab/NPMK
 
-[BML Toolbox Help Index](https://cdn.rawgit.com/Brain-Modulation-Lab/bml/5491fc46/doc/index.html)
+[BML Toolbox Help Index](https://cdn.rawgit.com/Brain-Modulation-Lab/bml/190ae5a0/doc/index.html)
