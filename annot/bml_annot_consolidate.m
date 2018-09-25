@@ -1,9 +1,9 @@
-function annot = bml_annot_consolidate(cfg, x)
+function cons = bml_annot_consolidate(cfg, annot)
 
 % BML_ANNOT_CONSOLIDATE returns a consolidated annotation table
 %
 % Use as
-%   annot = bml_annot_consolidate(cfg, annot1);
+%   cons = bml_annot_consolidate(cfg, annot);
 %
 % The first argument cfg is a configuration structure, which can contain
 % the following field:
@@ -13,12 +13,16 @@ function annot = bml_annot_consolidate(cfg, x)
 % cfg.description - string: description of the output annot table
 % cfg.additive - cellstr with names of variables to be treated as additive 
 %             defaults to empty
+% cfg.groupby - cellstr indicating name of column of annot by which to group
+%             the rows before consolidating. If missing no grouping is
+%             done.
 %
 % Returns a annotation table with the folloing variables:
 %   cons_duration - sum of the consolidated durations
 %   id_starts - first original id of the consolidated row
 %   id_ends - last original id of the consolidated row
 %   cons_n - number of consolidated rows
+%   cons_group - consolidation group id, only if groupby was specified
 % 
 % EXAMPLES
 % ========
@@ -33,56 +37,78 @@ function annot = bml_annot_consolidate(cfg, x)
 % cfg.criterion = @(x) height(x)<=4
 % grouped_annot = bml_annot_consolidate(cfg,annot);
 
-x = bml_annot_table(x,[],inputname(2));
+annot = bml_annot_table(annot,[],inputname(2));
 
-description = bml_getopt(cfg,'description', ['cons_' x.Properties.Description]);
+description = bml_getopt(cfg,'description', ['cons_' annot.Properties.Description]);
 criterion   = bml_getopt(cfg,'criterion',[]);
 additive    = bml_getopt(cfg,'additive',{});
+groupby     = bml_getopt(cfg,'groupby',[]);
 
 if ~isa(criterion, 'function_handle')
   error('''criterion'' should be a function handle');
 end
 
-i=1; j=1;
-tmp=collapse_table_rows(x(1,:),additive);
-annot = cell2table(cell(0,width(tmp))); 
-annot.Properties.VariableNames = tmp.Properties.VariableNames;
-
-if height(x)<=1
-  annot = collapse_table_rows(x,additive);
-  annot.id=[];
-  annot = bml_annot_table(annot,description);
-  return
+%ToDo: allow grouping by several variables
+if isempty(groupby)
+  annot.cons_group(:)=1;
+  groupby = {'cons_group'};
+  groups={1};
+else
+	if ~any(strcmp(annot.Properties.VariableNames, groupby))
+    error('groupby should match a column of annot');
+  end
+  groups = unique(annot{:,groupby});
 end
 
-while i<=height(x)
-  if j==1 
-    curr_s=collapse_table_rows(x(i,:),additive);
-  end
-  
-  merge_s = x(i:(i+j),:);
-  
-  if criterion(merge_s)
-    curr_s = collapse_table_rows(merge_s,additive);
-    j = j + 1;
-    if i + j > height(x)
-      annot = [annot; curr_s];
-      i = height(x)+1;
-    end
+cons = table();
+for g=1:numel(groups)
+  if iscellstr(groups(g))
+    annot_g = annot(strcmp(annot{:,groupby},groups(g)),:);
   else
-  	annot = [annot;curr_s];
-    i = i + j;
-    j = 1;
-    if i == height(x) %adding last register
-      curr_s = collapse_table_rows(x(i,:),additive);
-      annot = [annot; curr_s];
-      i = height(x)+1;
+    annot_g = annot(annot{:,groupby}==groups{g},:);    
+  end
+  
+  i=1; j=1;
+  tmp=collapse_table_rows(annot_g(1,:),additive);
+  cons_g = cell2table(cell(0,width(tmp))); 
+  cons_g.Properties.VariableNames = tmp.Properties.VariableNames;
+
+  if height(annot_g)<=1
+    cons_g = collapse_table_rows(annot_g,additive);
+    cons_g.id=[];
+    cons_g = bml_annot_table(cons_g,description);
+    return
+  end
+
+  while i<=height(annot_g)
+    if j==1 
+      curr_s=collapse_table_rows(annot_g(i,:),additive);
+    end
+
+    merge_s = annot_g(i:(i+j),:);
+
+    if criterion(merge_s)
+      curr_s = collapse_table_rows(merge_s,additive);
+      j = j + 1;
+      if i + j > height(annot_g)
+        cons_g = [cons_g; curr_s];
+        i = height(annot_g)+1;
+      end
+    else
+      cons_g = [cons_g;curr_s];
+      i = i + j;
+      j = 1;
+      if i == height(annot_g) %adding last register
+        curr_s = collapse_table_rows(annot_g(i,:),additive);
+        cons_g = [cons_g; curr_s];
+        i = height(annot_g)+1;
+      end
     end
   end
+  cons = [cons; cons_g];
 end
-
-annot.id=[];
-annot = bml_annot_table(annot,description);
+cons.id=[];
+cons = bml_annot_table(cons,description);
 
 
 
