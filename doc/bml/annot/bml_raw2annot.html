@@ -15,7 +15,7 @@
 <div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_raw2annot.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
 <h1>bml_raw2annot
 </h1>
@@ -35,13 +35,13 @@
    'id' corresponds to the trial
    'starts' time represented by the trial
      'ends' time represented by the trial
-   'duration'
-   's1'
-   't1'
-   's2'
-   't2'
-   'Fs'
-   'nSamples'</pre></div>
+   'duration' in seconds
+   's1' double, first sample sync coord
+   't1' double, time of first sample sample sync coord
+   's2' double, second sample sync coord
+   't2' double, time of second sample sample sync coord
+   'Fs' double, sampling rate
+   'nSamples' double, number of samples in raw</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
@@ -50,7 +50,7 @@ This function calls:
 <li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a raw of zeros with ones at annot times</li><li><a href="bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li></ul>
+<li><a href="bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a ft_datatype_raw of zeros with ones at annot times</li><li><a href="bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>	BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time</li><li><a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li></ul>
 <!-- crossreference -->
 
 
@@ -66,13 +66,13 @@ This function is called by:
 0008 <span class="comment">%   'id' corresponds to the trial</span>
 0009 <span class="comment">%   'starts' time represented by the trial</span>
 0010 <span class="comment">%     'ends' time represented by the trial</span>
-0011 <span class="comment">%   'duration'</span>
-0012 <span class="comment">%   's1'</span>
-0013 <span class="comment">%   't1'</span>
-0014 <span class="comment">%   's2'</span>
-0015 <span class="comment">%   't2'</span>
-0016 <span class="comment">%   'Fs'</span>
-0017 <span class="comment">%   'nSamples'</span>
+0011 <span class="comment">%   'duration' in seconds</span>
+0012 <span class="comment">%   's1' double, first sample sync coord</span>
+0013 <span class="comment">%   't1' double, time of first sample sample sync coord</span>
+0014 <span class="comment">%   's2' double, second sample sync coord</span>
+0015 <span class="comment">%   't2' double, time of second sample sample sync coord</span>
+0016 <span class="comment">%   'Fs' double, sampling rate</span>
+0017 <span class="comment">%   'nSamples' double, number of samples in raw</span>
 0018 
 0019 annot = table();
 0020 <span class="keyword">for</span> i=1:numel(raw.trial)
@@ -105,7 +105,7 @@ This function is called by:
 0047   
 0048 <span class="keyword">end</span>
 0049 
-0050 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,<span class="string">'raw'</span>);</pre></div>
-<hr><address>Generated on Tue 20-Feb-2018 16:13:59 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0050 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,inputname(1));</pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

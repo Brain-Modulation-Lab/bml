@@ -15,7 +15,7 @@
 <div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_transfer.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
 <h1>bml_annot_transfer
 </h1>
@@ -31,18 +31,19 @@
 
  Use as
    transfered = bml_annot_transfer(cfg, annot, transfer)
+   transfered = bml_annot_transfer(cfg.select, annot, transfer)
    transfered = bml_annot_transfer(annot, transfer)  
 
  The first argument cfg is a optional configuration structure, which can contain
  the following optional fields:
- cfg.overlap - double: fraction of overla required for filter. Defauls 0
+ cfg.overlap - double: fraction of overlap required for filter. Defauls 0
            (touch)
  cfg.description - string: description of output annotation
- cfg.select - cellstr. Names of variables to transfer (afeter name
+ cfg.select - cellstr. Names of variables to transfer (after name
            modification)
 
  annot, transfer - annot tables with fields 'starts' and 'ends'.
-        'filter' should have no overlapping annotations</pre></div>
+        'transfer' should have no overlapping annotations</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
@@ -63,69 +64,75 @@ This function is called by:
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%   transfered = bml_annot_transfer(cfg, annot, transfer)</span>
-0007 <span class="comment">%   transfered = bml_annot_transfer(annot, transfer)</span>
-0008 <span class="comment">%</span>
-0009 <span class="comment">% The first argument cfg is a optional configuration structure, which can contain</span>
-0010 <span class="comment">% the following optional fields:</span>
-0011 <span class="comment">% cfg.overlap - double: fraction of overla required for filter. Defauls 0</span>
-0012 <span class="comment">%           (touch)</span>
-0013 <span class="comment">% cfg.description - string: description of output annotation</span>
-0014 <span class="comment">% cfg.select - cellstr. Names of variables to transfer (afeter name</span>
-0015 <span class="comment">%           modification)</span>
-0016 <span class="comment">%</span>
-0017 <span class="comment">% annot, transfer - annot tables with fields 'starts' and 'ends'.</span>
-0018 <span class="comment">%        'filter' should have no overlapping annotations</span>
-0019 
-0020 <span class="keyword">if</span> nargin == 2
-0021   overlap = 0;
-0022   transfer = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
-0023   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cfg,[],inputname(1));
-0024   cfg=[];
-0025 <span class="keyword">elseif</span> nargin == 3
-0026   overlap = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'overlap'</span>,0);
-0027   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
-0028   transfer = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(transfer,[],inputname(3));
-0029 <span class="keyword">else</span>
-0030   error(<span class="string">'use as bml_annot_transfer(annot, filter_annot)'</span>);
-0031 <span class="keyword">end</span>
-0032 
-0033 <span class="keyword">if</span> isempty(annot)
-0034   <span class="keyword">return</span>
-0035 <span class="keyword">end</span>
-0036 
-0037 description = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'description'</span>,[]);
-0038 <span class="keyword">if</span> isempty(description)
-0039   <span class="keyword">if</span> isempty(annot.Properties.Description)
-0040     annot.Properties.Description = <span class="string">'annot'</span>;
-0041     description = <span class="string">'annot'</span>;
-0042   <span class="keyword">else</span>
-0043     description = annot.Properties.Description;
-0044   <span class="keyword">end</span>
-0045 <span class="keyword">end</span>
-0046 
-0047 intersect = <a href="bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(annot,transfer);
-0048 intersect.intersect_duration = intersect.duration;
-0049 intersect=intersect(:,setdiff(intersect.Properties.VariableNames,annot.Properties.VariableNames));
-0050 intersect.id = intersect.([description <span class="string">'_id'</span>]);
-0051 intersect.([description <span class="string">'_id'</span>]) = [];
+0007 <span class="comment">%   transfered = bml_annot_transfer(cfg.select, annot, transfer)</span>
+0008 <span class="comment">%   transfered = bml_annot_transfer(annot, transfer)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% The first argument cfg is a optional configuration structure, which can contain</span>
+0011 <span class="comment">% the following optional fields:</span>
+0012 <span class="comment">% cfg.overlap - double: fraction of overlap required for filter. Defauls 0</span>
+0013 <span class="comment">%           (touch)</span>
+0014 <span class="comment">% cfg.description - string: description of output annotation</span>
+0015 <span class="comment">% cfg.select - cellstr. Names of variables to transfer (after name</span>
+0016 <span class="comment">%           modification)</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% annot, transfer - annot tables with fields 'starts' and 'ends'.</span>
+0019 <span class="comment">%        'transfer' should have no overlapping annotations</span>
+0020 
+0021 <span class="keyword">if</span> nargin == 2
+0022   overlap = 0;
+0023   transfer = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
+0024   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cfg,[],inputname(1));
+0025   cfg=[];
+0026 <span class="keyword">elseif</span> nargin == 3
+0027     <span class="keyword">if</span> isstruct(cfg)
+0028       overlap = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'overlap'</span>,0);
+0029     <span class="keyword">else</span> <span class="comment">%case cfg.select is first argument</span>
+0030       overlap = 0;
+0031       cfg=struct(<span class="string">'select'</span>,cfg);
+0032     <span class="keyword">end</span>
+0033     annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
+0034     transfer = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(transfer,[],inputname(3));
+0035 <span class="keyword">else</span>
+0036   error(<span class="string">'use as bml_annot_transfer(annot, filter_annot)'</span>);
+0037 <span class="keyword">end</span>
+0038 
+0039 <span class="keyword">if</span> isempty(annot)
+0040   <span class="keyword">return</span>
+0041 <span class="keyword">end</span>
+0042 
+0043 description = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'description'</span>,[]);
+0044 <span class="keyword">if</span> isempty(description)
+0045   <span class="keyword">if</span> isempty(annot.Properties.Description)
+0046     annot.Properties.Description = <span class="string">'annot'</span>;
+0047     description = <span class="string">'annot'</span>;
+0048   <span class="keyword">else</span>
+0049     description = annot.Properties.Description;
+0050   <span class="keyword">end</span>
+0051 <span class="keyword">end</span>
 0052 
-0053 <span class="keyword">if</span> length(unique(intersect.id)) &lt; length(intersect.id)
-0054   error(&quot;can't transfer variables. Inconsistent mapping&quot;);
-0055 <span class="keyword">end</span>
-0056 
-0057 select = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'select'</span>,[]);
-0058 <span class="keyword">if</span> ~isempty(select)
-0059   select_members = ismember(select,intersect.Properties.VariableNames);
-0060   <span class="keyword">if</span> ~all(select_members)
-0061     warning(<span class="string">'%s variables not found. Avilabl evars are %s'</span>,<span class="keyword">...</span>
-0062       strjoin(select(~select_members)),strjoin(intersect.Properties.VariableNames));
-0063   <span class="keyword">end</span>
-0064   intersect = intersect(:,[{<span class="string">'id'</span>},select(select_members)]);
-0065 <span class="keyword">end</span>
-0066 
-0067 annot_intersect=innerjoin(annot,intersect,<span class="string">'Keys'</span>,<span class="string">'id'</span>);
-0068 
-0069 transfered = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot_intersect,description);</pre></div>
-<hr><address>Generated on Tue 20-Feb-2018 16:13:59 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0053 intersect = <a href="bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(annot,transfer);
+0054 intersect.intersect_duration = intersect.duration;
+0055 intersect=intersect(:,setdiff(intersect.Properties.VariableNames,annot.Properties.VariableNames));
+0056 intersect.id = intersect.([description <span class="string">'_id'</span>]);
+0057 intersect.([description <span class="string">'_id'</span>]) = [];
+0058 
+0059 <span class="keyword">if</span> length(unique(intersect.id)) &lt; length(intersect.id)
+0060   error(&quot;can't transfer variables. Inconsistent mapping&quot;);
+0061 <span class="keyword">end</span>
+0062 
+0063 select = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'select'</span>,[]);
+0064 <span class="keyword">if</span> ~isempty(select)
+0065   select_members = ismember(select,intersect.Properties.VariableNames);
+0066   <span class="keyword">if</span> ~all(select_members)
+0067     warning(<span class="string">'%s variables not found. Available vars are %s'</span>,<span class="keyword">...</span>
+0068       strjoin(select(~select_members)),strjoin(intersect.Properties.VariableNames));
+0069   <span class="keyword">end</span>
+0070   intersect = intersect(:,[{<span class="string">'id'</span>},select(select_members)]);
+0071 <span class="keyword">end</span>
+0072 
+0073 annot_intersect=innerjoin(annot,intersect,<span class="string">'Keys'</span>,<span class="string">'id'</span>);
+0074 
+0075 transfered = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot_intersect,description);</pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -15,7 +15,7 @@
 <div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_envelope_binabs.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
 <h1>bml_envelope_binabs
 </h1>
@@ -120,13 +120,15 @@ This function is called by:
 0061 env.cfg = struct();
 0062 env.cfg.envelope = &quot;binabs&quot;;
 0063 env.cfg.bin_size = bin_size;
-0064 env.cfg.previous = data.cfg;
-0065 
-0066 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fieldnames(data))
-0067   env.hdr = data.hdr;
-0068 <span class="keyword">end</span>
-0069 
-0070</pre></div>
-<hr><address>Generated on Tue 20-Feb-2018 16:13:59 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0064 <span class="keyword">if</span> isfield(data,<span class="string">'cfg'</span>)
+0065   env.cfg.previous = data.cfg;
+0066 <span class="keyword">end</span>
+0067 
+0068 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fieldnames(data))
+0069   env.hdr = data.hdr;
+0070 <span class="keyword">end</span>
+0071 
+0072</pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

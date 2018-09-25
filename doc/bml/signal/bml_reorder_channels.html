@@ -15,7 +15,7 @@
 <div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_reorder_channels.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
 <h1>bml_reorder_channels
 </h1>
@@ -35,18 +35,19 @@
 
  data - FT_DATATYPE_RAW
  cfg.order - vector of channel indices in desired order
-             if not provided channels are ordered alphabetically
-
+             if not provided channels are ordered according to 
+             cfg.label if present, or alphabetically
+ cfg.label - cellstr with desired order of channes
  returns a reordered raw object</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-</ul>
+<li><a href="bml_hstack.html" class="code" title="function [data] = bml_hstack(cfg, varargin)">bml_hstack</a>	BML_HSTACK concatenates multiple raw data structures by time</li></ul>
 <!-- crossreference -->
 
 
@@ -62,25 +63,32 @@ This function is called by:
 0008 <span class="comment">%</span>
 0009 <span class="comment">% data - FT_DATATYPE_RAW</span>
 0010 <span class="comment">% cfg.order - vector of channel indices in desired order</span>
-0011 <span class="comment">%             if not provided channels are ordered alphabetically</span>
-0012 <span class="comment">%</span>
-0013 <span class="comment">% returns a reordered raw object</span>
-0014 
-0015 <span class="keyword">if</span> ~exist(<span class="string">'data'</span>,<span class="string">'var'</span>)
-0016   data=cfg;
-0017   cfg=[];
-0018 <span class="keyword">end</span>
-0019 new_order = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'order'</span>);
-0020 <span class="keyword">if</span> isempty(new_order)
-0021   [~, new_order] = sort(data.label);
-0022 <span class="keyword">end</span>
-0023 
-0024 <span class="keyword">for</span> i=1:numel(data.trial)
-0025   data.trial{i} = data.trial{i}(new_order,:); 
-0026 <span class="keyword">end</span>
-0027 
-0028 data.label = data.label(new_order);
-0029 reordered=data;</pre></div>
-<hr><address>Generated on Tue 20-Feb-2018 16:13:59 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0011 <span class="comment">%             if not provided channels are ordered according to</span>
+0012 <span class="comment">%             cfg.label if present, or alphabetically</span>
+0013 <span class="comment">% cfg.label - cellstr with desired order of channes</span>
+0014 <span class="comment">% returns a reordered raw object</span>
+0015 
+0016 <span class="keyword">if</span> ~exist(<span class="string">'data'</span>,<span class="string">'var'</span>)
+0017   data=cfg;
+0018   cfg=[];
+0019 <span class="keyword">end</span>
+0020 new_order = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'order'</span>);
+0021 label     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>);
+0022 <span class="keyword">if</span> isempty(new_order)
+0023   <span class="keyword">if</span> isempty(label)
+0024     [~, new_order] = sort(data.label);
+0025   <span class="keyword">else</span>
+0026     assert(all(ismember(label, data.label)),&quot;Invalid label. Unknown channels&quot;);
+0027     new_order = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain)">bml_map</a>(label,data.label,1:length(data.label));
+0028   <span class="keyword">end</span>
+0029 <span class="keyword">end</span>
+0030 
+0031 <span class="keyword">for</span> i=1:numel(data.trial)
+0032   data.trial{i} = data.trial{i}(new_order,:); 
+0033 <span class="keyword">end</span>
+0034 
+0035 data.label = data.label(new_order);
+0036 reordered=data;</pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

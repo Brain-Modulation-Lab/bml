@@ -1,8 +1,11 @@
 %% Creates the html documentation folder doc/
-GIT_PATH = '/Users/brainmodulationlab/git';
+% requires m2html in path (https://www.artefact.tk/software/matlab/m2html/)
+% last run 2018.02.28?
+
+GIT_PATH = 'E:\MATLAB';
 
 cd(GIT_PATH)
-rmdir bml/doc s
+%rmdir('bml/doc') 
 m2html('mfiles',{'bml/bml_defaults.m','bml/annot','bml/io','bml/signal','bml/sync','bml/utils'},...
   'htmldir','bml/doc', 'global','on');
 
@@ -28,7 +31,7 @@ fprintf(fid,[ ...
 ]);
 fclose(fid);   
     
-builddocsearchdb([GIT_PATH '/bml/doc')    
+builddocsearchdb([GIT_PATH '/bml/doc'])    
     
     
     

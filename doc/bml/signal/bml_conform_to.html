@@ -4,7 +4,7 @@
 <head>
   <title>Description of bml_conform_to</title>
   <meta name="keywords" content="bml_conform_to">
-  <meta name="description" content="BML_CONFORM_TO conforms salve to master">
+  <meta name="description" content="BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -15,19 +15,19 @@
 <div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_conform_to.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="index.html">Index for bml/signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
 <h1>bml_conform_to
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>BML_CONFORM_TO conforms salve to master</strong></div>
+<div class="box"><strong>BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="box"><strong>function conformed = bml_conform_to(master, slave) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> BML_CONFORM_TO conforms salve to master
+<div class="fragment"><pre class="comment"> BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time
 
  Use as
     conformed = bml_conform_to(master, slave)
@@ -35,14 +35,15 @@
  master - FT_DATATYPE_RAW
  slave  - FT_DATATYPE_RAW
 
- returns the data of salve, resampled to the times of master
+ returns the data of slave, resampled to the times of master.
+ Asumes that master and slave are synchronized to same time origin.
 
- --- examples ---
+ EXAMPLES:
 
  % merge slave to master in a single merged FT_DATATYPE_RAW
 
  conformed = bml_conform_to(master, slave)
- 
+
  cfg=[];
  cfg.appenddim  = 'chan';
  merged = ft_appenddata(cfg,master,conformed);</pre></div>
@@ -51,7 +52,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li></ul>
+<li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 <li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li><li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
@@ -62,7 +63,7 @@ This function is called by:
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function conformed = bml_conform_to(master, slave)</a>
 0002 
-0003 <span class="comment">% BML_CONFORM_TO conforms salve to master</span>
+0003 <span class="comment">% BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time</span>
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%    conformed = bml_conform_to(master, slave)</span>
@@ -70,46 +71,127 @@ This function is called by:
 0008 <span class="comment">% master - FT_DATATYPE_RAW</span>
 0009 <span class="comment">% slave  - FT_DATATYPE_RAW</span>
 0010 <span class="comment">%</span>
-0011 <span class="comment">% returns the data of salve, resampled to the times of master</span>
-0012 <span class="comment">%</span>
-0013 <span class="comment">% --- examples ---</span>
-0014 <span class="comment">%</span>
-0015 <span class="comment">% % merge slave to master in a single merged FT_DATATYPE_RAW</span>
-0016 <span class="comment">%</span>
-0017 <span class="comment">% conformed = bml_conform_to(master, slave)</span>
-0018 <span class="comment">%</span>
-0019 <span class="comment">% cfg=[];</span>
-0020 <span class="comment">% cfg.appenddim  = 'chan';</span>
-0021 <span class="comment">% merged = ft_appenddata(cfg,master,conformed);</span>
-0022 <span class="comment">%</span>
-0023 
-0024 assert(numel(master.trial)==numel(slave.trial),&quot;master and slave have different number of trials&quot;);
-0025 starts=zeros(numel(master.trial),1);
-0026 ends=zeros(numel(master.trial),1);
-0027 <span class="keyword">for</span> i=1:numel(master.trial)
-0028   mc = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(master,i);
-0029   sc = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(slave,i);
-0030   assert(mc.t2 &gt; sc.t1 &amp;&amp; mc.t1 &lt; mc.t2, <span class="string">'can''t conform trial %i, raws dont''t overlap'</span>,i);
-0031   starts(i)=mc.t1;
-0032   ends(i)=mc.t2;
-0033 <span class="keyword">end</span>
-0034 
-0035 cfg=[]; cfg.time=master.time; cfg.method=<span class="string">'pchip'</span>;
-0036 cfg.feedback=<span class="string">'no'</span>;
-0037 conformed=ft_resampledata(cfg,<a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave,starts,ends));
-0038 
-0039 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(master))
-0040   conformed.fsample = master.fsample;
-0041 <span class="keyword">elseif</span> ismember(<span class="string">'fsample'</span>,fields(conformed))
-0042   conformed = rmfield(conformed,<span class="string">'fsample'</span>);
-0043 <span class="keyword">end</span>
-0044 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(slave))
-0045   conformed.hdr=slave.hdr;  
-0046 <span class="keyword">end</span>
-0047 <span class="comment">% if ismember('hdr',fields(master))</span>
-0048 <span class="comment">%   conformed.hdr=master.hdr;</span>
-0049 <span class="comment">% end</span>
-0050</pre></div>
-<hr><address>Generated on Tue 20-Feb-2018 16:13:59 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0011 <span class="comment">% returns the data of slave, resampled to the times of master.</span>
+0012 <span class="comment">% Asumes that master and slave are synchronized to same time origin.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% EXAMPLES:</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% % merge slave to master in a single merged FT_DATATYPE_RAW</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% conformed = bml_conform_to(master, slave)</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% cfg=[];</span>
+0021 <span class="comment">% cfg.appenddim  = 'chan';</span>
+0022 <span class="comment">% merged = ft_appenddata(cfg,master,conformed);</span>
+0023 <span class="comment">%</span>
+0024 
+0025 assert(isstruct(master) &amp;&amp; all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(master))),&quot;Invalid master&quot;);
+0026 assert(isstruct(slave) &amp;&amp; all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(slave))),&quot;Invalid slave&quot;);
+0027 
+0028 master_N = length(master.trial);
+0029 nChans = length(slave.label);
+0030 
+0031 <span class="comment">%calculating mapping between master and slave trials</span>
+0032 annot_master = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(master);
+0033 annot_slave  = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(slave);
+0034 master_slave = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(annot_master,annot_slave);
+0035 assert(~isempty(master_slave), &quot;Can't conform. No master trials correspond to any slave trials.&quot;);
+0036 master_slave.master_frac = master_slave.duration/master_slave.master_duration;
+0037 ms_map = zeros(length(master.trial),1); <span class="comment">%slave trial index for each master trial</span>
+0038 <span class="keyword">for</span> i=1:master_N
+0039   i_ms=master_slave(master_slave.master_id==i,:);
+0040   <span class="keyword">if</span> height(i_ms)&gt;1
+0041     [~,i_ms_max_idx]=max(i_ms.master_frac);
+0042     i_ms = i_ms(i_ms_max_idx,:);
+0043   <span class="keyword">end</span>
+0044   <span class="keyword">if</span> height(i_ms)&gt;0
+0045     ms_map(i)=i_ms.slave_id(1);
+0046   <span class="keyword">end</span>
+0047 <span class="keyword">end</span>
+0048 
+0049 <span class="comment">%creating subset of slave and master times</span>
+0050 sub_slave_N=sum(ms_map&gt;0);
+0051 sub_slave=[];
+0052 sub_slave.label = slave.label;
+0053 sub_slave.trial = cell(1,sub_slave_N);
+0054 sub_slave.time = cell(1,sub_slave_N);
+0055 sub_master_time = cell(1,sub_slave_N);
+0056 starts=zeros(sub_slave_N,1);
+0057 ends=zeros(sub_slave_N,1);
+0058 sub_ms_map = zeros(master_N,1); <span class="comment">%subset slave trial index for each master trial</span>
+0059 sub_slave_i=1;
+0060 <span class="keyword">for</span> i=1:master_N
+0061   mc = annot_master(i,:);
+0062   <span class="keyword">if</span> ms_map(i)==0
+0063     warning(&quot;Master trial <span class="comment">%i has no corresponding Slave trial. Adding empty trial.&quot;,i);</span>
+0064   <span class="keyword">else</span>
+0065     starts(sub_slave_i) = mc.t1;
+0066     ends(sub_slave_i) = mc.t2;
+0067     sub_ms_map(i) = sub_slave_i;
+0068     sub_slave.trial{sub_slave_i} = slave.trial{ms_map(i)};
+0069     sub_slave.time{sub_slave_i} = slave.time{ms_map(i)};
+0070     sub_master_time{sub_slave_i} = master.time{i};
+0071     sub_slave_i = sub_slave_i + 1;
+0072   <span class="keyword">end</span>
+0073 <span class="keyword">end</span>
+0074 
+0075 <span class="comment">%cheking if sampling rates of slave and master are similar.</span>
+0076 <span class="comment">%If fs_slave &gt;&gt; fs_master, then apply lowpass filter to slave before interpolating</span>
+0077 <span class="keyword">if</span> annot_slave.Fs(1) &gt; 1.01 * annot_master.Fs(1) <span class="comment">% 1% tolerance factor in freq comparison</span>
+0078   fprintf(&quot;low-pass filtering slave [<span class="comment">%f Hz] to half the master's sampling rate [%f Hz], using 6th order Butterworth\n&quot;,annot_slave.Fs(1),annot_master.Fs(1)/2);</span>
+0079   cfg=[]; cfg.lpfilter=<span class="string">'yes'</span>; cfg.lpfreq=annot_master.Fs(1)/2; <span class="comment">%such that new slave will be sampled at Nyquist rate</span>
+0080   cfg.lpfilttype = <span class="string">'but'</span>; cfg.lpfiltord = 6; <span class="comment">%sixth order butterworth lowpass filter</span>
+0081   cfg.lpfiltdir = <span class="string">'twopass'</span>; <span class="comment">%for zero lag</span>
+0082   cfg.lpinstabilityfix = <span class="string">'no'</span>;
+0083   cfg.lpfiltwintype = <span class="string">'hamming'</span>;
+0084   slave = ft_preprocessing(cfg,slave);
+0085 <span class="keyword">end</span>
+0086 
+0087 <span class="comment">%interpolating subset of slave trials to master times</span>
+0088 cfg=[]; cfg.time=sub_master_time; cfg.method=<span class="string">'pchip'</span>;
+0089 cfg.feedback=<span class="string">'no'</span>;
+0090 sub_conformed=ft_resampledata(cfg,<a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(sub_slave,starts,ends));
+0091 
+0092 <span class="comment">%adding empty slave trials if necessary</span>
+0093 conformed=[];
+0094 conformed.label = slave.label;
+0095 conformed.trial = cell(1,master_N);
+0096 conformed.time = cell(1,master_N);
+0097 <span class="keyword">for</span> i=1:master_N
+0098   <span class="keyword">if</span> sub_ms_map(i)&gt;0
+0099       conformed.time{i}=sub_conformed.time{sub_ms_map(i)};
+0100     conformed.trial{i}=sub_conformed.trial{sub_ms_map(i)};
+0101   <span class="keyword">else</span>
+0102     conformed.time{i}=master.time{i};
+0103     conformed.trial{i}=zeros(nChans,length(conformed.time{i}));
+0104   <span class="keyword">end</span>
+0105 <span class="keyword">end</span>
+0106 
+0107 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(slave))
+0108   conformed.hdr=slave.hdr;
+0109 <span class="keyword">else</span>
+0110   conformed.hdr=[];
+0111 <span class="keyword">end</span>
+0112 
+0113 <span class="comment">%creating header</span>
+0114 conformed.hdr.nChans = length(conformed.label);
+0115 conformed.hdr.Fs=round(1/mean(diff(conformed.time{1})));
+0116 conformed.hdr.label=conformed.label;
+0117 
+0118 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(master))
+0119   conformed.fsample = master.fsample;
+0120   conformed.hdr.Fs = master.fsample;
+0121 <span class="keyword">elseif</span> ismember(<span class="string">'fsample'</span>,fields(conformed))
+0122   conformed = rmfield(conformed,<span class="string">'fsample'</span>);
+0123 <span class="keyword">end</span>
+0124 
+0125 
+0126 
+0127 
+0128 
+0129 <span class="comment">% if ismember('hdr',fieldnames(master))</span>
+0130 <span class="comment">%   conformed.hdr=master.hdr;</span>
+0131 <span class="comment">% end</span></pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

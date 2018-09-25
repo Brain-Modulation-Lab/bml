@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_sync_audio_event</title>
+  <meta name="keywords" content="bml_sync_audio_event">
+  <meta name="description" content="bml_sync_audio_event synchronizes zoom audio files according to">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_sync_audio_event.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_sync_audio_event
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>bml_sync_audio_event synchronizes zoom audio files according to</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function sync_roi = bml_sync_audio_event(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> bml_sync_audio_event synchronizes zoom audio files according to
+ events
+
+ Use as 
+    sync_roi = bml_sync_audio_event(cfg)
+
+   cfg.master_events - events to align to in annot table in master time
+   cfg.roi - roi table for zoom audio files to be synchronized
+   cfg.timewarp - logical: Should slave time be warped? defaults to 
+            true.
+   cfg.scan - double: number of seconds to scan for optimal alignment 
+             (defaults to 100)
+   cfg.scan_step - double: step size of initial scan for alignment
+             (defaults to 0.1)
+   cfg.diagnostic_plot - logical
+   cfg.timetol - numeric, time tolerance in seconds. Defaults to 1e-6
+   cfg.min_events - integer. Minimum number of events required to attemp
+             alingment, defaults to 10. 
+   cfg.strict - logical. Issue errors if timetol is violated instead of errors. 
+             Defaults to false. 
+
+ returns a roi table</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="bml_timealign_annot.html" class="code" title="function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master, slave)">bml_timealign_annot</a>	BML_TIMEALIGN_ANNOT aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function sync_roi = bml_sync_audio_event(cfg)</a>
+0002 
+0003 <span class="comment">% bml_sync_audio_event synchronizes zoom audio files according to</span>
+0004 <span class="comment">% events</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Use as</span>
+0007 <span class="comment">%    sync_roi = bml_sync_audio_event(cfg)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%   cfg.master_events - events to align to in annot table in master time</span>
+0010 <span class="comment">%   cfg.roi - roi table for zoom audio files to be synchronized</span>
+0011 <span class="comment">%   cfg.timewarp - logical: Should slave time be warped? defaults to</span>
+0012 <span class="comment">%            true.</span>
+0013 <span class="comment">%   cfg.scan - double: number of seconds to scan for optimal alignment</span>
+0014 <span class="comment">%             (defaults to 100)</span>
+0015 <span class="comment">%   cfg.scan_step - double: step size of initial scan for alignment</span>
+0016 <span class="comment">%             (defaults to 0.1)</span>
+0017 <span class="comment">%   cfg.diagnostic_plot - logical</span>
+0018 <span class="comment">%   cfg.timetol - numeric, time tolerance in seconds. Defaults to 1e-6</span>
+0019 <span class="comment">%   cfg.min_events - integer. Minimum number of events required to attemp</span>
+0020 <span class="comment">%             alingment, defaults to 10.</span>
+0021 <span class="comment">%   cfg.strict - logical. Issue errors if timetol is violated instead of errors.</span>
+0022 <span class="comment">%             Defaults to false.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% returns a roi table</span>
+0025 
+0026 scan_step         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'scan_step'</span>,0.1);
+0027 scan              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'scan'</span>,100);
+0028 timewarp          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timewarp'</span>,false);
+0029 master_events     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'master_events'</span>);
+0030 roi               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0031 diagnostic_plot   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'diagnostic_plot'</span>,false);
+0032 timetol           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-6);
+0033 min_events        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'min_events'</span>,10);
+0034 strict            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'strict'</span>,false);
+0035 
+0036 assert(~isempty(roi),<span class="string">'roi required'</span>);
+0037 assert(~isempty(master_events),<span class="string">'master_events required'</span>);
+0038 
+0039 all_slave_dt = zeros(height(roi),1);
+0040 all_warpfactor = ones(height(roi),1);
+0041 all_meanerror = zeros(height(roi),1);
+0042 <span class="keyword">for</span> i=1:height(roi)
+0043   
+0044   <span class="comment">%getting events</span>
+0045     cfg=[];
+0046     cfg.roi = roi(i,:);
+0047     audio= <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);
+0048     min_peak_height = max(abs(audio.trial{1}(1,:)))*0.5;
+0049     MinPeakDistance = 0.25;
+0050     [pks,locs] = findpeaks(abs(audio.trial{1}(1,:)),audio.fsample,<span class="keyword">...</span>
+0051     <span class="string">'MinPeakHeight'</span>,min_peak_height,<span class="string">'MinPeakDistance'</span>,MinPeakDistance);
+0052     
+0053 
+0054   <span class="keyword">if</span> isempty(locs) || length(locs) &lt; min_events
+0055     all_slave_dt(i) = nan;
+0056     all_warpfactor(i) = nan;
+0057   <span class="keyword">else</span>
+0058     <span class="comment">%creating annot table with events</span>
+0059     starts = (roi.starts(i) + locs)';
+0060     ends = starts;
+0061     i_slave_events=<a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(table(starts,ends));
+0062     i_slave_events.type = repmat({<span class="string">'audio'</span>},[height(i_slave_events),1]);
+0063     i_slave_events.value = repmat(1,[height(i_slave_events),1]);
+0064     i_slave_events.sample = locs';
+0065     
+0066     
+0067 
+0068     
+0069     <span class="comment">%doing time alingment</span>
+0070     cfg=[]; 
+0071     cfg.scan=scan; 
+0072     cfg.scan_step=scan_step; 
+0073     cfg.timewarp = timewarp; 
+0074     [slave_dt, min_cost, warpfactor]=<a href="bml_timealign_annot.html" class="code" title="function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master, slave)">bml_timealign_annot</a>(cfg,master_events,i_slave_events);
+0075     all_slave_dt(i) = slave_dt;
+0076     all_warpfactor(i) = warpfactor;
+0077 
+0078     <span class="keyword">if</span> diagnostic_plot
+0079       tbar = mean(i_slave_events.starts);
+0080       i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
+0081       figure;
+0082       plot(master_events.starts,ones(1,height(master_events)),<span class="string">'bo'</span>);
+0083       hold on;
+0084       plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),<span class="string">'r*'</span>);
+0085     <span class="keyword">end</span>
+0086 
+0087     all_meanerror(i) = min_cost/height(i_slave_events);
+0088     <span class="keyword">if</span> all_meanerror(i) &gt; timetol
+0089       <span class="keyword">if</span> strict
+0090         error(<span class="string">'could not time align within timetol. Mean error %f &gt; %f. File %s'</span>,all_meanerror(i),timetol,roi.name{i});
+0091       <span class="keyword">else</span>
+0092         warning(<span class="string">'could not time align within timetol. Mean error %f &gt; %f. File %s. Ignoring this file during consolidation.'</span>,all_meanerror(i),timetol,roi.name{i});
+0093         all_slave_dt(i) = nan;
+0094         all_warpfactor(i) = nan;
+0095       <span class="keyword">end</span>
+0096     <span class="keyword">end</span>
+0097   <span class="keyword">end</span>
+0098 <span class="keyword">end</span>
+0099 
+0100 <span class="keyword">if</span> ~timewarp
+0101   all_slave_dt = repmat(nanmean(all_slave_dt),length(all_slave_dt),1);
+0102 <span class="keyword">end</span>
+0103 
+0104 <span class="comment">%consolidating results</span>
+0105 roi.slave_dt = all_slave_dt;
+0106 roi.warpfactor = all_warpfactor;
+0107 roi.alignment_error = all_meanerror;
+0108 
+0109 cfg=[];
+0110 cfg.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))&lt;10e-3);
+0111 cont_roi = <a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg,roi);
+0112 
+0113 consolidated_roi = table();
+0114 <span class="keyword">for</span> i=1:height(cont_roi)
+0115   i_roi = roi(roi.id &gt;= cont_roi.id_starts(i) &amp; roi.id &lt;= cont_roi.id_ends(i),:);
+0116   i_roi.slave_dt(:) = nanmean(i_roi.slave_dt);
+0117   i_roi.warpfactor(:) = nanmean(i_roi.warpfactor);
+0118   consolidated_roi = [consolidated_roi; i_roi];
+0119 <span class="keyword">end</span>
+0120 roi = consolidated_roi;
+0121 
+0122 <span class="keyword">if</span> any(ismissing(roi.slave_dt))
+0123   warning(<span class="string">'Using mean dt for some files'</span>);
+0124   roi.slave_dt(ismissing(roi.slave_dt)) = nanmean(roi.slave_dt);
+0125 <span class="keyword">end</span>
+0126 <span class="keyword">if</span> any(ismissing(roi.warpfactor))
+0127   warning(<span class="string">'Using mean warpfactor for some files'</span>);
+0128   roi.warpfactor(ismissing(roi.warpfactor)) = nanmean(roi.warpfactor);
+0129 <span class="keyword">end</span>
+0130 
+0131 midpoint_a = (roi.ends + roi.ends) ./ 2;
+0132 midpoint_t = (roi.t1 + roi.t2) ./ 2;
+0133 roi.starts = (roi.starts - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;
+0134 roi.ends = (roi.ends - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;
+0135 roi.t1 = (roi.t1 - midpoint_t) .* roi.warpfactor + midpoint_t + roi.slave_dt;
+0136 roi.t2 = (roi.t2 - midpoint_t) .* roi.warpfactor + midpoint_t + roi.slave_dt;
+0137 
+0138 roi.chunk_id = (1:height(roi))';
+0139 roi.sync_channel = repmat({<span class="string">'digital'</span>},height(roi),1);
+0140 roi.sync_type = repmat({<span class="string">'slave'</span>},height(roi),1);
+0141 
+0142 sync_roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
+0143 
+0144 sync_roi(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'name'</span>,<span class="string">'warpfactor'</span>})</pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

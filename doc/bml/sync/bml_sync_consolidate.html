@@ -15,7 +15,7 @@
 <div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_sync_consolidate.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="index.html">Index for bml/sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+<td align="right"><a href="index.html">Index for bml\sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
 <h1>bml_sync_consolidate
 </h1>
@@ -41,7 +41,8 @@
  cfg.group - variable indicating grouping criteria. Entries of different groups 
                are not consolidated. Defaults to 'session_id'
  cfg.timewarp - boolean, indicates if linear time warping is allowed in
-               consolidation. If false, uses nominal Fs value in roi table
+               consolidation. If false, uses nominal Fs value in roi
+               table. Defaults to true.
  cfg.rowisfile - boolean, indicates if row refer to files. Defaults to true.
 
  If chunking for consolidation was done, each file can have several entries in the
@@ -77,174 +78,180 @@ This function is called by:
 0014 <span class="comment">% cfg.group - variable indicating grouping criteria. Entries of different groups</span>
 0015 <span class="comment">%               are not consolidated. Defaults to 'session_id'</span>
 0016 <span class="comment">% cfg.timewarp - boolean, indicates if linear time warping is allowed in</span>
-0017 <span class="comment">%               consolidation. If false, uses nominal Fs value in roi table</span>
-0018 <span class="comment">% cfg.rowisfile - boolean, indicates if row refer to files. Defaults to true.</span>
-0019 <span class="comment">%</span>
-0020 <span class="comment">% If chunking for consolidation was done, each file can have several entries in the</span>
-0021 <span class="comment">% sync roi table. This function consolidates those entries into one per file.</span>
-0022 <span class="comment">% It does this by finding the sync curve that better fits all chunks.</span>
-0023 
-0024 <span class="keyword">if</span> istable(cfg)
-0025   cfg = struct(<span class="string">'roi'</span>,cfg);
-0026 <span class="keyword">end</span>
-0027 roi             = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
-0028 timetol         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-2);
-0029 contiguous      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'contiguous'</span>,true);
-0030 group           = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'group'</span>,<span class="string">'session_id'</span>);
-0031 timewarp        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timewarp'</span>,true);
-0032 rowisfile       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'rowisfile'</span>,true);
-0033 group_specified = ismember(&quot;group&quot;,fieldnames(cfg));
-0034 
-0035 REQUIRED_VARS2 = {<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'chantype'</span>,<span class="string">'filetype'</span>};
-0036 <span class="keyword">if</span> ~all(ismember(REQUIRED_VARS2,roi.Properties.VariableNames))
-0037   <span class="keyword">if</span> rowisfile
-0038     error(<span class="string">'Variables %s required'</span>,strjoin(REQUIRED_VARS2))
-0039   <span class="keyword">else</span>
-0040     <span class="keyword">for</span> i=1:length(REQUIRED_VARS2)
-0041       roi.(REQUIRED_VARS2{i})=repmat({<span class="string">'NA'</span>},height(roi),1);
-0042     <span class="keyword">end</span>
-0043   <span class="keyword">end</span>
-0044 <span class="keyword">end</span>
-0045 
-0046 roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
-0047 
-0048 <span class="comment">% REQUIRED_VARS = {'s1','t1','s2','t2','nSamples','Fs'};</span>
-0049 <span class="comment">% assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...</span>
-0050 <span class="comment">%   'Variables %s required',strjoin(REQUIRED_VARS))</span>
-0051 
-0052 roi.fullfile = fullfile(roi.folder,roi.name);
-0053 <span class="keyword">if</span> ismember(group,roi.Properties.VariableNames)
-0054   <span class="keyword">if</span> group_specified
-0055     fprintf(&quot;grouping by <span class="comment">%s \n&quot;,group);</span>
-0056   <span class="keyword">end</span>
-0057   <span class="keyword">if</span> isnumeric(roi.(group))
-0058     roi.fullfile = strcat(roi.fullfile,<span class="string">'_'</span>,num2str(roi.(group)));
-0059   <span class="keyword">else</span>
-0060     roi.fullfile = strcat(roi.fullfile,<span class="string">'_'</span>,roi.(group));
-0061   <span class="keyword">end</span>
-0062 <span class="keyword">end</span>
-0063 roi.sync_id = roi.id;
-0064 uff = unique(roi.fullfile); <span class="comment">%unique fullfile</span>
-0065 consolidated = table();
-0066 
-0067 <span class="comment">%consolidating several entries for the same file.</span>
-0068 <span class="keyword">for</span> i_uff=1:length(uff)
-0069   i_roi = roi(strcmp(roi.fullfile,uff(i_uff)),:);
-0070   <span class="keyword">if</span> height(i_roi)&gt;1
-0071 
-0072     <span class="comment">%doing linear fit to asses if consolidation is plausible</span>
-0073     s = [i_roi.s1; i_roi.s2];
-0074     t = [i_roi.t1; i_roi.t2];
-0075     <span class="keyword">if</span> timewarp
-0076       p = polyfit(s,t,1);
-0077     <span class="keyword">else</span>
-0078       assert(length(unique(i_roi.Fs))==1,&quot;Inconsistent Fs&quot;);
-0079       p1 = 1/unique(i_roi.Fs);
-0080       p = [p1, mean(t-p1*s)];
-0081     <span class="keyword">end</span>
-0082     tfit = polyval(p,s);
-0083     
-0084     max_delta_t = max(abs(t - tfit));
-0085     <span class="keyword">if</span> max_delta_t &lt;= timetol <span class="comment">%consolidating</span>
-0086       consrow = i_roi(1,:);
-0087       consrow.starts = min(i_roi.starts);
-0088       consrow.ends = max(i_roi.ends);
-0089       consrow.s1 = min(i_roi.s1);
-0090       consrow.s2 = max(i_roi.s2);
-0091       consrow.t1 = polyval(p,consrow.s1);
-0092       consrow.t2 = polyval(p,consrow.s2);
-0093       <span class="keyword">if</span> ismember(<span class="string">'warpfactor'</span>,i_roi.Properties.VariableNames)
-0094         consrow.warpfactor = 1/(consrow.Fs * p(1));
-0095       <span class="keyword">end</span>
-0096       i_roi = consrow;      
-0097     <span class="keyword">else</span>  
-0098       warning(<span class="string">'can''t consolidate within tolerance. Max delta t %f &gt; %f'</span>,max_delta_t,timetol);
-0099     <span class="keyword">end</span>
-0100   <span class="keyword">end</span>
-0101   consolidated = [consolidated; i_roi];
-0102 <span class="keyword">end</span>
-0103 
-0104 consolidated.id=[];
-0105 roi.fullfile=[];
-0106 consolidated = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(consolidated);
-0107 
-0108 <span class="comment">%consolidating several time contiguos files together</span>
-0109 <span class="keyword">if</span> contiguous
-0110   roi = consolidated;
-0111   consolidated = table();
-0112   roi.filetype_chantype = strcat(roi.filetype,roi.chantype,num2str(roi.Fs));
-0113   ufc = unique(roi.filetype_chantype);
-0114   <span class="keyword">for</span> i_ufc=1:length(ufc)
-0115       i_roi = roi(strcmp(roi.filetype_chantype,ufc(i_ufc)),:);
-0116     
-0117     <span class="comment">%detecting contiguos stretches</span>
-0118     cfg=[];
-0119     cfg.criterion = @(x) abs(sum(x.duration)-max(x.ends)+min(x.starts)) &lt; height(x)*timetol;
-0120     i_roi_cont = <a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg,i_roi);   
-0121     
-0122     <span class="keyword">for</span> j=1:height(i_roi_cont)
-0123         i_roi_cont_j = i_roi(i_roi.id&gt;=i_roi_cont.id_starts(j) &amp; i_roi.id&lt;=i_roi_cont.id_ends(j),:);
-0124     
-0125       <span class="keyword">if</span> height(i_roi_cont_j)&gt;1
-0126         
-0127         left_complete = i_roi_cont_j.starts(1)&lt;=i_roi_cont_j.t1(1);
-0128         right_complete = i_roi_cont_j.ends(end)&gt;=i_roi_cont_j.t2(end);
-0129         
-0130         <span class="comment">%calculating raw samples of contiguous file</span>
-0131         cs = cumsum(i_roi_cont_j.s2-i_roi_cont_j.s1) + i_roi_cont_j.s1(1);
-0132         cs = cs + (0:(height(i_roi_cont_j)-1))';
-0133         cs = [0; cs(1:end-1)];
-0134         i_roi_cont_j.raw1 = i_roi_cont_j.s1 + cs;
-0135         i_roi_cont_j.raw2 = i_roi_cont_j.s2 + cs;
-0136         
-0137         <span class="comment">%doing linear fit to asses if consolidation is plausible</span>
-0138         s = [i_roi_cont_j.raw1; i_roi_cont_j.raw2];
-0139         t = [i_roi_cont_j.t1; i_roi_cont_j.t2];
-0140         <span class="comment">%plot(s,t,'o')</span>
-0141         <span class="keyword">if</span> timewarp
-0142           p = polyfit(s,t,1);
-0143         <span class="keyword">else</span>
-0144           assert(length(unique(i_roi_cont_j.Fs))==1,&quot;Inconsistent Fs&quot;);
-0145           p1 = 1/unique(i_roi_cont_j.Fs);
-0146           p = [p1, mean(t-p1*s)];
-0147         <span class="keyword">end</span>
-0148         tfit = polyval(p,s);
-0149       
-0150         max_delta_t = max(abs(t - tfit));
-0151         <span class="keyword">if</span> max_delta_t &lt;= timetol <span class="comment">%consolidating</span>
-0152           i_roi_cont_j.t1 = polyval(p,i_roi_cont_j.raw1);
-0153           i_roi_cont_j.t2 = polyval(p,i_roi_cont_j.raw2);
-0154           <span class="keyword">if</span> ismember(<span class="string">'warpfactor'</span>,i_roi_cont_j.Properties.VariableNames)
-0155             i_roi_cont_j.warpfactor = 1 ./ (i_roi_cont_j.Fs .* p(1));
-0156           <span class="keyword">end</span>
-0157         <span class="keyword">else</span>  
-0158           warning(<span class="string">'can''t consolidate within tolerance. Max delta t %f &gt; %f'</span>,max_delta_t,timetol);
-0159         <span class="keyword">end</span>
-0160         i_roi_cont_j.raw1=[];
-0161         i_roi_cont_j.raw2=[];          
-0162         
-0163         <span class="comment">%adjusting starts and ends to take to confluence</span>
-0164         <span class="keyword">if</span> left_complete
-0165           i_roi_cont_j.starts(1) = i_roi_cont_j.t1(1) - 0.5/i_roi_cont_j.Fs(1);
-0166         <span class="keyword">end</span>
-0167         <span class="keyword">for</span> i=1:(height(i_roi_cont_j)-1)
-0168           i_roi_cont_j.ends(i)     = (i_roi_cont_j.t2(i) + i_roi_cont_j.t1(i+1))/2;
-0169           i_roi_cont_j.starts(i+1) = (i_roi_cont_j.t2(i) + i_roi_cont_j.t1(i+1))/2;        
-0170         <span class="keyword">end</span>
-0171         <span class="keyword">if</span> right_complete
-0172           i_roi_cont_j.ends(1) = i_roi_cont_j.t2(1) + 0.5/i_roi_cont_j.Fs(1);
-0173         <span class="keyword">end</span>
-0174     
-0175         consolidated = [consolidated; i_roi_cont_j];
-0176       <span class="keyword">else</span>
-0177         consolidated = [consolidated; i_roi_cont_j];
-0178       <span class="keyword">end</span>
-0179     <span class="keyword">end</span>
-0180   <span class="keyword">end</span>
-0181 <span class="keyword">end</span>
-0182 
-0183 consolidated = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(consolidated);
-0184</pre></div>
-<hr><address>Generated on Tue 20-Feb-2018 16:13:59 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0017 <span class="comment">%               consolidation. If false, uses nominal Fs value in roi</span>
+0018 <span class="comment">%               table. Defaults to true.</span>
+0019 <span class="comment">% cfg.rowisfile - boolean, indicates if row refer to files. Defaults to true.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% If chunking for consolidation was done, each file can have several entries in the</span>
+0022 <span class="comment">% sync roi table. This function consolidates those entries into one per file.</span>
+0023 <span class="comment">% It does this by finding the sync curve that better fits all chunks.</span>
+0024 
+0025 <span class="keyword">if</span> istable(cfg)
+0026   cfg = struct(<span class="string">'roi'</span>,cfg);
+0027 <span class="keyword">end</span>
+0028 roi             = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0029 timetol         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-2);
+0030 contiguous      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'contiguous'</span>,true);
+0031 group           = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'group'</span>,<span class="string">'session_id'</span>);
+0032 timewarp        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timewarp'</span>,true);
+0033 rowisfile       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'rowisfile'</span>,true);
+0034 group_specified = ismember(&quot;group&quot;,fieldnames(cfg));
+0035 
+0036 REQUIRED_VARS2 = {<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'chantype'</span>,<span class="string">'filetype'</span>};
+0037 <span class="keyword">if</span> ~all(ismember(REQUIRED_VARS2,roi.Properties.VariableNames))
+0038   <span class="keyword">if</span> rowisfile
+0039     error(<span class="string">'Variables %s required'</span>,strjoin(REQUIRED_VARS2))
+0040   <span class="keyword">else</span>
+0041     <span class="keyword">for</span> i=1:length(REQUIRED_VARS2)
+0042       roi.(REQUIRED_VARS2{i})=repmat({<span class="string">'NA'</span>},height(roi),1);
+0043     <span class="keyword">end</span>
+0044   <span class="keyword">end</span>
+0045 <span class="keyword">end</span>
+0046 
+0047 roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
+0048 
+0049 <span class="comment">% REQUIRED_VARS = {'s1','t1','s2','t2','nSamples','Fs'};</span>
+0050 <span class="comment">% assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...</span>
+0051 <span class="comment">%   'Variables %s required',strjoin(REQUIRED_VARS))</span>
+0052 
+0053 roi.fullfile = fullfile(roi.folder,roi.name);
+0054 <span class="keyword">if</span> ismember(group,roi.Properties.VariableNames)
+0055   <span class="keyword">if</span> group_specified
+0056     fprintf(&quot;grouping by <span class="comment">%s \n&quot;,group);</span>
+0057   <span class="keyword">end</span>
+0058   <span class="keyword">if</span> isnumeric(roi.(group))
+0059     roi.fullfile = strcat(roi.fullfile,<span class="string">'_'</span>,num2str(roi.(group)));
+0060   <span class="keyword">else</span>
+0061     roi.fullfile = strcat(roi.fullfile,<span class="string">'_'</span>,roi.(group));
+0062   <span class="keyword">end</span>
+0063 <span class="keyword">end</span>
+0064 roi.sync_id = roi.id;
+0065 uff = unique(roi.fullfile); <span class="comment">%unique fullfile</span>
+0066 consolidated = table();
+0067 
+0068 <span class="comment">%consolidating several entries for the same file.</span>
+0069 <span class="keyword">for</span> i_uff=1:length(uff)
+0070   i_roi = roi(strcmp(roi.fullfile,uff(i_uff)),:);
+0071   <span class="keyword">if</span> height(i_roi)&gt;1
+0072 
+0073     <span class="comment">%doing linear fit to assess if consolidation is plausible</span>
+0074     s = [i_roi.s1; i_roi.s2];
+0075     t = [i_roi.t1; i_roi.t2];
+0076     <span class="keyword">if</span> timewarp
+0077       p = polyfit(s,t,1);
+0078     <span class="keyword">else</span>
+0079       assert(length(unique(i_roi.Fs))==1,&quot;Inconsistent Fs&quot;);
+0080       p1 = 1/unique(i_roi.Fs);
+0081       p = [p1, mean(t-p1*s)];
+0082     <span class="keyword">end</span>
+0083     tfit = polyval(p,s);
+0084     
+0085     max_delta_t = max(abs(t - tfit));
+0086     <span class="keyword">if</span> max_delta_t &lt;= timetol <span class="comment">%consolidating</span>
+0087       consrow = i_roi(1,:);
+0088       consrow.starts = min(i_roi.starts);
+0089       consrow.ends = max(i_roi.ends);
+0090       consrow.s1 = min(i_roi.s1);
+0091       consrow.s2 = max(i_roi.s2);
+0092       consrow.t1 = polyval(p,consrow.s1);
+0093       consrow.t2 = polyval(p,consrow.s2);
+0094       <span class="keyword">if</span> ismember(<span class="string">'warpfactor'</span>,i_roi.Properties.VariableNames)
+0095         consrow.warpfactor = 1/(consrow.Fs * p(1));
+0096       <span class="keyword">end</span>
+0097       i_roi = consrow;      
+0098     <span class="keyword">else</span>  
+0099       error(<span class="string">'can''t consolidate within tolerance. Max delta t %f &gt; %f'</span>,max_delta_t,timetol)
+0100     <span class="keyword">end</span>
+0101   <span class="keyword">end</span>
+0102   consolidated = [consolidated; i_roi];
+0103 <span class="keyword">end</span>
+0104 
+0105 consolidated.id=[];
+0106 roi.fullfile=[];
+0107 consolidated = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(consolidated);
+0108 
+0109 <span class="comment">%consolidating several time contiguos files together</span>
+0110 <span class="keyword">if</span> contiguous
+0111   roi = consolidated;
+0112   consolidated = table();
+0113   roi.filetype_chantype = strcat(roi.filetype,roi.chantype,num2str(roi.Fs));
+0114   ufc = unique(roi.filetype_chantype);
+0115   <span class="keyword">for</span> i_ufc=1:length(ufc)
+0116       i_roi = roi(strcmp(roi.filetype_chantype,ufc(i_ufc)),:);
+0117     <span class="keyword">if</span>  height(i_roi)&gt;1 &amp;&amp; length(unique(i_roi.name))&lt;=1
+0118       <span class="comment">%probably the first consolidation failed. Returning with a warning</span>
+0119       error(<span class="string">'multiple chunks for single file after per file consolidation'</span>);
+0120       consolidated = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
+0121       <span class="keyword">return</span>
+0122     <span class="keyword">end</span>
+0123     <span class="comment">%detecting contiguos stretches</span>
+0124     cfg=[];
+0125     cfg.criterion = @(x) abs(sum(x.duration)-max(x.ends)+min(x.starts)) &lt; height(x)*timetol;
+0126     i_roi_cont = <a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg,i_roi);   
+0127     
+0128     <span class="keyword">for</span> j=1:height(i_roi_cont)
+0129         i_roi_cont_j = i_roi(i_roi.id&gt;=i_roi_cont.id_starts(j) &amp; i_roi.id&lt;=i_roi_cont.id_ends(j),:);
+0130     
+0131       <span class="keyword">if</span> height(i_roi_cont_j)&gt;1
+0132         
+0133         left_complete = i_roi_cont_j.starts(1)&lt;=i_roi_cont_j.t1(1);
+0134         right_complete = i_roi_cont_j.ends(end)&gt;=i_roi_cont_j.t2(end);
+0135         
+0136         <span class="comment">%calculating raw samples of contiguous file</span>
+0137         cs = cumsum(i_roi_cont_j.s2-i_roi_cont_j.s1) + i_roi_cont_j.s1(1);
+0138         cs = cs + (0:(height(i_roi_cont_j)-1))';
+0139         cs = [0; cs(1:end-1)];
+0140         i_roi_cont_j.raw1 = i_roi_cont_j.s1 + cs;
+0141         i_roi_cont_j.raw2 = i_roi_cont_j.s2 + cs;
+0142         
+0143         <span class="comment">%doing linear fit to asses if consolidation is plausible</span>
+0144         s = [i_roi_cont_j.raw1; i_roi_cont_j.raw2];
+0145         t = [i_roi_cont_j.t1; i_roi_cont_j.t2];
+0146         <span class="comment">%plot(s,t,'o')</span>
+0147         <span class="keyword">if</span> timewarp
+0148           p = polyfit(s,t,1);
+0149         <span class="keyword">else</span>
+0150           assert(length(unique(i_roi_cont_j.Fs))==1,&quot;Inconsistent Fs&quot;);
+0151           p1 = 1/unique(i_roi_cont_j.Fs);
+0152           p = [p1, mean(t-p1*s)];
+0153         <span class="keyword">end</span>
+0154         tfit = polyval(p,s);
+0155       
+0156         max_delta_t = max(abs(t - tfit));
+0157         <span class="keyword">if</span> max_delta_t &lt;= timetol <span class="comment">%consolidating</span>
+0158           i_roi_cont_j.t1 = polyval(p,i_roi_cont_j.raw1);
+0159           i_roi_cont_j.t2 = polyval(p,i_roi_cont_j.raw2);
+0160           <span class="keyword">if</span> ismember(<span class="string">'warpfactor'</span>,i_roi_cont_j.Properties.VariableNames)
+0161             i_roi_cont_j.warpfactor = 1 ./ (i_roi_cont_j.Fs .* p(1));
+0162           <span class="keyword">end</span>
+0163         <span class="keyword">else</span>  
+0164           error(<span class="string">'can''t consolidate within tolerance. Max delta t %f &gt; %f'</span>,max_delta_t,timetol);
+0165         <span class="keyword">end</span>
+0166         i_roi_cont_j.raw1=[];
+0167         i_roi_cont_j.raw2=[];          
+0168         
+0169         <span class="comment">%adjusting starts and ends to take to confluence</span>
+0170         <span class="keyword">if</span> left_complete
+0171           i_roi_cont_j.starts(1) = i_roi_cont_j.t1(1) - 0.5/i_roi_cont_j.Fs(1);
+0172         <span class="keyword">end</span>
+0173         <span class="keyword">for</span> i=1:(height(i_roi_cont_j)-1)
+0174           i_roi_cont_j.ends(i)     = (i_roi_cont_j.t2(i) + i_roi_cont_j.t1(i+1))/2;
+0175           i_roi_cont_j.starts(i+1) = (i_roi_cont_j.t2(i) + i_roi_cont_j.t1(i+1))/2;        
+0176         <span class="keyword">end</span>
+0177         <span class="keyword">if</span> right_complete
+0178           i_roi_cont_j.ends(1) = i_roi_cont_j.t2(1) + 0.5/i_roi_cont_j.Fs(1);
+0179         <span class="keyword">end</span>
+0180     
+0181         consolidated = [consolidated; i_roi_cont_j];
+0182       <span class="keyword">else</span>
+0183         consolidated = [consolidated; i_roi_cont_j];
+0184       <span class="keyword">end</span>
+0185     <span class="keyword">end</span>
+0186   <span class="keyword">end</span>
+0187 <span class="keyword">end</span>
+0188 
+0189 consolidated = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(consolidated);
+0190</pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

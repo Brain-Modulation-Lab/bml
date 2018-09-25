@@ -15,7 +15,7 @@
 <div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot2spike.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="index.html">Index for bml/annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
 <h1>bml_annot2spike
 </h1>
@@ -36,10 +36,15 @@
  
  cfg.roi - roi table used to transform the times in annot.starts to
        timestamps (ie, samples). Required if raw is not provided. 
+ cfg.waveform_mult - double, multiplying factor for waveform. Defaults to 1.
  cfg.waveform_extract - boolean indicating if waveforms whould be cropped
        from raw. Defaults to false. 
  cfg.waveform_samples - integer indicating number of sample for the
        waveforms. Defauls to 44. 
+ cfg.annot_spike_id - string, indicates which variable of annot should be
+       treated as spike index for waveform extraction. Defaults to 'spike_idx'
+ cfg.unit_delimiter - string to delimit units from channels. Defaults to
+       '_unit'
 
  annot - annotation table to transform to spike timestamps. Only the
          starts vector is used. Normally obtained from bml_plexon2annot
@@ -64,7 +69,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>	BML_TIME2IDX calculates sample indices from a time vector and file coordinates</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the domain</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>	BML_TIME2IDX calculates sample indices from a time vector and file coordinates</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the domain</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -84,108 +89,124 @@ This function is called by:
 0009 <span class="comment">%</span>
 0010 <span class="comment">% cfg.roi - roi table used to transform the times in annot.starts to</span>
 0011 <span class="comment">%       timestamps (ie, samples). Required if raw is not provided.</span>
-0012 <span class="comment">% cfg.waveform_extract - boolean indicating if waveforms whould be cropped</span>
-0013 <span class="comment">%       from raw. Defaults to false.</span>
-0014 <span class="comment">% cfg.waveform_samples - integer indicating number of sample for the</span>
-0015 <span class="comment">%       waveforms. Defauls to 44.</span>
-0016 <span class="comment">%</span>
-0017 <span class="comment">% annot - annotation table to transform to spike timestamps. Only the</span>
-0018 <span class="comment">%         starts vector is used. Normally obtained from bml_plexon2annot</span>
-0019 <span class="comment">% raw - ft_datatype_raw from where to use as template for the spikes</span>
-0020 <span class="comment">%       timestamps and to crop the snippets from.</span>
-0021 <span class="comment">% spike_waveform - ft_datatype_spike as returned by ft_read_spike or</span>
-0022 <span class="comment">%       bml_plexon2annot. waveforms are extracted from here if available.</span>
-0023 <span class="comment">%       should contain fields 'waveform' and 'label'.</span>
-0024 <span class="comment">%</span>
-0025 <span class="comment">% returns a ft_datatype_spike structure. Each label correspons to an</span>
-0026 <span class="comment">% individual unit named as &lt;channel&gt;_&lt;unit&gt;.</span>
-0027 <span class="comment">%</span>
-0028 <span class="comment">% If spike_waveform is provided, a waveform field will be present in the</span>
-0029 <span class="comment">% output, where the mapping of units to waveform is based on annot.channel,</span>
-0030 <span class="comment">% annot.spike_idx, spike_waveform.label and spike_waveform.waveform.</span>
-0031 <span class="comment">%</span>
-0032 <span class="comment">% If raw is provided, a waveform field will be present in the output, where the</span>
-0033 <span class="comment">% mapping of snippets are extracted from the raw vector. The labels of raw</span>
-0034 <span class="comment">% must match annot.channel.</span>
-0035 
-0036 <span class="keyword">if</span> nargin == 3
-0037   assert(isstruct(raw), &quot;Invalid third argument&quot;);
-0038   <span class="keyword">if</span> all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(raw)))
-0039     <span class="comment">% Usage spike = bml_annot2spike(cfg, annot, raw)</span>
-0040     spike_waveform = [];
-0041   <span class="keyword">elseif</span>    all(ismember({<span class="string">'waveform'</span>,<span class="string">'label'</span>},fieldnames(raw)))
-0042     <span class="comment">% Usage spike = bml_annot2spike(cfg, annot, spike_waveform)</span>
-0043     spike_waveform = raw;
-0044     raw = [];
-0045   <span class="keyword">else</span>
-0046     error(&quot;invalid third argument&quot;);
-0047   <span class="keyword">end</span>  
-0048 <span class="keyword">elseif</span> nargin == 2
-0049   spike_waveform = [];  
-0050     raw = [];
-0051 <span class="keyword">else</span>
-0052   error(&quot;Incorrect number of arguments&quot;);
-0053 <span class="keyword">end</span>
-0054 
-0055 roi = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
-0056 <span class="keyword">if</span> isempty(roi) 
-0057   <span class="keyword">if</span> ~isempty(raw)
-0058     roi = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(raw);
-0059   <span class="keyword">else</span>
-0060     error(&quot;cfg.roi or raw required&quot;);
-0061   <span class="keyword">end</span>
-0062 <span class="keyword">end</span>
-0063 
-0064 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
-0065 assert(all(ismember({<span class="string">'channel'</span>,<span class="string">'unit'</span>},annot.Properties.VariableNames)),<span class="keyword">...</span>
-0066   &quot;channel and unit columns required in annot&quot;);
-0067 
-0068 waveform_extract = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'waveform_extract'</span>,false);
-0069 waveform_samples = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'waveform_samples'</span>,44);
-0070 
-0071 has_spike_idx = ismember({<span class="string">'spike_idx'</span>},annot.Properties.VariableNames);
+0012 <span class="comment">% cfg.waveform_mult - double, multiplying factor for waveform. Defaults to 1.</span>
+0013 <span class="comment">% cfg.waveform_extract - boolean indicating if waveforms whould be cropped</span>
+0014 <span class="comment">%       from raw. Defaults to false.</span>
+0015 <span class="comment">% cfg.waveform_samples - integer indicating number of sample for the</span>
+0016 <span class="comment">%       waveforms. Defauls to 44.</span>
+0017 <span class="comment">% cfg.annot_spike_id - string, indicates which variable of annot should be</span>
+0018 <span class="comment">%       treated as spike index for waveform extraction. Defaults to 'spike_idx'</span>
+0019 <span class="comment">% cfg.unit_delimiter - string to delimit units from channels. Defaults to</span>
+0020 <span class="comment">%       '_unit'</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% annot - annotation table to transform to spike timestamps. Only the</span>
+0023 <span class="comment">%         starts vector is used. Normally obtained from bml_plexon2annot</span>
+0024 <span class="comment">% raw - ft_datatype_raw from where to use as template for the spikes</span>
+0025 <span class="comment">%       timestamps and to crop the snippets from.</span>
+0026 <span class="comment">% spike_waveform - ft_datatype_spike as returned by ft_read_spike or</span>
+0027 <span class="comment">%       bml_plexon2annot. waveforms are extracted from here if available.</span>
+0028 <span class="comment">%       should contain fields 'waveform' and 'label'.</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">% returns a ft_datatype_spike structure. Each label correspons to an</span>
+0031 <span class="comment">% individual unit named as &lt;channel&gt;_&lt;unit&gt;.</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">% If spike_waveform is provided, a waveform field will be present in the</span>
+0034 <span class="comment">% output, where the mapping of units to waveform is based on annot.channel,</span>
+0035 <span class="comment">% annot.spike_idx, spike_waveform.label and spike_waveform.waveform.</span>
+0036 <span class="comment">%</span>
+0037 <span class="comment">% If raw is provided, a waveform field will be present in the output, where the</span>
+0038 <span class="comment">% mapping of snippets are extracted from the raw vector. The labels of raw</span>
+0039 <span class="comment">% must match annot.channel.</span>
+0040 
+0041 <span class="keyword">if</span> nargin == 3
+0042   assert(isstruct(raw), &quot;Invalid third argument&quot;);
+0043   <span class="keyword">if</span> all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(raw)))
+0044     <span class="comment">% Usage spike = bml_annot2spike(cfg, annot, raw)</span>
+0045     spike_waveform = [];
+0046   <span class="keyword">elseif</span>    all(ismember({<span class="string">'waveform'</span>,<span class="string">'label'</span>},fieldnames(raw)))
+0047     <span class="comment">% Usage spike = bml_annot2spike(cfg, annot, spike_waveform)</span>
+0048     spike_waveform = raw;
+0049     raw = [];
+0050   <span class="keyword">else</span>
+0051     error(&quot;invalid third argument&quot;);
+0052   <span class="keyword">end</span>  
+0053 <span class="keyword">elseif</span> nargin == 2
+0054   spike_waveform = [];  
+0055     raw = [];
+0056 <span class="keyword">else</span>
+0057   error(&quot;Incorrect number of arguments&quot;);
+0058 <span class="keyword">end</span>
+0059 
+0060 roi = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0061 <span class="keyword">if</span> isempty(roi) 
+0062   <span class="keyword">if</span> ~isempty(raw)
+0063     roi = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(raw);
+0064   <span class="keyword">else</span>
+0065     error(&quot;cfg.roi or raw required&quot;);
+0066   <span class="keyword">end</span>
+0067 <span class="keyword">end</span>
+0068 
+0069 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
+0070 assert(all(ismember({<span class="string">'channel'</span>,<span class="string">'unit'</span>},annot.Properties.VariableNames)),<span class="keyword">...</span>
+0071   &quot;channel and unit columns required in annot&quot;);
 0072 
-0073 spike=struct();
-0074 spike.timestamp=[];
-0075 spike.label=[];
-0076 spike_idx=[];
-0077 channel=[];
-0078 
-0079 lev_channel = unique(annot.channel);
-0080 <span class="keyword">for</span> i_ch=1:length(lev_channel)
-0081   ch_annot = annot(strcmp(annot.channel,lev_channel(i_ch)),:);
-0082   lev_unit = unique(ch_annot.unit);
-0083   <span class="keyword">for</span> i_u=1:length(lev_unit)
-0084     u_ch_annot = ch_annot(ch_annot.unit==lev_unit(i_u),:);
-0085     spike.timestamp = {spike.timestamp, <a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(roi,u_ch_annot.starts)};
-0086     spike.label = {spike.timestamp, strcat(lev_unit(i_ch),<span class="string">'_'</span>,u_ch_annot(i_u))};
-0087     <span class="keyword">if</span> has_spike_idx
-0088       spike_idx = {spike_idx, u_ch_annot.spike_idx};
-0089       channel = {channel, lev_unit(i_ch)};
-0090     <span class="keyword">end</span>
-0091   <span class="keyword">end</span>
-0092 <span class="keyword">end</span>
-0093 
-0094 <span class="keyword">if</span> has_spike_idx &amp;&amp; ~isempty(spike_waveform)
-0095   <span class="comment">%getting waveforms from spike_waveform</span>
-0096   spike.waveform=cell(1,length(spike_idx));
-0097   <span class="keyword">for</span> i_wf=1:length(spike_idx)
-0098     orig_wf_idx = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(channel(i_wf),spike_waveform.label);
-0099     spike.waveform(1,i_wf) = spike_waveform.waveform{orig_wf_idx}(spike_idx{i_wf},:);
-0100   <span class="keyword">end</span>
-0101 <span class="keyword">end</span>
-0102 
-0103 <span class="keyword">if</span> ~isempty(raw) &amp;&amp; waveform_extract
-0104   error(&quot;waveform extraction not implemented yet&quot;);
-0105 <span class="keyword">end</span>
-0106 
-0107 
-0108 
+0073 waveform_mult    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'waveform_mult'</span>,1);
+0074 waveform_extract = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'waveform_extract'</span>,false);
+0075 waveform_samples = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'waveform_samples'</span>,44);
+0076 unit_delimiter   = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'unit_delimiter'</span>,<span class="string">'_unit'</span>);
+0077 
+0078 annot_spike_id   = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'annot_spike_id'</span>,<span class="string">'spike_idx'</span>);
+0079 has_spike_idx = ismember({annot_spike_id},annot.Properties.VariableNames);
+0080 
+0081 annot.channel_unit = strcat(annot.channel,unit_delimiter,num2str(annot.unit));
+0082 tot_units = length(unique(annot.channel_unit));
+0083 
+0084 spike=struct();
+0085 spike.timestamp=cell(1,tot_units);
+0086 spike.label=cell(1,tot_units);
+0087 spike_idx=cell(1,tot_units);
+0088 channel=cell(1,tot_units);
+0089 
+0090 lev_channel = unique(annot.channel);
+0091 i_tot_unit = 1;
+0092 annot = <a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(annot,roi);
+0093 assert(height(annot)&gt;0,<span class="string">'no events in annot in specified time window'</span>);
+0094 <span class="keyword">for</span> i_ch=1:length(lev_channel)
+0095   assert(i_tot_unit&lt;=tot_units);
+0096   ch_annot = annot(strcmp(annot.channel,lev_channel(i_ch)),:);
+0097   lev_unit = unique(ch_annot.unit);
+0098   <span class="keyword">for</span> i_u=1:length(lev_unit)
+0099     u_ch_annot = ch_annot(ch_annot.unit == lev_unit(i_u),:);
+0100     spike.timestamp{i_tot_unit} = <a href="../../bml/sync/bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(roi,u_ch_annot.starts);
+0101     spike.label(i_tot_unit) = strcat(lev_channel(i_ch),unit_delimiter,num2str(lev_unit(i_u)));
+0102     <span class="keyword">if</span> has_spike_idx
+0103       spike_idx{i_tot_unit} = u_ch_annot.spike_idx;
+0104       channel{i_tot_unit} = lev_channel(i_ch);
+0105     <span class="keyword">end</span>
+0106     i_tot_unit = i_tot_unit + 1;
+0107   <span class="keyword">end</span>
+0108 <span class="keyword">end</span>
 0109 
-0110 
-0111 
-0112 
-0113</pre></div>
-<hr><address>Generated on Tue 20-Feb-2018 16:13:59 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0110 <span class="keyword">if</span> has_spike_idx &amp;&amp; ~isempty(spike_waveform)
+0111   <span class="comment">%getting waveforms from spike_waveform</span>
+0112   spike.waveform=cell(1,length(spike_idx));
+0113   <span class="keyword">for</span> i_wf=1:length(spike_idx)
+0114     orig_wf_idx = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(channel{i_wf},spike_waveform.label);
+0115     spike.waveform{1,i_wf} = waveform_mult .* spike_waveform.waveform{orig_wf_idx}(:,:,spike_idx{i_wf});
+0116   <span class="keyword">end</span>
+0117 <span class="keyword">end</span>
+0118 
+0119 <span class="keyword">if</span> ~isempty(raw) &amp;&amp; waveform_extract
+0120   error(&quot;waveform extraction not implemented yet&quot;);
+0121 <span class="keyword">end</span>
+0122 
+0123 
+0124 
+0125 
+0126 
+0127 
+0128 
+0129</pre></div>
+<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
