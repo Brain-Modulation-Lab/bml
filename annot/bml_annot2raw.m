@@ -13,7 +13,11 @@ function raw = bml_annot2raw(cfg, annot)
 % cfg.roi - roi table from which to construct raw
 % cfg.label - cellstr, names of channels in new raw. Defaults to 'annot'
 % cfg.annot_label - string, indicates channel on which events should be
-%     added. Defaults to cfg.label{1}
+%     added. Defaults to cfg.label{1}. 
+% cfg.annot_label_colname - cellstr, indicating name of column of annot
+%     containging the channel's label the current annotation should be
+%     added to. If not given, all annotations are added 
+%     to same channel defined by annot_label.  
 % cfg.template - raw to use as template
 % annot - annotation table. If omitted a raw of zeros is returned.
 %
@@ -68,15 +72,41 @@ if nargin == 2
   if length(raw.label)==1 && strcmp(raw.label{1},'annot')
     raw.label={description};
   end
-  annot_label	= bml_getopt(cfg,'annot_label',raw.label{1});
-  annot_idx   = bml_getidx(annot_label,raw.label);
   
-  for t=1:height(roi)
-    t_annot = bml_annot_filter(annot,roi(t,:));
-    for i=1:height(t_annot)
-      [s,e] = bml_crop_idx_valid(roi(t,:), t_annot.starts(i), t_annot.ends(i));
-      raw.trial{t}(annot_idx,s:e)=1;
+  annot_label_colname = bml_getopt(cfg,'annot_label_colname',[]);
+  
+  %assigning all annotation to same channel of raw
+  if isempty(annot_label_colname)
+    annot_label	= bml_getopt(cfg,'annot_label',raw.label{1});
+    annot_idx   = bml_getidx(annot_label,raw.label);
+
+    for t=1:height(roi)
+      t_annot = bml_annot_filter(annot,roi(t,:));
+      for i=1:height(t_annot)
+        [s,e] = bml_crop_idx_valid(roi(t,:), t_annot.starts(i), t_annot.ends(i));
+        raw.trial{t}(annot_idx,s:e)=1;
+      end
     end
+    
+  else %annotations assing to specific channels
+    if ~any(strcmp(annot.Properties.VariableNames, annot_label_colname))
+      error('annot_label_colname should match a column of annot');
+    end
+    %iterating over labels of annot_label_colname
+    ul = unique(annot{:,annot_label_colname});
+    for i_ul=1:numel(ul)
+      annot_l = annot(strcmp(annot{:,annot_label_colname},ul{i_ul}),:);
+      annot_idx = bml_getidx(ul{i_ul},raw.label);
+
+      for t=1:height(roi)
+        t_annot_l = bml_annot_filter(annot_l,roi(t,:));
+        for i=1:height(t_annot_l)
+          [s,e] = bml_crop_idx_valid(roi(t,:), t_annot_l.starts(i), t_annot_l.ends(i));
+          raw.trial{t}(annot_idx,s:e)=1;
+        end
+      end
+      
+    end    
   end
 end
 

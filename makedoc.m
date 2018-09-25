@@ -1,6 +1,7 @@
 %% Creates the html documentation folder doc/
 % requires m2html in path (https://www.artefact.tk/software/matlab/m2html/)
-% last run 2018.02.28?
+% last run 2018.09.25
+% update bml/README.md for doc to point to the correct commit. 
 
 GIT_PATH = 'E:\MATLAB';
 
