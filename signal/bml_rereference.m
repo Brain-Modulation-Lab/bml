@@ -29,6 +29,9 @@ label     = bml_getopt(cfg,'label',raw.label);
 group     = bml_getopt(cfg,'group');
 method    = bml_getopt_single(cfg,'method','CAR');
 
+%checking for NaNs in data
+raw_has_nan = any(cellfun(@(x) any(any(isnan(x),1),2),raw.trial));
+
 %inferring groups from labels
 if isempty(group)
   sl=split(label,'_');
@@ -58,44 +61,69 @@ g0 = sum(group<=0);
 ug = unique(g);
 [N,~] = histc(g,ug);
 
-%creating blocks
-if ismember(method,{'CAR','common'})
-  U_blocks=cellfun(@bml_comavgref_matrix,num2cell(N),'UniformOutput',false);
-elseif ismember(method,{'LAR','local'})
-  U_blocks=cellfun(@bml_locavgref_matrix,num2cell(N),'UniformOutput',false);
-elseif ismember(method,{'VAR','variable'})
-  warning('Using experimental method VAR, susceptible to high amplitude artifacts')
-  
-  %calculating variance-covariance matrix
-  cfg=[];
-  cfg.covariance = 'yes';
-  cfg.vartrllength = 2;
-  tl_raw=ft_timelockanalysis(cfg,raw);
-  
-  %grouping matrix into blocks
-  COVs = cell(length(ug),1);
-  for i=1:length(ug)
-    COVs{i,1}=tl_raw.cov(g_idx(g==ug(i)),g_idx(g==ug(i)));
-  end
-  
+if ~raw_has_nan
   %creating blocks
-  U_blocks=cellfun(@bml_varavgref_matrix,COVs,'UniformOutput',false);
-  
+  if ismember(method,{'CAR','common'})
+    U_blocks=cellfun(@bml_comavgref_matrix,num2cell(N),'UniformOutput',false);
+  elseif ismember(method,{'LAR','local'})
+    U_blocks=cellfun(@bml_locavgref_matrix,num2cell(N),'UniformOutput',false);
+  elseif ismember(method,{'VAR','variable'})
+    warning('Using experimental method VAR, susceptible to high amplitude artifacts')
+
+    %calculating variance-covariance matrix
+    cfg=[];
+    cfg.covariance = 'yes';
+    cfg.vartrllength = 2;
+    tl_raw=ft_timelockanalysis(cfg,raw);
+
+    %grouping matrix into blocks
+    COVs = cell(length(ug),1);
+    for i=1:length(ug)
+      COVs{i,1}=tl_raw.cov(g_idx(g==ug(i)),g_idx(g==ug(i)));
+    end
+
+    %creating blocks
+    U_blocks=cellfun(@bml_varavgref_matrix,COVs,'UniformOutput',false);
+
+  else
+    error('unknown method')
+  end
+
+  %replacing block by identity for null group
+  if g0 > 0
+    U_blocks{1} = eye(N(1));
+  end
+
+  %joining blocks
+  U = blkdiag(U_blocks{:});
+  U(g_idx,g_idx) = U;
+  %image(U,'CDataMapping','scaled')
+
+  %applying unmixing matrix to data
+  ref = bml_apply(@(x) U*x, raw);
+
 else
-  error('unknown method')
+  fprintf('raw has NaNs. ')
+  if ismember(method,{'CAR','common'})
+    fprintf('Using common average referencing per group in NaN robust implementation.\n')
+    ref = raw;
+    for t=1:numel(raw.trial)
+      ug = unique(group);
+      for g=1:numel(ug)
+        %calculating groups common average
+        commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
+        ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
+      end
+    end
+
+  elseif ismember(method,{'LAR','local'})
+    error('local average referencing not implemented for data with NaNs')
+  elseif ismember(method,{'VAR','variable'})
+    error('variable average referencing not implemented for data with NaNs')
+  else
+    error('unknown method')
+  end
 end
 
-%replacing block by identity for null group
-if g0 > 0
-  U_blocks{1} = eye(N(1));
-end
 
-%joining blocks
-U = blkdiag(U_blocks{:});
-U(g_idx,g_idx) = U;
-%image(U,'CDataMapping','scaled')
-  
-%applying unmixing matrix to data
-ref = bml_apply(@(x) U*x, raw);
-  
 
