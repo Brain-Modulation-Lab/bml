@@ -127,8 +127,6 @@ assert(~ismember('filetype',chunks.Properties.VariableNames),...
   'cfg.chunks should not containt ''filetype'' variable');
 assert(~isempty(chunks),'empty chunks table');
 
-
-
 chunks = bml_annot_table(bml_chunk_sessions(chunks),'chunks');
 
 sync_roi = table();
@@ -174,7 +172,6 @@ for chunk_i=1:height(chunks)
   %intersecting with extended chunks for slave
   extended_chunk_roi_os = bml_annot_intersect(roi_os, extended_chunks(chunk_i,:));  
 
-  
   do_this_chunk = true;
   %cheking if this chunk was previously done
   if ~isempty(prev_sync_roi)
@@ -208,6 +205,8 @@ for chunk_i=1:height(chunks)
   end
   
   if do_this_chunk
+    fprintf('synchronizing chunk %i \n',chunk_id);
+
     cfg=[]; %creating masters raw with sync channel for entire session
     cfg.channel = master_channel; 
     cfg.chantype = master_chantype; 

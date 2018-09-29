@@ -104,7 +104,7 @@ elseif isunix()
   cmd = ['praat --open ' cmd '&'];
 else
   cmd = ['praat --open ' cmd '&'];  
-  warning('make sure praat is in your path. !echo $PATH')
+  %warning('make sure praat is in your path. !echo $PATH')
 end
 
 system(cmd);

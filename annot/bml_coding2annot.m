@@ -45,6 +45,7 @@ if isempty(AudioCoord) || praat
   if ~isempty(audio_channel)
     cfg1=[];
     cfg1.channel = audio_channel;
+    cfg1.trackcallinfo=false;
     sync_audio = ft_selectdata(cfg1,sync_audio);
   end
   

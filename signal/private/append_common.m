@@ -91,6 +91,7 @@ switch cfg.appenddim
     % determine the union of all input data
     tmpcfg = keepfields(cfg, {'tolerance', 'channel', 'showcallinfo'});
     tmpcfg.select = 'union';
+    tmpcfg.trackcallinfo = false;
     [varargin{:}] = ft_selectdata(tmpcfg, varargin{:});
     for i=1:numel(varargin)
       [cfg, varargin{i}] = rollback_provenance(cfg, varargin{i});
@@ -170,6 +171,7 @@ switch cfg.appenddim
     % determine the union of all input data
     tmpcfg = keepfields(cfg, {'tolerance', 'channel'});
     tmpcfg.select = 'union';
+    tmpcfg.trackcallinfo=false;
     [varargin{:}] = ft_selectdata(tmpcfg, varargin{:});
     
     % start with the union of all input data
@@ -250,6 +252,7 @@ switch cfg.appenddim
     % determine the intersection of all input data
     tmpcfg = keepfields(cfg, {'tolerance', 'channel'});
     tmpcfg.select = 'intersect';
+    tmpcfg.trackcallinfo = false;
     [varargin{:}] = ft_selectdata(tmpcfg, varargin{:});
     for i=1:numel(varargin)
       [cfg, varargin{i}] = rollback_provenance(cfg, varargin{i});

@@ -173,6 +173,7 @@ cfg.chantype=chantype;
 cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
 cfg.feedback=ft_feedback;
+cfg.trackcallinfo=false;
 hdr = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
 
 %checking nomimal sampling frequencies
@@ -193,7 +194,10 @@ if ~isempty(channel)
   if numel(channel_selected)==0
     error('%s not present in raw %s \nAvailable channels are: %s',strjoin(channel),cfg.dataset,strjoin(raw.label));
   elseif ~dryrun
-    cfg=[]; cfg.channel=channel; cfg.feedback=ft_feedback;
+    cfg=[]; 
+    cfg.channel=channel; 
+    cfg.feedback=ft_feedback;
+    cfg.trackcallinfo=false;
     raw = ft_selectdata(cfg,raw);
   end
 end
@@ -225,6 +229,7 @@ for i=2:height(roi)
   cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
   cfg.feedback=ft_feedback;
+  cfg.trackcallinfo=false;
   if ~dryrun
     next_raw = ft_preprocessing(cfg);
   else
@@ -236,6 +241,7 @@ for i=2:height(roi)
     if isstring(channel); channel = {char(channel)}; end
     if ~dryrun
       cfg=[]; cfg.channel=channel; cfg.feedback=ft_feedback;
+      cfg.trackcallinfo=false;
       next_raw = ft_selectdata(cfg,next_raw);
     end
   end
