@@ -7,8 +7,9 @@ function shadow = bml_annot_shadow(cfg,annot)
 %
 % cfg.direction - double: if positive the shadow is in future time 
 %           (defaults to 1)
-% cfg.max_duration - double: maximal allowed duration of shadow
-% cfg.gap_duration - double: duraton of gap between annot and shadow
+% cfg.max_duration - double: maximal allowed duration of shadow. 
+% cfg.gap_duration - double: duratton of gap between annot and shadow.
+%           Defaults to 0
 %
 % shadow inherits all variable names from annot
 

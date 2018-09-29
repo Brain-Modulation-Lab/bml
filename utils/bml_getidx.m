@@ -1,6 +1,6 @@
 function idx = bml_getidx(element,collection)
 
-% BML_GETIDX gets the first indices of the elements in the domain
+% BML_GETIDX gets the first indices of the elements in the collection (or domain)
 %
 % Use as
 %   idx = bml_getidx(element,collection)

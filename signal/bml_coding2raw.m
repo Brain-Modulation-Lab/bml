@@ -19,7 +19,7 @@ else
   error('Use as bml_codingmatrix2raw(cfg)');
 end
 
-t0               = bml_getopt(cfg,'t0',0);
+t0 = bml_getopt(cfg,'t0',0);
 
 if size(Audio,1) > size(Audio,2)
   Audio = Audio';
