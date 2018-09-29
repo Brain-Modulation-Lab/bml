@@ -27,6 +27,11 @@ elseif nargin ~= 3
   error('incorrect call. See usage')
 end
 
+if isempty(annot)
+  extended = annot;
+  return
+end
+
 annot = bml_annot_table(annot);
 annot.starts = annot.starts - ext1;
 annot.ends = annot.ends + ext2;

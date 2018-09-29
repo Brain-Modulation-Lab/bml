@@ -18,6 +18,11 @@ elseif nargin ~= 2
   error('incorrect number of arguments');
 end
 
+if height(annot)==1
+  overlap = [];
+  return
+end
+
 timetol = bml_getopt(cfg,'timetol',1e-5);
 annot = bml_annot_table(annot);
 
