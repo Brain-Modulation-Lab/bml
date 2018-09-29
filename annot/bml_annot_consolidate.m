@@ -4,12 +4,17 @@ function cons = bml_annot_consolidate(cfg, annot)
 %
 % Use as
 %   cons = bml_annot_consolidate(cfg, annot);
+%   cons = bml_annot_consolidate(annot);
 %
 % The first argument cfg is a configuration structure, which can contain
 % the following field:
 % cfg.criterion - function handle: consolidation criteria. This function should
 %             accept a table of candidate annotations to consolidate and 
 %             return a true or false.  
+%             defaults to @(x) (x.starts(end) <= max(x.ends(1:(end-1))))
+%             that is, a row is consolidated with the previous if the
+%             starts time of the row is smaller than the largest ends time
+%             of the previous rows. 
 % cfg.description - string: description of the output annot table
 % cfg.additive - cellstr with names of variables to be treated as additive 
 %             defaults to empty
@@ -37,12 +42,29 @@ function cons = bml_annot_consolidate(cfg, annot)
 % cfg.criterion = @(x) height(x)<=4
 % grouped_annot = bml_annot_consolidate(cfg,annot);
 
-annot = bml_annot_table(annot,[],inputname(2));
+if nargin == 1
+  annot = bml_annot_table(cfg,[],inputname(1));
+  cfg = [];
+elseif nargin == 2
+  annot = bml_annot_table(annot,[],inputname(2));
+else
+  error('incorrect number of arguments in call to bml_annot_consolidate');
+end
 
 description = bml_getopt(cfg,'description', ['cons_' annot.Properties.Description]);
 criterion   = bml_getopt(cfg,'criterion',[]);
 additive    = bml_getopt(cfg,'additive',{});
 groupby     = bml_getopt(cfg,'groupby',[]);
+
+if isempty(annot)
+  cons = annot;
+  return
+end
+
+if isempty(criterion)
+  fprintf('consolidating by default overlap/contiguity criterion\n')
+  criterion = @(x) (x.starts(end) <= max(x.ends(1:(end-1))));
+end
 
 if ~isa(criterion, 'function_handle')
   error('''criterion'' should be a function handle');
@@ -50,12 +72,12 @@ end
 
 %ToDo: allow grouping by several variables
 if isempty(groupby)
-  annot.cons_group(:)=1;
-  groupby = {'cons_group'};
+  annot.groupby_=ones(height(annot),1);
+  groupby = {'groupby_'};
   groups={1};
 else
-	if ~any(strcmp(annot.Properties.VariableNames, groupby))
-    error('groupby should match a column of annot');
+	if sum(strcmp(annot.Properties.VariableNames, groupby))~=1
+    error('groupby should match one (and only one) column of annot');
   end
   groups = unique(annot{:,groupby});
 end
@@ -77,7 +99,8 @@ for g=1:numel(groups)
     cons_g = collapse_table_rows(annot_g,additive);
     cons_g.id=[];
     cons_g = bml_annot_table(cons_g,description);
-    return
+    cons = [cons; cons_g];
+    continue
   end
 
   while i<=height(annot_g)
@@ -110,7 +133,9 @@ end
 cons.id=[];
 cons = bml_annot_table(cons,description);
 
-
+if any(strcmp('groupby_',cons.Properties.VariableNames))
+  cons.groupby_ = [];
+end
 
 function collapsed = collapse_table_rows(merge_s,additive)
 %
