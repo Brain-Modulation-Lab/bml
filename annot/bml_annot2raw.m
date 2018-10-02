@@ -19,6 +19,7 @@ function raw = bml_annot2raw(cfg, annot)
 %     containging the channel's label the current annotation should be
 %     added to. If not given, all annotations are added 
 %     to same channel defined by annot_label.  
+% cfg.annot_label_colname - (deprecated) same as label_colname 
 % cfg.template - raw to use as template
 % cfg.count - boolean indicating if number in raw should indicate number of
 %     annotations at that time point. Defaults to true. If false,
@@ -38,8 +39,10 @@ count       = bml_getopt(cfg,'count',true);
 label       = bml_getopt(cfg,'label',[]);
 annot_label	= bml_getopt(cfg,'annot_label',[]);
 annot_label_colname = bml_getopt(cfg,'annot_label_colname',[]);
+label_colname =  bml_getopt(cfg,'label_colname',annot_label_colname);
 
-if isempty(annot_label_colname)
+
+if isempty(label_colname)
   if isempty(label)
     if isempty(template)
       label = {'annot'}; %default
@@ -52,13 +55,13 @@ if isempty(annot_label_colname)
     annot_label = label{1}; %default
   end
 else
-  if sum(strcmp(annot.Properties.VariableNames, annot_label_colname))~=1
+  if sum(strcmp(annot.Properties.VariableNames, label_colname))~=1
     error('cf.annot_label_colname should match a column of annot');
   end
-	ul = unique(annot{:,annot_label_colname});
+	ul = unique(annot{:,label_colname});
   if isempty(label)
     if isempty(template)
-      fprintf('using levels of %s as labels\n',annot_label_colname{1})
+      fprintf('using levels of %s as labels\n', label_colname{1})
       label = ul;
     else
       fprintf('using labels from template\n'); 
@@ -112,7 +115,7 @@ if nargin == 2
   end
   
   %assigning all annotation to same channel of raw
-  if isempty(annot_label_colname)
+  if isempty(label_colname)
     annot_idx   = bml_getidx(annot_label,raw.label);
     if annot_idx > 0 && annot_idx <= numel(raw.label)
       for t=1:height(roi)
@@ -132,7 +135,7 @@ if nargin == 2
 
     %iterating over labels of annot_label_colname
     for i_ul=1:numel(ul)
-      annot_l = annot(strcmp(annot{:,annot_label_colname},ul{i_ul}),:);
+      annot_l = annot(strcmp(annot{:,label_colname},ul{i_ul}),:);
       annot_idx = bml_getidx(ul{i_ul},raw.label);
       if annot_idx > 0 && annot_idx <= numel(raw.label)
         for t=1:height(roi)
