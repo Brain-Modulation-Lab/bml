@@ -6,7 +6,7 @@ function sync = bml_sync_transfer_neuroomega_chantype(cfg)
 %   sync = bml_sync_transfer_neuroomega_chantype(cfg)
 %
 % This function calculates synchronization rows for neuroomega channels,
-% based on a sync channel. Normally neuroomega files are sync with the
+% based on another sync channel. Normally neuroomega files are sync with the
 % analog 2750Hz channel. This function creates registries for other
 % channels (for example 'macro' and 'micro'), based on the synchronized channel. 
 %
