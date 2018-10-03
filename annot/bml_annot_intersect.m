@@ -51,9 +51,9 @@ elseif nargin == 3
   x=bml_annot_table(x,[],inputname(2));
   y=bml_annot_table(y,[],inputname(3));
   description = ['intersect_' x.Properties.Description '_' y.Properties.Description];
-  description = ft_getopt(cfg,'description',description);
+  description = bml_getopt(cfg,'description',description);
 else
-  error('use as bml_annot_intersect(x, y)')
+  error('incorrect use of bml_annot_intersect')
 end
 
 keep      = bml_getopt_single(cfg,'keep','both');

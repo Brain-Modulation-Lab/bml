@@ -76,7 +76,7 @@ else
   error('groupby_x and groupby_y should be both given or none at all')
 end
 
-annot = table();
+annot =table();
 for g=1:numel(groups_x)
   annot_g=table();
   if iscellstr(groups_x(g))
@@ -131,8 +131,11 @@ for g=1:numel(groups_x)
           error('Should never get here');
       end
     end
+    if ~isempty(annot_g)
+      annot_g.Properties.VariableNames = {'starts','ends','id',groupby_x{1}}; 
+    end
   else
-    annot_g = x_g(:,{'starts','ends','id',groups_x(g)});
+    annot_g = x_g(:,{'starts','ends','id',groupby_x{1}});
   end
   annot = [annot; annot_g];
 end
