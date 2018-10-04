@@ -86,7 +86,7 @@ if annot_slave.Fs(1) > 1.01 * annot_master.Fs(1) % 1% tolerance factor in freq c
   if ~isfield(slave,'sampleinfo')
     %adding sample info if missing. Assuming contiguity.
     s = cumsum(cellfun(@(x) size(x,2),slave.time,'UniformOutput',true));
-    slave.sampleinfo = [[0, s(1,end-1)]' + 1, s'];
+    slave.sampleinfo = [[0, s(1:(end-1))]' + 1, s'];
   end
   slave = ft_preprocessing(cfg,slave);
 end
