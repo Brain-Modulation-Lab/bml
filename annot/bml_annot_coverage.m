@@ -5,7 +5,7 @@ function coverage = bml_annot_coverage(cfg, numerator, denominator)
 %
 % Use as
 %   coverage = bml_annot_coverage(cfg, numerator, denominator);
-%  coverage = bml_annot_coverage(numerator, denominator)
+%   coverage = bml_annot_coverage(numerator, denominator);
 %
 % The first argument cfg is a optional configuration structure with
 % the following optional fields:

@@ -12,7 +12,7 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 %          global time coordinates. Can be string or char that matches a 
 %          variable of cfg.epoch, or a numeric vector of the same length than cfg.epoch
 % cfg.regularize - if true, resulting times are forced to be equal.
-%          Defaults to false
+%          Defaults to false. [NOT IMPLEMENTED]
 % cfg.warn - logical indicating if warnings should be issued. Defaults to true
 %
 % returns a raw with new trials. The epoch ANNOT is added as a new field in the 
@@ -24,7 +24,7 @@ regularize = bml_getopt(cfg,'regularize',false);
 warn       = bml_getopt(cfg,'warn',true);
 
 if regularize
-  keyboard %have to implement this
+  error('regularize not implemented')
 end
 
 if ~isempty(t0)
