@@ -6,9 +6,12 @@ function annot = bml_raw2annot(cfg, raw)
 %   annot = bml_raw2annot(raw)
 %   annot = bml_raw2annot(cfg, raw)
 %
-% cfg.per_label = bool, defults to false. If true, a row for every label
-%   and every trial will be created, and the variable 'label' will be
-%   included in the output
+% cfg.label_colname = string indicating name of column with labels. If
+%   empty (default) a single row is returned per trial. If  
+%   label_colname is given, a row is returned for each label of each trial,
+%   with the label specified in column 'label_colname'.
+% cfg.per_label = bool, defults to false. If true, label_colname is set to
+%   'label'. Deprecated, use 'label_colname' instead. 
 %
 % raw - FT_DATATYPE_RAW
 %
@@ -38,8 +41,16 @@ else
 end
 
 per_label = bml_getopt(cfg,'per_label',false);
-
 if per_label
+	label_colname = 'label';
+else
+  label_colname = [];
+end
+label_colname = bml_getopt(cfg,'label_colname',label_colname);
+
+
+
+if ~isempty(label_colname)
   labels = raw.label;
 else
   labels = {'roi'};
@@ -71,7 +82,10 @@ for l=1:numel(labels)
   annot = [annot; annot_l];
 end
 
-if ~per_label
+if isempty(label_colname)
+  annot.label = [];
+elseif ~strcmp(label_colname,'label')
+  annot.(label_colname{1}) = annot.label;
   annot.label = [];
 end
 

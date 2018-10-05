@@ -153,15 +153,20 @@ collapsed = table(...
 vars = setdiff(merge_s.Properties.VariableNames,[collapsed.Properties.VariableNames,additive]);
 row=[];
 for i=1:length(vars)
-  uval = unique(merge_s.(vars{i}));
-  if length(uval)==1
-    row.(vars{i}) = uval;
-  elseif iscell(uval)
-    row.(vars{i}) = {[]};   
-  elseif isa(uval,'datetime')
-    row.(vars{i}) = NaT;
+  merge_s_var_i = merge_s.(vars{i});
+  if iscell(merge_s_var_i) && numel(merge_s_var_i)==1 && isempty(merge_s_var_i{1})
+    row.(vars{i}) = {[]};
   else
-    row.(vars{i}) = nan;
+    uval = unique(merge_s_var_i);
+    if length(uval)==1
+      row.(vars{i}) = uval;
+    elseif iscell(uval)
+      row.(vars{i}) = {[]};   
+    elseif isa(uval,'datetime')
+      row.(vars{i}) = NaT;
+    else
+      row.(vars{i}) = nan;
+    end
   end
 end
 
