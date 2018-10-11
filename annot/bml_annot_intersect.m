@@ -110,14 +110,21 @@ for g=1:numel(groups)
     y_g = y(y{:,groupby_y}==groups{g},:);   
   end
 
+  %optimizing for special cases
+  if isempty(y_g); continue; end
+	if height(y_g)==1
+    ovlp_y = false;
+    x_g = x_g(x_g.ends > y_g.starts(1) & x_g.starts < y_g.ends(1),:);
+  else
+    ovlp_y = ~isempty(bml_annot_overlap(y_g));
+    if ovlp_y; error('''y'' has overlaps for group %s',groups(g)); end 
+  end
+	if isempty(x_g); continue; end
   ovlp_x = ~isempty(bml_annot_overlap(x_g));
-  ovlp_y = ~isempty(bml_annot_overlap(y_g));
-  if ovlp_y; error('''y'' has overlaps for group %s',groups(g)); end
-
+  
   i=1; j=1;
   annot_g = cell2table(cell(0,5)); 
   annot_g.Properties.VariableNames = {'starts','ends',xidn,yidn,groupby_x{1}};
-
   if ovlp_x
     while i<=height(x_g) && j<=height(y_g)
       if x_g.starts(i) < y_g.ends(j) && x_g.ends(i) > y_g.starts(j)

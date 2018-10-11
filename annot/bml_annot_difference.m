@@ -139,6 +139,7 @@ for g=1:numel(groups_x)
   end
   annot = [annot; annot_g];
 end
+if isempty(annot); return; end
 annot.Properties.VariableNames = {'starts','ends','x_id_',groupby_x{1}};
 annot = bml_annot_table(annot,description);
 if isempty(annot); return; end

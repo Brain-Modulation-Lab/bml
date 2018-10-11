@@ -30,7 +30,13 @@ else
 end
 annot.Properties.Description = 'annot';
 
-if isempty(annot)
+if isempty(annot) %optimization for empty filess
+  filtered = annot;
+  return
+end
+
+if overlap==0 && height(filter_annot)==1 %optimization for single row touch
+  filtered = annot(annot.starts < filter_annot.ends(1) & annot.ends > filter_annot.starts(1),:);
   return
 end
 
