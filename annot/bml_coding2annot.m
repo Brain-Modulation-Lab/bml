@@ -15,6 +15,8 @@ function annot = bml_coding2annot(cfg)
 %                        >'U01_v2'(default): UO1 coding after July 2018.
 %                                   Contains structured coding of errors
 %                        >'pilot': for coding of pilot data (DBS2000 series)
+% cfg.session_id       - integer, session id number for warnings and
+%                        session_id column of output table
 %
 % returns annot table with one row per trial (syllable triplet) 
 
