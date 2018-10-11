@@ -71,7 +71,7 @@ if isempty(AudioCoord) || praat
     
     fprintf('Calculating alignment between coding and roi audio\n');
     cfg1=[]; cfg1.method='lpf';
-    assert(sync_audio.fsample == Afs, 'roi''s Fs should be equivalent to Coding Audio Afs');      
+    assert(sync_audio.fsample == Afs, 'roi''s Fs=%f should be equivalent to Coding Audio Afs=%f',sync_audio.fsample,Afs);      
     [coding_audio_dt, max_corr] = bml_timealign(cfg1, sync_audio, coding_audio);
     
     AudioCoord.s1 = AudioCoord.s1 - round(coding_audio_dt*Afs);
@@ -133,6 +133,11 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     syl1_onset=bml_idx2time(AudioCoord,(onset_syl(1)+ti)*Afs); %in sfm
     syl2_onset=bml_idx2time(AudioCoord,(onset_syl(2)+ti)*Afs); %in sfm
     syl3_onset=bml_idx2time(AudioCoord,(onset_syl(3)+ti)*Afs); %in sfm
+    
+    if ~isnan(syl1_onset) && ~iscellstr(phonetic_code)
+      warning('Inconsistent phonetic coding (row 1) in trial %i of session %i',trial_id,session_id)
+      data_integrity = false;     
+    end
     
     %CodingMatrix row 4: Syl offset time  
     offset_syl = bml_strnumcell2ordvec(CodingMatrix{4,i}); %in Audio seconds
