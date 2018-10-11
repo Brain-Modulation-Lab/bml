@@ -10,7 +10,8 @@ function bml_sync_check(cfg)
 %            'filetype','sync_channel','sync_type','chunk_id'. Contains 
 %            a coarse alignment of the files, normally inferred from the
 %            OS 'Date-Modified' metadata.
-%   cfg.praat - logical: should synchronized files be opened in praat for
+%   cfg.praat - logical: should synchronized files be opened in praat.
+%           Defaults to true.
 %   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
 %           functions 
 

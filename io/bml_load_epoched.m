@@ -53,6 +53,7 @@ cfg.electrode = [];
 
 cfg_resample = [];
 if ~isempty(resamplefs)
+  cfg_resample.trackcallinfo=false;
   cfg_resample.resamplefs = resamplefs;
   cfg_resample.detrend = detrend;
   cfg_resample.demean = demean;
@@ -154,6 +155,8 @@ end
 
 cfg=[];
 cfg.appenddim = 'rpt';
+cfg.trackcallinfo = false;
+cfg.showcallinfo = 'no';
 raw = ft_appenddata(cfg, raw{:});
 
 if ~isempty(hdr)

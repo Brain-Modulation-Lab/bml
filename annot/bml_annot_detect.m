@@ -23,18 +23,24 @@ else
 end
 upper_threshold   = bml_getopt(cfg, 'upper_threshold', upper_threshold);
 lower_threshold   = bml_getopt(cfg, 'lower_threshold', lower_threshold);
+%parallel          = bml_getopt(cfg, 'parallel', 'no'); 
+%ToDo paralelize this
+
 assert(~isempty(upper_threshold) & ~isempty(lower_threshold),"cfg.threshold required");
 
 annot = table();
 for i=1:numel(env.trial)
-  
+  fprintf("\n");
+
   cfg1=[];
   cfg1.trials=i;
   cfg1.feedback='no';
+  cfg1.trackcallinfo=false;
   env_coord = bml_raw2coord(ft_selectdata(cfg1,env));
 
-	fprintf("\nDetecting trial %i, labels: \n",i);
+	fprintf("Detecting trial %i, labels: \n",i);
      
+  %ToDo: parallelize this
   for l=1:numel(env.label)
     label = env.label(l);
     fprintf("%s ",label{1});
@@ -53,7 +59,7 @@ for i=1:numel(env.trial)
     annot_l = table();
     while search_detect
       loop_count = loop_count + 1;
-      [env_max, env_max_ix] = max(env.trial{i}(l,:),[],2);       
+      [env_max, env_max_ix] = max(env.trial{i}(l,:),[],2,'omitnan');       
       assert(loop_count <= max_annots, "More annots detected than max_annots");
 
       if env_max > upper_threshold
@@ -93,5 +99,5 @@ for i=1:numel(env.trial)
     annot = [annot; annot_l];
   end
 end
-
+fprintf("\n");
 annot = bml_annot_table(annot);

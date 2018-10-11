@@ -11,11 +11,17 @@ function annot = bml_annot_intersect(cfg, x, y)
 % the following optional fields:
 %
 % cfg.keep - string: 'x','y','none' or 'both'. Indicates which variables to keep
-%                         if 'both' (default), common variable names are prefixed
+%                         if 'both' (default), shared variable names are prefixed
 %                         with the table's description. 
 % cfg.description - string: description of output annotation
 % cfg.warn - logical: indicates if warnings should be issue if variables
 %           are overwriten
+% cfg.groupby - string: indicates variable name by which to group the rows
+%           before intersecting. Variable has to be present in x and y. If
+%           variable names are not the same in both tables, use
+%           cfg.grouby_x and cfg.groupby_y.
+% cfg.groupby_x - string: 'x' groupby variable name
+% cfg.groupby_y - string: 'y' groupby variable anme
 %
 % x, y - annot tables with fields 'starts' and 'ends'.
 %        'y' should have no overlapping annotations 
@@ -45,13 +51,17 @@ elseif nargin == 3
   x=bml_annot_table(x,[],inputname(2));
   y=bml_annot_table(y,[],inputname(3));
   description = ['intersect_' x.Properties.Description '_' y.Properties.Description];
-  description = ft_getopt(cfg,'description',description);
+  description = bml_getopt(cfg,'description',description);
 else
-  error('use as bml_annot_intersect(x, y)')
+  error('incorrect use of bml_annot_intersect')
 end
 
-keep = bml_getopt_single(cfg,'keep','both');
-warn = bml_getopt(cfg,'warn',true);
+keep      = bml_getopt_single(cfg,'keep','both');
+warn      = bml_getopt(cfg,'warn',true);
+groupby   = bml_getopt(cfg,'groupby',[]);
+groupby_x = bml_getopt(cfg,'groupby_x',groupby);
+groupby_y = bml_getopt(cfg,'groupby_y',groupby);
+
 
 if isempty(x.Properties.Description); x.Properties.Description = 'x'; end
 if isempty(y.Properties.Description); y.Properties.Description = 'y'; end
@@ -64,65 +74,113 @@ end
 xidn=[x.Properties.Description '_id'];
 yidn=[y.Properties.Description '_id'];
 
-ovlp_x = ~isempty(bml_annot_overlap(x));
-ovlp_y = ~isempty(bml_annot_overlap(y));
-if ovlp_y; error('''y'' has overlaps'); end
-
-i=1; j=1;
-annot = cell2table(cell(0,4)); 
-annot.Properties.VariableNames = {'starts','ends',xidn,yidn};
-
-if ovlp_x
-  while i<=height(x) && j<=height(y)
-    if x.starts(i) < y.ends(j) && x.ends(i) > y.starts(j)
-      annot = [annot;{...
-        max(x.starts(i),y.starts(j)),...
-        min(x.ends(i),y.ends(j)),...
-        x.id(i),...
-        y.id(j)}];
-      if x.ends(i) < y.ends(j) || j >= height(y)
-        i = i + 1;
-        j=1;
-      else
-        j = j + 1;
-      end
-    elseif x.ends(i) <= y.starts(j) || j >= height(y)
-      i=i+1;
-      j=1;
-    elseif x.starts(i) >= y.ends(j)
-      j=j+1;
-    else
-      error('Unsupported input annotations tables');
-    end
+%ToDo: allow grouping by several variables
+if isempty(groupby_x) && isempty(groupby_y)
+  x.groupby_=ones(height(x),1);
+  y.groupby_=ones(height(y),1);
+  groupby_x = {'groupby_'};
+  groupby_y = {'groupby_'};
+  groups={1};
+elseif ~isempty(groupby_x) && ~isempty(groupby_y)
+	if sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
+    error('groupby_x should match one (and only one) column of x');
   end
-else %no overlaps in x
-  while i<=height(x) && j<=height(y)
-    if x.starts(i) < y.ends(j) && x.ends(i) > y.starts(j)
-      annot = [annot;{...
-        max(x.starts(i),y.starts(j)),...
-        min(x.ends(i),y.ends(j)),...
-        x.id(i),...
-        y.id(j)}];
-      if x.ends(i) < y.ends(j)
-        i = i + 1;
-      else
-        j = j + 1;
-      end
-    elseif x.ends(i) <= y.starts(j)
-      i=i+1;
-    elseif x.starts(i) >= y.ends(j)
-      j=j+1;
-    else
-      error('Unsupported input annotations tables');
-    end
+	if sum(strcmp(y.Properties.VariableNames, groupby_y))~=1
+    error('groupby_y should match one (and only one) column of y');
   end
+  groups_x = unique(x{:,groupby_x});
+  groups_y = unique(y{:,groupby_y});
+  groups = intersect(groups_x,groups_y);
+  if isempty(groups)
+    annot = [];
+    return
+  end
+
+else
+  error('groupby_x and groupby_y should be both given or none at all')
 end
 
+annot = table();
+for g=1:numel(groups)
+  if iscellstr(groups(g))
+    x_g = x(strcmp(x{:,groupby_x},groups(g)),:);
+    y_g = y(strcmp(y{:,groupby_y},groups(g)),:);
+  else
+    x_g = x(x{:,groupby_x}==groups{g},:);   
+    y_g = y(y{:,groupby_y}==groups{g},:);   
+  end
+
+  %optimizing for special cases
+  if isempty(y_g); continue; end
+	if height(y_g)==1
+    ovlp_y = false;
+    x_g = x_g(x_g.ends > y_g.starts(1) & x_g.starts < y_g.ends(1),:);
+  else
+    ovlp_y = ~isempty(bml_annot_overlap(y_g));
+    if ovlp_y; error('''y'' has overlaps for group %s',groups(g)); end 
+  end
+	if isempty(x_g); continue; end
+  ovlp_x = ~isempty(bml_annot_overlap(x_g));
+  
+  i=1; j=1;
+  annot_g = cell2table(cell(0,5)); 
+  annot_g.Properties.VariableNames = {'starts','ends',xidn,yidn,groupby_x{1}};
+  if ovlp_x
+    while i<=height(x_g) && j<=height(y_g)
+      if x_g.starts(i) < y_g.ends(j) && x_g.ends(i) > y_g.starts(j)
+        annot_g = [annot_g;{...
+          max(x_g.starts(i),y_g.starts(j)),...
+          min(x_g.ends(i),y_g.ends(j)),...
+          x_g.id(i),...
+          y_g.id(j),...
+          groups{g}}];
+        if x_g.ends(i) < y_g.ends(j) || j >= height(y_g)
+          i = i + 1;
+          j=1;
+        else
+          j = j + 1;
+        end
+      elseif x_g.ends(i) <= y_g.starts(j) || j >= height(y_g)
+        i=i+1;
+        j=1;
+      elseif x_g.starts(i) >= y_g.ends(j)
+        j=j+1;
+      else
+        error('Unsupported input annotations tables');
+      end
+    end
+  else %no overlaps in x
+    while i<=height(x_g) && j<=height(y_g)
+      if x_g.starts(i) < y_g.ends(j) && x_g.ends(i) > y_g.starts(j)
+        annot_g = [annot_g;{...
+          max(x_g.starts(i),y_g.starts(j)),...
+          min(x_g.ends(i),y_g.ends(j)),...
+          x_g.id(i),...
+          y_g.id(j),...
+          groups{g}}];
+        if x_g.ends(i) < y_g.ends(j)
+          i = i + 1;
+        else
+          j = j + 1;
+        end
+      elseif x_g.ends(i) <= y_g.starts(j)
+        i=i+1;
+      elseif x_g.starts(i) >= y_g.ends(j)
+        j=j+1;
+      else
+        error('Unsupported input annotations tables');
+      end
+    end
+  end
+  annot = [annot; annot_g];
+end
 annot = bml_annot_table(annot,description);
 if isempty(annot); return; end
 
 x.starts=[]; x.ends=[]; % x.Properties.VariableNames{1}=xidn;
 y.starts=[]; y.ends=[]; % y.Properties.VariableNames{1}=yidn;
+if ~isempty(groupby_x); x.(groupby_x{1})=[]; end
+if ~isempty(groupby_y); y.(groupby_y{1})=[]; end
 
 switch keep
   case {'both','keepboth','keep both','keep_both'}
@@ -207,7 +265,9 @@ if ismember(keep,{'y','both'})
   annot=join(annot,y,'Keys',yidn);
 end
 
-
+if any(strcmp('groupby_',annot.Properties.VariableNames))
+  annot.groupby_ = [];
+end
 
 
 

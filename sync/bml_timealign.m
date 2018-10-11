@@ -106,9 +106,13 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   %common resample frequency
   cfg=[]; cfg.feedback=ft_feedback;
   cfg.resamplefs=resample_freq;
+  cfg.trackcallinfo=false;
+  cfg.showcallinfo='no';
   master = ft_resampledata(cfg, master);
   cfg=[]; cfg.feedback=ft_feedback;
   cfg.time=master.time; cfg.method='linear';
+  cfg.trackcallinfo=false;
+  cfg.showcallinfo='no';
   slave = ft_resampledata(cfg, slave);
 
   %checking slave resampling

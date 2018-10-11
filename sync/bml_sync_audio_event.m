@@ -63,9 +63,6 @@ for i=1:height(roi)
     i_slave_events.value = repmat(1,[height(i_slave_events),1]);
     i_slave_events.sample = locs';
     
-    
-
-    
     %doing time alingment
     cfg=[]; 
     cfg.scan=scan; 

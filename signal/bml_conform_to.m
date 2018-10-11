@@ -81,12 +81,21 @@ if annot_slave.Fs(1) > 1.01 * annot_master.Fs(1) % 1% tolerance factor in freq c
   cfg.lpfiltdir = 'twopass'; %for zero lag
   cfg.lpinstabilityfix = 'no';
   cfg.lpfiltwintype = 'hamming';
+  cfg.trackcallinfo = false;
+  cfg.showcallinfo = 'no';
+  if ~isfield(slave,'sampleinfo')
+    %adding sample info if missing. Assuming contiguity.
+    s = cumsum(cellfun(@(x) size(x,2),slave.time,'UniformOutput',true));
+    slave.sampleinfo = [[0, s(1:(end-1))]' + 1, s'];
+  end
   slave = ft_preprocessing(cfg,slave);
 end
 
 %interpolating subset of slave trials to master times
 cfg=[]; cfg.time=sub_master_time; cfg.method='pchip';
 cfg.feedback='no';
+cfg.trackcallinfo = false;
+cfg.showcallinfo = 'no';
 sub_conformed=ft_resampledata(cfg,bml_crop(sub_slave,starts,ends));
 
 %adding empty slave trials if necessary
@@ -122,10 +131,3 @@ elseif ismember('fsample',fields(conformed))
   conformed = rmfield(conformed,'fsample');
 end
 
-
-
-
-
-% if ismember('hdr',fieldnames(master))
-%   conformed.hdr=master.hdr;
-% end

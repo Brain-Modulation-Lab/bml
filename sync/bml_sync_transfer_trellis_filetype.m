@@ -51,7 +51,7 @@ for i=1:height(sync_filetype_roi)
   [~,n,~]=fileparts(row.name{1});
   fn=fullfile(row.folder{1},[n,extension]);
   if ~exist(fn,'file')
-    warning("%s doesn't exist",fn);
+    warning("%s doesn't exist",fn)
   else
     hdr = ft_read_header(fn,'chantype',sync_chantype);
     
