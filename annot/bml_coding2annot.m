@@ -103,7 +103,12 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     
     %initial trial time in Audio seconds 
     ti = EventTimes(SkipEvents + i * EventsPerTrial);  
-    tf = EventTimes(SkipEvents + i * EventsPerTrial + 1);  
+    tf_idx = SkipEvents + i * EventsPerTrial + 1; 
+    if tf_idx <= length(EventTimes)
+      tf = EventTimes(tf_idx); 
+    else
+      rf = ti + 5;
+    end
     
     %CodingMatrix row 1: Phonetic code in latex
     phonetic_code=CodingMatrix(1,i);
