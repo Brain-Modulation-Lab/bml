@@ -59,8 +59,11 @@ dryrun        = bml_getopt(cfg,'dryrun',false);
 ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous = bml_getopt(cfg,'discontinuous','warn');
 padval        = bml_getopt(cfg,'padval',0);
-electrode     = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
 match_labels  = bml_getopt(cfg,'match_labels',true);
+
+electrode     = bml_getopt(cfg,'electrode',[]);
+if istable(electrode) && isempty(electrode); error('Empty electrode table'); end
+electrode     = bml_annot_table(electrode,'electrode');
 
 if isempty(roi)
   raw=[];

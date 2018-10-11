@@ -38,11 +38,14 @@ resamplefs    = bml_getopt(cfg,'resamplefs');
 detrend       = bml_getopt_single(cfg,'detrend','no');
 demean        = bml_getopt_single(cfg,'demean','no');
 feedback      = bml_getopt_single(cfg,'feedback','no');
-electrode     = bml_annot_table(bml_getopt(cfg,'electrode'),'electrode');
 relabel       = bml_getopt(cfg,'relabel');
 warn          = bml_getopt(cfg,'warn',true);
 allow_missing = bml_getopt(cfg,'allow_missing',false);
 load_empty    = bml_getopt(cfg,'load_empty',true);
+
+electrode     = bml_getopt(cfg,'electrode',[]);
+if istable(electrode) && isempty(electrode); error('Empty electrode table'); end
+electrode     = bml_annot_table(electrode,'electrode');
 
 cfg.roi = [];
 cfg.epoch = [];
