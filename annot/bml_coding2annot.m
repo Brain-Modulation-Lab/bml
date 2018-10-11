@@ -107,7 +107,7 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     if tf_idx <= length(EventTimes)
       tf = EventTimes(tf_idx); 
     else
-      rf = ti + 5;
+      tf = ti + 5;
     end
     
     %CodingMatrix row 1: Phonetic code in latex
@@ -123,10 +123,13 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
 
     %CodingMatrix row 3: Syl onset time
     onset_syl=bml_strnumcell2ordvec(CodingMatrix{3,i}); %in Audio seconds
+    empty_syl = false;
     if length(onset_syl) ~= 3 
       if ~isempty(onset_syl) 
         warning('Inconsistent syl onset times (row 3) in trial %i of session %i',trial_id,session_id)
         data_integrity = false;
+      else
+        empty_syl = true;
       end
       onset_syl = default_nan3(onset_syl);
     end    
@@ -179,7 +182,7 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     %CodingMatrix row 5: Vowel onset time
     onset_vowel=bml_strnumcell2ordvec(CodingMatrix{5,i}); %in Audio seconds
     if length(onset_vowel) ~= 3
-      if ~isempty(onset_vowel)
+      if ~(isempty(onset_vowel) && empty_syl)
         warning('Inconsistent vowel onset time (row 5) in trial %i of session %i',trial_id,session_id)
         data_integrity = false;
       end
@@ -289,47 +292,76 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     
     %CodingMatrix row 13: Note for current trial
     row13=CodingMatrix{13,i};
-    comment = default_str(row13(1,1));
-    
-    %mapping non-task codes to strings
-    nt_code = [1,      2,                  3,          4,                 5,                6];
-    nt_str = {'none', 'beeping-constant', 'OR-noise', 'provider-speech', 'patient-speech', 'patient-non-speech'};
-  
-    nontask1_pre_type=bml_map(row13{2,1}(1),nt_code,nt_str);
-    nontask2_post_type=bml_map(row13{2,1}(2),nt_code,nt_str);
-    nontask3_other_type=bml_map(row13{2,1}(3),nt_code,nt_str);
-    nontask4_other_type=bml_map(row13{2,1}(4),nt_code,nt_str);
-    nontask5_other_type=bml_map(row13{2,1}(5),nt_code,nt_str);
+    if ~iscell(row13) || ~(size(row13,1)==2 && size(row13,2)==1)
+      warning('Inconsistent nontask event description (row 13) in trial %i of session %i',trial_id,session_id)
+      data_integrity = false;
+      comment = {'row13 invalid'};
+      nontask1_pre_type={nan};
+      nontask2_post_type={nan};
+      nontask3_other_type={nan};
+      nontask4_other_type={nan};
+      nontask5_other_type={nan};
+    else    
+      comment = default_str(row13(1,1));
+
+      %mapping non-task codes to strings
+      nt_code = [1,      2,                  3,          4,                 5,                6];
+      nt_str = {'none', 'beeping-constant', 'OR-noise', 'provider-speech', 'patient-speech', 'patient-non-speech'};
+
+      nontask1_pre_type=bml_map(row13{2,1}(1),nt_code,nt_str);
+      nontask2_post_type=bml_map(row13{2,1}(2),nt_code,nt_str);
+      nontask3_other_type=bml_map(row13{2,1}(3),nt_code,nt_str);
+      nontask4_other_type=bml_map(row13{2,1}(4),nt_code,nt_str);
+      nontask5_other_type=bml_map(row13{2,1}(5),nt_code,nt_str);
+    end  
     
     %CodingMatrix row 14: Stressors binary
     row14=CodingMatrix{14,i};
+    if ~isnumeric(row14) || iscell(row14) || ~(size(row14,1)==5 && size(row14,2)==3)
+      warning('Inconsistent speech specification (row 14) in trial %i of session %i',trial_id,session_id)
+      syl1_stress={nan};
+      syl2_stress={nan}; 
+      syl3_stress={nan};
+      syl1_consonant_accuracy={nan};
+      syl2_consonant_accuracy={nan};
+      syl3_consonant_accuracy={nan};
+      syl1_vowel_accuracy={nan};
+      syl2_vowel_accuracy={nan};
+      syl3_vowel_accuracy={nan};
+      syl1_consonant_disorder={nan};
+      syl2_consonant_disorder={nan};
+      syl3_consonant_disorder={nan};
+      syl1_vowel_disorder={nan};
+      syl2_vowel_disorder={nan};
+      syl3_vowel_disorder={nan};
+    else
+      stressor_code = [0,1];
+      stressor_str  = {'not-stressed', 'stressed'};
+      syl1_stress = bml_map(row14(1,1),stressor_code,stressor_str);
+      syl2_stress = bml_map(row14(1,2),stressor_code,stressor_str);    
+      syl3_stress = bml_map(row14(1,3),stressor_code,stressor_str);    
+
+      accuracy_code = [0,1];
+      accuracy_str  = {'accurate', 'inaccurate'};
+      syl1_consonant_accuracy = bml_map(row14(2,1),accuracy_code,accuracy_str);
+      syl2_consonant_accuracy = bml_map(row14(2,2),accuracy_code,accuracy_str);    
+      syl3_consonant_accuracy = bml_map(row14(2,3),accuracy_code,accuracy_str);    
+
+      syl1_vowel_accuracy = bml_map(row14(3,1),accuracy_code,accuracy_str);
+      syl2_vowel_accuracy = bml_map(row14(3,2),accuracy_code,accuracy_str);    
+      syl3_vowel_accuracy = bml_map(row14(3,3),accuracy_code,accuracy_str);    
+
+      disorder_code = [1,       2,         3,           4,           5,                6,            7,        8,        9,         10,             11,           12];
+      disorder_str  = {'none', 'missing', 'distorted', 'imprecise', 'spirantization', 'dysfluency', 'creaky', 'tremor', 'breathy', 'hoarse-harsh', 'voice-break','strain'}; 
+      syl1_consonant_disorder = bml_map(row14(4,1),disorder_code,disorder_str);
+      syl2_consonant_disorder = bml_map(row14(4,2),disorder_code,disorder_str);    
+      syl3_consonant_disorder = bml_map(row14(4,3),disorder_code,disorder_str); 
+
+      syl1_vowel_disorder = bml_map(row14(5,1),disorder_code,disorder_str);
+      syl2_vowel_disorder = bml_map(row14(5,2),disorder_code,disorder_str);    
+      syl3_vowel_disorder = bml_map(row14(5,3),disorder_code,disorder_str);  
+    end
     
-    stressor_code = [0,1];
-    stressor_str  = {'not-stressed', 'stressed'};
-    syl1_stress = bml_map(row14(1,1),stressor_code,stressor_str);
-    syl2_stress = bml_map(row14(1,2),stressor_code,stressor_str);    
-    syl3_stress = bml_map(row14(1,3),stressor_code,stressor_str);    
-    
-    accuracy_code = [0,1];
-    accuracy_str  = {'accurate', 'inaccurate'};
-    syl1_consonant_accuracy = bml_map(row14(2,1),accuracy_code,accuracy_str);
-    syl2_consonant_accuracy = bml_map(row14(2,2),accuracy_code,accuracy_str);    
-    syl3_consonant_accuracy = bml_map(row14(2,3),accuracy_code,accuracy_str);    
-    
-    syl1_vowel_accuracy = bml_map(row14(3,1),accuracy_code,accuracy_str);
-    syl2_vowel_accuracy = bml_map(row14(3,2),accuracy_code,accuracy_str);    
-    syl3_vowel_accuracy = bml_map(row14(3,3),accuracy_code,accuracy_str);    
-    
-    disorder_code = [1,       2,         3,           4,           5,                6,            7,        8,        9,         10,             11,           12];
-    disorder_str  = {'none', 'missing', 'distorted', 'imprecise', 'spirantization', 'dysfluency', 'creaky', 'tremor', 'breathy', 'hoarse-harsh', 'voice-break','strain'}; 
-    syl1_consonant_disorder = bml_map(row14(4,1),disorder_code,disorder_str);
-    syl2_consonant_disorder = bml_map(row14(4,2),disorder_code,disorder_str);    
-    syl3_consonant_disorder = bml_map(row14(4,3),disorder_code,disorder_str); 
-    
-    syl1_vowel_disorder = bml_map(row14(5,1),disorder_code,disorder_str);
-    syl2_vowel_disorder = bml_map(row14(5,2),disorder_code,disorder_str);    
-    syl3_vowel_disorder = bml_map(row14(5,3),disorder_code,disorder_str);  
-   
     cue_triplet = WordList(i);
 
     starts = bml_idx2time(AudioCoord, ti * Afs);
