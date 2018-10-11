@@ -315,8 +315,8 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     syl2_vowel_accuracy = bml_map(row14(3,2),accuracy_code,accuracy_str);    
     syl3_vowel_accuracy = bml_map(row14(3,3),accuracy_code,accuracy_str);    
     
-    disorder_code = [1,       2,         3,           4,           5,                6,            7,        8,        9,         10,             11];
-    disorder_str  = {'none', 'missing', 'distorted', 'imprecise', 'spirantization', 'dysfluency', 'creaky', 'tremor', 'breathy', 'hoarse-harsh', 'voice-break'}; 
+    disorder_code = [1,       2,         3,           4,           5,                6,            7,        8,        9,         10,             11,           12];
+    disorder_str  = {'none', 'missing', 'distorted', 'imprecise', 'spirantization', 'dysfluency', 'creaky', 'tremor', 'breathy', 'hoarse-harsh', 'voice-break','strain'}; 
     syl1_consonant_disorder = bml_map(row14(4,1),disorder_code,disorder_str);
     syl2_consonant_disorder = bml_map(row14(4,2),disorder_code,disorder_str);    
     syl3_consonant_disorder = bml_map(row14(4,3),disorder_code,disorder_str); 
