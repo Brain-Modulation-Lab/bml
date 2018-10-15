@@ -16,6 +16,7 @@ function coverage = bml_annot_coverage(cfg, x, y)
 %   (default), all rows of x are considered in the same group. 
 % cfg.groupby_y - cellstr indicating grouping columns of y (denominator). If empty
 %   (default), all rows of y are considered for all groups of x.
+% cfg.colname - str, name of output column. Defaults to 'coverage'
 %
 % x, y - annot tables with fields 'starts' and 'ends'.
 %
@@ -32,10 +33,11 @@ elseif nargin ~= 3
   error('incorrect use of bml_annot_coverage. See help.');
 end
 
-groupby             = bml_getopt(cfg,'groupby',[]);
-groupby_x   =  bml_getopt(cfg,'groupby_numerator',groupby);
-groupby_y =  bml_getopt(cfg,'groupby_denominator',...
+groupby    = bml_getopt(cfg,'groupby',[]);
+groupby_x  = bml_getopt(cfg,'groupby_numerator',groupby);
+groupby_y  = bml_getopt(cfg,'groupby_denominator',...
                 intersect(groupby, y.Properties.VariableNames));
+coverage_colname = bml_getopt_single(cfg,'colname','coverage');
 
 %ToDo: allow grouping by several variables
 if isempty(groupby_y)
@@ -65,9 +67,9 @@ else
   end
 end
 
-coverage = cell(numel(groups) .* height(y) ,width(y) + 2);
-idx=1;
 width_y = width(y);
+coverage = cell(numel(groups) .* height(y) ,width_y + 2);
+idx=1;
 for g=1:numel(groups)
   if iscellstr(groups(g))
     x_g = x(strcmp(x{:,groupby_x},groups(g)),:);
@@ -85,25 +87,26 @@ for g=1:numel(groups)
     end
   end
   if ~isempty(x_g)
-    x_g = sortrows(x_g,'starts');
+    %x_g = sortrows(x_g,'starts');
     for j=1:height(y_g)
       i=1;
       t=y_g.starts(j);
       cvg=0;
       while i <= height(x_g) && t < y_g.ends(j)
         if x_g.starts(i) < y_g.ends(j) && x_g.ends(i) > t
-            s=max(x_g.starts(i),t);
-            e=min(x_g.ends(i),y_g.ends(j));
-            cvg=cvg+e-s;
-            t=e;
+          s=max(x_g.starts(i),t);
+          e=min(x_g.ends(i),y_g.ends(j));
+          cvg=cvg+e-s;
+          t=e;
           if e < y_g.ends(j)
             i = i + 1;
           end
-        elseif x_g.ends(i) <= y_g.starts(j)
+        elseif x_g.ends(i) <= t
           i=i+1;
         elseif x_g.starts(i) >= y_g.ends(j)
           break
         else
+          keyboard
           error('error in bml_annot_coverage');
         end
       end
@@ -120,9 +123,11 @@ for g=1:numel(groups)
   end
 end
 
-coverage = cell2table(coverage);
-coverage.Properties.VariableNames = [y.Properties.VariableNames,groupby_x,'coverage'];
-
+coverage = cell2table(coverage(1:(idx-1),:));
+if ismember(groupby_x,y.Properties.VariableNames)
+  groupby_x = {'groupby_'};
+end
+coverage.Properties.VariableNames = [y.Properties.VariableNames,groupby_x,coverage_colname];
 if any(strcmp('groupby_',coverage.Properties.VariableNames))
   coverage.groupby_ = [];
 end
