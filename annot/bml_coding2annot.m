@@ -17,6 +17,8 @@ function annot = bml_coding2annot(cfg)
 %                        >'pilot': for coding of pilot data (DBS2000 series)
 % cfg.session_id       - integer, session id number for warnings and
 %                        session_id column of output table
+% cfg.diary_filename   - str, name of file to save all output, including
+%                        warnings. Defaults to empty
 %
 % returns annot table with one row per trial (syllable triplet) 
 
@@ -43,6 +45,15 @@ AudioCoord       = bml_getopt(cfg,'warpcoords');
 praat            = bml_getopt(cfg,'praat');
 audio_channel    = bml_getopt(cfg,'audio_channel');
 session_id       = bml_getopt(cfg,'session_id',nan);
+diary_filename   = bml_getopt_single(cfg,'diary_filename',[]);
+
+if ~isempty(diary_filename)
+  diary(diary_filename);
+end
+
+if ~isnan(session_id)
+  fprintf('\n - Extracting coding from session %i - \n\n ',session_id)  
+end
 
 if isempty(AudioCoord) || praat
   %loading sychronized audio to get the time-mapping
@@ -78,7 +89,7 @@ if isempty(AudioCoord) || praat
     AudioCoord.s2 = AudioCoord.s2 - round(coding_audio_dt*Afs);
     
     if max_corr < 0.95
-      warning('max_cor = %f should be near 1. Check in Praat if alignment is correct.', max_corr)
+      fprintf('Warning: max_cor = %f should be near 1. Check in Praat if alignment is correct.\n', max_corr)
     end    
   end
   if praat
@@ -93,7 +104,7 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
   EventsPerTrial   = bml_getopt(cfg,'EventsPerTrial',3);
   N_trials = size(CodingMatrix,2);
 	if SkipEvents + N_trials * EventsPerTrial > length(EventTimes)
-    warning("Less EventTimes than expected based on CodingMatrix.");
+    fprintf('Warning: Less EventTimes than expected based on CodingMatrix.\n');
     N_trials = floor((length(EventTimes) - SkipEvents)/EventsPerTrial);
   end
   for i=1:N_trials
@@ -123,13 +134,11 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
 
     %CodingMatrix row 3: Syl onset time
     onset_syl=bml_strnumcell2ordvec(CodingMatrix{3,i}); %in Audio seconds
-    empty_syl = false;
+    empty_syl = isempty(onset_syl);
     if length(onset_syl) ~= 3 
-      if ~isempty(onset_syl) 
-        warning('Inconsistent syl onset times (row 3) in trial %i of session %i',trial_id,session_id)
+      if ~empty_syl || ~ismissing(phonetic_code{1})
+        fprintf('Warning[01] number of syllable onsets is different from 3 in trial %i of session %i \n',trial_id,session_id)
         data_integrity = false;
-      else
-        empty_syl = true;
       end
       onset_syl = default_nan3(onset_syl);
     end    
@@ -138,154 +147,197 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     syl3_onset=bml_idx2time(AudioCoord,(onset_syl(3)+ti)*Afs); %in sfm
     
     if ~isnan(syl1_onset) && ~iscellstr(phonetic_code)
-      warning('Inconsistent phonetic coding (row 1) in trial %i of session %i',trial_id,session_id)
+      fprintf('Warning[02] phonetic coding is missing but syllable onsets are present in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;     
     end
     
     %CodingMatrix row 4: Syl offset time  
-    offset_syl = bml_strnumcell2ordvec(CodingMatrix{4,i}); %in Audio seconds
-    if isempty(offset_syl)
-      offset_syl = nan;
-    end
-    row4_warn = false;
-    %completing missing offsets
-    if length(offset_syl)==length(onset_syl)
-      offset_syl_complete = offset_syl;
-    else
-      offset_syl_complete = zeros(1,length(onset_syl));
-      onset_syl_inf = [onset_syl inf];
-      j=1; %offset_syl counter
-      for k=1:(length(onset_syl))
-        if j <= length(offset_syl) 
-          if offset_syl(j) <= onset_syl_inf(k+1)
-            offset_syl_complete(k) = offset_syl(j);
-            j = j + 1;
-          else
-            offset_syl_complete(k) = onset_syl_inf(k+1);
-            offset_syl_coded(k) = 0;
-          end
-        else
-          offset_syl_complete(k) = NaN;        
-          if ~row4_warn
-            warning('Inconsistent syl offset times (row 4) in trial %i of session %i',trial_id,session_id)
-            row4_warn = true;
-          end
-          data_integrity = false;
+    offset_syl = default_nan(bml_strnumcell2ordvec(CodingMatrix{4,i})); %in Audio seconds
+    offset_syl_complete = nan(1,length(onset_syl));
+    if ~empty_syl
+      for j=1:length(onset_syl)
+        if j<length(onset_syl) && ~isnan(onset_syl(j+1))
+          curr_syl_offset = offset_syl(offset_syl > onset_syl(j) & offset_syl <= onset_syl(j+1));
+        else %last syl
+          curr_syl_offset = offset_syl(offset_syl > onset_syl(j));          
+        end
+        if length(curr_syl_offset)>1
+          fprintf('Warning[05] syllable %i has more than one offset in trial %i of session %i\n',j,trial_id,session_id)
+          data_integrity = false;  
+          offset_syl_complete(j) = curr_syl_offset(1);
+        elseif length(curr_syl_offset)==1
+          offset_syl_complete(j) = curr_syl_offset(1);          
+        else %no current syl offset
+          if j < length(onset_syl)
+            offset_syl_complete(j) = onset_syl(j+1); 
+          elseif ~isnan(onset_syl(j)) %last syl onset
+            fprintf('Warning[04] last syllable has no offset in trial %i of session %i\n',trial_id,session_id)
+            data_integrity = false;  
+            offset_syl_complete(j) = nan;
+          end         
         end
       end
+    else %empty syl
+      if ~all(ismissing(offset_syl))
+        fprintf('Warning[03] syllable offsets are present but no syllable onsets are given in trial %i of session %i\n',trial_id,session_id)
+        data_integrity = false;         
+      end
+      offset_syl_complete = nan(1,length(onset_syl));
     end
-    offset_syl_complete(~isfinite(offset_syl_complete))=nan;
     syl1_offset=bml_idx2time(AudioCoord,(offset_syl_complete(1)+ti) * Afs);%in sfm
     syl2_offset=bml_idx2time(AudioCoord,(offset_syl_complete(2)+ti) * Afs);%in sfm
     syl3_offset=bml_idx2time(AudioCoord,(offset_syl_complete(3)+ti) * Afs);%in sfm
 
     %CodingMatrix row 5: Vowel onset time
     onset_vowel=bml_strnumcell2ordvec(CodingMatrix{5,i}); %in Audio seconds
-    if length(onset_vowel) ~= 3
-      if ~(isempty(onset_vowel) && empty_syl)
-        warning('Inconsistent vowel onset time (row 5) in trial %i of session %i',trial_id,session_id)
-        data_integrity = false;
+    onset_vowel_complete = nan(1,length(onset_syl));
+    if ~empty_syl
+      %checking for vowel onsets outside syllables
+      if isectopic(onset_vowel,onset_syl,offset_syl_complete)
+        fprintf('Warning[08] vowel onset(s) outside syllable in trial %i of session %i\n',trial_id,session_id)
+        data_integrity = false;         
       end
-      onset_vowel = default_nan3(onset_vowel);
-    end  
-    syl1_vowel_onset=bml_idx2time(AudioCoord,(onset_vowel(1)+ti) * Afs);
-    syl2_vowel_onset=bml_idx2time(AudioCoord,(onset_vowel(2)+ti) * Afs);
-    syl3_vowel_onset=bml_idx2time(AudioCoord,(onset_vowel(3)+ti) * Afs);
-
-    %CodingMatrix row 6: Vowel offsets, not coded
-    offset_vowel = bml_strnumcell2ordvec(CodingMatrix{6,i}); %in Audio seconds
-    if isempty(offset_vowel)
-      offset_vowel_complete = offset_syl_complete;
-    elseif length(offset_vowel) == 3
-      offset_vowel_complete = offset_vowel;
-    elseif length(offset_vowel) < 3
-      offset_vowel_complete = nan(1,3);
-      %figuring out to what syllable each element corresponds to
-      j=1;
-      k=1;
-      while k<=3
-        if j > length(offset_vowel) || offset_vowel(j) > offset_syl_complete(k)
-          offset_vowel_complete(k)=offset_syl_complete(k); 
-        else  
-          offset_vowel_complete(k)=offset_vowel(j);
-          j=j+1;
+      %assigning vowel onsets to syllables
+      for j=1:length(onset_syl)
+        curr_onset_vowel = onset_vowel(onset_vowel >= onset_syl(j) & onset_vowel < offset_syl_complete(j));
+        if length(curr_onset_vowel)>1
+          fprintf('Warning[06] syllable %i has more than one vowel onset in trial %i of session %i\n',j,trial_id,session_id)
+          data_integrity = false;  
+          onset_vowel_complete(j) = curr_onset_vowel(1);
+        elseif length(curr_onset_vowel)==1
+          onset_vowel_complete(j) = curr_onset_vowel(1);          
+        else %no current vowel onset, assuming syl onset for vowel
+          onset_vowel_complete(j) = onset_syl(j); 
         end
-        k=k+1;
       end
-    else
-      warning('Inconsistent vowel offset time (row 6) in trial %i of session %i',trial_id,session_id)
-      offset_vowel_complete = nan(1,3);
-      data_integrity = false;
-    end    
+    else %empty syl
+      if ~all(ismissing(onset_vowel))
+        fprintf('Warning[07] vowel onset(s) are present but no syllable onsets are given in trial %i of session %i\n',trial_id,session_id)
+        data_integrity = false;         
+      end
+      onset_vowel_complete = nan(1,length(onset_syl));
+    end
+    syl1_vowel_onset=bml_idx2time(AudioCoord,(onset_vowel_complete(1)+ti) * Afs);
+    syl2_vowel_onset=bml_idx2time(AudioCoord,(onset_vowel_complete(2)+ti) * Afs);
+    syl3_vowel_onset=bml_idx2time(AudioCoord,(onset_vowel_complete(3)+ti) * Afs);
+
+    %CodingMatrix row 6: Vowel offsets
+    offset_vowel = bml_strnumcell2ordvec(CodingMatrix{6,i}); %in Audio seconds
+    offset_vowel_complete = nan(1,length(onset_syl));
+    if ~empty_syl
+      %checking for vowel offsets outside syllables
+      if isectopic(offset_vowel,onset_syl,offset_syl_complete)
+        fprintf('Warning[11] vowel offset(s) outside syllable in trial %i of session %i\n',trial_id,session_id)
+        data_integrity = false;         
+      end
+      %assigning vowel offsets to syllables
+      for j=1:length(onset_syl)
+        curr_offset_vowel = offset_vowel(offset_vowel > onset_syl(j) & offset_vowel <= offset_syl_complete(j));
+        if length(curr_offset_vowel)>1
+          fprintf('Warning[09] syllable %i has more than one vowel offset in trial %i of session %i\n',j,trial_id,session_id)
+          data_integrity = false;  
+          offset_vowel_complete(j) = curr_offset_vowel(1);
+        elseif length(curr_offset_vowel)==1
+          offset_vowel_complete(j) = curr_offset_vowel(1);          
+        else %no current vowel onset, assuming syl onset for vowel
+          offset_vowel_complete(j) = offset_syl_complete(j); 
+        end
+      end
+    else %empty syl
+      if ~all(ismissing(offset_vowel))
+        fprintf('Warning[10] vowel offset(s) are present but no syllable onsets are given in trial %i of session %i\n',trial_id,session_id)
+        data_integrity = false;         
+      end
+      offset_vowel_complete = nan(1,length(onset_syl));
+    end 
     syl1_vowel_offset=bml_idx2time(AudioCoord,(offset_vowel_complete(1)+ti) * Afs);%in sfm
     syl2_vowel_offset=bml_idx2time(AudioCoord,(offset_vowel_complete(2)+ti) * Afs);%in sfm
     syl3_vowel_offset=bml_idx2time(AudioCoord,(offset_vowel_complete(3)+ti) * Afs);%in sfm
 
     %CodingMatrix row 7: Preword onset times
     nontask1_pre_onset = default_nan(bml_strnumcell2ordvec(CodingMatrix{7,i})); %in Audio seconds
-    nontask1_pre_onset = bml_idx2time(AudioCoord,(nontask1_pre_onset+ti) * Afs);
-    if length(nontask1_pre_onset) ~= 1
-      warning('Inconsistent preword onset times (row 7) in trial %i of session %i',trial_id,session_id)
+    if length(nontask1_pre_onset) > 1
+      fprintf('Warning[12] more than one Pre onset time given in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;
       nontask1_pre_onset = nontask1_pre_onset(1);
     end
+    if ~isnan(nontask1_pre_onset) && nontask1_pre_onset >= onset_syl(1)
+      fprintf('Warning[13] Pre event onset after first syllable onset in trial %i of session %i\n',trial_id,session_id)
+      data_integrity = false;
+    end
+    nontask1_pre_onset = bml_idx2time(AudioCoord,(nontask1_pre_onset+ti) * Afs);
     
     %CodingMatrix row 8: Preword offset times
     nontask1_pre_offset = default_nan(bml_strnumcell2ordvec(CodingMatrix{8,i})); %in Audio seconds
-    nontask1_pre_offset = bml_idx2time(AudioCoord,(nontask1_pre_offset+ti) * Afs);
-    if length(nontask1_pre_offset) ~= 1
-      warning('Inconsistent preword offset times (row 8) in trial %i of session %i',trial_id,session_id)
+    if ~isnan(nontask1_pre_offset) || length(nontask1_pre_offset) > 1
+      fprintf('Warning[14] Pre event offset(s) present when none expected in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;
       nontask1_pre_offset = nontask1_pre_offset(1);
-    end
-    
-    if ~isnan(nontask1_pre_onset) && isnan(nontask1_pre_offset)
-      nontask1_pre_offset = syl1_onset;
-    end
-    
+    else %asigning Pre offse to first syl onset
+      nontask1_pre_offset = onset_syl(1);
+    end  
+    nontask1_pre_offset = bml_idx2time(AudioCoord,(nontask1_pre_offset+ti) * Afs);
+
     %CodingMatrix row 9: Post word onset times
     nontask2_post_onset = default_nan(bml_strnumcell2ordvec(CodingMatrix{9,i})); %in Audio seconds
-    nontask2_post_onset = bml_idx2time(AudioCoord,(nontask2_post_onset+ti) * Afs);
-    if length(nontask2_post_onset) ~= 1
-      warning('Inconsistent postword onset times (row 9) in trial %i of session %i',trial_id,session_id)
+    if ~isnan(nontask2_post_onset) || length(nontask2_post_onset) > 1
+      fprintf('Warning[15] Post event onset(s) present when none expected in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;
       nontask2_post_onset = nontask2_post_onset(1);
-    end    
-    
+    else %asigning post onset to last syl offset
+      nontask2_post_onset = offset_syl_complete(end);
+    end      
+    nontask2_post_onset = bml_idx2time(AudioCoord,(nontask2_post_onset+ti) * Afs);
+
     %CodingMatrix row 10: Post word offset times
     nontask2_post_offset = default_nan(bml_strnumcell2ordvec(CodingMatrix{10,i})); %in Audio seconds
-    nontask2_post_offset = bml_idx2time(AudioCoord,(nontask2_post_offset+ti) * Afs);
-    if length(nontask2_post_offset) ~= 1
-      warning('Inconsistent postword offset times (row 10) in trial %i of session %i',trial_id,session_id)
+    if length(nontask2_post_offset) > 1
+      fprintf('Warning[16] more than one Post event offset time given in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;
       nontask2_post_offset = nontask2_post_offset(1);
-    end   
-    
-    %TP: If no corresponding onset time, post-task event is connected to start of last
-    %syllable. Further described by index 2 of non-task identifier array in
-    %CodingMatrix{13,j}{2,1}.
-    if ~isnan(nontask2_post_offset) && isnan(nontask2_post_onset)
-      nontask2_post_onset = syl3_offset;
     end
+    if ~isnan(nontask2_post_offset) && nontask2_post_offset <= offset_syl_complete(end)
+      fprintf('Warning[17] Post event offset before last syllable offset in trial %i of session %i\n',trial_id,session_id)
+      data_integrity = false;
+    end
+    nontask2_post_offset = bml_idx2time(AudioCoord,(nontask2_post_offset+ti) * Afs);
     
     %CodingMatrix row 11: Other onset times  
     nontask345_other_onset = default_nan3(bml_strnumcell2ordvec(CodingMatrix{11,i}));
-    nontask345_other_onset = bml_idx2time(AudioCoord,(nontask345_other_onset+ti) * Afs);
     if length(nontask345_other_onset) ~= 3
-      warning('Inconsistent nontask onset times (row 11) in trial %i of session %i',trial_id,session_id)
+      fprintf('Warning[18] more than 3 ''Other events'' onsets present in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;
     end  
-    nontask3_other_onset = nontask345_other_onset(1);
-    nontask4_other_onset = nontask345_other_onset(2);    
-    nontask5_other_onset = nontask345_other_onset(3);
     
     %CodingMatrix row 12: Other offset times
     nontask345_other_offset = default_nan3(bml_strnumcell2ordvec(CodingMatrix{12,i}));
-    nontask345_other_offset = bml_idx2time(AudioCoord,(nontask345_other_offset+ti) * Afs);
     if length(nontask345_other_offset) ~= 3
-      warning('Inconsistent nontask onset times (row 12) in trial %i of session %i',trial_id,session_id)
+      fprintf('Warning[19] more than 3 ''Other events'' offsets present in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;
     end  
+    
+    if (~isnan(nontask345_other_offset(1)) && isnan(nontask345_other_onset(1))) || ...
+       (~isnan(nontask345_other_offset(2)) && isnan(nontask345_other_onset(2))) || ...
+       (~isnan(nontask345_other_offset(3)) && isnan(nontask345_other_onset(3)))
+      fprintf('Warning[20] Other event offset has no corresponding onset in trial %i of session %i\n',trial_id,session_id)
+      data_integrity = false;     
+    end
+
+    for j=1:3
+      if ~isnan(nontask345_other_onset(j)) && ...
+          isectopic(nontask345_other_onset(j),onset_syl,offset_syl_complete) && ...
+          isnan(nontask345_other_offset(j))
+        fprintf('Warning[21] Other event onset %i outside syllables has no corresponding offset in trial %i of session %i\n',j,trial_id,session_id)
+        data_integrity = false;
+      end
+    end
+   
+    %transforming to global time coords of other nontask events
+    nontask345_other_onset = bml_idx2time(AudioCoord,(nontask345_other_onset+ti) * Afs);
+    nontask3_other_onset = nontask345_other_onset(1);
+    nontask4_other_onset = nontask345_other_onset(2);    
+    nontask5_other_onset = nontask345_other_onset(3);
+    nontask345_other_offset = bml_idx2time(AudioCoord,(nontask345_other_offset+ti) * Afs);
     nontask3_other_offset = nontask345_other_offset(1);
     nontask4_other_offset = nontask345_other_offset(2);    
     nontask5_other_offset = nontask345_other_offset(3);
@@ -293,7 +345,7 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     %CodingMatrix row 13: Note for current trial
     row13=CodingMatrix{13,i};
     if ~iscell(row13) || ~(size(row13,1)==2 && size(row13,2)==1)
-      warning('Inconsistent nontask event description (row 13) in trial %i of session %i',trial_id,session_id)
+      fprintf('Warning[22] CodingMatrix format of non-task event description is invalid in trial %i of session %i\n',trial_id,session_id)
       data_integrity = false;
       comment = {'row13 invalid'};
       nontask1_pre_type={nan};
@@ -318,7 +370,7 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     %CodingMatrix row 14: Stressors binary
     row14=CodingMatrix{14,i};
     if ~isnumeric(row14) || iscell(row14) || ~(size(row14,1)==5 && size(row14,2)==3)
-      warning('Inconsistent speech specification (row 14) in trial %i of session %i',trial_id,session_id)
+      fprintf('Warning[23] CodingMatrix format of speech-specific annotations are invalid in trial %i of session %i\n',trial_id,session_id)
       syl1_stress={nan};
       syl2_stress={nan}; 
       syl3_stress={nan};
@@ -543,6 +595,11 @@ end
   
 annot = bml_annot_table(annot);
 annot.trial_id = annot.id;
+
+if ~isempty(diary_filename)
+  diary off;
+end
+
 end
 
 
@@ -578,3 +635,22 @@ end
 function default = default_nan3(input)
   default = padarray(input,[isempty(input),max([0,3-size(input,2)])],nan,'post');
 end
+
+function ise = isectopic(t,syl_onset,syl_offset)
+  for j=1:length(t)
+    if ~isnan(t(j))
+      ise = true;
+      for k=1:length(syl_onset)
+       if ~isnan(syl_onset(k)) && ~isnan(syl_offset(k)) && t(j) >= syl_onset(k) && t(j) <= syl_offset(k)
+         ise = false;
+       end
+      end
+      if ise
+        return
+      end
+    end
+  end
+  ise = false;
+end
+
+
