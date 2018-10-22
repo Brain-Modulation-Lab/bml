@@ -8,11 +8,18 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 % raw - FT_DATAYPR_RAW to be re-epoched with time in global coordinates
 % cfg - configuraton structure
 % cfg.epoch - ANNOT table with new epoching
-% cfg.t0 - reference time for each epoch. If not specified the time is kept in
+% cfg.timelock - reference time for timelocking each epoch. If not specified the time is kept in
 %          global time coordinates. Can be string or char that matches a 
 %          variable of cfg.epoch, or a numeric vector of the same length than cfg.epoch
+% cfg.timesnap - bool, if true times are snapped to 'round' value according
+%          to sampling rate. Defaults to true if timelock is given, false
+%          if not.
+% cfg.timesignif - number of significant digits to consider for smapling rate
+%          during time snapping. Defaults to 4. 
+% cfg.t0 - same as timelock. Depreciated. 
 % cfg.regularize - if true, resulting times are forced to be equal.
 %          Defaults to false. [NOT IMPLEMENTED]
+
 % cfg.warn - logical indicating if warnings should be issued. Defaults to true
 %
 % returns a raw with new trials. The epoch ANNOT is added as a new field in the 
@@ -20,31 +27,40 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 
 epoch      = bml_annot_table(bml_getopt(cfg,'epoch'),'epoch');
 t0         = bml_getopt(cfg,'t0');
+timelock   = bml_getopt(cfg,'timelock');
 regularize = bml_getopt(cfg,'regularize',false);
 warn       = bml_getopt(cfg,'warn',true);
+
+if isempty(timelock) && ~isempty(t0)
+  warning('t0 option deprecated. Use timelock instead');
+  timelock = t0;
+end
+
+timesnap   = bml_getopt(cfg,'timesnap',~isempty(timelock));
+timesignif = bml_getopt(cfg,'timesignif',4);
 
 if regularize
   error('regularize not implemented')
 end
 
-if ~isempty(t0)
-  if isstring(t0) || ischar(t0)
-    t0 = cellstr(t0);
+if ~isempty(timelock)
+  if isstring(timelock) || ischar(timelock)
+    timelock = cellstr(timelock);
   end
     
-  if iscellstr(t0)
-    assert(numel(t0)==1,"single t0 variable required");
-    if ismember(t0,epoch.Properties.VariableNames)
-      t0 = epoch.(t0{1});
+  if iscellstr(timelock)
+    assert(numel(timelock)==1,"single t0 variable required");
+    if ismember(timelock,epoch.Properties.VariableNames)
+      timelock = epoch.(timelock{1});
     else
       error("t0 doesn't match any variable in epoch");
     end
   end
   
-  if isnumeric(t0)
-    assert(length(t0)==height(epoch),"incorrect length for t0");
+  if isnumeric(timelock)
+    assert(length(timelock)==height(epoch),"incorrect length for timelock");
   else
-    error("t0 should be a numeric vector, or be the name of a numeric variable in epoch");
+    error("timelock should be a numeric vector, or be the name of a numeric variable in epoch");
   end
 end
 
@@ -61,6 +77,13 @@ end
 %extracting trial info from raw
 raw_trial = bml_annot_table(bml_raw2annot(raw),'raw');
 raw_trial.midpoint = (raw_trial.starts + raw_trial.ends)/2;
+
+if timesnap
+  raw_trial.Fs = round(raw_trial.Fs,timesignif,'significant');
+end
+if regularize && length(uniquetol(raw_trial.Fs))>1
+  error('different sampling rates for different trials of raw. Can''t regularize');
+end
 
 %looping though epochs
 for i=1:height(epoch)
@@ -105,16 +128,23 @@ for i=1:height(epoch)
   %creating trial
   new_row.id = numel(redefined.trial) + 1;
   redefined.trial{new_row.id} = raw.trial{i_raw_trial.raw_id}(:,s:e);
-  redefined.time{new_row.id} = raw.time{i_raw_trial.raw_id}(:,s:e);
+  new_time =  raw.time{i_raw_trial.raw_id}(:,s:e);
+  %changing time reference if t0 is present
+  if ~isempty(timelock)
+    new_time = new_time - timelock(i);
+  end
+  if timesnap
+    sT = round(1/raw_trial.Fs(i),timesignif,'significant');
+    len_t = length(new_time);
+    mid_idx = ceil(len_t/2);
+    mid_time = sT*round(new_time(mid_idx)/sT,0);
+    new_time = (((-mid_idx+1):(len_t-mid_idx)) .* sT) + mid_time;
+  end
+  redefined.time{new_row.id} = new_time;
   redefined_epoch = [redefined_epoch; new_row];
   %cropped.sampleinfo(i,:) = [s,e];
-  
-  %changing time reference if t0 is present
-  if ~isempty(t0)
-    redefined.time{new_row.id} = redefined.time{new_row.id} - t0(i);
-  end
- 
+
 end
 
-
+redefined = ft_datatype_raw(redefined);
 
