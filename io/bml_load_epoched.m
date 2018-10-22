@@ -16,6 +16,8 @@ function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)
 %           electrode annotation for a channel doesn't span the entire 
 %           epoch. In this case the channel is 'empty'. defaults to true.
 % cfg.relabel - optinbal cellstr with new names of channels. 
+% cfg.extrapolate_sync - bool, if true (default) allows to load parts of 
+%           files outside synchronization chunks. 
 % cfg.warn - logical indicating if warnings should be issued
 %
 % cfg... further arguments for BML_LOAD_CONTINUOUS 
@@ -42,6 +44,7 @@ relabel       = bml_getopt(cfg,'relabel');
 warn          = bml_getopt(cfg,'warn',true);
 allow_missing = bml_getopt(cfg,'allow_missing',false);
 load_empty    = bml_getopt(cfg,'load_empty',true);
+extrapolate_sync = bml_getopt(cfg,'extrapolate_sync',true);
 
 electrode     = bml_getopt(cfg,'electrode',[]);
 if istable(electrode) && isempty(electrode); error('Empty electrode table'); end
@@ -75,12 +78,16 @@ loaded_epoch = table();
 
 for i=1:height(epoch)
   fprintf("\n --- Loading epoch id %i (%i of %i) --- \n",epoch.id(i),i,height(epoch));
-  
   i_loaded_epoch = epoch(i,:);
-  cfg_keep_x = struct('keep','x');
-  cfg.roi = bml_annot_intersect(cfg_keep_x, roi, epoch(i,:));
-  if height(cfg.roi)>0
-    cfg.roi = bml_sync_consolidate(cfg.roi);
+  croi = bml_annot_filter(roi,epoch(i,:)); %selecting sync entries for current epoch  
+  if height(croi)>0
+    croi = bml_sync_consolidate(croi); %consolidating entries
+    if extrapolate_sync
+      croi = bml_sync_confluence(croi); %taking files to confluence
+      %this steps allows to load sections of files not in sync table
+    end
+    cfg_keep_x = struct('keep','x');
+    cfg.roi = bml_annot_intersect(cfg_keep_x, croi, epoch(i,:));
 
     if ~isempty(electrode)
       if load_empty
