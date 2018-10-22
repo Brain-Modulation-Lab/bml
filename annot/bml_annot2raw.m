@@ -15,7 +15,7 @@ function raw = bml_annot2raw(cfg, annot)
 %     annot_label_colname is not provided. 
 % cfg.annot_label - string, indicates channel on which events should be
 %     added. Defaults to cfg.label{1}. 
-% cfg.annot_label_colname - cellstr, indicating name of column of annot
+% cfg.label_colname - cellstr, indicating name of column of annot
 %     containging the channel's label the current annotation should be
 %     added to. If not given, all annotations are added 
 %     to same channel defined by annot_label.  
@@ -24,7 +24,11 @@ function raw = bml_annot2raw(cfg, annot)
 % cfg.count - boolean indicating if number in raw should indicate number of
 %     annotations at that time point. Defaults to true. If false,
 %     presence/absence is reported. 
-% annot - annotation table. If omitted a raw of zeros is returned.
+% cfg.fill_function - function handle. Should take to arguments and
+%     returne a matrix of specified size. Defaults to zeros. Common alternatives
+%     are 'nan', 'ones', 'randn', etc.
+% annot - annotation table. If omitted a raw of zeros (or as determined by 
+%     fill_function) is returned.
 %
 % returns a FT_DATAYE_RAW structure with ones during the annotations
 
@@ -40,7 +44,13 @@ label       = bml_getopt(cfg,'label',[]);
 annot_label	= bml_getopt(cfg,'annot_label',[]);
 annot_label_colname = bml_getopt(cfg,'annot_label_colname',[]);
 label_colname =  bml_getopt(cfg,'label_colname',annot_label_colname);
+fill_function = bml_getopt(cfg,'fill_function',@(x,y) zeros(x,y));
 
+if nargin == 2
+  annot = bml_annot_table(annot,[],inputname(2));
+else
+  annot = [];
+end
 
 if isempty(label_colname)
   if isempty(label)
@@ -54,22 +64,35 @@ if isempty(label_colname)
   if isempty(annot_label)
     annot_label = label{1}; %default
   end
-else
-  if sum(strcmp(annot.Properties.VariableNames, label_colname))~=1
-    error('cf.annot_label_colname should match a column of annot');
-  end
-	ul = unique(annot{:,label_colname});
-  if isempty(label)
-    if isempty(template)
-      fprintf('using levels of %s as labels\n', label_colname{1})
-      label = ul;
-    else
-      fprintf('using labels from template\n'); 
-      label = template.label;
+  
+else %label_colname present
+  if istable(annot)
+    if isempty(annot)
+      warning('empty annot table passed to bml_annot2raw');
+      ul =[];
+    elseif sum(strcmp(annot.Properties.VariableNames, label_colname))~=1
+      error('cfg.label_colname should match a column of annot');
+    else  
+      ul = unique(annot{:,label_colname});      
     end
-  end
-  if ~isempty(annot_label)
-    fprintf('cfg.annot_label_colname found in annot, ignoring cfg.annot_label \n')
+    if isempty(label)
+      if isempty(template)
+        if ~isempty(ul)
+          fprintf('using levels of %s as labels\n', label_colname{1})
+          label = ul;
+        else
+          label = {'annot'};
+        end
+      else
+        fprintf('using labels from template\n'); 
+        label = template.label;
+      end
+    end
+    if ~isempty(annot_label)
+      fprintf('cfg.label_colname found in annot, ignoring cfg.annot_label \n');
+    end
+  else
+    error('label_annot specified but no annot table given');
   end
 end
 
@@ -84,27 +107,20 @@ if ~isempty(roi) %from roi
   raw.label = label;
   assert(length(unique(roi.Fs))==1, "Inconsistent Fs in roi");
   for i=1:height(roi)
-    %assert(height(roi)==1,"can't deal with more than one sync chunk after consolidation for now");
     raw.time{i}=bml_idx2time(roi(i,:),roi.s1(i):roi.s2(i));
-    raw.trial{i}=zeros(length(label),size(raw.time{i},2));
+    raw.trial{i}=fill_function(length(label),size(raw.time{i},2));
   end
 elseif ~isempty(template) %from template
   raw = template;
   for i=1:length(raw.trial)
-    raw.trial{i}=zeros(length(label),size(raw.time{i},2));
+    raw.trial{i}=fill_function(length(label),size(raw.time{i},2));
   end
   roi = bml_raw2annot(raw);
 else
   error('cfg.roi or cfg.template required');
 end
 
-if nargin == 2
-  annot = bml_annot_table(annot,[],inputname(2));
-  
-  % assert(isempty(bml_annot_overlap(annot)),'annot contains overlaps');
-  % if all(annot.duration==0)
-  %   annot = bml_annot_extend(annot,mean(diff(raw.time{1}))/2);
-  % end
+if istable(annot)
   
   description = annot.Properties.Description;
   if isempty(description) 
@@ -131,12 +147,12 @@ if nargin == 2
       end
     end
   
-  else %annotations assing to specific channels
+  elseif ~isempty(annot) %annotations assing to specific channels
 
-    %iterating over labels of annot_label_colname
-    for i_ul=1:numel(ul)
-      annot_l = annot(strcmp(annot{:,label_colname},ul{i_ul}),:);
-      annot_idx = bml_getidx(ul{i_ul},raw.label);
+    %iterating over labels 
+    for i_l=1:numel(label)
+      annot_l = annot(strcmp(annot{:,label_colname},label{i_l}),:);
+      annot_idx = bml_getidx(label{i_l},raw.label);
       if annot_idx > 0 && annot_idx <= numel(raw.label)
         for t=1:height(roi)
           t_annot_l = bml_annot_filter(annot_l,roi(t,:));
