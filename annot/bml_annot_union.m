@@ -79,7 +79,7 @@ if ~isempty(y)
 end
 
 cfg1=[];
-cfg1.criterion = @(x) abs(max(x.ends) - min(x.starts) - sum(x.duration)) < timetol;
+cfg1.criterion = @(x) max(x.ends) - min(x.starts) - sum(x.duration) < timetol;
 cfg1.groupby = groupby_x;
 annot = bml_annot_consolidate(cfg1,x);
 annot = bml_annot_table(annot,description);
