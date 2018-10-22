@@ -12,9 +12,13 @@ function [ref,U] = bml_rereference(cfg,raw)
 %   If not specified, groups are defined by string before underscore '_'
 %   (i.e. ecog_*, micro_*, macro_*, audio_*, envaudio_*, etc)
 % cfg.method - string, method to be implemented
-%   'CAR' or 'common', common average referencing (default)
-%   'LAR' or 'local', local average referencing
-%   'VAR' or 'variable', variable average referencing
+%   'CAR', common average referencing (default)
+%   'CMR', common median referencing
+%   'CTAR', common trimmed average referencing
+%   'LAR', local average referencing
+%   'VAR', variable average referencing
+% cfg.percent - numeric, indicates percentage of labels in group used in
+%   trimmed mean. Defaults to 50. 
 %
 % raw - ft_datatype_raw to be re-referenced
 % 
@@ -28,6 +32,7 @@ assert(all(ismember({'trial','time','label'},fieldnames(raw))),"invalid raw");
 label     = bml_getopt(cfg,'label',raw.label);
 group     = bml_getopt(cfg,'group');
 method    = bml_getopt_single(cfg,'method','CAR');
+percent   = bml_getopt(cfg,'percent',50);
 
 %checking for NaNs in data
 raw_has_nan = any(cellfun(@(x) any(any(isnan(x),1),2),raw.trial));
@@ -48,6 +53,7 @@ if ~all(in)
 end
 
 %re-ordering group to match raw.label
+assert(length(group)==length(label),'cfg.label and cfg.group should be of same length');
 group = bml_map(raw.label,label,group);
 label = raw.label;
 
@@ -61,13 +67,13 @@ g0 = sum(group<=0);
 ug = unique(g);
 [N,~] = histc(g,ug);
 
-if ~raw_has_nan
+if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
   %creating blocks
-  if ismember(method,{'CAR','common'})
+  if ismember(method,{'CAR'})
     U_blocks=cellfun(@bml_comavgref_matrix,num2cell(N),'UniformOutput',false);
-  elseif ismember(method,{'LAR','local'})
+  elseif ismember(method,{'LAR'})
     U_blocks=cellfun(@bml_locavgref_matrix,num2cell(N),'UniformOutput',false);
-  elseif ismember(method,{'VAR','variable'})
+  elseif ismember(method,{'VAR'})
     warning('Using experimental method VAR, susceptible to high amplitude artifacts')
 
     %calculating variance-covariance matrix
@@ -103,7 +109,6 @@ if ~raw_has_nan
   ref = bml_apply(@(x) U*x, raw);
 
 else
-  fprintf('raw has NaNs. ')
   if ismember(method,{'CAR','common'})
     fprintf('Using common average referencing per group in NaN robust implementation.\n')
     ref = raw;
@@ -115,7 +120,31 @@ else
         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
       end
     end
-
+    
+  elseif ismember(method,{'CMR'})
+    fprintf('Using common median referencing per group in NaN robust implementation.\n')
+    ref = raw;
+    for t=1:numel(raw.trial)
+      ug = unique(group);
+      for g=1:numel(ug)
+        %calculating groups common median 
+        commmed = nanmedian(raw.trial{t}(group==ug(g),:),1);
+        ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
+      end
+    end   
+    
+  elseif ismember(method,{'CTAR'})
+    fprintf('Using common trimmed average referencing per group in NaN robust implementation.\n')
+    ref = raw;
+    for t=1:numel(raw.trial)
+      ug = unique(group);
+      for g=1:numel(ug)
+        %calculating groups common trimmed average
+        commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
+        ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
+      end
+    end   
+    
   elseif ismember(method,{'LAR','local'})
     error('local average referencing not implemented for data with NaNs')
   elseif ismember(method,{'VAR','variable'})
