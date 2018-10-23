@@ -57,8 +57,12 @@ end
 
 if isempty(AudioCoord) || praat
   %loading sychronized audio to get the time-mapping
-  roi = bml_sync_consolidate(roi);
-  sync_audio = bml_load_continuous(roi);
+  %roi = bml_sync_consolidate(roi);
+  
+  cfg1=[];
+  cfg1.roi = roi;
+  cfg1.match_labels = false; %allowing for audio files with different labels
+  sync_audio = bml_load_continuous(cfg1);
   
   if ~isempty(audio_channel)
     cfg1=[];
@@ -123,7 +127,7 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     
     %CodingMatrix row 1: Phonetic code in latex
     phonetic_code=CodingMatrix(1,i);
-    if strcmp(phonetic_code,{' '})
+    if isempty(phonetic_code)|| strcmp(phonetic_code,{' '}) || strcmp(phonetic_code,{''})
       phonetic_code = {nan(1)};
     end
 
