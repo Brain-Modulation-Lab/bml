@@ -90,8 +90,8 @@ for i=1:height(epoch)
   
   %intersecting epochs with raw's trials
   new_row = epoch(i,:);
-  i_raw_trial = bml_annot_intersect(struct('keep','x'),raw_trial,epoch(i,:));
-  
+  i_raw_trial = bml_annot_intersect(struct('keep','x'),raw_trial,new_row);
+
   %if no intersection, move to next epoch
   if isempty(i_raw_trial)
     if warn
@@ -106,13 +106,11 @@ for i=1:height(epoch)
     i_raw_trial = i_raw_trial(i_raw_trial.duration == max_duration,:);
     [~,min_i]=min(abs((i_raw_trial.starts+i_raw_trial.ends)/2 - i_raw_trial.midpoint));
     i_raw_trial = i_raw_trial(min_i,:);  
-    %if warn
-    %  warning("several trials of raw match to epoch %i. Selecting trial %i",i,i_raw_trial.raw_id(min_i));
-    %end
   end
-  
+
   %partial epoch
-  if (epoch.duration(i) > i_raw_trial.duration) && warn
+  timetol = epoch.duration(i)*(10^(-timesignif));
+  if (abs(epoch.duration(i) - i_raw_trial.duration) > timetol) && warn
     warning('partial epoch %i loaded',i);
   end
   
@@ -134,7 +132,7 @@ for i=1:height(epoch)
     new_time = new_time - timelock(i);
   end
   if timesnap
-    sT = round(1/raw_trial.Fs(i),timesignif,'significant');
+    sT = round(1/i_raw_trial.Fs(1),timesignif,'significant');
     len_t = length(new_time);
     mid_idx = ceil(len_t/2);
     mid_time = sT*round(new_time(mid_idx)/sT,0);
