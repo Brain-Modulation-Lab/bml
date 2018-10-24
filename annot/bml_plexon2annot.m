@@ -77,6 +77,31 @@ assert(length(label)==length(spike.label),"Incorrect label");
 assert(all(ismember(FM_VARS,FileMapping.Properties.VariableNames)),"Invalid FileMapping table");
 assert(all(ismember(SY_VARS,roi.Properties.VariableNames)),"Invalid roi table");
 
+%% WJL deal with Plexon files with degenerate channels
+if length(spike.timestamp)>length(label)
+    fprintf('BML_PLEXON2ANNOT: Consolidating degenerate channels.\n')
+    PlexonChannelNames = unique({spike.hdr.ChannelHeader.Name});
+    if length(PlexonChannelNames) ~= length(label)
+        fprintf('BML_PLEXON2ANNOT: Channel number does not match.\n')
+    else
+        chmap = {};
+        for ch = 1:length(label)
+        chmap{ch} = find( cellfun(@(x) find(strcmp(x, PlexonChannelNames)), {spike.hdr.ChannelHeader.Name})==ch & ...
+            ~cellfun(@isempty, spike.timestamp) );
+        end
+        
+        if any(cellfun(@(x) length(x)~=1, chmap))
+            fprintf('BML_PLEXON2ANNOT: Cannot match up channels.\n')
+        else
+        chmap = cell2mat(chmap);
+        % remap channels
+        spike.timestamp = spike.timestamp(chmap);
+        spike.unit = spike.unit(chmap);
+        spike.waveform = spike.waveform(chmap);
+        end
+    end
+end
+
 annot=table();
 for i=1:length(spike.timestamp)
   if ~isempty(spike.timestamp{i})
@@ -87,9 +112,12 @@ for i=1:length(spike.timestamp)
     fm = FileMapping(:,FM_VARS);
     sy = roi(ismember(roi.name,fm.name),SY_VARS);    
     syfm=join(sy,fm,'Keys','name');
-    
+
     assert(all(syfm.nSamples_sy==syfm.nSamples_fm), "Inconsistent number of samples");
 
+    syfm = syfm((syfm.raw2-syfm.raw1) == (syfm.s2-syfm.s1),:);
+    assert(~isempty(syfm), "No vaid sync chunks found for consolidation.");
+    
     syfm.s1=syfm.raw1;
     syfm.s2=syfm.raw2;
     syfm.nSamples = syfm.nSamples_sy;
