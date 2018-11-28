@@ -24,9 +24,9 @@ function raw = bml_annot2raw(cfg, annot)
 % cfg.count - boolean indicating if number in raw should indicate number of
 %     annotations at that time point. Defaults to true. If false,
 %     presence/absence is reported. 
-% cfg.fill_function - function handle. Should take to arguments and
+% cfg.fill_function - function handle. Should take two arguments and
 %     returne a matrix of specified size. Defaults to zeros. Common alternatives
-%     are 'nan', 'ones', 'randn', etc.
+%     are '@(x,y) nan(x,y)', '@(x,y) ones(x,y)', '@(x,y) randn(x,y)', etc.
 % annot - annotation table. If omitted a raw of zeros (or as determined by 
 %     fill_function) is returned.
 %

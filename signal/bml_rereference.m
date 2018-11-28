@@ -13,12 +13,15 @@ function [ref,U] = bml_rereference(cfg,raw)
 %   (i.e. ecog_*, micro_*, macro_*, audio_*, envaudio_*, etc)
 % cfg.method - string, method to be implemented
 %   'CAR', common average referencing (default)
+%   'CARCF', common average referencing with cross fading
 %   'CMR', common median referencing
 %   'CTAR', common trimmed average referencing
 %   'LAR', local average referencing
 %   'VAR', variable average referencing
 % cfg.percent - numeric, indicates percentage of labels in group used in
 %   trimmed mean. Defaults to 50. 
+% cfg.crossfading_width - scalar. Width in samples of the crossfading
+%   region. Defaults to 100;
 %
 % raw - ft_datatype_raw to be re-referenced
 % 
@@ -33,6 +36,7 @@ label     = bml_getopt(cfg,'label',raw.label);
 group     = bml_getopt(cfg,'group');
 method    = bml_getopt_single(cfg,'method','CAR');
 percent   = bml_getopt(cfg,'percent',50);
+crossfading_width = bml_getopt(cfg,'crossfading_width',100);
 
 %checking for NaNs in data
 raw_has_nan = any(cellfun(@(x) any(any(isnan(x),1),2),raw.trial));
@@ -109,8 +113,7 @@ if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
   ref = bml_apply(@(x) U*x, raw);
 
 else
-  if ismember(method,{'CAR','common'})
-    fprintf('Using common average referencing per group in NaN robust implementation.\n')
+  if ismember(method,{'CAR','common'}) %common average referencing
     ref = raw;
     for t=1:numel(raw.trial)
       ug = unique(group);
@@ -121,8 +124,37 @@ else
       end
     end
     
+  elseif ismember(method,{'CARCF'}) %common average referencing with cross fading
+    cfp = linspace(0,1,ceil(crossfading_width/2)); %crossfading pattern
+    cfp = [cfp, fliplr(cfp(2:end))]; 
+    cfp = cfp ./ sum(cfp);
+    cfr = ones(size(cfp)); %crossfading region
+    cfr = cfr ./ sum(cfr);
+    
+    ref = raw;
+    for t=1:numel(raw.trial)
+      %get nan mask
+      cf_weights = isnan(raw.trial{t});
+      
+      %implementing justification of crossfading by extending nan mask
+      cf_weights = convn(cf_weights, cfr, 'same');
+      cf_weights = cf_weights > 0;
+
+      %calculating crossfading weights
+      cf_weights = 1 - convn(cf_weights, cfp, 'same');
+      
+      ug = unique(group);
+      for g=1:numel(ug)
+        %calculating groups common average
+        tr = raw.trial{t}(group==ug(g),:);
+        tr(isnan(tr)) = 0;
+        tw = cf_weights(group==ug(g),:);
+        commavg = sum(tr .* tw,1) ./ sum(tw,1);
+        ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
+      end
+    end
+    
   elseif ismember(method,{'CMR'})
-    fprintf('Using common median referencing per group in NaN robust implementation.\n')
     ref = raw;
     for t=1:numel(raw.trial)
       ug = unique(group);
@@ -134,7 +166,6 @@ else
     end   
     
   elseif ismember(method,{'CTAR'})
-    fprintf('Using common trimmed average referencing per group in NaN robust implementation.\n')
     ref = raw;
     for t=1:numel(raw.trial)
       ug = unique(group);
