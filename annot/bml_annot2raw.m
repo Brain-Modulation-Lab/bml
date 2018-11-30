@@ -52,6 +52,13 @@ else
   annot = [];
 end
 
+if ~isempty(label)
+  label = cellstr(label);
+  if size(label,1) < size(label,2)
+    label = label';
+  end
+end
+
 if isempty(label_colname)
   if isempty(label)
     if isempty(template)
@@ -115,6 +122,7 @@ elseif ~isempty(template) %from template
   for i=1:length(raw.trial)
     raw.trial{i}=fill_function(length(label),size(raw.time{i},2));
   end
+  raw.label = label;
   roi = bml_raw2annot(raw);
 else
   error('cfg.roi or cfg.template required');

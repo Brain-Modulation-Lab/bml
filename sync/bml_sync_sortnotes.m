@@ -1,17 +1,15 @@
 function sortnotes = bml_sync_sortnotes(cfg)
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
+% BML_SYNC_SORTNOTES 
 
 roi           = bml_getopt(cfg,'roi');
 roi           = bml_roi_table(roi);
-assert(~isempty(roi),"roi table required");
-
-sortnotes           = bml_getopt(cfg,'sortnotes');
-
-WaveformFreq           = bml_getopt(cfg,'WaveformFreq');
-
+sortnotes     = bml_getopt(cfg,'sortnotes');
+WaveformFreq	= bml_getopt(cfg,'WaveformFreq');
 plexon        = bml_getopt_single(cfg,'plexon');
+
+assert(~isempty(roi),"roi table required");
 assert(isfile(plexon),"Valid plexon file required");
+assert(isfile(sortnotes),"Valid sortnotes file required");
 
 plexon_src    = strrep(plexon,'.plx','.mat');
 if ~isfile(plexon_src)
