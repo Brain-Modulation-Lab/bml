@@ -8,11 +8,14 @@ function annot = bml_annot_detect(cfg, env)
 % cfg.threshold - double len 1 or 2: lower/upper threshold for the segmentation
 % cfg.max_annots - integer: maximun number of regions of interest in a
 %       envelope
+% cfg.trials - = 1xN, trial indices on which to perform detection. Defaults
+%       to all trials of env
 %
 % returns an annotation table
 
 max_annots        = bml_getopt(cfg, 'max_annots', inf);
 threshold         = bml_getopt(cfg, 'threshold');
+trials            = bml_getopt(cfg, 'trials',1:numel(env.trial));
 if ~isempty(threshold)
   assert(length(threshold)<=2,"threshold should be of length 1 or 2");
   lower_threshold = threshold(1);
@@ -29,7 +32,7 @@ lower_threshold   = bml_getopt(cfg, 'lower_threshold', lower_threshold);
 assert(~isempty(upper_threshold) & ~isempty(lower_threshold),"cfg.threshold required");
 
 annot = table();
-for i=1:numel(env.trial)
+for i=trials
   fprintf("\n");
 
   cfg1=[];
