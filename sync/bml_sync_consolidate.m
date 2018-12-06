@@ -8,11 +8,11 @@ function consolidated = bml_sync_consolidate(cfg)
 %
 % cfg.roi - roi table with sync chunks to consolidate
 % cfg.timetol - double: time tolerance allowed in consolidation. Defaults
-%               to 1e-2
+%               to 1e-3
 % cfg.contiguous - logical: should time contiguous files of the same type
 %               be consolidated toghether. Defaults to true. 
 % cfg.group - variable indicating grouping criteria. Entries of different groups 
-%               are not consolidated. Defaults to 'session_id'
+%               are not consolidated together. Defaults to 'session_id'
 % cfg.timewarp - boolean, indicates if linear time warping is allowed in
 %               consolidation. If false, uses nominal Fs value in roi
 %               table. Defaults to true.
@@ -26,20 +26,20 @@ if istable(cfg)
   cfg = struct('roi',cfg);
 end
 roi             = bml_getopt(cfg,'roi');
-timetol         = bml_getopt(cfg,'timetol',1e-2);
+timetol         = bml_getopt(cfg,'timetol',1e-3);
 contiguous      = bml_getopt(cfg,'contiguous',true);
 group           = bml_getopt_single(cfg,'group','session_id');
 timewarp        = bml_getopt(cfg,'timewarp',true);
 rowisfile       = bml_getopt(cfg,'rowisfile',true);
 group_specified = ismember("group",fieldnames(cfg));
 
-REQUIRED_VARS2 = {'folder','name','chantype','filetype'};
-if ~all(ismember(REQUIRED_VARS2,roi.Properties.VariableNames))
+REQUIRED_VARS = {'folder','name','chantype','filetype'};
+if ~all(ismember(REQUIRED_VARS,roi.Properties.VariableNames))
   if rowisfile
-    error('Variables %s required',strjoin(REQUIRED_VARS2))
+    error('Variables %s required',strjoin(REQUIRED_VARS))
   else
-    for i=1:length(REQUIRED_VARS2)
-      roi.(REQUIRED_VARS2{i})=repmat({'NA'},height(roi),1);
+    for i=1:length(REQUIRED_VARS)
+      roi.(REQUIRED_VARS{i})=repmat({'NA'},height(roi),1);
     end
   end
 end

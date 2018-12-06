@@ -38,7 +38,8 @@ for chunk_i=1:length(chunk_ids)
   
   master_filename = unique(master_roi.name);
   master_folder = unique(master_roi.name);
-  
+
+	assert(~isempty(master_filename), "No master file found for for chunk %i",chunk_id);
   assert(length(master_filename)==1 & length(master_folder)==1,...
     "More than one master file for chunk %i",chunk_id);
   assert(length(unique(master_roi.s1))==1,"Inconsistent s1 for master of chunk %i", chunk_id);

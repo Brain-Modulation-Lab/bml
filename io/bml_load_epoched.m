@@ -19,6 +19,8 @@ function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)
 % cfg.extrapolate_sync - bool, if true (default) allows to load parts of 
 %           files outside synchronization chunks. 
 % cfg.warn - logical indicating if warnings should be issued
+% cfg.timetol - time tolerance passed to bml_sync_consolidate. Defaults to
+%           1e-3.
 %
 % cfg... further arguments for BML_LOAD_CONTINUOUS 
 % cfg.chantype
@@ -45,6 +47,7 @@ warn          = bml_getopt(cfg,'warn',true);
 allow_missing = bml_getopt(cfg,'allow_missing',false);
 load_empty    = bml_getopt(cfg,'load_empty',true);
 extrapolate_sync = bml_getopt(cfg,'extrapolate_sync',true);
+timetol       = bml_getopt(cfg,'timetol',1e-3);
 
 electrode     = bml_getopt(cfg,'electrode',[]);
 if istable(electrode) && isempty(electrode); error('Empty electrode table'); end
@@ -81,7 +84,10 @@ for i=1:height(epoch)
   i_loaded_epoch = epoch(i,:);
   croi = bml_annot_filter(roi,epoch(i,:)); %selecting sync entries for current epoch  
   if height(croi)>0
-    croi = bml_sync_consolidate(croi); %consolidating entries
+    cfg1=[];
+    cfg1.roi = croi;
+    cfg1.timetol = timetol;
+    croi = bml_sync_consolidate(cfg1); %consolidating entries
     if extrapolate_sync
       croi = bml_sync_confluence(croi); %taking files to confluence
       %this steps allows to load sections of files not in sync table
