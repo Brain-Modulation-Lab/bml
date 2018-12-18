@@ -11,7 +11,8 @@ function sync = bml_sync_transfer_neuroomega_chantype(cfg)
 % channels (for example 'macro' and 'micro'), based on the synchronized channel. 
 %
 % cfg.roi           - original sync table (normaly with chantype=analog)
-% cfg.chantype      - char, new chantype. Options are 'micro', 'macro', 'analog'
+% cfg.chantype      - char, new chantype. Options are 'micro', 'macro',
+%                     'analog', 'emg'
 % cfg.time_channel  - char, channel of new chantype used to extract time
 %                     use 'CRAW_01___Central', etc. 
 %                     if not provided uses the first channel of the
@@ -34,6 +35,7 @@ function sync = bml_sync_transfer_neuroomega_chantype(cfg)
 % 'add_analog' | 'CADD_ANALOG_IN_1'
 % 'micro_lfp'  | 'CLFP_01___Central'
 % 'macro_lfp'  | 'CMacro_LFP_01___Central
+% 'emg'        | 'CEMG_1___01'
 % ----------------------------------------
 %
 %

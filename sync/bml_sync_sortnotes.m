@@ -9,7 +9,7 @@ plexon        = bml_getopt_single(cfg,'plexon');
 
 assert(~isempty(roi),"roi table required");
 assert(isfile(plexon),"Valid plexon file required");
-assert(isfile(sortnotes),"Valid sortnotes file required");
+% assert(isfile(sortnotes),"Valid sortnotes file required");
 
 plexon_src    = strrep(plexon,'.plx','.mat');
 if ~isfile(plexon_src)
