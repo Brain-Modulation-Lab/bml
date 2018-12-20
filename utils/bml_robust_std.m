@@ -12,8 +12,8 @@ function std = bml_robust_std(data, center)
 %   if data is a matrix, center has to be a column vector of the same
 %   height as data
 
-if nargin==1
-  center = median(data,2);
+if ~exist('center','var')
+  center = nanmedian(data,2);
 end
 
 std = zeros(size(data,1),1);
