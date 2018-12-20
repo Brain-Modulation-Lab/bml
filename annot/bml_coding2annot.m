@@ -19,6 +19,9 @@ function annot = bml_coding2annot(cfg)
 %                        session_id column of output table
 % cfg.diary_filename   - str, name of file to save all output, including
 %                        warnings. Defaults to empty
+% cfg.timetol_consolidate - double: consolidation time tolerance. Defaults to 1e-3s
+%           this time tolerance relates to the sync consolidation process.
+%           extrinsic time tolerance (between samples of different strams)
 %
 % returns annot table with one row per trial (syllable triplet) 
 
@@ -46,6 +49,7 @@ praat            = bml_getopt(cfg,'praat');
 audio_channel    = bml_getopt(cfg,'audio_channel');
 session_id       = bml_getopt(cfg,'session_id',nan);
 diary_filename   = bml_getopt_single(cfg,'diary_filename',[]);
+timetol_cons     = bml_getopt(cfg,'timetol_consolidate',1e-3);
 
 if ~isempty(diary_filename)
   diary(diary_filename);
@@ -62,6 +66,7 @@ if isempty(AudioCoord) || praat
   cfg1=[];
   cfg1.roi = roi;
   cfg1.match_labels = false; %allowing for audio files with different labels
+  cfg1.timetol_consolidate = timetol_cons;
   sync_audio = bml_load_continuous(cfg1);
   
   if ~isempty(audio_channel)

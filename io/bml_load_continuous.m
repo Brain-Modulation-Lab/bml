@@ -17,7 +17,12 @@ function [raw, file_raw_map] = bml_load_continuous(cfg)
 %   cfg.chantype - string, overwrites info in cfg.roi
 %   cfg.filetype - overwrites info in cfg.roi
 %   cfg.Fs - overwrites info in cfg.roi
-%   cfg.timetol - double: time tolerance in seconds per sample. Defaults to 1e-6
+%   cfg.timetol - double: time tolerance in seconds per sample. Defaults to 1e-5s
+%           this time tolerance relates to sample contiguity, i.e.
+%           intrinsic time tolerance (between samples of same stream)
+%   cfg.timetol_consolidate - double: consolidation time tolerance. Defaults to 1e-3s
+%           this time tolerance relates to the sync consolidation process.
+%           extrinsic time tolerance (between samples of different strams)
 %   cfg.dryrun - logical: should a dry-run test be performed? Defaults to false
 %   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
 %           functions 
@@ -55,6 +60,7 @@ filetype      = bml_getopt(cfg,'filetype');
 Fs            = bml_getopt(cfg,'Fs');
 roi           = bml_annot_table(bml_getopt(cfg,'roi'),'roi');
 timetol       = bml_getopt(cfg,'timetol',1e-5);
+timetol_cons  = bml_getopt(cfg,'timetol_consolidate',1e-3);
 dryrun        = bml_getopt(cfg,'dryrun',false);
 ft_feedback   = bml_getopt_single(cfg,'ft_feedback','no');
 discontinuous = bml_getopt(cfg,'discontinuous','warn');
@@ -80,7 +86,10 @@ if islogical(discontinuous)
 end
 
 %consolidating chunks of same file when possible
-roi = bml_sync_consolidate(roi);
+cfg1=[];
+cfg1.roi=roi;
+cfg1.timetol=timetol_cons;
+roi = bml_sync_consolidate(cfg1);
 
 %removing zero length rois
 roi = roi(roi.duration > 0,:);
