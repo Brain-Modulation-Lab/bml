@@ -117,7 +117,9 @@ for g=1:numel(groups)
     x_g = x_g(x_g.ends > y_g.starts(1) & x_g.starts < y_g.ends(1),:);
   else
     ovlp_y = ~isempty(bml_annot_overlap(y_g));
-    if ovlp_y; error('''y'' has overlaps for group %s',groups(g)); end 
+    if ovlp_y
+      error('''y'' has overlaps for group %s',string(groups(g)))
+    end 
   end
 	if isempty(x_g); continue; end
   ovlp_x = ~isempty(bml_annot_overlap(x_g));

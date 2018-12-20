@@ -41,6 +41,8 @@ for i=1:numel(raw.trial)
   tc=bml_raw2coord(raw,i);
   [s,e]=bml_crop_idx(tc,starts(i),ends(i));
 
+  assert(e>0,"cropping interval outside raw")
+  assert(s<=nSamples,"cropping interval outside raw")
   if s < 1; s=1; end
   if e > nSamples; e = nSamples; end
 
