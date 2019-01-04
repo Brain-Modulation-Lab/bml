@@ -6,6 +6,9 @@ roi           = bml_roi_table(roi);
 sortnotes     = bml_getopt(cfg,'sortnotes');
 WaveformFreq	= bml_getopt(cfg,'WaveformFreq');
 plexon        = bml_getopt_single(cfg,'plexon');
+timetol         = bml_getopt(cfg,'timetol',1e-3);
+
+partialchunks = bml_getopt(cfg,'partialchunks',false);
 
 assert(~isempty(roi),"roi table required");
 assert(isfile(plexon),"Valid plexon file required");
@@ -51,15 +54,34 @@ syfm=join(sy,fm,'Keys','name');
 
 assert(all(syfm.nSamples_sy==syfm.nSamples_fm), "Inconsistent number of samples");
 
-syfm = syfm((syfm.raw2-syfm.raw1) == (syfm.s2-syfm.s1),:);
-assert(~isempty(syfm), "No vaid sync chunks found for consolidation.");
+if partialchunks
+    
+    syfm.nSamples = syfm.nSamples_sy;
+    
+    % first fm file -- assume raw2 corresponds to end of chunk
+    syfm.s1(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s1(syfm.raw1 == 1);
+    syfm.s2(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s2(syfm.raw1 == 1);    
+    
+    % remaining fm files -- assume raw1 corresponds to start of chunk
+    syfm.s1(syfm.raw1 > 1) = syfm.raw1(syfm.raw1 > 1) + syfm.s1(syfm.raw1 > 1) - 1;
+    syfm.s2(syfm.raw1 > 1) = syfm.raw1(syfm.raw1 > 1) + syfm.s2(syfm.raw1 > 1) - 1;
 
-syfm.s1=syfm.raw1;
-syfm.s2=syfm.raw2;
-syfm.nSamples = syfm.nSamples_sy;
+    %     syfm = syfm((syfm.raw2-syfm.raw1+1) == syfm.nSamples,:);
+    %     assert(~isempty(syfm), "No vaid sync chunks found for consolidation.");
+    
+else
+    
+    syfm = syfm((syfm.raw2-syfm.raw1) == (syfm.s2-syfm.s1),:);
+    assert(~isempty(syfm), "No vaid sync chunks found for consolidation.");
+    
+    syfm.s1=syfm.raw1;
+    syfm.s2=syfm.raw2;
+    syfm.nSamples = syfm.nSamples_sy;
+    
+end
 
 cfg1=[];
-% cfg1.timetol = 0.1;  % increase tolerance due to bad sync (DBS3005)
+cfg1.timetol = timetol; 
 cfg1.roi=syfm;
 cfg1.rowisfile=false;
 spike_sync=bml_sync_consolidate(cfg1);

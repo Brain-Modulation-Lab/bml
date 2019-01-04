@@ -28,6 +28,8 @@ roi           = bml_getopt(cfg,'roi');
 roi           = bml_roi_table(roi);
 assert(~isempty(roi),"roi table required");
 
+timetol       = bml_getopt(cfg,'timetol',1e-3);
+
 plexon        = bml_getopt_single(cfg,'plexon');
 assert(isfile(plexon),"Valid plexon file required");
 
@@ -57,6 +59,8 @@ if ~isempty(label) && ~isempty(electrode) && ...
     all(ismember({'electrode','channel'},electrode.Properties.VariableNames))
   label=bml_map(label,electrode.channel,electrode.electrode);
 end
+
+partialchunks = bml_getopt(cfg,'partialchunks',false);
 
 %loading fieldtrip spike structure from plexon file
 spike= ft_read_spike(plexon);
@@ -115,16 +119,36 @@ for i=1:length(spike.timestamp)
 
     assert(all(syfm.nSamples_sy==syfm.nSamples_fm), "Inconsistent number of samples");
 
-    syfm = syfm((syfm.raw2-syfm.raw1) == (syfm.s2-syfm.s1),:);
-    assert(~isempty(syfm), "No vaid sync chunks found for consolidation.");
-    
-    syfm.s1=syfm.raw1;
-    syfm.s2=syfm.raw2;
-    syfm.nSamples = syfm.nSamples_sy;
+    if partialchunks
+        
+        syfm.nSamples = syfm.nSamples_sy;
+        
+        % first fm file -- assume raw2 corresponds to end of chunk
+        syfm.s1(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s1(syfm.raw1 == 1);
+        syfm.s2(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s2(syfm.raw1 == 1);
+        
+        % remaining fm files -- assume raw1 corresponds to start of chunk
+        syfm.s1(syfm.raw1 > 1) = syfm.raw1(syfm.raw1 > 1) + syfm.s1(syfm.raw1 > 1) - 1;
+        syfm.s2(syfm.raw1 > 1) = syfm.raw1(syfm.raw1 > 1) + syfm.s2(syfm.raw1 > 1) - 1;
+        
+        %     syfm = syfm((syfm.raw2-syfm.raw1+1) == syfm.nSamples,:);
+        %     assert(~isempty(syfm), "No vaid sync chunks found for consolidation.");
+        
+    else
+        
+        syfm = syfm((syfm.raw2-syfm.raw1) == (syfm.s2-syfm.s1),:);
+        assert(~isempty(syfm), "No vaid sync chunks found for consolidation.");
+        
+        syfm.s1=syfm.raw1;
+        syfm.s2=syfm.raw2;
+        syfm.nSamples = syfm.nSamples_sy;
+        
+    end
     
     cfg1=[];
     cfg1.roi=syfm;
     cfg1.rowisfile=false;
+    cfg1.timetol = timetol;
     spike_sync=bml_sync_consolidate(cfg1);
     
     %creating table with spikes
