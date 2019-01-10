@@ -15,12 +15,15 @@ function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)
 % cfg.load_empty - logical, indicates how to proceed if a the
 %           electrode annotation for a channel doesn't span the entire 
 %           epoch. In this case the channel is 'empty'. defaults to true.
-% cfg.relabel - optinbal cellstr with new names of channels. 
+% cfg.relabel - optinal cellstr with new names of channels. 
 % cfg.extrapolate_sync - bool, if true (default) allows to load parts of 
 %           files outside synchronization chunks. 
 % cfg.warn - logical indicating if warnings should be issued
 % cfg.timetol_consolidate - time tolerance passed to bml_sync_consolidate. 
 %           Defaults to 1e-3.
+% cfg.reorder_channels - bool indicating if channels should be reordered as defined
+%           in the electrode table. If false ('default') the order in which
+%           they are stored in memory is maintained. 
 %
 % cfg... further arguments for BML_LOAD_CONTINUOUS 
 % cfg.chantype
@@ -48,13 +51,19 @@ allow_missing = bml_getopt(cfg,'allow_missing',false);
 load_empty    = bml_getopt(cfg,'load_empty',true);
 extrapolate_sync = bml_getopt(cfg,'extrapolate_sync',true);
 timetol_cons  = bml_getopt(cfg,'timetol_consolidate',1e-3);
+reorder_c     = bml_getopt(cfg,'reorder_channels',false);
+
 if isfield(cfg,'timetol')
   warning('cfg.timetol is deprecated for bml_load_epoched. Use cfg.timetol_consolidate instead');
   timetol_cons = bml_getopt(cfg,'timetol',1e-3);
 end
 
 electrode     = bml_getopt(cfg,'electrode',[]);
-if istable(electrode) && isempty(electrode); error('Empty electrode table'); end
+if istable(electrode) && isempty(electrode) 
+  error('Empty electrode table')
+elseif isempty(electrode) && reorder_c
+  error('electrode table required if cfg.reorder_channels is set to true');
+end
 electrode     = bml_annot_table(electrode,'electrode');
 
 cfg.roi = [];
@@ -182,6 +191,13 @@ raw = ft_appenddata(cfg, raw{:});
 if ~isempty(hdr)
   raw.hdr = hdr;
 end
+
+if reorder_c
+  cfg1=[];
+  cfg1.label = electrode.electrode;
+  raw = bml_reorder_channels(cfg1,raw);
+end
+
 
 file_raw_map.id=[];
 file_raw_map = bml_roi_table(file_raw_map);
