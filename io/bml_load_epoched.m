@@ -194,10 +194,9 @@ end
 
 if reorder_c
   cfg1=[];
-  cfg1.label = electrode.electrode;
+  cfg1.label = unique(electrode.electrode,'stable');
   raw = bml_reorder_channels(cfg1,raw);
 end
-
 
 file_raw_map.id=[];
 file_raw_map = bml_roi_table(file_raw_map);

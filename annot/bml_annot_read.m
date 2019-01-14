@@ -13,6 +13,9 @@ function annot = bml_annot_read(filename,varargin)
 if ~ismember('delimiter',varargin)
   varargin = [varargin, {'delimiter','\t'}];
 end
+if ~ismember('TreatAsEmpty',varargin)
+  varargin = [varargin, {'TreatAsEmpty',{'NA'}}];
+end
 annot = readtable(filename,varargin{:});
 [~,name,~]=fileparts(filename);
 annot = bml_annot_table(annot,name);

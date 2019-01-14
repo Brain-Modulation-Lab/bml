@@ -10,7 +10,7 @@ function reordered = bml_reorder_channels(cfg,data)
 % cfg.order - vector of channel indices in desired order
 %             if not provided channels are ordered according to 
 %             cfg.label if present, or alphabetically
-% cfg.label - cellstr with desired order of channes
+% cfg.label - cellstr with desired order of channels
 % returns a reordered raw object
 
 if ~exist('data','var')
@@ -24,6 +24,7 @@ if isempty(new_order)
     [~, new_order] = sort(data.label);
   else
     assert(all(ismember(label, data.label)),"Invalid label. Unknown channels");
+    assert(length(label)==length(unique(label)),"Repeated channels in label");
     new_order = bml_map(label,data.label,1:length(data.label));
   end
 end
