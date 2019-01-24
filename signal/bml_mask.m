@@ -33,10 +33,14 @@ value          = bml_getopt(cfg,'value',NaN);
 complete_trial = bml_getopt(cfg,'complete_trial',false);
 remask_nan     = bml_getopt(cfg,'remask_nan',false);
 
-assert(xor(~isempty(annot),istrue(remask_nan)),'cfg.annot or cfg.remask_nan  required');
-
-roi = bml_raw2annot(raw);
 masked = raw;
+roi = bml_raw2annot(raw);
+
+%assert(xor(~isempty(annot),istrue(remask_nan)),'cfg.annot or cfg.remask_nan  required');
+if isempty(annot) && ~istrue(remask_nan)
+  %nothing to mask
+  return 
+end
 
 if remask_nan
   if ~isempty(label_colname); warning('label_colname ignored'); end

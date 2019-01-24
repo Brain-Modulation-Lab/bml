@@ -16,5 +16,7 @@ for i=1:numel(varargin)
   end
 end
 
-annot.id=[];
-annot = bml_annot_table(annot);
+if ~isempty(annot)
+    annot.id=[];
+    annot = bml_annot_table(annot);
+end
