@@ -95,8 +95,12 @@ for i_uff=1:length(uff)
         consrow.warpfactor = 1/(consrow.Fs * p(1));
       end
       i_roi = consrow;      
-    else  
-      error('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol)
+    else
+      %[~,I]=sort(s); figure; plot(s(I),t(I)-tfit(I))
+      err_idx = mod(find(abs(abs(t - tfit)-max_delta_t) < eps,1)-1,height(i_roi))+1;
+      err_roi = i_roi(err_idx,:);
+      error('can''t consolidate within tolerance. Max delta t %f > %f.\nOffending row is t=[%f,%f] of file %s',...
+        max_delta_t,timetol,err_roi.starts(1),err_roi.ends(1),err_roi.name{1})
     end
   end
   consolidated = [consolidated; i_roi];
@@ -116,7 +120,7 @@ if contiguous
   	i_roi = roi(strcmp(roi.filetype_chantype,ufc(i_ufc)),:);
     if  height(i_roi)>1 && length(unique(i_roi.name))<=1
       %probably the first consolidation failed. Returning with a warning
-      error('multiple chunks for single file after per file consolidation');
+      warning('multiple chunks for single file after per file consolidation');
       consolidated = bml_roi_table(roi);
       return
     end
