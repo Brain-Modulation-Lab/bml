@@ -11,8 +11,13 @@ function sync_roi = bml_sync_analog(cfg)
 %            files, normally inferred from the OS 'Date-Modified' metadata.
 %            'starts' and 'ends' should be given in seconds from midnight.
 %   cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'
+%            and optionally 'threshold' (see below).
 %            This table defines how channels of different filetypes will be
-%            mapped with each other. 
+%            mapped with each other. If the threshold variable is present and 
+%            the value for a specific channels is given (i.e. it is not NaN), 
+%            then time intervals where the rectified signal of that channel exceeds the threshold
+%            are zeroed. This can be useful to remove saturating glitches in the 
+%            signal sometimes observed in trellis analog or other channels.     
 %   cfg.chunks - annot table: defines starts and ends of chunks of time to sync
 %            in master time. Usually corresponds to sessions but can be
 %            shorter periods.
@@ -144,11 +149,12 @@ if ~isempty(prev_sync_roi) %previous attempts to sync
   prev_sync_roi = bml_roi_table(prev_sync_roi,'prev');
   assert(all(ismember({'sync_type','sync_channel','chantype'},prev_sync_roi.Properties.VariableNames)),...
     "variables sync_type, sync_channel and chantype required for cfg.sync_roi");
-else %checking files before commiting to first round of synchronization
+else %checking files before commiting to synchronization
   for chunk_i=1:height(chunks)
     chunk_roi_os = bml_annot_intersect(roi_os, chunks(chunk_i,:));  
     for filetype_i=1:length(filetypes)
-      cfg=[]; cfg.ft_feedback=ft_feedback;
+      cfg=[]; 
+      cfg.ft_feedback=ft_feedback;
       cfg.channel = sync_channels.channel{strcmp(sync_channels.filetype,filetypes(filetype_i))};
       cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,filetypes(filetype_i))};
       cfg.roi=chunk_roi_os(string(chunk_roi_os.filetype)==filetypes(filetype_i),:);
@@ -156,7 +162,11 @@ else %checking files before commiting to first round of synchronization
       cfg.discontinuous=discontinuous;
       assert(height(cfg.roi)>0,'No files for filetype %s and chunk_id %i',...
         filetypes{filetype_i},chunks.id(chunk_i));
-      bml_load_continuous(cfg); %raises error if continuity is violated
+      try
+        bml_load_continuous(cfg); %raises error if continuity is violated
+      catch err
+        error('filetype %s chunk %i failed \n %s',filetypes{filetype_i},chunks.id(chunk_i),err.message);
+      end
     end
   end
 end
@@ -211,11 +221,35 @@ for chunk_i=1:height(chunks)
     cfg.channel = master_channel; 
     cfg.chantype = master_chantype; 
     cfg.roi = master_chunk_roi_os; 
-    cfg.ft_feedback=ft_feedback;
+    cfg.ft_feedback = ft_feedback;
     cfg.dryrun = dryrun;
-    cfg.discontinuous=discontinuous;
+    cfg.discontinuous = discontinuous;
     [master, master_map] = bml_load_continuous(cfg);
 
+    if ismember('threshold',sync_channels.Properties.VariableNames)
+      %zeroing supra treshold regions of master
+      threshold = sync_channels.threshold(...
+        strcmp(sync_channels.filetype,master_filetype) & ...
+        strcmp(sync_channels.channel,master_channel) & ...
+        strcmp(sync_channels.chantype,master_chantype));
+      
+      if ~isnan(threshold)
+        fprintf('Threshold found for channel ''%s'' of filetype ''%s'' \nZeroing where abs > %f \n',...
+          master_channel,master_filetype,threshold);  
+        
+        cfg1=[];
+        cfg1.threshold = threshold;
+        sat = bml_annot_detect(cfg1,bml_envelope_binabs(master));
+        
+        cfg2=[];
+        cfg2.value=0;
+        cfg2.annot=sat;
+        master = bml_mask(cfg2,master);
+      end
+    end
+    
+    %if sync_channels.channel{strcmp(sync_channels.filetype,master_filetype)}
+    
     if high_pass
       master.trial{1} = ft_preproc_highpassfilter(master.trial{1},...
                         master.fsample, high_pass_freq, 4, 'but', 'twopass');
@@ -247,6 +281,28 @@ for chunk_i=1:height(chunks)
       cfg.discontinuous=discontinuous;
       [slave, slave_map] = bml_load_continuous(cfg);  
 
+      if ismember('threshold',sync_channels.Properties.VariableNames)
+     	%zeroing supra treshold regions of slave
+        threshold = sync_channels.threshold(...
+          strcmp(sync_channels.filetype,slave_filetypes(slave_i)) & ...
+          strcmp(sync_channels.channel,slave_channel) & ...
+          strcmp(sync_channels.chantype,slave_chantype));
+      
+        if ~isnan(threshold)
+          fprintf('Threshold found for channel ''%s'' of filetype ''%s'' \nZeroing where abs > %f \n',...
+            slave_channel,slave_filetypes(slave_i),threshold);  
+
+          cfg1=[];
+          cfg1.threshold = threshold;
+          sat = bml_annot_detect(cfg1,bml_envelope_binabs(slave));
+
+          cfg2=[];
+          cfg2.value=0;
+          cfg2.annot=sat;
+          slave = bml_mask(cfg2,slave);
+        end
+      end
+      
       if high_pass && ~dryrun
         slave.trial{1} = ft_preproc_highpassfilter(slave.trial{1},...
                         slave.fsample, 5, 4, 'but', 'twopass');
