@@ -70,6 +70,11 @@ function sync_roi = bml_sync_analog(cfg)
 %   cfg.high_pass - logical: should high pass filter be applied before
 %           alignment. Defaults to false.
 %   cfg.high_pass_freq - float: high pass frequency in Hz. Defaults to 5 Hz
+%   cfg.predictive_loading - boolean indicating if robust average of time
+%           offsets calculated from previous chunks should be used to
+%           predictively load the correct time interval of the slave file
+%           in the following chunk. Useful for files with systematic data
+%           lost. Defaults to false. 
 %
 % returns roi table with vars 
 %   id: integer identification number of the synchronized file chunk
@@ -127,6 +132,7 @@ discontinuous       = bml_getopt(cfg,'discontinuous','warn');
 high_pass           = bml_getopt(cfg,'high_pass',false);
 high_pass_freq      = bml_getopt(cfg,'high_pass_freq',5);
 timetol             = bml_getopt(cfg,'timetol',1e-6);
+predictive_loading  = bml_getopt(cfg,'predictive_loading',false);
 
 assert(~ismember('filetype',chunks.Properties.VariableNames),...
   'cfg.chunks should not containt ''filetype'' variable');
@@ -142,6 +148,7 @@ filetypes=unique(sync_channels.filetype);
 slave_filetypes = setdiff(filetypes,master_filetype);
 master_channel = sync_channels.channel{strcmp(sync_channels.filetype,master_filetype)};
 master_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,master_filetype)};
+slave_filetype_delta_t = cell(1,length(slave_filetypes));
 
 extended_chunks = bml_annot_extend(chunks,chunk_extend);
 
@@ -248,8 +255,6 @@ for chunk_i=1:height(chunks)
       end
     end
     
-    %if sync_channels.channel{strcmp(sync_channels.filetype,master_filetype)}
-    
     if high_pass
       master.trial{1} = ft_preproc_highpassfilter(master.trial{1},...
                         master.fsample, high_pass_freq, 4, 'but', 'twopass');
@@ -272,13 +277,17 @@ for chunk_i=1:height(chunks)
       slave_channel = sync_channels.channel{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
       slave_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
 
-      cfg=[]; %creating slave raw with sync channel for entire session
-      cfg.ft_feedback=ft_feedback;
+      cfg = []; %creating slave raw with sync channel for entire session
+      cfg.ft_feedback = ft_feedback;
       cfg.channel = slave_channel; 
       cfg.chantype = slave_chantype;
       cfg.roi = filetype_chunk_roi_os;
       cfg.dryrun = dryrun;
       cfg.discontinuous=discontinuous;
+      if predictive_loading && length(slave_filetype_delta_t{slave_i})>5
+        cfg.roi.t1 = cfg.roi.t1 + trimmean(slave_filetype_delta_t{slave_i},50);
+        cfg.roi.t2 = cfg.roi.t2 + trimmean(slave_filetype_delta_t{slave_i},50);
+      end
       [slave, slave_map] = bml_load_continuous(cfg);  
 
       if ismember('threshold',sync_channels.Properties.VariableNames)
@@ -357,6 +366,9 @@ for chunk_i=1:height(chunks)
       row.chunk_id = repmat(chunk_id,height(row),1);
       sync_roi = [sync_roi; row];
 
+      %saving displacement for predictive loading
+      slave_filetype_delta_t{slave_i} = [slave_filetype_delta_t{slave_i},mean(row.t1 - slave_map.t1)];
+      
       if praat && ~dryrun
         slave_crop = bml_conform_to(master,slave);
         bml_praat(strcat('c',num2str(chunk_id),'_slave_',slave_filetypes(slave_i)),slave_crop);
