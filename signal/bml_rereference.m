@@ -113,10 +113,12 @@ if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
   ref = bml_apply(@(x) U*x, raw);
 
 else
+  %removing null group 
+  ug = ug(ug>0);
+  
   if ismember(method,{'CAR','common'}) %common average referencing
     ref = raw;
     for t=1:numel(raw.trial)
-      ug = unique(group);
       for g=1:numel(ug)
         %calculating groups common average
         commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
@@ -143,7 +145,6 @@ else
       %calculating crossfading weights
       cf_weights = 1 - convn(cf_weights, cfp, 'same');
       
-      ug = unique(group);
       for g=1:numel(ug)
         %calculating groups common average
         tr = raw.trial{t}(group==ug(g),:);
@@ -157,7 +158,6 @@ else
   elseif ismember(method,{'CMR'})
     ref = raw;
     for t=1:numel(raw.trial)
-      ug = unique(group);
       for g=1:numel(ug)
         %calculating groups common median 
         commmed = nanmedian(raw.trial{t}(group==ug(g),:),1);
@@ -168,7 +168,6 @@ else
   elseif ismember(method,{'CTAR'})
     ref = raw;
     for t=1:numel(raw.trial)
-      ug = unique(group);
       for g=1:numel(ug)
         %calculating groups common trimmed average
         commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
