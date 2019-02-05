@@ -56,7 +56,7 @@ if isempty(groupby_x) && isempty(groupby_y)
   y.groupby_=ones(height(y),1);
   groupby_x = {'groupby_'};
   groupby_y = {'groupby_'};
-  groups={1};
+  groups_x={1};
 elseif ~isempty(groupby_x) && ~isempty(groupby_y)
 	if sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
     error('groupby_x should match one (and only one) column of x');

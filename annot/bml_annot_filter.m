@@ -8,8 +8,8 @@ function filtered = bml_annot_filter(cfg, annot, filter_annot)
 %
 % The first argument cfg is a optional configuration structure, which can contain
 % the following optional fields:
-% cfg.overlap - double: fraction of overla required for filter. Defauls 0
-%           (touch)
+% cfg.overlap - double: fraction of overlap required for filter. Defauls to
+%         zero (i.e. "touch")
 % cfg.description - string: description of output annotation
 %
 % annot, filter - annot tables with fields 'starts' and 'ends'.
