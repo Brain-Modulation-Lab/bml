@@ -8,14 +8,24 @@ function annot = bml_annot_detect(cfg, env)
 % cfg.threshold - double len 1 or 2: lower/upper threshold for the segmentation
 % cfg.max_annots - integer: maximun number of regions of interest in a
 %       envelope
-% cfg.trials - = 1xN, trial indices on which to perform detection. Defaults
+% cfg.trials - 1xN, trial indices on which to perform detection. Defaults
 %       to all trials of env
+% cfg.channel - Nx1 cell-array with selection of channels (default = 'all'), see FT_CHANNELSELECTION
+% cfg.timeeps - double, epsilon for time. Defaults to 1e-9
 %
 % returns an annotation table
 
 max_annots        = bml_getopt(cfg, 'max_annots', inf);
 threshold         = bml_getopt(cfg, 'threshold');
-trials            = bml_getopt(cfg, 'trials',1:numel(env.trial));
+timeeps           = bml_getopt(cfg, 'timeeps', 1e-9);
+trials            = bml_getopt(cfg, 'trials', 1:numel(env.trial));
+
+if any(ismember({'channel'},fieldnames(cfg)))
+  cfg1=[];
+  cfg1.channel = cfg.channel;
+  env = ft_selectdata(cfg1,env);
+end
+
 if ~isempty(threshold)
   assert(length(threshold)<=2,"threshold should be of length 1 or 2");
   lower_threshold = threshold(1);
@@ -86,7 +96,16 @@ for i=trials
         for j=1:height(annot_l)
           row = annot_l(j,:);
           if row.starts < ends && row.ends > starts
-            overlaps = true;
+            %attemping to make contiguous
+            if abs(row.starts - ends) < timeeps
+              ends = row.starts;
+            end
+            if abs(row.ends - starts) < timeeps 
+              starts = row.ends;
+            end
+            if row.starts < ends && row.ends > starts
+              overlaps = true;
+            end
           end
         end
         if ~overlaps
