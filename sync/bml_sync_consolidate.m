@@ -1,6 +1,6 @@
 function consolidated = bml_sync_consolidate(cfg)
 
-% BML_SYNC_CONSOLIDATE consolidates file synchronization chunks 
+% BML_SYNC_CONSOLIDATE consolidates synchronization chunks 
 %
 % Use as
 %   consolidated = bml_sync_consolidate(cfg)
@@ -17,10 +17,16 @@ function consolidated = bml_sync_consolidate(cfg)
 %               consolidation. If false, uses nominal Fs value in roi
 %               table. Defaults to true.
 % cfg.rowisfile - boolean, indicates if row refer to files. Defaults to true.
+% cfg.partial   - boolean, indicates if partial consolidation is allowed.
+%               Defaults to false. 
+% cfg.plot_diagnostic - boolean, indicates if per group matrix of pariwise
+%               consolidation residual should be plotted.
+%               usefull for rouge chunk identification. Defaults to false.
 %
 % If chunking for consolidation was done, each file can have several entries in the
 % sync roi table. This function consolidates those entries into one per file.
-% It does this by finding the sync curve that better fits all chunks. 
+% It does this by finding the sync line that better fits all chunks. This function
+% alson consolidates time contiguos files of the same filetype. 
 
 if istable(cfg)
   cfg = struct('roi',cfg);
@@ -31,6 +37,8 @@ contiguous      = bml_getopt(cfg,'contiguous',true);
 group           = bml_getopt_single(cfg,'group','session_id');
 timewarp        = bml_getopt(cfg,'timewarp',true);
 rowisfile       = bml_getopt(cfg,'rowisfile',true);
+partial         = bml_getopt(cfg,'partial',false);
+plot_diagnostic = bml_getopt(cfg,'plot_diagnostic',false);
 group_specified = ismember("group",fieldnames(cfg));
 
 REQUIRED_VARS = {'folder','name','chantype','filetype'};
@@ -46,11 +54,13 @@ end
 
 roi = bml_roi_table(roi);
 
-% REQUIRED_VARS = {'s1','t1','s2','t2','nSamples','Fs'};
-% assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
-%   'Variables %s required',strjoin(REQUIRED_VARS))
+REQUIRED_VARS = {'s1','t1','s2','t2','nSamples','Fs'};
+assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
+  'Variables %s required',strjoin(REQUIRED_VARS))
 
 roi.fullfile = fullfile(roi.folder,roi.name);
+
+%dealing with consolidation groups (usually sessions)
 if ismember(group,roi.Properties.VariableNames)
   if group_specified
     fprintf("grouping by %s \n",group);
@@ -70,64 +80,83 @@ for i_uff=1:length(uff)
   i_roi = roi(strcmp(roi.fullfile,uff(i_uff)),:);
   if height(i_roi)>1
 
-    %doing linear fit to assess if consolidation is plausible
-    s = [i_roi.s1; i_roi.s2];
-    t = [i_roi.t1; i_roi.t2];
-    if timewarp
-      p = polyfit(s,t,1);
-    else
-      assert(length(unique(i_roi.Fs))==1,"Inconsistent Fs");
-      p1 = 1/unique(i_roi.Fs);
-      p = [p1, mean(t-p1*s)];
+    if plot_diagnostic
+      delta_t_M = sync_cons_group_pairwise(i_roi,timewarp,'s');
+      figure();
+      image(delta_t_M,'CDataMapping','scaled');
+      xticks(1:height(i_roi));
+      yticks(1:height(i_roi));
+      xticklabels(i_roi.id);
+      yticklabels(i_roi.id);
+      title(regexprep(uff{i_uff}, '\\', '\\\\'));
+      colorbar;
     end
-    tfit = polyval(p,s);
     
-    max_delta_t = max(abs(t - tfit));
-    if max_delta_t <= timetol %consolidating
-      consrow = i_roi(1,:);
-      consrow.starts = min(i_roi.starts);
-      consrow.ends = max(i_roi.ends);
-      consrow.s1 = min(i_roi.s1);
-      consrow.s2 = max(i_roi.s2);
-      consrow.t1 = polyval(p,consrow.s1);
-      consrow.t2 = polyval(p,consrow.s2);
-      if ismember('warpfactor',i_roi.Properties.VariableNames)
-        consrow.warpfactor = 1/(consrow.Fs * p(1));
+    %doing linear fit to assess if consolidation is plausible
+    [consrow,conserr] = sync_cons_group_partial(i_roi,timewarp,'s',timetol);
+    
+    if height(consrow)>1
+      fprintf(['\nGroup ' regexprep(uff{i_uff}, '\\', '\\\\') '\n']);
+      consrow(:,{'id','starts','duration','cons_n','cons_t_err'})
+      conserr(:,{'id1','id2','cons_t_err'})
+      if ~partial
+        error('can''t consolidate within tolerance. Max delta t %f > %f',...
+          max(conserr.cons_t_err),timetol)
       end
-      i_roi = consrow;      
+    elseif height(consrow)==0
+      error('empty group');
     else
-      %[~,I]=sort(s); figure; plot(s(I),t(I)-tfit(I))
-      err_idx = mod(find(abs(abs(t - tfit)-max_delta_t) < eps,1)-1,height(i_roi))+1;
-      err_roi = i_roi(err_idx,:);
-      error('can''t consolidate within tolerance. Max delta t %f > %f.\nOffending row is t=[%f,%f] of file %s',...
-        max_delta_t,timetol,err_roi.starts(1),err_roi.ends(1),err_roi.name{1})
+      %managed to consolidate within tolerance, continue
     end
+    i_roi = consrow;
+  else
+    i_roi.cons_t_err=0;
+    i_roi.cons_n=1;
   end
   consolidated = [consolidated; i_roi];
 end
 
-consolidated.id=[];
+
+if ~isempty(consolidated)
+  consolidated.id=[];
+  consolidated = bml_roi_table(consolidated);
+else
+  keyboard
+end
 roi.fullfile=[];
-consolidated = bml_roi_table(consolidated);
 
 %consolidating several time contiguos files together
 if contiguous
+  
   roi = consolidated;
   consolidated = table();
   roi.filetype_chantype = strcat(roi.filetype,roi.chantype,num2str(roi.Fs));
+  
+  %dealing with consolidation groups (usually sessions)
+  if ismember(group,roi.Properties.VariableNames)
+    if isnumeric(roi.(group))
+      roi.filetype_chantype = strcat(roi.filetype_chantype,'_',num2str(roi.(group)));
+    else
+      roi.filetype_chantype = strcat(roi.filetype_chantype,'_',roi.(group));
+    end
+  end
+  
   ufc = unique(roi.filetype_chantype);
   for i_ufc=1:length(ufc)
   	i_roi = roi(strcmp(roi.filetype_chantype,ufc(i_ufc)),:);
-    if  height(i_roi)>1 && length(unique(i_roi.name))<=1
-      %probably the first consolidation failed. Returning with a warning
-      warning('multiple chunks for single file after per file consolidation');
-      consolidated = bml_roi_table(roi);
-      return
+    if  height(i_roi)>1 && length(unique(i_roi.name))<=1 
+      if partial
+        consolidated = [consolidated; i_roi];
+        continue
+      else
+        error('multiple chunks for single file (and group) after per file consolidation');
+      end
     end
-    %detecting contiguos stretches
+    
+    %detecting time contiguos stretches
     cfg=[];
     cfg.criterion = @(x) abs(sum(x.duration)-max(x.ends)+min(x.starts)) < height(x)*timetol;
-    i_roi_cont = bml_annot_consolidate(cfg,i_roi);   
+    i_roi_cont = bml_annot_consolidate(cfg,bml_roi_confluence(i_roi));   
     
     for j=1:height(i_roi_cont)
     	i_roi_cont_j = i_roi(i_roi.id>=i_roi_cont.id_starts(j) & i_roi.id<=i_roi_cont.id_ends(j),:);
@@ -136,28 +165,18 @@ if contiguous
         
         left_complete = i_roi_cont_j.starts(1)<=i_roi_cont_j.t1(1);
         right_complete = i_roi_cont_j.ends(end)>=i_roi_cont_j.t2(end);
-        
+
         %calculating raw samples of contiguous file
-        cs = cumsum(i_roi_cont_j.s2-i_roi_cont_j.s1) + i_roi_cont_j.s1(1);
-        cs = cs + (0:(height(i_roi_cont_j)-1))';
-        cs = [0; cs(1:end-1)];
-        i_roi_cont_j.raw1 = i_roi_cont_j.s1 + cs;
-        i_roi_cont_j.raw2 = i_roi_cont_j.s2 + cs;
+%         cs = cumsum(i_roi_cont_j.s2-i_roi_cont_j.s1) + i_roi_cont_j.s1(1);
+%         cs = cs + (0:(height(i_roi_cont_j)-1))';
+%         cs = [0; cs(1:end-1)];
+%         i_roi_cont_j.raw1 = i_roi_cont_j.s1 + cs;
+%         i_roi_cont_j.raw2 = i_roi_cont_j.s2 + cs;
+        i_roi_cont_j = s2raw(i_roi_cont_j);
         
         %doing linear fit to asses if consolidation is plausible
-        s = [i_roi_cont_j.raw1; i_roi_cont_j.raw2];
-        t = [i_roi_cont_j.t1; i_roi_cont_j.t2];
-        %plot(s,t,'o')
-        if timewarp
-          p = polyfit(s,t,1);
-        else
-          assert(length(unique(i_roi_cont_j.Fs))==1,"Inconsistent Fs");
-          p1 = 1/unique(i_roi_cont_j.Fs);
-          p = [p1, mean(t-p1*s)];
-        end
-        tfit = polyval(p,s);
-      
-        max_delta_t = max(abs(t - tfit));
+        [p,max_delta_t,off_idx] = sync_cons_group(i_roi_cont_j,timewarp,'raw');
+        
         if max_delta_t <= timetol %consolidating
           i_roi_cont_j.t1 = polyval(p,i_roi_cont_j.raw1);
           i_roi_cont_j.t2 = polyval(p,i_roi_cont_j.raw2);
@@ -165,7 +184,9 @@ if contiguous
             i_roi_cont_j.warpfactor = 1 ./ (i_roi_cont_j.Fs .* p(1));
           end
         else  
-          error('can''t consolidate within tolerance. Max delta t %f > %f',max_delta_t,timetol);
+          err_roi = i_roi_cont_j(off_idx,:);
+          error('can''t consolidate within tolerance. Max delta t %f > %f.\nOffending row is t=[%f,%f] of file %s',...
+            max_delta_t,timetol,err_roi.starts(1),err_roi.ends(1),err_roi.name{1})
         end
         i_roi_cont_j.raw1=[];
         i_roi_cont_j.raw2=[];          
