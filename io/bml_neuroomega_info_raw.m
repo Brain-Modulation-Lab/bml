@@ -82,7 +82,20 @@ time_begin     = strcat(time_channel,'_TimeBegin');
 time_end       = strcat(time_channel,'_TimeEnd');
 
 for i=1:height(info)
-  hdr = ft_read_header(fullfile(info.folder{i},info.name{i}),'chantype',chantype);
+  try
+    hdr = ft_read_header(fullfile(info.folder{i},info.name{i}),'chantype',chantype);
+  catch
+    fprintf("Could not open header for file %s \n", info.name{i});
+    hdr_table.chantype(i) = {''};
+    hdr_table.Fs(i) = {NaN};
+    hdr_table.nSamples(i) = {NaN};
+    hdr_table.nChans(i) = {NaN};  
+    hdr_table.nTrials(i) = {NaN};    
+    hdr_table.chanunit(i) = {''}; 
+    hdr_table.time_begin(i) = {NaN};
+    hdr_table.time_end(i) = {NaN};
+    continue
+  end
   hdr_table.chantype(i) = {strjoin(unique(hdr.chantype))};
   hdr_table.Fs(i) = {hdr.Fs};
   hdr_table.nSamples(i) = {hdr.nSamples};
