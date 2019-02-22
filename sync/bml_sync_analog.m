@@ -5,7 +5,7 @@ function sync_roi = bml_sync_analog(cfg)
 % Use as
 %   sync_roi = bml_sync_digital(cfg)
 %
-% cfg - configuration structure (reuired fields)
+% cfg - configuration structure (required fields)
 %   cfg.roi - roi table with vars 'id','starts','ends','folder','name',
 %            'nSamples','filetype'. Contains a coarse alignment of the
 %            files, normally inferred from the OS 'Date-Modified' metadata.

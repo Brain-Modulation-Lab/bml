@@ -16,10 +16,9 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 %          if not.
 % cfg.timesignif - number of significant digits to consider for smapling rate
 %          during time snapping. Defaults to 4. 
-% cfg.t0 - same as timelock. Depreciated. 
+% cfg.t0 - same as timelock. Deprecated. 
 % cfg.regularize - if true, resulting times are forced to be equal.
 %          Defaults to false. [NOT IMPLEMENTED]
-
 % cfg.warn - logical indicating if warnings should be issued. Defaults to true
 %
 % returns a raw with new trials. The epoch ANNOT is added as a new field in the 

@@ -15,7 +15,7 @@ end
 tfit = polyval(p,s);
 max_delta_t = max(abs(t - tfit));
 off_idx = mod(find(abs(abs(t - tfit)-max_delta_t) < eps,1)-1,height(roi))+1;
-
+%plot(s,t-tfit,'o','color',['r','b'])
 
 
 

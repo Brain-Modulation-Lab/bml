@@ -1,6 +1,7 @@
 function r = bml_xcorr(cfg, x, y)
 
 % BML_XCORR calculates the cross correlation between ft_raw objects
+% [deprecated]
 %
 % Use as
 %   r = bml_xcorr(cfg, x, y)
@@ -16,10 +17,12 @@ function r = bml_xcorr(cfg, x, y)
 %     cross-correlation or autocorrelation. Any option other than 'none' 
 %     (the default) requires x and y to have the same length.
 %
-% note: bml_xcorr matches x to y by trial. Use bml_conform_to to enforde trial
+% note: bml_xcorr matches x to y trial-by-trial. Use bml_conform_to to enforce trial
 % matching by time. 
 %
 % returns a fieldtrip raw object, where time is mapped to lags
+
+warning('bml_xcorr is deprecated function')
 
 is_raw_cfg = all(ismember({'trial','time','label'},fieldnames(cfg)));
 if nargin == 3
@@ -40,7 +43,7 @@ elseif nargin == 1
 else
   error('incorrect use of bml_xcorr')
 end
-assert(all(ismember({'trial','time','label'},fieldnames(y))),'ft_raw_expected as y');
+assert(all(ismember({'trial','time','label'},fieldnames(y))),'ft_datatype_raw expected as y');
 
 maxlag = bml_getopt(cfg,'maxlag',[]);
 scaleopt = bml_getopt(cfg,'scaleopt','none');
