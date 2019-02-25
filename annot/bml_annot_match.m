@@ -14,8 +14,8 @@ function annot = bml_annot_match(cfg, data, template)
 % cfg.timeeps - double, epsilon for time. Defaults to 1e-9
 % cfg.scan - annotation table with ranges to scan. If not provided the
 %       entire data object will be scanned
-% cfg.max_annots - integer: maximun number of annotations to return
-% cfg.max_annots_per_scan - integer: maximun number of annotations to
+% cfg.max_annot - integer: maximun number of annotations to return
+% cfg.max_annot_per_scan - integer: maximun number of annotations to
 %       return per time interval scanned per channel
 % cfg.warn - bool, should warnings be issued? Defaults to true
 %
@@ -23,8 +23,8 @@ function annot = bml_annot_match(cfg, data, template)
 
 
 %% Loading parameters
-max_annots        = bml_getopt(cfg, 'max_annots', inf);
-max_annots_per_scan = bml_getopt(cfg, 'max_annots_per_scan', inf);
+max_annot         = bml_getopt(cfg, 'max_annot', inf);
+max_annot_per_scan = bml_getopt(cfg, 'max_annot_per_scan', inf);
 timeeps           = bml_getopt(cfg, 'timeeps', 1e-9);
 template_channel  = bml_getopt_single(cfg, 'template_channel',[]);
 threshold         = bml_getopt(cfg, 'threshold', []);
@@ -139,7 +139,7 @@ for s=1:numel(data.trial)
       loop_count = loop_count + 1;
       n_annots = n_annots + 1;
       
-      if n_annots > max_annots
+      if n_annots > max_annot
         error('more annotations found than max_annot = %i',max_annot)
       end
       
@@ -161,7 +161,7 @@ for s=1:numel(data.trial)
           annot = [annot; cell2table({max_ti,max_tf,max_r})];
           n_annots_per_scan = n_annots_per_scan + 1;
           r(floor(max_idx-n1/2):ceil(max_idx+n1/2))=0;
-          search_match = n_annots_per_scan < max_annots_per_scan;
+          search_match = n_annots_per_scan < max_annot_per_scan;
         else
           r(floor(max_idx-n1/4):ceil(max_idx+n1/4))=0;
         end
