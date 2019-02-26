@@ -12,7 +12,7 @@ function consolidated = bml_sync_consolidate(cfg)
 % cfg.contiguous - logical: should time contiguous files of the same type
 %               be consolidated toghether. Defaults to true. 
 % cfg.timetol_contiguous - double: time tolerance in seconds by which to
-%               detect contiguous files. Defaults to 1e-4.
+%               detect contiguous files. Defaults to 1e-3.
 % cfg.group - variable indicating grouping criteria. Entries of different groups 
 %               are not consolidated together. Defaults to 'session_id'
 % cfg.timewarp - boolean, indicates if linear time warping is allowed in
@@ -35,7 +35,7 @@ if istable(cfg)
 end
 roi                = bml_getopt(cfg,'roi');
 timetol            = bml_getopt(cfg,'timetol',1e-3);
-timetol_contiguous = bml_getopt(cfg,'timetol_contiguous',1e-4);
+timetol_contiguous = bml_getopt(cfg,'timetol_contiguous',1e-3);
 contiguous         = bml_getopt(cfg,'contiguous',true);
 timewarp           = bml_getopt(cfg,'timewarp',true);
 rowisfile          = bml_getopt(cfg,'rowisfile',true);
