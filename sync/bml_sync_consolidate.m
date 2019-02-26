@@ -11,6 +11,8 @@ function consolidated = bml_sync_consolidate(cfg)
 %               to 1e-3
 % cfg.contiguous - logical: should time contiguous files of the same type
 %               be consolidated toghether. Defaults to true. 
+% cfg.timetol_contiguous - double: time tolerance in seconds by which to
+%               detect contiguous files. Defaults to 1e-4.
 % cfg.group - variable indicating grouping criteria. Entries of different groups 
 %               are not consolidated together. Defaults to 'session_id'
 % cfg.timewarp - boolean, indicates if linear time warping is allowed in
@@ -31,15 +33,25 @@ function consolidated = bml_sync_consolidate(cfg)
 if istable(cfg)
   cfg = struct('roi',cfg);
 end
-roi             = bml_getopt(cfg,'roi');
-timetol         = bml_getopt(cfg,'timetol',1e-3);
-contiguous      = bml_getopt(cfg,'contiguous',true);
-group           = bml_getopt_single(cfg,'group','session_id');
-timewarp        = bml_getopt(cfg,'timewarp',true);
-rowisfile       = bml_getopt(cfg,'rowisfile',true);
-partial         = bml_getopt(cfg,'partial',false);
-plot_diagnostic = bml_getopt(cfg,'plot_diagnostic',false);
+roi                = bml_getopt(cfg,'roi');
+timetol            = bml_getopt(cfg,'timetol',1e-3);
+timetol_contiguous = bml_getopt(cfg,'timetol_contiguous',1e-4);
+contiguous         = bml_getopt(cfg,'contiguous',true);
+timewarp           = bml_getopt(cfg,'timewarp',true);
+rowisfile          = bml_getopt(cfg,'rowisfile',true);
+partial            = bml_getopt(cfg,'partial',false);
+plot_diagnostic    = bml_getopt(cfg,'plot_diagnostic',false);
+
 group_specified = ismember("group",fieldnames(cfg));
+if group_specified 
+  if ~isempty(cfg.group)
+    group = bml_getopt_single(cfg,'group');
+  else
+    group = [];
+  end
+else
+  group = bml_getopt_single(cfg,'group','session_id');
+end
 
 REQUIRED_VARS = {'folder','name','chantype','filetype'};
 if ~all(ismember(REQUIRED_VARS,roi.Properties.VariableNames))
@@ -61,7 +73,7 @@ assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),...
 roi.fullfile = fullfile(roi.folder,roi.name);
 
 %dealing with consolidation groups (usually sessions)
-if ismember(group,roi.Properties.VariableNames)
+if ~isempty(group) && ismember(group,roi.Properties.VariableNames)
   if group_specified
     fprintf("grouping by %s \n",group);
   end
@@ -144,7 +156,7 @@ if contiguous
   ufc = unique(roi.filetype_chantype);
   for i_ufc=1:length(ufc)
   	i_roi = roi(strcmp(roi.filetype_chantype,ufc(i_ufc)),:);
-    if  height(i_roi)>1 && length(unique(i_roi.name))<=1 
+    if height(i_roi)>1 && length(unique(i_roi.name))<=1 
       if partial
         consolidated = [consolidated; i_roi];
         continue
@@ -155,7 +167,7 @@ if contiguous
     
     %detecting time contiguos stretches
     cfg=[];
-    cfg.criterion = @(x) abs(sum(x.duration)-max(x.ends)+min(x.starts)) < height(x)*timetol;
+    cfg.criterion = @(x) abs(sum(x.duration)-max(x.ends)+min(x.starts)) < height(x)*timetol_contiguous;
     i_roi_cont = bml_annot_consolidate(cfg,bml_roi_confluence(i_roi));   
     
     for j=1:height(i_roi_cont)
@@ -167,13 +179,19 @@ if contiguous
         right_complete = i_roi_cont_j.ends(end)>=i_roi_cont_j.t2(end);
 
         %calculating raw samples of contiguous file
-%         cs = cumsum(i_roi_cont_j.s2-i_roi_cont_j.s1) + i_roi_cont_j.s1(1);
-%         cs = cs + (0:(height(i_roi_cont_j)-1))';
-%         cs = [0; cs(1:end-1)];
-%         i_roi_cont_j.raw1 = i_roi_cont_j.s1 + cs;
-%         i_roi_cont_j.raw2 = i_roi_cont_j.s2 + cs;
         i_roi_cont_j = s2raw(i_roi_cont_j);
         
+%         if plot_diagnostic
+%           delta_t_M = sync_cons_group_pairwise(i_roi_cont_j,timewarp,'raw');
+%           figure();
+%           image(delta_t_M,'CDataMapping','scaled');
+%           xticks(1:height(i_roi_cont_j));
+%           yticks(1:height(i_roi_cont_j));
+%           xticklabels(i_roi_cont_j.id);
+%           yticklabels(i_roi_cont_j.id);
+%           colorbar;
+%         end
+
         %doing linear fit to asses if consolidation is plausible
         [p,max_delta_t,off_idx] = sync_cons_group(i_roi_cont_j,timewarp,'raw');
         
