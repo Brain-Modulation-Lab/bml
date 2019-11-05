@@ -1,6 +1,6 @@
 function [Rec] =  bml_neuroomega_load(cfg)
 
-% BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as FT_DATATYPE_RAW data structure. 
+% BML_NEUROOMEGA_LOAD loads a NeuroOmega dataset as FT_DATATYPE_RAW data structure.
 %
 % Use as
 %   rec = bml_load_neuroomega(cfg);
@@ -15,7 +15,7 @@ function [Rec] =  bml_neuroomega_load(cfg)
 % cfg.chantype - cell array of strings: defines channel types to be loaded.
 %                use an invalid channel as '?' to get a table of available
 %                channels and chantypes printed out. An error will stop
-%                further analysis. 
+%                further analysis.
 %
 % Returns a struct.array, where each element contains the following fields
 % Rec(i).files - cell array of strings: .mat filenames
@@ -64,15 +64,15 @@ for m=1:N %cycling through depths
     fprintf('\n--- Processing Depth %f ---\n', depth_sel(m));
     db = files([files.depth]==depth_sel(m),:);
     db = sortrows(db,'name');
-    Rec(m).folder=db.folder;    
+    Rec(m).folder=db.folder;
     Rec(m).filename=db.name;
     Rec(m).depth=depth_sel(m);
-   
+
     for i=1:numel(chantype) %cycling through chantypes
       tmp=cellfun(@(x) ft_preprocessing(...
           struct('dataset',x,'chantype',chantype{i})),...
           fullfile(Rec(m).folder,Rec(m).filename),'UniformOutput',false);
-      Rec(m).(chantype{i})=ft_appenddata(struct('appenddim','time'),tmp{:});       
-    end   
+      %Rec(m).(chantype{i})=ft_appenddata(struct('appenddim','time'),tmp{:});
+      Rec(m).(chantype{i})=bml_hstack([],tmp{:});
+    end
 end
-

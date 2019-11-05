@@ -12,7 +12,7 @@ function [data] = bml_hstack(cfg, varargin)
 % cfg.match_labels - logical: indicates if same labels (channel names)
 %               should be enforced for concatenation. If false and all
 %               raws have the same number of labels, concatenation will
-%               proceed with a warning. Defaults to true. 
+%               proceed with a warning. Defaults to true.
 %
 % returns a time-concatenated raw
 
@@ -64,7 +64,9 @@ for i=2:numel(varargin)
   issamelabel  = issamelabel  && isempty(setxor(varargin{i}.label, varargin{1}.label));
   issamenchan  = issamenchan && (length(varargin{i}.label) == length(varargin{1}.label));
   isequaltrial = isequaltrial && isequal(numel(varargin{i}.trial),numel(varargin{1}.trial));
-  isequalfreq  = isequalfreq && length(uniquetol([varargin{i}.fsample,varargin{1}.fsample],timetol))==1;
+  isequalfreq  = isequalfreq && isfield(varargin{i},'hdr') && isfield(varargin{1},'hdr') && ...
+                             && isfield(varargin{i}.hdr,'Fs') && isfield(varargin{1}.hdr,'Fs') && ...
+                             length(uniquetol([varargin{i}.hdr.Fs,varargin{1}.hdr.Fs],cfg.tolerance))==1;
 end
 
 % ft_selectdata cannot create the union of the data contained in cell-arrays
@@ -102,9 +104,9 @@ if ~isequallabel
 end
 if ~isequaltrial
     ft_error('Same number of trials required to append data by time')
-end  
+end
 if ~isequalfreq
-    ft_error('Same Fs required to append data by time')        
+    ft_error('Same Fs required to append data by time')
 end
 
 % don't do any data appending inside the common function
@@ -120,7 +122,7 @@ end
 if ismember('hdr',fieldnames(varargin{1}))
   data.hdr=varargin{1}.hdr;
 end
-%data.sampleinfo=[]; 
+%data.sampleinfo=[];
 
 if strcmp(timeref,'auto')
   if bml_check_contiguity(cfg,varargin{:})
@@ -147,7 +149,7 @@ if strcmp(timeref,'independent')
     tim = cat(2, tim, trial_tim);
   end
   data.trial = dat;
-  data.time  = tim;      
+  data.time  = tim;
 elseif strcmp(timeref,'common')
   dat = cell(1,0);
   tim = cell(1,0);
@@ -162,8 +164,7 @@ elseif strcmp(timeref,'common')
     tim = cat(2, tim, trial_tim);
   end
   data.trial = dat;
-  data.time  = tim; 
+  data.time  = tim;
 else
   error('unknown cfg.timeref');
 end
-
