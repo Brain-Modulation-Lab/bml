@@ -181,16 +181,16 @@ if contiguous
         %calculating raw samples of contiguous file
         i_roi_cont_j = s2raw(i_roi_cont_j);
         
-%         if plot_diagnostic
-%           delta_t_M = sync_cons_group_pairwise(i_roi_cont_j,timewarp,'raw');
-%           figure();
-%           image(delta_t_M,'CDataMapping','scaled');
-%           xticks(1:height(i_roi_cont_j));
-%           yticks(1:height(i_roi_cont_j));
-%           xticklabels(i_roi_cont_j.id);
-%           yticklabels(i_roi_cont_j.id);
-%           colorbar;
-%         end
+        if plot_diagnostic
+          delta_t_M = sync_cons_group_pairwise(i_roi_cont_j,timewarp,'raw');
+          figure();
+          image(delta_t_M,'CDataMapping','scaled');
+          xticks(1:height(i_roi_cont_j));
+          yticks(1:height(i_roi_cont_j));
+          xticklabels(i_roi_cont_j.id);
+          yticklabels(i_roi_cont_j.id);
+          colorbar;
+        end
 
         %doing linear fit to asses if consolidation is plausible
         [p,max_delta_t,off_idx] = sync_cons_group(i_roi_cont_j,timewarp,'raw');

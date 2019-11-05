@@ -144,8 +144,9 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
     %CodingMatrix row 3: Syl onset time
     onset_syl=bml_strnumcell2ordvec(CodingMatrix{3,i}); %in Audio seconds
     empty_syl = isempty(onset_syl);
-    if length(onset_syl) ~= 3 
-      if ~empty_syl || ~ismissing(phonetic_code{1})
+    if length(onset_syl) ~= 3
+      %if ~empty_syl || ~ismissing(phonetic_code{1})
+      if ~empty_syl | ~ismissing(phonetic_code{1})
         fprintf('Warning[01] number of syllable onsets is different from 3 in trial %i of session %i \n',trial_id,session_id)
         data_integrity = false;
       end
