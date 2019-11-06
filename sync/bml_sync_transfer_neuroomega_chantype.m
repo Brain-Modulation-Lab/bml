@@ -51,7 +51,9 @@ assert(~isempty(roi),'roi required');
 
 hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),'chantype','chaninfo');
 if isempty(time_channel)
-  time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,chantype),:).channel{1};
+  sel_time_channel = strcmp(hdr1.chaninfo.chantype,chantype);
+  assert(sum(sel_time_channel)>0,'no channel of specified chantype');
+  time_channel = hdr1.chaninfo(sel_time_channel,:).channel{1};
 end
 if isempty(sync_time_channel)
   sync_time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,roi.chantype{1}),:).channel{1};
