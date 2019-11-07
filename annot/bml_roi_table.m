@@ -54,13 +54,34 @@ if ~all(ismember(REQUIRED_VARS, roi.Properties.VariableNames))
   error(['table ''x'' requires variables ' strjoin(REQUIRED_VARS,', ')])
 end
 
+if iscell(roi.nSamples)
+  roi.nSamples=cell2mat(roi.nSamples);
+end
+if iscell(roi.Fs)
+  roi.Fs=cell2mat(roi.Fs);
+end
+
 if ~all(ismember({'s1','t1'}, roi.Properties.VariableNames))
   roi.s1=ones(height(roi),1);
   roi.t1=roi.starts + 0.5 ./ roi.Fs;
+  else
+    if iscell(roi.s1)
+      roi.s1=cell2mat(roi.s1);
+    end
+    if iscell(roi.t1)
+      roi.t1=cell2mat(roi.t1);
+    end
 end
 if ~all(ismember({'s2','t2'}, roi.Properties.VariableNames))
   roi.s2=roi.nSamples;
   roi.t2=roi.ends - 0.5 ./ roi.Fs;
+  else
+    if iscell(roi.s2)
+      roi.s2=cell2mat(roi.s2);
+    end
+    if iscell(roi.t2)
+      roi.t2=cell2mat(roi.t2);
+    end
 end
 
 if ~ismember('chantype', roi.Properties.VariableNames)

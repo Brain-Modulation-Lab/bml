@@ -61,6 +61,9 @@ if ~ismember('starts',x.Properties.VariableNames)
     error('x should have variable ''starts''');
   end
 end
+if iscell(x.starts)
+    x.starts=cell2mat(x.starts);
+end
 if(any(ismissing(x.starts)))
   warning("starts contains nans");
 end
@@ -74,20 +77,28 @@ if ~ismember('ends',x.Properties.VariableNames)
     error('x should have variable ''ends''');
   end  
 end
+if iscell(x.ends)
+    x.ends=cell2mat(x.ends);
+end
 if(any(ismissing(x.ends)))
   warning("ends contains nans");
 end
 
-if ~strcmp('id',x.Properties.VariableNames)
+if ~ismember('id',x.Properties.VariableNames)
   x = sortrows(x,'starts');
   x = [table(transpose(1:height(x)),'VariableNames',{'id'}), x];
-elseif length(unique(x.id)) < height(x)
-  error('inconsistent id variable')
 else
-   x = sortrows(x,'id');
+  if iscell(x.id)
+    x.id=cell2mat(x.id);
+  end
+  if length(unique(x.id)) < height(x)
+    error('inconsistent id variable')
+  else
+    x = sortrows(x,'id');
+  end
 end
 
-if any(strcmp('duration',x.Properties.VariableNames))
+if ismember('duration',x.Properties.VariableNames)
   x.duration = [];
 end
 x = [x, table(x.ends - x.starts,'VariableNames',{'duration'})];

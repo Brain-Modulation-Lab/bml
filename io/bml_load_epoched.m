@@ -186,6 +186,7 @@ cfg=[];
 cfg.appenddim = 'rpt';
 cfg.trackcallinfo = false;
 cfg.showcallinfo = 'no';
+cfg.keepsampleinfo = 'no'; 
 raw = ft_appenddata(cfg, raw{:});
 
 if ~isempty(hdr)
