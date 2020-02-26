@@ -57,32 +57,24 @@ XYZ_mm = [coord{:,col_idx_x}, coord{:,col_idx_y}, coord{:,col_idx_z}];
 XYZ_mm = [XYZ_mm ones(size(XYZ_mm,1),1)];
 
 %initializing columns
-if max_assign == 1
-    if ismember(lab_col_bn,coord.Properties.VariableNames)
-        fprintf('recalculating %s \n',lab_col_bn)
-        coord(:,lab_col_bn) = NaN(height(coord),1);
+for i=1:max_assign       
+    col_Li = [lab_col_bn '_l' num2str(i)];
+    col_Wi = [lab_col_bn '_w' num2str(i)];
+    if ismember(col_Li,coord.Properties.VariableNames)
+        fprintf('recalculating %s \n',col_Li)
+        coord(:,col_Li) = repmat({''},height(coord),1);
     else
-        coord = addvars(coord, NaN(height(coord),1),'NewVariableNames',lab_col_bn);        
+        coord = addvars(coord, repmat({''},height(coord),1),'NewVariableNames',col_Li);             
     end
-elseif max_assign > 1
-    for i=1:max_assign       
-        col_Li = [lab_col_bn '_l' num2str(i)];
-        col_Wi = [lab_col_bn '_w' num2str(i)];
-        if ismember(col_Li,coord.Properties.VariableNames)
-            fprintf('recalculating %s \n',col_Li)
-            coord(:,col_Li) = repmat({''},height(coord),1);
-        else
-        	coord = addvars(coord, repmat({''},height(coord),1),'NewVariableNames',col_Li);             
-        end
-        
-        if ismember(col_Wi,coord.Properties.VariableNames)
-            fprintf('recalculating %s \n',col_Wi)
-            coord(:,col_Wi) = NaN(height(coord),1);
-        else
-        	coord = addvars(coord, NaN(height(coord),1),'NewVariableNames',col_Wi);             
-        end
+
+    if ismember(col_Wi,coord.Properties.VariableNames)
+        fprintf('recalculating %s \n',col_Wi)
+        coord(:,col_Wi) = NaN(height(coord),1);
+    else
+        coord = addvars(coord, NaN(height(coord),1),'NewVariableNames',col_Wi);             
     end
 end
+
 
 %getting labels nifti
 fname_nii = [atlas_path atlas '.nii'];
@@ -162,18 +154,13 @@ for e=1:size(RCS_vx,1) %for each electrode
         labs = bml_map(labs,keys.id,keys.label);
         
         if ~isempty(labs)
-            if max_assign == 1
-               coord(e,lab_col_bn)=labs(1);
-            elseif max_assign > 1
-                for i=1:min(max_assign,length(labs))
-                    coord(e,[lab_col_bn '_l' num2str(i)])=labs(i);
-                    coord{e,[lab_col_bn '_w' num2str(i)]}=w(i);      
-                end
+            for i=1:min(max_assign,length(labs))
+                coord(e,[lab_col_bn '_l' num2str(i)])=labs(i);
+                coord{e,[lab_col_bn '_w' num2str(i)]}=w(i);      
             end
         end
         
     end
-    
     anat_labels = coord;
 end
 
