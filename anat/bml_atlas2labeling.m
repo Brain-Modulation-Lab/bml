@@ -58,11 +58,19 @@ for subf=1:length(subfs)
     end
 end
 
-lab = ea_load_nii(spacefile);
-lab.img = Fvol;
-lab.fname = [ea_space([],'labeling'), atlasname, '.nii'];
 disp('Write out NIfTI..');
-ea_write_nii(lab);
+lab = [];
+lab.fname = [ea_space([],'labeling'), atlasname, '.nii'];
+lab.mat = ea_get_affine(spacefile);
+lab.dim = [hdr.dim1, hdr.dim2, hdr.dim3];
+lab.pinfo = [1; 0];
+lab.descrip = [atlasname ' labeling'];
+if max(Fvol,[],'all') <= 255
+    lab.dt = [spm_type('uint8') spm_platform('bigend')];
+else
+	lab.dt = [spm_type('uint16') spm_platform('bigend')];   
+end
+spm_write_vol(lab, Fvol);
 
 disp('Write out TXT..');
 f = fopen([ea_space([],'labeling'), atlasname, '.txt'], 'w');
