@@ -1,6 +1,6 @@
-function anat_labels = bml_anat_label_coord(cfg, coord)
+function anat_labels = bml_anat_coord2label(cfg, coord)
 
-% BML_ANAT_LABEL_COORD returns a label from an atlas corresponding to a
+% BML_ANAT_LCOORD2LABEL returns a label from an atlas corresponding to a
 % given coordinate
 %
 % Use as
@@ -10,17 +10,20 @@ function anat_labels = bml_anat_label_coord(cfg, coord)
 % the following fields:
 % cfg.atlas - name of the atlas to use 
 % cfg.max_assign - integer >= 1, max number of labels assigned to each electrode. Defaults to 1. 
+% cfg.profile - either 'sphere' or 'gaussian'. Defaulst to 'gaussian'.
+% cfg.sigma - float, indicating gaussiand sigma parameter in mm.
 % cfg.radius - radius in mm around each electrode coordinate to consider in
-%        label assignation. 
-% cfg.profile - either 'sphere' or 'gaussian'
+%        label assignation. Defaults to 3mm.
 % cfg.atlas_path - path to volume atlas repository. Defaults to lead-dbs's
 %             icbm 2009b nlin asym labeling folder
 % cfg.keys - table with code to structure key. By default the .txt file 
 %             associated with the nifti file is used 
 % cfg.exclude_labels - vector with integer labels to exclude. Defaults yto
-%             [0], normally assigned to CSF
+%             [0], normally assigned to CSF or no label
 % cfg.label_column_basename - string. Basename for added columns to coord with
 %             label information. Defauls to first part of atlas name. 
+% cfg.return_coords - bool indicating if coordinates should be returned in
+%             anat_labels table. defaulst to false
 %
 % coord - table with electrode coordinates. The first three columns ending 
 % with  _x, _y, _z will be used as x,y,z coordinates. Note that the coordinates have to be
@@ -40,6 +43,7 @@ max_assign     = bml_getopt(cfg,'max_assign',1);
 sigma          = bml_getopt(cfg,'sigma',1);
 radius         = bml_getopt(cfg,'radius',3);
 profile        = bml_getopt_single(cfg,'profile','gaussian');
+return_coords  = bml_getopt_single(cfg,'return_coords',false);
 exclude_labels = bml_getopt(cfg,'exclude_labels',0);
 lab_col_bn = strsplit(atlas,' ');
 if iscell(lab_col_bn); lab_col_bn = lab_col_bn{1}; end
@@ -56,22 +60,30 @@ end
 XYZ_mm = [coord{:,col_idx_x}, coord{:,col_idx_y}, coord{:,col_idx_z}];
 XYZ_mm = [XYZ_mm ones(size(XYZ_mm,1),1)];
 
+anat_labels = coord;
+if ~return_coords
+    col_idxs = sort([col_idx_x,col_idx_y,col_idx_z],'ascend');
+    anat_labels(:,col_idxs(3))=[];
+    anat_labels(:,col_idxs(2))=[];
+	anat_labels(:,col_idxs(1))=[];
+end
+
 %initializing columns
 for i=1:max_assign       
-    col_Li = [lab_col_bn '_l' num2str(i)];
-    col_Wi = [lab_col_bn '_w' num2str(i)];
-    if ismember(col_Li,coord.Properties.VariableNames)
+    col_Li = [lab_col_bn '_label_' num2str(i)];
+    col_Wi = [lab_col_bn '_weight_' num2str(i)];
+    if ismember(col_Li,anat_labels.Properties.VariableNames)
         fprintf('recalculating %s \n',col_Li)
-        coord(:,col_Li) = repmat({''},height(coord),1);
+        anat_labels(:,col_Li) = repmat({''},height(anat_labels),1);
     else
-        coord = addvars(coord, repmat({''},height(coord),1),'NewVariableNames',col_Li);             
+        anat_labels = addvars(anat_labels, repmat({''},height(anat_labels),1),'NewVariableNames',col_Li);             
     end
 
-    if ismember(col_Wi,coord.Properties.VariableNames)
+    if ismember(col_Wi,anat_labels.Properties.VariableNames)
         fprintf('recalculating %s \n',col_Wi)
-        coord(:,col_Wi) = NaN(height(coord),1);
+        anat_labels(:,col_Wi) = NaN(height(anat_labels),1);
     else
-        coord = addvars(coord, NaN(height(coord),1),'NewVariableNames',col_Wi);             
+        anat_labels = addvars(anat_labels, NaN(height(anat_labels),1),'NewVariableNames',col_Wi);             
     end
 end
 
@@ -151,17 +163,16 @@ for e=1:size(RCS_vx,1) %for each electrode
         labs = labs(w > eps);
         w = w(w > eps);
         
-        labs = bml_map(labs,keys.id,keys.label);
+        labs = bml_map(labs,keys.id,keys.label,'NaN');
         
         if ~isempty(labs)
             for i=1:min(max_assign,length(labs))
-                coord(e,[lab_col_bn '_l' num2str(i)])=labs(i);
-                coord{e,[lab_col_bn '_w' num2str(i)]}=w(i);      
+                anat_labels(e,[lab_col_bn '_label_' num2str(i)])=labs(i);
+                anat_labels{e,[lab_col_bn '_weight_' num2str(i)]}=w(i);      
             end
         end
         
     end
-    anat_labels = coord;
 end
 
 
