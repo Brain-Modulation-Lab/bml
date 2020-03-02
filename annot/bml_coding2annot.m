@@ -22,6 +22,10 @@ function annot = bml_coding2annot(cfg)
 % cfg.timetol_consolidate - double: consolidation time tolerance. Defaults to 1e-3s
 %           this time tolerance relates to the sync consolidation process.
 %           extrinsic time tolerance (between samples of different strams)
+% cfg.praat - bool: if true, audio files are opened in praat for visual
+%           inspections
+% cfg.AudioCoord = time coordinates of audio file. If empty, calculated
+%           from roi
 %
 % returns annot table with one row per trial (syllable triplet) 
 
@@ -44,8 +48,8 @@ load(CodingMatPath,'Afs');
 
 roi              = bml_getopt(cfg,'roi');
 CodingAppVersion = bml_getopt(cfg,'CodingAppVersion','U01_v2');
-AudioCoord       = bml_getopt(cfg,'warpcoords');
-praat            = bml_getopt(cfg,'praat');
+AudioCoord       = bml_getopt(cfg,'AudioCoord');
+praat            = bml_getopt(cfg,'praat',false);
 audio_channel    = bml_getopt(cfg,'audio_channel');
 session_id       = bml_getopt(cfg,'session_id',nan);
 diary_filename   = bml_getopt_single(cfg,'diary_filename',[]);

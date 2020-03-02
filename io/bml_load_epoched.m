@@ -24,6 +24,9 @@ function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)
 % cfg.reorder_channels - bool indicating if channels should be reordered as defined
 %           in the electrode table. If false ('default') the order in which
 %           they are stored in memory is maintained. 
+% cfg.match_labels - logical, indicates if labels of all files should be
+%           the same. Defaulst to true. If false a warning will be issued
+%           when concatenating files with different labels. 
 %
 % cfg... further arguments for BML_LOAD_CONTINUOUS 
 % cfg.chantype
@@ -82,7 +85,7 @@ if ~isempty(resamplefs)
   cfg_resample.feedback = feedback;
 end
 
-assert(istable(epoch),"epoch required");
+assert(istable(epoch) && height(epoch)>0,"epoch required");
 if ~ismember('epoch_id',epoch.Properties.VariableNames)
   epoch.epoch_id = epoch.id;
 end
