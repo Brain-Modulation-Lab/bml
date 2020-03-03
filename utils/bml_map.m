@@ -5,9 +5,9 @@ function mapped = bml_map(element,domain,codomain,non_domain)
 % Use as
 %   mapped = bml_map(element,domain,codomain)
 %
-% element - cellstr, cell or array
-% domain - cellstr, cell or array. Possible elements to match with
-% codomain - cellstr, cell or array. Corresponding elements
+% element - cellstr, cell or array in column format
+% domain - cellstr, cell or array. Possible elements to match with in column format
+% codomain - cellstr, cell or array. Corresponding elements in column format
 % non_domain - optional value to be returned if element is not in domain
 %
 % returns the corresponding codomain element for each given domain element
@@ -15,6 +15,14 @@ function mapped = bml_map(element,domain,codomain,non_domain)
 if ischar(element)
   element = {element};
 end
+
+if size(element,2) > size(element,1); element=element'; end
+if size(domain,2) > size(domain,1); domain=domain'; end
+if size(codomain,2) > size(codomain,1); codomain=codomain'; end
+
+assert(size(element,2)==1,'element should be column vector');
+assert(size(domain,2)==1,'domain should be column vector');
+assert(size(codomain,2)==1,'codomain should be column vector');
 
 if exist('non_domain','var')
     out_of_domain = setdiff(element,domain);
