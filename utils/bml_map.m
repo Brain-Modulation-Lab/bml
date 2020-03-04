@@ -20,9 +20,9 @@ if size(element,2) > size(element,1); element=element'; end
 if size(domain,2) > size(domain,1); domain=domain'; end
 if size(codomain,2) > size(codomain,1); codomain=codomain'; end
 
-assert(size(element,2)==1,'element should be column vector');
-assert(size(domain,2)==1,'domain should be column vector');
-assert(size(codomain,2)==1,'codomain should be column vector');
+assert(size(element,2)<=1,'element should be column vector');
+assert(size(domain,2)<=1,'domain should be column vector');
+assert(size(codomain,2)<=1,'codomain should be column vector');
 
 if exist('non_domain','var')
     out_of_domain = setdiff(element,domain);
