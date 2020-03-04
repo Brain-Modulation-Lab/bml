@@ -374,6 +374,9 @@ if ismember(CodingAppVersion,{'U01_v2'}) % CodingApp version July 2018 =========
       nt_code = [1,      2,                  3,          4,                 5,                6];
       nt_str = {'none', 'beeping-constant', 'OR-noise', 'provider-speech', 'patient-speech', 'patient-non-speech'};
 
+      if length(row13{2,1}) < 5
+        row13{2,1}=[row13{2,1} ones(1,5-length(row13{2,1}))];
+      end
       nontask1_pre_type=bml_map(row13{2,1}(1),nt_code,nt_str);
       nontask2_post_type=bml_map(row13{2,1}(2),nt_code,nt_str);
       nontask3_other_type=bml_map(row13{2,1}(3),nt_code,nt_str);
