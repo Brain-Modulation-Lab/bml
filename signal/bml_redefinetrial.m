@@ -5,7 +5,7 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 % Use as
 %   redefined = bml_redefinetrial(cfg, raw)
 %
-% raw - FT_DATAYPR_RAW to be re-epoched with time in global coordinates
+% raw - FT_DATAYPE_RAW to be re-epoched with time in global coordinates
 % cfg - configuraton structure
 % cfg.epoch - ANNOT table with new epoching
 % cfg.timelock - reference time for timelocking each epoch. If not specified the time is kept in
