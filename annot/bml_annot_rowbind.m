@@ -17,6 +17,8 @@ for i=1:numel(varargin)
 end
 
 if ~isempty(annot)
-    annot.id=[];
+    if ismember('id',annot.Properties.VariableNames)
+      annot.id=[];
+    end
     annot = bml_annot_table(annot);
 end
