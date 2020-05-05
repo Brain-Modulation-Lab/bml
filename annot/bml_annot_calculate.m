@@ -18,16 +18,28 @@ function annot = bml_annot_calculate(cfg, raw, varargin)
 %          if not provided, the epochs are determined by the raw structure.
 %          if a channels column is present, it use to select the channel
 %          for each annotation
+% cfg.warn - logical indicating if warnings should be issued. Defaults to true
+% cfg.minduration - minimal duration in seconds of epoch on which to calculate the
+%          feature. Defaults to 0.001.
 %
 % returns an annotation table with new features calculated from raw
+warn        = bml_getopt(cfg,'warn',true);
+minduration = bml_getopt(cfg,'minduration',0.001);
+epoch_orig = bml_annot_table(bml_getopt(cfg,'epoch',[]),'epoch');
+epoch_id_present = ismember('epoch_id',epoch_orig.Properties.VariableNames);
+if ~epoch_id_present
+  epoch_orig.epoch_id = epoch_orig.id;
+end
+epoch = epoch_orig;
 
-epoch = bml_annot_table(bml_getopt(cfg,'epoch',[]),'epoch');
 if isempty(epoch)
 	epoch = bml_raw2annot(raw);
+  epoch.epoch_id = epoch.id;
   eraw = raw;
 else
   cfg1=[];
   cfg1.epoch = epoch;
+  cfg1.warn = warn;
   [eraw, epoch] = bml_redefinetrial(cfg1,raw);
 end
 
@@ -39,10 +51,12 @@ if ~ismember('channel',epoch.Properties.VariableNames)
   end
 end
 
+epoch = epoch(:,{'id','starts','ends','duration','epoch_id','channel'});
+
 if nargin < 4
   error('at least one feature name and function required')
 elseif mod(nargin,2)~=0 
-  error('uneven number of arguments.Pairs of feature names and functions required')
+  error('uneven number of arguments. Pairs of feature names and functions required')
 else
   nfeatures = (nargin - 2)/2;
 end
@@ -52,17 +66,26 @@ for i=1:nfeatures
   feature_fun = varargin{(i-1)*2+2};
   
   if ~ismember(feature_name,epoch.Properties.VariableNames)
-    epoch.(feature_name) = repmat({nan},height(epoch),1);
+    epoch.(feature_name) = nan(height(epoch),1);
   end
   
   for t=1:numel(eraw.trial)
     trial = eraw.trial{t};
-    try
-      epoch{t,feature_name}={feature_fun(trial(bml_getidx(epoch.channel(i),eraw.label),:))};
-    catch 
-      warning("%s failed on trial %i \n",feature_name,t)
+    if epoch.duration(t) > minduration
+      try
+        epoch{t,feature_name}=feature_fun(trial(bml_getidx(epoch.channel(i),eraw.label),:));
+      catch 
+        warning("%s failed on trial %i \n",feature_name,t)
+      end
     end
   end
 end
 
-annot = epoch;
+annot = outerjoin(epoch_orig,epoch(:,5:end),'Type','left','Keys','epoch_id','MergeKeys',true);
+
+if ~epoch_id_present
+  annot.epoch_id = [];
+end
+
+
+
