@@ -1,5 +1,7 @@
 function bml_atlas2labeling(atlasname, spacefile)
 % adpated from ea_atlas2labeling to work for Distal atlas
+%
+% Use as bml_atlas2labeling('Morel (Jakab 2008)')
 
 if ~exist('spacefile','var')
     spacefile = [ea_space,'t2.nii'];
@@ -65,7 +67,8 @@ lab.mat = ea_get_affine(spacefile);
 lab.dim = [hdr.dim1, hdr.dim2, hdr.dim3];
 lab.pinfo = [1; 0];
 lab.descrip = [atlasname ' labeling'];
-if max(Fvol,[],'all') <= 255
+
+if cnt <= 255
     lab.dt = [spm_type('uint8') spm_platform('bigend')];
 else
 	lab.dt = [spm_type('uint16') spm_platform('bigend')];   
