@@ -64,9 +64,9 @@ end
 if iscell(x.starts)
     x.starts=cell2mat(x.starts);
 end
-if(any(ismissing(x.starts)))
-  warning("starts contains nans");
-end
+% if(any(ismissing(x.starts)))
+%   warning("starts contains nans");
+% end
 
 if ~ismember('ends',x.Properties.VariableNames)
   if width(x)==1 
@@ -80,9 +80,9 @@ end
 if iscell(x.ends)
     x.ends=cell2mat(x.ends);
 end
-if(any(ismissing(x.ends)))
-  warning("ends contains nans");
-end
+% if(any(ismissing(x.ends)))
+%   warning("ends contains nans");
+% end
 
 if ~ismember('id',x.Properties.VariableNames)
   x = sortrows(x,'starts');
