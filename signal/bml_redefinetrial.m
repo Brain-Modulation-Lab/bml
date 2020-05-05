@@ -22,7 +22,9 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 % cfg.warn - logical indicating if warnings should be issued. Defaults to true
 %
 % returns a raw with new trials. The epoch ANNOT is added as a new field in the 
-% raw, changing the id to match the index of the corresponding trials if necessary.
+% raw, changing the id to match the index of the corresponding trials if
+% necessary. The original id is returned in a new epoch_id variable, if
+% this variable didn't exist. 
 
 epoch      = bml_annot_table(bml_getopt(cfg,'epoch'),'epoch');
 t0         = bml_getopt(cfg,'t0');
@@ -61,6 +63,10 @@ if ~isempty(timelock)
   else
     error("timelock should be a numeric vector, or be the name of a numeric variable in epoch");
   end
+end
+
+if ~ismember('epoch_id',epoch.Properties.VariableNames)
+  epoch.epoch_id = epoch.id;
 end
 
 %creating output raw
