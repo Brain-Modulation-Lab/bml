@@ -67,7 +67,8 @@ for l=1:numel(labels)
     if ismember('fsample',fields(raw))
       Fs = raw.fsample;
     else
-      Fs = round(1/mean(diff(raw.time{i})),9,'significant');
+      Fs = bml_getFs(raw);
+      %Fs = round(1/mean(diff(raw.time{i})),9,'significant');
     end
 
     s1 = 1;
