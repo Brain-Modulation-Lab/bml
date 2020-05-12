@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_xcorr</title>
+  <meta name="keywords" content="bml_xcorr">
+  <meta name="description" content="BML_XCORR calculates the cross correlation between ft_raw objects">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_xcorr.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_xcorr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_XCORR calculates the cross correlation between ft_raw objects</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function r = bml_xcorr(cfg, x, y) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_XCORR calculates the cross correlation between ft_raw objects
+ [deprecated]
+
+ Use as
+   r = bml_xcorr(cfg, x, y)
+   r = bml_xcorr(x, y)
+   r = bml_xcorr(cfg, x)
+   r = bml_xcorr(x)
+
+ x,y - FT_DATAYPE_RAW 
+ cfg - configuration structure
+ cfg.maxlag -  limits the lag range from –maxlag to maxlag. This syntax 
+        accepts one or two input sequences. maxlag defaults to N – 1.
+ cfg.scaleopt - additionally specifies a normalization option for the 
+     cross-correlation or autocorrelation. Any option other than 'none' 
+     (the default) requires x and y to have the same length.
+
+ note: bml_xcorr matches x to y trial-by-trial. Use bml_conform_to to enforce trial
+ matching by time. 
+
+ returns a fieldtrip raw object, where time is mapped to lags</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function r = bml_xcorr(cfg, x, y)</a>
+0002 
+0003 <span class="comment">% BML_XCORR calculates the cross correlation between ft_raw objects</span>
+0004 <span class="comment">% [deprecated]</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Use as</span>
+0007 <span class="comment">%   r = bml_xcorr(cfg, x, y)</span>
+0008 <span class="comment">%   r = bml_xcorr(x, y)</span>
+0009 <span class="comment">%   r = bml_xcorr(cfg, x)</span>
+0010 <span class="comment">%   r = bml_xcorr(x)</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% x,y - FT_DATAYPE_RAW</span>
+0013 <span class="comment">% cfg - configuration structure</span>
+0014 <span class="comment">% cfg.maxlag -  limits the lag range from –maxlag to maxlag. This syntax</span>
+0015 <span class="comment">%        accepts one or two input sequences. maxlag defaults to N – 1.</span>
+0016 <span class="comment">% cfg.scaleopt - additionally specifies a normalization option for the</span>
+0017 <span class="comment">%     cross-correlation or autocorrelation. Any option other than 'none'</span>
+0018 <span class="comment">%     (the default) requires x and y to have the same length.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% note: bml_xcorr matches x to y trial-by-trial. Use bml_conform_to to enforce trial</span>
+0021 <span class="comment">% matching by time.</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% returns a fieldtrip raw object, where time is mapped to lags</span>
+0024 
+0025 warning(<span class="string">'bml_xcorr is deprecated function'</span>)
+0026 
+0027 is_raw_cfg = all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(cfg)));
+0028 <span class="keyword">if</span> nargin == 3
+0029   assert((isempty(cfg) || isstruct(cfg)) &amp;&amp; ~is_raw_cfg,<span class="string">'incorrect use of bml_xcorr'</span>);  
+0030 <span class="keyword">elseif</span> nargin == 2
+0031   <span class="keyword">if</span> is_raw_cfg <span class="comment">% case r = bml_xcorr(x, y)</span>
+0032     y=x;
+0033     x=cfg;
+0034     cfg=[];
+0035   <span class="keyword">else</span> <span class="comment">% case r = bml_xcorr(cfg, x)</span>
+0036     y=[];
+0037   <span class="keyword">end</span>
+0038 <span class="keyword">elseif</span> nargin == 1
+0039   assert(is_raw_cfg,<span class="string">'incorrect use of bml_xcorr'</span>);
+0040   y=[];
+0041   x=cfg;
+0042   cfg=[];
+0043 <span class="keyword">else</span>
+0044   error(<span class="string">'incorrect use of bml_xcorr'</span>)
+0045 <span class="keyword">end</span>
+0046 assert(all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(y))),<span class="string">'ft_datatype_raw expected as y'</span>);
+0047 
+0048 maxlag = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'maxlag'</span>,[]);
+0049 scaleopt = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'scaleopt'</span>,<span class="string">'none'</span>);
+0050 
+0051 <span class="keyword">if</span> ~isempty(y) <span class="comment">% cross correlation</span>
+0052   assert(all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(y))),<span class="string">'ft_raw_expected as y'</span>);
+0053   <span class="keyword">if</span> numel(y.label)==1
+0054     T = min(numel(x.trial),numel(y.trial));
+0055     <span class="keyword">if</span> numel(y.trial) ~= numel(x.trial)
+0056       warning(<span class="string">'x and y have different number of trials. Analyzing first %i trials'</span>,T)
+0057     <span class="keyword">end</span>
+0058     
+0059     <span class="comment">%creating output ft_raw</span>
+0060     r = struct();
+0061     r.label = x.label;
+0062     r.time = cell(1,size(x.time,2));
+0063     r.trial = cell(1,size(x.trial,2));
+0064     
+0065     <span class="keyword">for</span> t=1:T
+0066       x_Fs = round(1/mean(diff(x.time{t})),3,<span class="string">'significant'</span>);
+0067       y_Fs = round(1/mean(diff(y.time{t})),3,<span class="string">'significant'</span>);
+0068       <span class="keyword">if</span> abs(x_Fs-y_Fs)/x_Fs &gt; 0.001
+0069         warning(<span class="string">'Mismatched sampling rates Fs_x = %f ~= Fs_y = %f for trial %i'</span>,x_Fs,y_Fs,t)
+0070       <span class="keyword">end</span>
+0071       
+0072       <span class="keyword">if</span> isempty(maxlag)
+0073         maxlag_t = size(x.trial{t},2)-1;
+0074       <span class="keyword">else</span>
+0075         maxlag_t = maxlag;
+0076       <span class="keyword">end</span>
+0077       
+0078       <span class="comment">%doing first label for x</span>
+0079       [x_t_l1, x_t_lag1] = xcorr(x.trial{t}(1,:),y.trial{t}(1,:),maxlag_t,scaleopt);
+0080       x_t_lag1 = x_t_lag1/x_Fs;
+0081       <span class="comment">%prealocating matrix</span>
+0082       r.trial{t} = zeros(size(x.trial{t},1),size(x_t_l1,2));
+0083       r.trial{t}(1,:) = x_t_l1;
+0084       r.time{t} = x_t_lag1;
+0085       
+0086       <span class="keyword">for</span> l=2:numel(x.label)
+0087         [x_t_l, x_t_lag] = xcorr(x.trial{t}(l,:),y.trial{t}(1,:),maxlag_t,scaleopt);
+0088         x_t_lag = x_t_lag/x_Fs;
+0089         <span class="keyword">if</span> isequal(x_t_lag,x_t_lag1)
+0090           r.trial{t}(l,:) = x_t_l;        
+0091         <span class="keyword">else</span>
+0092           error(<span class="string">'unequal lags for trial %t label %s'</span>,t,x.label{t}(l))
+0093         <span class="keyword">end</span>
+0094       <span class="keyword">end</span>
+0095     <span class="keyword">end</span>
+0096   <span class="keyword">elseif</span> numel(y.label) &gt; 1  
+0097     error(<span class="string">'sorry, cross-correlation agains multiple channels not implemented yet\n Use single channel y'</span>)
+0098   <span class="keyword">else</span>
+0099     error(<span class="string">'y has no channels'</span>)
+0100   <span class="keyword">end</span>
+0101 <span class="keyword">else</span> <span class="comment">% autocorrelation</span>
+0102   error(<span class="string">'sorry, autocorrelation mode not implemented yet'</span>)
+0103 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

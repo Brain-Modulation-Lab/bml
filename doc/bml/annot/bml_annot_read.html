@@ -65,10 +65,13 @@ This function is called by:
 0013 <span class="keyword">if</span> ~ismember(<span class="string">'delimiter'</span>,varargin)
 0014   varargin = [varargin, {<span class="string">'delimiter'</span>,<span class="string">'\t'</span>}];
 0015 <span class="keyword">end</span>
-0016 annot = readtable(filename,varargin{:});
-0017 [~,name,~]=fileparts(filename);
-0018 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,name);
-0019</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0016 <span class="keyword">if</span> ~ismember(<span class="string">'TreatAsEmpty'</span>,varargin)
+0017   varargin = [varargin, {<span class="string">'TreatAsEmpty'</span>,{<span class="string">'NA'</span>}}];
+0018 <span class="keyword">end</span>
+0019 annot = readtable(filename,varargin{:});
+0020 [~,name,~]=fileparts(filename);
+0021 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,name);
+0022</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

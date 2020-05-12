@@ -4,7 +4,7 @@
 <head>
   <title>Description of bml_getidx</title>
   <meta name="keywords" content="bml_getidx">
-  <meta name="description" content="BML_GETIDX gets the first indices of the elements in the domain">
+  <meta name="description" content="BML_GETIDX gets the first indices of the elements in the collection (or domain)">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>BML_GETIDX gets the first indices of the elements in the domain</strong></div>
+<div class="box"><strong>BML_GETIDX gets the first indices of the elements in the collection (or domain)</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="box"><strong>function idx = bml_getidx(element,collection) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> BML_GETIDX gets the first indices of the elements in the domain
+<div class="fragment"><pre class="comment"> BML_GETIDX gets the first indices of the elements in the collection (or domain)
 
  Use as
    idx = bml_getidx(element,collection)
@@ -49,7 +49,7 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a ft_datatype_raw of zeros with ones at annot times</li><li><a href="../../bml/annot/bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/io/bml_load_epoched.html" class="code" title="function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)">bml_load_epoched</a>	BML_LOAD_EPOCHED loads an epoched raw from one or more files</li></ul>
+<li><a href="../../bml/annot/bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a ft_datatype_raw from and annotation table</li><li><a href="../../bml/annot/bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/annot/bml_annot_calculate.html" class="code" title="function annot = bml_annot_calculate(cfg, raw, varargin)">bml_annot_calculate</a>	BML_ANNOT_CALCULATE calculate scalar values from specific annotations in</li><li><a href="../../bml/io/bml_load_epoched.html" class="code" title="function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)">bml_load_epoched</a>	BML_LOAD_EPOCHED loads an epoched raw from one or more files</li><li><a href="../../bml/signal/bml_mask.html" class="code" title="function masked = bml_mask(cfg, raw)">bml_mask</a>	BML_MASK creates a new raw file with the specified values masked</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
@@ -59,7 +59,7 @@ This function is called by:
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function idx = bml_getidx(element,collection)</a>
 0002 
-0003 <span class="comment">% BML_GETIDX gets the first indices of the elements in the domain</span>
+0003 <span class="comment">% BML_GETIDX gets the first indices of the elements in the collection (or domain)</span>
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%   idx = bml_getidx(element,collection)</span>
@@ -103,6 +103,6 @@ This function is called by:
 0044     y = x;
 0045   <span class="keyword">end</span>
 0046 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

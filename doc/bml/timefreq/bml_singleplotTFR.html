@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_singleplotTFR</title>
+  <meta name="keywords" content="bml_singleplotTFR">
+  <meta name="description" content="BML_SINGLEPLOTTFR is a thin wrapper over ft_singleplotTFR">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">timefreq</a> &gt; bml_singleplotTFR.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\timefreq&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_singleplotTFR
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_SINGLEPLOTTFR is a thin wrapper over ft_singleplotTFR</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function bml_singleplotTFR(cfg, data) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_SINGLEPLOTTFR is a thin wrapper over ft_singleplotTFR
+ 
+ cfg.events - table with events to be marked as vertical lines
+ cfg.bands - indicates if cannonical bands should be indicated</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/hex2rgb.html" class="code" title="function [ rgb ] = hex2rgb(hex,range)">hex2rgb</a>	hex2rgb converts hex color values to rgb arrays on the range 0 to 1.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bml_singleplotTFR(cfg, data)</a>
+0002 
+0003 <span class="comment">% BML_SINGLEPLOTTFR is a thin wrapper over ft_singleplotTFR</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% cfg.events - table with events to be marked as vertical lines</span>
+0006 <span class="comment">% cfg.bands - indicates if cannonical bands should be indicated</span>
+0007 <span class="comment">%</span>
+0008 
+0009 <span class="keyword">if</span> ~isfield(cfg,<span class="string">'channel'</span>) || isempty(cfg.channel)
+0010   error(<span class="string">'channel required'</span>);
+0011 <span class="keyword">end</span>
+0012 
+0013 <span class="keyword">if</span> ~isfield(cfg,<span class="string">'baseline'</span>) || isempty(cfg.baseline)
+0014   error(<span class="string">'baseline required'</span>);
+0015 <span class="keyword">end</span>
+0016 
+0017 <span class="keyword">if</span> ~isfield(data,<span class="string">'freq'</span>) || isempty(data.freq)
+0018   error(<span class="string">'data.freq required'</span>);
+0019 <span class="keyword">end</span>
+0020 
+0021 name =   {<span class="string">'delta'</span>,   <span class="string">'theta'</span>,  <span class="string">'alpha'</span>,   <span class="string">'beta'</span>,<span class="string">'low gamma'</span>,<span class="string">'high gamma'</span>}';
+0022 symbol = {<span class="string">'\delta'</span>, <span class="string">'\theta'</span>, <span class="string">'\alpha'</span>,  <span class="string">'\beta'</span>, <span class="string">'\gamma_L'</span>,<span class="string">'\gamma_H'</span>}';
+0023 fstarts = [     1,         4,        8,       12,         30,          60]';
+0024 fends =   [     4,         8,       12,       30,         60,         250]';
+0025 color = {<span class="string">'#EDF8FB'</span>,<span class="string">'#BFD3E6'</span>,<span class="string">'#9EBCDA'</span>,<span class="string">'#8C96C6'</span>,  <span class="string">'#8856A7'</span>,   <span class="string">'#810F7C'</span>}'; <span class="comment">%ColorBrewer BuPu_6</span>
+0026 cannonical_bands = table(name,fstarts,fends,color,symbol);
+0027 clear name fstarts fends color symbol; 
+0028 
+0029 events           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'events'</span>,table());
+0030 bands            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'bands'</span>,cannonical_bands);
+0031 
+0032 <span class="comment">%nyticks          = bml_getopt(cfg,'nyticks',5);</span>
+0033 foi              = data.freq;
+0034 foi_idx          = 1:length(data.freq);
+0035 data.freq        = foi_idx;
+0036 
+0037 toilimbands      = [min(data.time) max(data.time)];
+0038 
+0039 cfg.ylim         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'ylim'</span>,<span class="string">'maxmin'</span>);
+0040 cfg.colorbar     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'colorbar'</span>,<span class="string">'yes'</span>);
+0041 
+0042 cfg.baselinetype = <span class="string">'db'</span>; 
+0043 cfg.showlabels   = <span class="string">'no'</span>;    
+0044 cfg.showscale    = <span class="string">'no'</span>;
+0045 cfg.box          = <span class="string">'no'</span>;
+0046 cfg.masknans     = <span class="string">'yes'</span>;
+0047 
+0048 ft_singleplotTFR(cfg, data);
+0049 
+0050 set(gca,<span class="string">'ytick'</span>,[])
+0051 set(gca,<span class="string">'yticklabel'</span>,[])
+0052 
+0053 polycoeff = polyfit(log10(foi),foi_idx,1);
+0054 
+0055 <span class="keyword">if</span> ~isempty(bands)
+0056   hold on
+0057   fstarts_idx = polyval(polycoeff,log10(max(bands.fstarts,min(foi))));
+0058     fends_idx =  polyval(polycoeff,log10(min(bands.fends,max(foi))));
+0059   <span class="comment">%fstarts_idx = dsearchn(foi',bands.fstarts)-0.5;</span>
+0060     <span class="comment">%fends_idx = dsearchn(foi',bands.fends)+0.5;</span>
+0061   midpoint_idx = 0.5.*(fstarts_idx + fends_idx);
+0062   yyaxis right
+0063   yticks(midpoint_idx)
+0064   yticklabels(bands.symbol)
+0065     <span class="keyword">for</span> i=1:height(bands)
+0066     fill(toilimbands(2) .* [1,1.05,1.05,1],<span class="keyword">...</span>
+0067          [fstarts_idx(i),fstarts_idx(i),fends_idx(i),fends_idx(i)],<span class="keyword">...</span>
+0068          <a href="../../bml/utils/hex2rgb.html" class="code" title="function [ rgb ] = hex2rgb(hex,range)">hex2rgb</a>(bands.color(i)),<span class="string">'EdgeColor'</span>,<span class="string">'black'</span>,<span class="string">'Marker'</span>,<span class="string">'none'</span>);
+0069   <span class="keyword">end</span>
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="comment">%selecting y axis ticks</span>
+0073 <span class="comment">%foi_ticks_wanted = 10 .^ (min(log10(foi)) + linspace(0,1,nyticks) .* range(log10(foi)));</span>
+0074 <span class="comment">%foi_ticks_idx = dsearchn(foi',foi_ticks_wanted');</span>
+0075 
+0076 foi_ticks_wanted = [round(min(foi),1),4,8,12,30,60,120,250];
+0077 foi_ticks_idx = polyval(polycoeff,log10(foi_ticks_wanted));
+0078 
+0079 yyaxis left
+0080 yticks(foi_ticks_idx)
+0081 yticklabels(round(foi_ticks_wanted,2,<span class="string">'signif'</span>))
+0082 
+0083 hold on
+0084 <span class="keyword">if</span> ~isempty(events)
+0085   <span class="keyword">if</span> ~ismember(<span class="string">'color'</span>,events.Properties.VariableNames)
+0086     events.color(:)={<span class="string">'#444444'</span>};
+0087   <span class="keyword">end</span>
+0088   <span class="keyword">if</span> ~ismember(<span class="string">'linestyle'</span>,events.Properties.VariableNames)
+0089     events.linestyle(:)={<span class="string">'-'</span>};
+0090   <span class="keyword">end</span>
+0091   <span class="keyword">if</span> ~ismember(<span class="string">'starts_error'</span>,events.Properties.VariableNames)
+0092     events.error=events.rstd;
+0093   <span class="keyword">end</span>
+0094   
+0095   <span class="keyword">for</span> i=1:height(events)
+0096     
+0097     plot(repmat(events.starts(i),[1,2]),[min(foi_idx)-0.5,max(foi_idx)],<span class="keyword">...</span>
+0098       <span class="string">'Color'</span>,<a href="../../bml/utils/hex2rgb.html" class="code" title="function [ rgb ] = hex2rgb(hex,range)">hex2rgb</a>(events.color{i}),<span class="string">'LineStyle'</span>,events.linestyle{i},<span class="keyword">...</span>
+0099       <span class="string">'Marker'</span>,<span class="string">'none'</span>);
+0100     plot(repmat(events.ends(i),[1,2]),[min(foi_idx)-0.5,max(foi_idx)],<span class="keyword">...</span>
+0101       <span class="string">'Color'</span>,<a href="../../bml/utils/hex2rgb.html" class="code" title="function [ rgb ] = hex2rgb(hex,range)">hex2rgb</a>(events.color{i}),<span class="string">'LineStyle'</span>,events.linestyle{i},<span class="keyword">...</span>
+0102       <span class="string">'Marker'</span>,<span class="string">'none'</span>);
+0103    <span class="keyword">if</span> ismember(<span class="string">'starts_error'</span>,events.Properties.VariableNames) &amp;&amp; ~isnan(events.starts_error(i))
+0104       errorbar(events.starts(i),max(foi_idx),events.starts_error(i),<span class="string">'horizontal'</span>,<span class="keyword">...</span>
+0105         <span class="string">'Color'</span>,<a href="../../bml/utils/hex2rgb.html" class="code" title="function [ rgb ] = hex2rgb(hex,range)">hex2rgb</a>(events.color{i}),<span class="string">'Marker'</span>,<span class="string">'none'</span>)
+0106    <span class="keyword">end</span>
+0107      <span class="keyword">if</span> ismember(<span class="string">'ends_error'</span>,events.Properties.VariableNames) &amp;&amp; ~isnan(events.ends_error(i))
+0108       errorbar(events.ends(i),max(foi_idx),events.ends_error(i),<span class="string">'horizontal'</span>,<span class="keyword">...</span>
+0109         <span class="string">'Color'</span>,<a href="../../bml/utils/hex2rgb.html" class="code" title="function [ rgb ] = hex2rgb(hex,range)">hex2rgb</a>(events.color{i}),<span class="string">'Marker'</span>,<span class="string">'none'</span>)
+0110    <span class="keyword">end</span> 
+0111    
+0112   <span class="keyword">end</span>
+0113 <span class="keyword">end</span>
+0114</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -32,14 +32,19 @@
  Use as
    sync_roi = bml_sync_digital(cfg)
 
- cfg - configuration structure (reuired fields)
+ cfg - configuration structure (required fields)
    cfg.roi - roi table with vars 'id','starts','ends','folder','name',
             'nSamples','filetype'. Contains a coarse alignment of the
             files, normally inferred from the OS 'Date-Modified' metadata.
             'starts' and 'ends' should be given in seconds from midnight.
    cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'
+            and optionally 'threshold' (see below).
             This table defines how channels of different filetypes will be
-            mapped with each other. 
+            mapped with each other. If the threshold variable is present and 
+            the value for a specific channels is given (i.e. it is not NaN), 
+            then time intervals where the rectified signal of that channel exceeds the threshold
+            are zeroed. This can be useful to remove saturating glitches in the 
+            signal sometimes observed in trellis analog or other channels.     
    cfg.chunks - annot table: defines starts and ends of chunks of time to sync
             in master time. Usually corresponds to sessions but can be
             shorter periods.
@@ -92,6 +97,11 @@
    cfg.high_pass - logical: should high pass filter be applied before
            alignment. Defaults to false.
    cfg.high_pass_freq - float: high pass frequency in Hz. Defaults to 5 Hz
+   cfg.predictive_loading - boolean indicating if robust average of time
+           offsets calculated from previous chunks should be used to
+           predictively load the correct time interval of the slave file
+           in the following chunk. Useful for files with systematic data
+           lost. Defaults to false. 
 
  returns roi table with vars 
    id: integer identification number of the synchronized file chunk
@@ -125,7 +135,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot_extend.html" class="code" title="function extended = bml_annot_extend(annot,ext1,ext2)">bml_annot_extend</a>	BML_ANNOT_EXTEND extends the annotation times</li><li><a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>	BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time</li><li><a href="bml_chunk_sessions.html" class="code" title="function chunks = bml_chunk_sessions(session, split_time, chunk_duration)">bml_chunk_sessions</a>	BML_CHUNK_SESSIONS breaks up sessions into smaller chunks</li><li><a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>	BML_PRAAT opens FT_DATATYPE_RAWs in praat</li></ul>
+<li><a href="../../bml/annot/bml_annot_detect.html" class="code" title="function annot = bml_annot_detect(cfg, env)">bml_annot_detect</a>	BML_ANNOT_DETECT identifies annotations thresholding an envelope signal</li><li><a href="../../bml/annot/bml_annot_extend.html" class="code" title="function extended = bml_annot_extend(annot,ext1,ext2)">bml_annot_extend</a>	BML_ANNOT_EXTEND extends the annotation times</li><li><a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>	BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time</li><li><a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>	BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method</li><li><a href="../../bml/signal/bml_mask.html" class="code" title="function masked = bml_mask(cfg, raw)">bml_mask</a>	BML_MASK creates a new raw file with the specified values masked</li><li><a href="bml_chunk_sessions.html" class="code" title="function chunks = bml_chunk_sessions(session, split_time, chunk_duration)">bml_chunk_sessions</a>	BML_CHUNK_SESSIONS breaks up sessions into smaller chunks</li><li><a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>	BML_PRAAT opens FT_DATATYPE_RAWs in praat</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -141,324 +151,391 @@ This function is called by:
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%   sync_roi = bml_sync_digital(cfg)</span>
 0007 <span class="comment">%</span>
-0008 <span class="comment">% cfg - configuration structure (reuired fields)</span>
+0008 <span class="comment">% cfg - configuration structure (required fields)</span>
 0009 <span class="comment">%   cfg.roi - roi table with vars 'id','starts','ends','folder','name',</span>
 0010 <span class="comment">%            'nSamples','filetype'. Contains a coarse alignment of the</span>
 0011 <span class="comment">%            files, normally inferred from the OS 'Date-Modified' metadata.</span>
 0012 <span class="comment">%            'starts' and 'ends' should be given in seconds from midnight.</span>
 0013 <span class="comment">%   cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'</span>
-0014 <span class="comment">%            This table defines how channels of different filetypes will be</span>
-0015 <span class="comment">%            mapped with each other.</span>
-0016 <span class="comment">%   cfg.chunks - annot table: defines starts and ends of chunks of time to sync</span>
-0017 <span class="comment">%            in master time. Usually corresponds to sessions but can be</span>
-0018 <span class="comment">%            shorter periods.</span>
-0019 <span class="comment">%   cfg.master_filetype - string: filetype that defines filetype used as master time,</span>
-0020 <span class="comment">%            to which to align other filetypes</span>
-0021 <span class="comment">%   cfg.sync_roi - roi table with previous results of current run. If</span>
-0022 <span class="comment">%            provided, the algorithm will skip doing the same</span>
-0023 <span class="comment">%            synchronization chunks. Useful for iterative chunking.</span>
-0024 <span class="comment">%</span>
-0025 <span class="comment">% cfg - configuration structure (optional fields)</span>
-0026 <span class="comment">%   cfg.timewarp - logical: Should slave time be warped? defaults to true.</span>
-0027 <span class="comment">%   cfg.lpf - logical: low-pass-filter alignment if true (default)</span>
-0028 <span class="comment">%   cfg.praat - logical: should synchronized files be opened in praat for</span>
-0029 <span class="comment">%            manual quality check. Defaults to false.</span>
-0030 <span class="comment">%   cfg.chunk_extend - double or double array of length 2: amount of seconds by</span>
-0031 <span class="comment">%             which to extend each sync chunk in slave files to avoid cropping out</span>
-0032 <span class="comment">%             relevant part of because of incorrect initial alignemnt</span>
-0033 <span class="comment">%             files. Defaults to 0 seconds.</span>
-0034 <span class="comment">%   cfg.resample_freq - double: frequency in Hz at which to resample master</span>
-0035 <span class="comment">%            and slave raws. Defaults to 10000.</span>
-0036 <span class="comment">%   cfg.dryrun - logical: if true no alignment is performed (defaults to</span>
-0037 <span class="comment">%           false)</span>
-0038 <span class="comment">%   cfg.env_freq - double: frequency of the envelope used for coarse</span>
-0039 <span class="comment">%           alignement (Hz). Defaults to 100. Note that</span>
-0040 <span class="comment">%           resample_freq/env_freq should be an integer.</span>
-0041 <span class="comment">%   cfg.env_scan - double: number of seconds in which to scan for initial</span>
-0042 <span class="comment">%           coarse grain alignement between master and slave's envelopes.</span>
-0043 <span class="comment">%           Defaults to 300 seconds (5 minutes).</span>
-0044 <span class="comment">%   cfg.env_penalty_wt0_min - double: penalty parameter for midpoint shift in</span>
-0045 <span class="comment">%           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)</span>
-0046 <span class="comment">%   cfg.env_penalty_ws1 - double: penalty parameter for time stretching in</span>
-0047 <span class="comment">%           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)</span>
-0048 <span class="comment">%   cfg.lpf_max_freq - double: maximum low-pass-filter cutoff frequency (Hz).</span>
-0049 <span class="comment">%           The value used is the minimum between this argument and the</span>
-0050 <span class="comment">%           master's and slave's sampling frequency. Defaults to 4000 Hz.</span>
-0051 <span class="comment">%   cfg.lpf_scan - double: number of seconds in which to scan for fine-grain</span>
-0052 <span class="comment">%           alignement between master and slave's low-pass-filter signal.</span>
-0053 <span class="comment">%           Defaults to 1 seconds.</span>
-0054 <span class="comment">%   cfg.lpf_penalty_wt0_min - double: penalty parameter for midpoint shift in</span>
-0055 <span class="comment">%           fine-grain time-warp. Defaults to 1e-6. (see BML_TIMEWARP)</span>
-0056 <span class="comment">%   cfg.lpf_penalty_ws1 - double: penalty parameter for time stretching in</span>
-0057 <span class="comment">%           fine-grain time-warp. Defaults to 1e-4. (see BML_TIMEWARP)</span>
-0058 <span class="comment">%   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip</span>
-0059 <span class="comment">%           functions</span>
-0060 <span class="comment">%   cfg.discontinuous - string or logical:</span>
-0061 <span class="comment">%           * true or 'allow' to allow discontinous files to be loaded filling</span>
-0062 <span class="comment">%           the gap with zero-padding, if possible within timetol.</span>
-0063 <span class="comment">%           * false or 'no' to issue an error if discontinous files are found</span>
-0064 <span class="comment">%           * 'warn' to allow with a warning (default)</span>
-0065 <span class="comment">%   cfg.high_pass - logical: should high pass filter be applied before</span>
-0066 <span class="comment">%           alignment. Defaults to false.</span>
-0067 <span class="comment">%   cfg.high_pass_freq - float: high pass frequency in Hz. Defaults to 5 Hz</span>
-0068 <span class="comment">%</span>
-0069 <span class="comment">% returns roi table with vars</span>
-0070 <span class="comment">%   id: integer identification number of the synchronized file chunk</span>
-0071 <span class="comment">%   starts: start time in seconds from midnight of the represented signal</span>
-0072 <span class="comment">%   ends: end time in seconds from midnight of the represented signal</span>
-0073 <span class="comment">%   duration: duration in seconds as calculated by ends - starts</span>
-0074 <span class="comment">%   s1: first sample number of synchronization coordinate</span>
-0075 <span class="comment">%   t1: midpoint time of sample s1. Note that if s1==1 =&gt; t1=starts+0.5/Fs</span>
-0076 <span class="comment">%   s2: last sample number of synchronization coordinate</span>
-0077 <span class="comment">%   t2: midpoint time of sample s2. Note that if s2==end =&gt; t2=ends-0.5/Fs</span>
-0078 <span class="comment">%   folder:</span>
-0079 <span class="comment">%   name: file name. Note that several each file can have several file</span>
-0080 <span class="comment">%         chunks, i.e. several rows in this table</span>
-0081 <span class="comment">%   nSamples: integer total number of samples of the file</span>
-0082 <span class="comment">%   filetype:</span>
-0083 <span class="comment">%</span>
-0084 <span class="comment">%--------------------------------------------------------------------------</span>
-0085 <span class="comment">%</span>
-0086 <span class="comment">% The algorithm first opens time chucks (defined in cfg.chunks) of the files</span>
-0087 <span class="comment">% defined in cfg.roi, loading the channels defined in cfg.sync_channels.</span>
-0088 <span class="comment">% The coarse alignment of cfg.roi should be within a 60 second tolerance.</span>
-0089 <span class="comment">% It then calculates the envelope of the channels with BML_ENVELOPE_BINABS,</span>
-0090 <span class="comment">% and aligns these envelopes with BML_TIMEALIGN. If cfg.timewarp is true,</span>
-0091 <span class="comment">% it applies a time-warping algorithm as defined in BML_TIMEWARP to</span>
-0092 <span class="comment">% maximize the correlation between slave and master channels. If cfg.lpf is</span>
-0093 <span class="comment">% true, it then repeats these processes for a low-pass filter version of</span>
-0094 <span class="comment">% the channels. If cfg.praat is true, the resulting synchronized chunks are</span>
-0095 <span class="comment">% loaded in praat. The function returns a synchronization roi table.</span>
-0096 <span class="comment">%</span>
-0097 
-0098 <span class="comment">%ToDo: check that filetype of roi is consitent with cfg.sync_channels</span>
-0099 <span class="comment">%add examples to documentation</span>
-0100 
-0101 sync_channels       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'sync_channels'</span>);
-0102 master_filetype     = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'master_filetype'</span>);
-0103 chunks              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'chunks'</span>);
-0104 chunk_extend        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'chunk_extend'</span>,0);
-0105 roi_os              = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>),<span class="string">'roi_os'</span>);
-0106 prev_sync_roi       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'sync_roi'</span>);
-0107 praat               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'praat'</span>,false);
-0108 resample_freq       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'resample_freq'</span>,10000);
-0109 dryrun              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'dryrun'</span>,false);
-0110 env_freq            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_freq'</span>,100);
-0111 env_scan            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_scan'</span>,300);
-0112 env_penalty_wt0_min = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_penalty_wt0_min'</span>,1e-3);
-0113 env_penalty_ws1     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_penalty_ws1'</span>,1e-3);
-0114 lpf_max_freq        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_max_freq'</span>,4000);
-0115 lpf                 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf'</span>,true);
-0116 lpf_scan            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_scan'</span>,1);
-0117 lpf_penalty_wt0_min = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_penalty_wt0_min'</span>,1e-6);
-0118 lpf_penalty_ws1     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_penalty_ws1'</span>,1e-4);
-0119 timewarp            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timewarp'</span>,true);
-0120 ft_feedback         = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'ft_feedback'</span>,<span class="string">'no'</span>);
-0121 discontinuous       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'discontinuous'</span>,<span class="string">'warn'</span>);
-0122 high_pass           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'high_pass'</span>,false);
-0123 high_pass_freq      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'high_pass_freq'</span>,5);
-0124 timetol             = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-6);
-0125 
-0126 assert(~ismember(<span class="string">'filetype'</span>,chunks.Properties.VariableNames),<span class="keyword">...</span>
-0127   <span class="string">'cfg.chunks should not containt ''filetype'' variable'</span>);
-0128 assert(~isempty(chunks),<span class="string">'empty chunks table'</span>);
-0129 
-0130 
-0131 
-0132 chunks = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="bml_chunk_sessions.html" class="code" title="function chunks = bml_chunk_sessions(session, split_time, chunk_duration)">bml_chunk_sessions</a>(chunks),<span class="string">'chunks'</span>);
-0133 
-0134 sync_roi = table();
-0135 sync_roi_vars = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'s1'</span>,<span class="string">'t1'</span>,<span class="string">'s2'</span>,<span class="string">'t2'</span>,<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'session_id'</span>,<span class="string">'session_part'</span>,<span class="string">'filetype'</span>};
-0136 sync_roi_vars_out = [sync_roi_vars,{<span class="string">'chantype'</span>,<span class="string">'chunk_id'</span>,<span class="string">'warpfactor'</span>,<span class="string">'sync_channel'</span>,<span class="string">'sync_type'</span>}];
-0137 
-0138 filetypes=unique(sync_channels.filetype);
-0139 slave_filetypes = setdiff(filetypes,master_filetype);
-0140 master_channel = sync_channels.channel{strcmp(sync_channels.filetype,master_filetype)};
-0141 master_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,master_filetype)};
+0014 <span class="comment">%            and optionally 'threshold' (see below).</span>
+0015 <span class="comment">%            This table defines how channels of different filetypes will be</span>
+0016 <span class="comment">%            mapped with each other. If the threshold variable is present and</span>
+0017 <span class="comment">%            the value for a specific channels is given (i.e. it is not NaN),</span>
+0018 <span class="comment">%            then time intervals where the rectified signal of that channel exceeds the threshold</span>
+0019 <span class="comment">%            are zeroed. This can be useful to remove saturating glitches in the</span>
+0020 <span class="comment">%            signal sometimes observed in trellis analog or other channels.</span>
+0021 <span class="comment">%   cfg.chunks - annot table: defines starts and ends of chunks of time to sync</span>
+0022 <span class="comment">%            in master time. Usually corresponds to sessions but can be</span>
+0023 <span class="comment">%            shorter periods.</span>
+0024 <span class="comment">%   cfg.master_filetype - string: filetype that defines filetype used as master time,</span>
+0025 <span class="comment">%            to which to align other filetypes</span>
+0026 <span class="comment">%   cfg.sync_roi - roi table with previous results of current run. If</span>
+0027 <span class="comment">%            provided, the algorithm will skip doing the same</span>
+0028 <span class="comment">%            synchronization chunks. Useful for iterative chunking.</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">% cfg - configuration structure (optional fields)</span>
+0031 <span class="comment">%   cfg.timewarp - logical: Should slave time be warped? defaults to true.</span>
+0032 <span class="comment">%   cfg.lpf - logical: low-pass-filter alignment if true (default)</span>
+0033 <span class="comment">%   cfg.praat - logical: should synchronized files be opened in praat for</span>
+0034 <span class="comment">%            manual quality check. Defaults to false.</span>
+0035 <span class="comment">%   cfg.chunk_extend - double or double array of length 2: amount of seconds by</span>
+0036 <span class="comment">%             which to extend each sync chunk in slave files to avoid cropping out</span>
+0037 <span class="comment">%             relevant part of because of incorrect initial alignemnt</span>
+0038 <span class="comment">%             files. Defaults to 0 seconds.</span>
+0039 <span class="comment">%   cfg.resample_freq - double: frequency in Hz at which to resample master</span>
+0040 <span class="comment">%            and slave raws. Defaults to 10000.</span>
+0041 <span class="comment">%   cfg.dryrun - logical: if true no alignment is performed (defaults to</span>
+0042 <span class="comment">%           false)</span>
+0043 <span class="comment">%   cfg.env_freq - double: frequency of the envelope used for coarse</span>
+0044 <span class="comment">%           alignement (Hz). Defaults to 100. Note that</span>
+0045 <span class="comment">%           resample_freq/env_freq should be an integer.</span>
+0046 <span class="comment">%   cfg.env_scan - double: number of seconds in which to scan for initial</span>
+0047 <span class="comment">%           coarse grain alignement between master and slave's envelopes.</span>
+0048 <span class="comment">%           Defaults to 300 seconds (5 minutes).</span>
+0049 <span class="comment">%   cfg.env_penalty_wt0_min - double: penalty parameter for midpoint shift in</span>
+0050 <span class="comment">%           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)</span>
+0051 <span class="comment">%   cfg.env_penalty_ws1 - double: penalty parameter for time stretching in</span>
+0052 <span class="comment">%           coarse time-warp. Defaults to 1e-3. (see BML_TIMEWARP)</span>
+0053 <span class="comment">%   cfg.lpf_max_freq - double: maximum low-pass-filter cutoff frequency (Hz).</span>
+0054 <span class="comment">%           The value used is the minimum between this argument and the</span>
+0055 <span class="comment">%           master's and slave's sampling frequency. Defaults to 4000 Hz.</span>
+0056 <span class="comment">%   cfg.lpf_scan - double: number of seconds in which to scan for fine-grain</span>
+0057 <span class="comment">%           alignement between master and slave's low-pass-filter signal.</span>
+0058 <span class="comment">%           Defaults to 1 seconds.</span>
+0059 <span class="comment">%   cfg.lpf_penalty_wt0_min - double: penalty parameter for midpoint shift in</span>
+0060 <span class="comment">%           fine-grain time-warp. Defaults to 1e-6. (see BML_TIMEWARP)</span>
+0061 <span class="comment">%   cfg.lpf_penalty_ws1 - double: penalty parameter for time stretching in</span>
+0062 <span class="comment">%           fine-grain time-warp. Defaults to 1e-4. (see BML_TIMEWARP)</span>
+0063 <span class="comment">%   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip</span>
+0064 <span class="comment">%           functions</span>
+0065 <span class="comment">%   cfg.discontinuous - string or logical:</span>
+0066 <span class="comment">%           * true or 'allow' to allow discontinous files to be loaded filling</span>
+0067 <span class="comment">%           the gap with zero-padding, if possible within timetol.</span>
+0068 <span class="comment">%           * false or 'no' to issue an error if discontinous files are found</span>
+0069 <span class="comment">%           * 'warn' to allow with a warning (default)</span>
+0070 <span class="comment">%   cfg.high_pass - logical: should high pass filter be applied before</span>
+0071 <span class="comment">%           alignment. Defaults to false.</span>
+0072 <span class="comment">%   cfg.high_pass_freq - float: high pass frequency in Hz. Defaults to 5 Hz</span>
+0073 <span class="comment">%   cfg.predictive_loading - boolean indicating if robust average of time</span>
+0074 <span class="comment">%           offsets calculated from previous chunks should be used to</span>
+0075 <span class="comment">%           predictively load the correct time interval of the slave file</span>
+0076 <span class="comment">%           in the following chunk. Useful for files with systematic data</span>
+0077 <span class="comment">%           lost. Defaults to false.</span>
+0078 <span class="comment">%</span>
+0079 <span class="comment">% returns roi table with vars</span>
+0080 <span class="comment">%   id: integer identification number of the synchronized file chunk</span>
+0081 <span class="comment">%   starts: start time in seconds from midnight of the represented signal</span>
+0082 <span class="comment">%   ends: end time in seconds from midnight of the represented signal</span>
+0083 <span class="comment">%   duration: duration in seconds as calculated by ends - starts</span>
+0084 <span class="comment">%   s1: first sample number of synchronization coordinate</span>
+0085 <span class="comment">%   t1: midpoint time of sample s1. Note that if s1==1 =&gt; t1=starts+0.5/Fs</span>
+0086 <span class="comment">%   s2: last sample number of synchronization coordinate</span>
+0087 <span class="comment">%   t2: midpoint time of sample s2. Note that if s2==end =&gt; t2=ends-0.5/Fs</span>
+0088 <span class="comment">%   folder:</span>
+0089 <span class="comment">%   name: file name. Note that several each file can have several file</span>
+0090 <span class="comment">%         chunks, i.e. several rows in this table</span>
+0091 <span class="comment">%   nSamples: integer total number of samples of the file</span>
+0092 <span class="comment">%   filetype:</span>
+0093 <span class="comment">%</span>
+0094 <span class="comment">%--------------------------------------------------------------------------</span>
+0095 <span class="comment">%</span>
+0096 <span class="comment">% The algorithm first opens time chucks (defined in cfg.chunks) of the files</span>
+0097 <span class="comment">% defined in cfg.roi, loading the channels defined in cfg.sync_channels.</span>
+0098 <span class="comment">% The coarse alignment of cfg.roi should be within a 60 second tolerance.</span>
+0099 <span class="comment">% It then calculates the envelope of the channels with BML_ENVELOPE_BINABS,</span>
+0100 <span class="comment">% and aligns these envelopes with BML_TIMEALIGN. If cfg.timewarp is true,</span>
+0101 <span class="comment">% it applies a time-warping algorithm as defined in BML_TIMEWARP to</span>
+0102 <span class="comment">% maximize the correlation between slave and master channels. If cfg.lpf is</span>
+0103 <span class="comment">% true, it then repeats these processes for a low-pass filter version of</span>
+0104 <span class="comment">% the channels. If cfg.praat is true, the resulting synchronized chunks are</span>
+0105 <span class="comment">% loaded in praat. The function returns a synchronization roi table.</span>
+0106 <span class="comment">%</span>
+0107 
+0108 <span class="comment">%ToDo: check that filetype of roi is consitent with cfg.sync_channels</span>
+0109 <span class="comment">%add examples to documentation</span>
+0110 
+0111 sync_channels       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'sync_channels'</span>);
+0112 master_filetype     = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'master_filetype'</span>);
+0113 chunks              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'chunks'</span>);
+0114 chunk_extend        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'chunk_extend'</span>,0);
+0115 roi_os              = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>),<span class="string">'roi_os'</span>);
+0116 prev_sync_roi       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'sync_roi'</span>);
+0117 praat               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'praat'</span>,false);
+0118 resample_freq       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'resample_freq'</span>,10000);
+0119 dryrun              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'dryrun'</span>,false);
+0120 env_freq            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_freq'</span>,100);
+0121 env_scan            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_scan'</span>,300);
+0122 env_penalty_wt0_min = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_penalty_wt0_min'</span>,1e-3);
+0123 env_penalty_ws1     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'env_penalty_ws1'</span>,1e-3);
+0124 lpf_max_freq        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_max_freq'</span>,4000);
+0125 lpf                 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf'</span>,true);
+0126 lpf_scan            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_scan'</span>,1);
+0127 lpf_penalty_wt0_min = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_penalty_wt0_min'</span>,1e-6);
+0128 lpf_penalty_ws1     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'lpf_penalty_ws1'</span>,1e-4);
+0129 timewarp            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timewarp'</span>,true);
+0130 ft_feedback         = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'ft_feedback'</span>,<span class="string">'no'</span>);
+0131 discontinuous       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'discontinuous'</span>,<span class="string">'warn'</span>);
+0132 high_pass           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'high_pass'</span>,false);
+0133 high_pass_freq      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'high_pass_freq'</span>,5);
+0134 timetol             = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-6);
+0135 predictive_loading  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'predictive_loading'</span>,false);
+0136 
+0137 assert(~ismember(<span class="string">'filetype'</span>,chunks.Properties.VariableNames),<span class="keyword">...</span>
+0138   <span class="string">'cfg.chunks should not containt ''filetype'' variable'</span>);
+0139 assert(~isempty(chunks),<span class="string">'empty chunks table'</span>);
+0140 
+0141 chunks = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="bml_chunk_sessions.html" class="code" title="function chunks = bml_chunk_sessions(session, split_time, chunk_duration)">bml_chunk_sessions</a>(chunks),<span class="string">'chunks'</span>);
 0142 
-0143 extended_chunks = <a href="../../bml/annot/bml_annot_extend.html" class="code" title="function extended = bml_annot_extend(annot,ext1,ext2)">bml_annot_extend</a>(chunks,chunk_extend);
-0144 
-0145 <span class="keyword">if</span> ~isempty(prev_sync_roi) <span class="comment">%previous attempts to sync</span>
-0146   prev_sync_roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(prev_sync_roi,<span class="string">'prev'</span>);
-0147   assert(all(ismember({<span class="string">'sync_type'</span>,<span class="string">'sync_channel'</span>,<span class="string">'chantype'</span>},prev_sync_roi.Properties.VariableNames)),<span class="keyword">...</span>
-0148     &quot;variables sync_type, sync_channel and chantype required <span class="keyword">for</span> cfg.sync_roi&quot;);
-0149 <span class="keyword">else</span> <span class="comment">%checking files before commiting to first round of synchronization</span>
-0150   <span class="keyword">for</span> chunk_i=1:height(chunks)
-0151     chunk_roi_os = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(roi_os, chunks(chunk_i,:));  
-0152     <span class="keyword">for</span> filetype_i=1:length(filetypes)
-0153       cfg=[]; cfg.ft_feedback=ft_feedback;
-0154       cfg.channel = sync_channels.channel{strcmp(sync_channels.filetype,filetypes(filetype_i))};
-0155       cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,filetypes(filetype_i))};
-0156       cfg.roi=chunk_roi_os(string(chunk_roi_os.filetype)==filetypes(filetype_i),:);
-0157       cfg.dryrun=true;
-0158       cfg.discontinuous=discontinuous;
-0159       assert(height(cfg.roi)&gt;0,<span class="string">'No files for filetype %s and chunk_id %i'</span>,<span class="keyword">...</span>
-0160         filetypes{filetype_i},chunks.id(chunk_i));
-0161       <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg); <span class="comment">%raises error if continuity is violated</span>
-0162     <span class="keyword">end</span>
-0163   <span class="keyword">end</span>
-0164 <span class="keyword">end</span>
-0165 
-0166 <span class="comment">%synchronizing</span>
-0167 <span class="keyword">for</span> chunk_i=1:height(chunks)
-0168   chunk_id = chunks.id(chunk_i);
-0169   
-0170   <span class="comment">%interseting with chunks for master</span>
-0171   chunk_roi_os = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(roi_os, chunks(chunk_i,:)); 
-0172   master_chunk_roi_os=chunk_roi_os(strcmp(chunk_roi_os.filetype,master_filetype),:);  
-0173   
-0174   <span class="comment">%intersecting with extended chunks for slave</span>
-0175   extended_chunk_roi_os = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(roi_os, extended_chunks(chunk_i,:));  
-0176 
-0177   
-0178   do_this_chunk = true;
-0179   <span class="comment">%cheking if this chunk was previously done</span>
-0180   <span class="keyword">if</span> ~isempty(prev_sync_roi)
-0181     cfg=[];
-0182     cfg.overlap=0.001;
-0183     prev_chunk_i = <a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(cfg,prev_sync_roi,master_chunk_roi_os);
-0184     prev_chunk_i_master = prev_chunk_i(strcmp(prev_chunk_i.sync_type,<span class="string">'master'</span>) &amp;<span class="keyword">...</span>
-0185                                        strcmp(prev_chunk_i.sync_channel,master_channel) &amp; <span class="keyword">...</span>
-0186                                        strcmp(prev_chunk_i.chantype,master_chantype),:);
-0187     <span class="comment">%cheking consistency of previous and current syncs</span>
-0188     <span class="keyword">if</span> height(prev_chunk_i_master)==height(master_chunk_roi_os) &amp;&amp; <span class="keyword">...</span>
-0189        abs(min(prev_chunk_i_master.starts) - min(master_chunk_roi_os.starts)) &lt; timetol &amp;&amp; <span class="keyword">...</span>
-0190        abs(max(prev_chunk_i_master.ends) - max(master_chunk_roi_os.ends)) &lt; timetol
-0191      
-0192        do_this_chunk = false; <span class="comment">%will skip the calculations for this chunk</span>
-0193        fprintf(<span class="string">'skipping chunk %i consistent with chunk %i in cfg.sync_roi \n'</span>,chunk_id, unique(prev_chunk_i_master.chunk_id));
-0194      
-0195        <span class="comment">%adding row info for master</span>
-0196        row = prev_chunk_i_master(:,sync_roi_vars_out);
-0197        row.chunk_id(:) = chunk_id;  <span class="comment">%replacing chunk info</span>
-0198        sync_roi = [sync_roi;row];
-0199        
-0200        <span class="comment">%adding row info for slaves</span>
-0201        row = prev_chunk_i(ismember(prev_chunk_i.filetype,slave_filetypes) &amp; <span class="keyword">...</span>
-0202               ismember(prev_chunk_i.sync_channel,sync_channels.channel(ismember(sync_channels.filetype,slave_filetypes))) &amp;<span class="keyword">...</span>
-0203               prev_chunk_i.chunk_id == unique(prev_chunk_i_master.chunk_id), <span class="keyword">...</span>
-0204               sync_roi_vars_out);
-0205        row.chunk_id(:) = chunk_id; <span class="comment">%replacing chunk info</span>
-0206        sync_roi = [sync_roi;row];  
-0207     <span class="keyword">end</span>
-0208   <span class="keyword">end</span>
-0209   
-0210   <span class="keyword">if</span> do_this_chunk
-0211     cfg=[]; <span class="comment">%creating masters raw with sync channel for entire session</span>
-0212     cfg.channel = master_channel; 
-0213     cfg.chantype = master_chantype; 
-0214     cfg.roi = master_chunk_roi_os; 
-0215     cfg.ft_feedback=ft_feedback;
-0216     cfg.dryrun = dryrun;
-0217     cfg.discontinuous=discontinuous;
-0218     [master, master_map] = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);
-0219 
-0220     <span class="keyword">if</span> high_pass
-0221       master.trial{1} = ft_preproc_highpassfilter(master.trial{1},<span class="keyword">...</span>
-0222                         master.fsample, high_pass_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);
-0223     <span class="keyword">end</span>
-0224 
-0225     row = master_chunk_roi_os(:,sync_roi_vars);
-0226     row.chantype = repmat({master_chantype},height(row),1);
-0227     row.chunk_id = repmat(chunk_id,height(row),1);
-0228     row.warpfactor = ones(height(row),1);
-0229     row.sync_channel = master_channel;
-0230     row.sync_type = {<span class="string">'master'</span>};
-0231     sync_roi = [sync_roi;row];
-0232 
-0233     <span class="keyword">if</span> praat &amp;&amp; ~dryrun
-0234       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_master_'</span>,master_filetype),master);  
-0235     <span class="keyword">end</span>
-0236 
-0237     <span class="keyword">for</span> slave_i=1:length(slave_filetypes)
-0238       filetype_chunk_roi_os=extended_chunk_roi_os(string(extended_chunk_roi_os.filetype)==slave_filetypes(slave_i),:);
-0239       slave_channel = sync_channels.channel{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
-0240       slave_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
-0241 
-0242       cfg=[]; <span class="comment">%creating slave raw with sync channel for entire session</span>
-0243       cfg.ft_feedback=ft_feedback;
-0244       cfg.channel = slave_channel; 
-0245       cfg.chantype = slave_chantype;
-0246       cfg.roi = filetype_chunk_roi_os;
-0247       cfg.dryrun = dryrun;
-0248       cfg.discontinuous=discontinuous;
-0249       [slave, slave_map] = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);  
-0250 
-0251       <span class="keyword">if</span> high_pass &amp;&amp; ~dryrun
-0252         slave.trial{1} = ft_preproc_highpassfilter(slave.trial{1},<span class="keyword">...</span>
-0253                         slave.fsample, 5, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);
-0254       <span class="keyword">end</span>
-0255 
-0256       <span class="comment">%envelope alingment and warping</span>
-0257       <span class="keyword">if</span> ~dryrun
-0258         cfg=[]; cfg.ft_feedback=ft_feedback;
-0259         cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
-0260         cfg.method=<span class="string">'envelope'</span>; cfg.env_freq=env_freq; cfg.scan=env_scan;
-0261         cfg.penalty_wt0_min=env_penalty_wt0_min; cfg.penalty_ws1=env_penalty_ws1;
-0262         wc_env = <a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>(cfg,master,slave);
-0263         slave.time{1} = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_env, 1:length(slave.time{1}));
-0264       <span class="keyword">else</span>  
-0265         wc_env = [];
-0266         wc_env.s1 = min(slave_map.raw1);
-0267         wc_env.s2 = max(slave_map.raw2);
-0268         wc_env.t1 = min(slave_map.t1);
-0269         wc_env.t2 = max(slave_map.t2);
-0270         wc_env.wt0=0; 
-0271         wc_env.ws1=1; 
-0272       <span class="keyword">end</span>
-0273 
-0274       <span class="keyword">if</span> lpf &amp;&amp; ~dryrun <span class="comment">%low-pass frequency filter alignment and warping</span>
-0275           cfg=[]; cfg.ft_feedback=ft_feedback;
-0276           cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
-0277           cfg.method=<span class="string">'low-pass-filter'</span>; cfg.scan=lpf_scan;
-0278           cfg.lpf_freq=min([master.fsample,slave.fsample,lpf_max_freq]);
-0279           cfg.penalty_wt0_min=lpf_penalty_wt0_min; cfg.penalty_ws1=lpf_penalty_ws1;
-0280           wc_lpf = <a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>(cfg,master,slave);
-0281           slave.time{1} = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_lpf, 1:length(slave.time{1}));
-0282       <span class="keyword">else</span>
-0283           wc_lpf = wc_env;
-0284           wc_lpf.ws1 = 1;
-0285       <span class="keyword">end</span>
-0286 
-0287       <span class="comment">%saving sync info</span>
-0288       row = filetype_chunk_roi_os(:,sync_roi_vars);
-0289       <span class="keyword">if</span> height(row) ~= height(slave_map)
-0290         row = row(ismember(row.name,slave_map.name),:);
-0291       <span class="keyword">end</span>
-0292       row.s1 = slave_map.s1;
-0293       row.s2 = slave_map.s2; 
-0294       row.t1 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_lpf,slave_map.raw1);
-0295       row.t2 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_lpf,slave_map.raw2);
-0296       row.starts = row.t1 - 0.5./row.Fs;
-0297       row.ends = row.t2 + 0.5./row.Fs;
-0298       row.chantype=repmat({slave_chantype},height(row),1);
-0299       row.sync_channel = repmat({slave_channel},height(row),1);
-0300       row.sync_type = repmat({<span class="string">'slave'</span>},height(row),1);
-0301       row.warpfactor = repmat(wc_env.ws1*wc_lpf.ws1,height(row),1);
-0302       row.chunk_id = repmat(chunk_id,height(row),1);
-0303       sync_roi = [sync_roi; row];
-0304 
-0305       <span class="keyword">if</span> praat &amp;&amp; ~dryrun
-0306         slave_crop = <a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>(master,slave);
-0307         <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_slave_'</span>,slave_filetypes(slave_i)),slave_crop);
-0308       <span class="keyword">end</span>
-0309     <span class="keyword">end</span>
-0310   <span class="keyword">end</span>
-0311 <span class="keyword">end</span>
-0312 
-0313 sync_roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(sync_roi);
-0314 
-0315 <span class="keyword">for</span> slave_i=1:length(slave_filetypes)
-0316   sync_roi_i = sync_roi(strcmp(sync_roi.filetype,slave_filetypes{slave_i}),:);
-0317   chantype = unique(sync_roi_i.chantype);
-0318   sync_channel = unique(sync_roi_i.sync_channel);
-0319   fprintf(<span class="string">'Summary for slave filetype %s, chantype %s, sync_channel %s \n.'</span>,<span class="keyword">...</span>
-0320     slave_filetypes{slave_i},chantype{1},sync_channel{1});
-0321   sync_roi_i(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'name'</span>,<span class="string">'session_id'</span>,<span class="string">'warpfactor'</span>})
-0322 <span class="keyword">end</span>
-0323 
-0324 
-0325</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0143 sync_roi = table();
+0144 sync_roi_vars = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'s1'</span>,<span class="string">'t1'</span>,<span class="string">'s2'</span>,<span class="string">'t2'</span>,<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'session_id'</span>,<span class="string">'session_part'</span>,<span class="string">'filetype'</span>};
+0145 sync_roi_vars_out = [sync_roi_vars,{<span class="string">'chantype'</span>,<span class="string">'chunk_id'</span>,<span class="string">'warpfactor'</span>,<span class="string">'sync_channel'</span>,<span class="string">'sync_type'</span>}];
+0146 
+0147 filetypes=unique(sync_channels.filetype);
+0148 slave_filetypes = setdiff(filetypes,master_filetype);
+0149 master_channel = sync_channels.channel{strcmp(sync_channels.filetype,master_filetype)};
+0150 master_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,master_filetype)};
+0151 slave_filetype_delta_t = cell(1,length(slave_filetypes));
+0152 
+0153 extended_chunks = <a href="../../bml/annot/bml_annot_extend.html" class="code" title="function extended = bml_annot_extend(annot,ext1,ext2)">bml_annot_extend</a>(chunks,chunk_extend);
+0154 
+0155 <span class="keyword">if</span> ~isempty(prev_sync_roi) <span class="comment">%previous attempts to sync</span>
+0156   prev_sync_roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(prev_sync_roi,<span class="string">'prev'</span>);
+0157   assert(all(ismember({<span class="string">'sync_type'</span>,<span class="string">'sync_channel'</span>,<span class="string">'chantype'</span>},prev_sync_roi.Properties.VariableNames)),<span class="keyword">...</span>
+0158     &quot;variables sync_type, sync_channel and chantype required <span class="keyword">for</span> cfg.sync_roi&quot;);
+0159 <span class="keyword">else</span> <span class="comment">%checking files before commiting to synchronization</span>
+0160   <span class="keyword">for</span> chunk_i=1:height(chunks)
+0161     chunk_roi_os = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(roi_os, chunks(chunk_i,:));  
+0162     <span class="keyword">for</span> filetype_i=1:length(filetypes)
+0163       cfg=[]; 
+0164       cfg.ft_feedback=ft_feedback;
+0165       cfg.channel = sync_channels.channel{strcmp(sync_channels.filetype,filetypes(filetype_i))};
+0166       cfg.chantype = sync_channels.chantype{strcmp(sync_channels.filetype,filetypes(filetype_i))};
+0167       cfg.roi=chunk_roi_os(string(chunk_roi_os.filetype)==filetypes(filetype_i),:);
+0168       cfg.dryrun=true;
+0169       cfg.discontinuous=discontinuous;
+0170       assert(height(cfg.roi)&gt;0,<span class="string">'No files for filetype %s and chunk_id %i'</span>,<span class="keyword">...</span>
+0171         filetypes{filetype_i},chunks.id(chunk_i));
+0172       <span class="keyword">try</span>
+0173         <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg); <span class="comment">%raises error if continuity is violated</span>
+0174       <span class="keyword">catch</span> err
+0175         error(<span class="string">'filetype %s chunk %i failed \n %s'</span>,filetypes{filetype_i},chunks.id(chunk_i),err.message);
+0176       <span class="keyword">end</span>
+0177     <span class="keyword">end</span>
+0178   <span class="keyword">end</span>
+0179 <span class="keyword">end</span>
+0180 
+0181 <span class="comment">%synchronizing</span>
+0182 <span class="keyword">for</span> chunk_i=1:height(chunks)
+0183   chunk_id = chunks.id(chunk_i);
+0184   
+0185   <span class="comment">%interseting with chunks for master</span>
+0186   chunk_roi_os = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(roi_os, chunks(chunk_i,:)); 
+0187   master_chunk_roi_os=chunk_roi_os(strcmp(chunk_roi_os.filetype,master_filetype),:);  
+0188   
+0189   <span class="comment">%intersecting with extended chunks for slave</span>
+0190   extended_chunk_roi_os = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(roi_os, extended_chunks(chunk_i,:));  
+0191 
+0192   do_this_chunk = true;
+0193   <span class="comment">%cheking if this chunk was previously done</span>
+0194   <span class="keyword">if</span> ~isempty(prev_sync_roi)
+0195     cfg=[];
+0196     cfg.overlap=0.001;
+0197     prev_chunk_i = <a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(cfg,prev_sync_roi,master_chunk_roi_os);
+0198     prev_chunk_i_master = prev_chunk_i(strcmp(prev_chunk_i.sync_type,<span class="string">'master'</span>) &amp;<span class="keyword">...</span>
+0199                                        strcmp(prev_chunk_i.sync_channel,master_channel) &amp; <span class="keyword">...</span>
+0200                                        strcmp(prev_chunk_i.chantype,master_chantype),:);
+0201     <span class="comment">%cheking consistency of previous and current syncs</span>
+0202     <span class="keyword">if</span> height(prev_chunk_i_master)==height(master_chunk_roi_os) &amp;&amp; <span class="keyword">...</span>
+0203        abs(min(prev_chunk_i_master.starts) - min(master_chunk_roi_os.starts)) &lt; timetol &amp;&amp; <span class="keyword">...</span>
+0204        abs(max(prev_chunk_i_master.ends) - max(master_chunk_roi_os.ends)) &lt; timetol
+0205      
+0206        do_this_chunk = false; <span class="comment">%will skip the calculations for this chunk</span>
+0207        fprintf(<span class="string">'skipping chunk %i consistent with chunk %i in cfg.sync_roi \n'</span>,chunk_id, unique(prev_chunk_i_master.chunk_id));
+0208      
+0209        <span class="comment">%adding row info for master</span>
+0210        row = prev_chunk_i_master(:,sync_roi_vars_out);
+0211        row.chunk_id(:) = chunk_id;  <span class="comment">%replacing chunk info</span>
+0212        sync_roi = [sync_roi;row];
+0213        
+0214        <span class="comment">%adding row info for slaves</span>
+0215        row = prev_chunk_i(ismember(prev_chunk_i.filetype,slave_filetypes) &amp; <span class="keyword">...</span>
+0216               ismember(prev_chunk_i.sync_channel,sync_channels.channel(ismember(sync_channels.filetype,slave_filetypes))) &amp;<span class="keyword">...</span>
+0217               prev_chunk_i.chunk_id == unique(prev_chunk_i_master.chunk_id), <span class="keyword">...</span>
+0218               sync_roi_vars_out);
+0219        row.chunk_id(:) = chunk_id; <span class="comment">%replacing chunk info</span>
+0220        sync_roi = [sync_roi;row];  
+0221     <span class="keyword">end</span>
+0222   <span class="keyword">end</span>
+0223   
+0224   <span class="keyword">if</span> do_this_chunk
+0225     fprintf(<span class="string">'synchronizing chunk %i \n'</span>,chunk_id);
+0226 
+0227     cfg=[]; <span class="comment">%creating masters raw with sync channel for entire session</span>
+0228     cfg.channel = master_channel; 
+0229     cfg.chantype = master_chantype; 
+0230     cfg.roi = master_chunk_roi_os; 
+0231     cfg.ft_feedback = ft_feedback;
+0232     cfg.dryrun = dryrun;
+0233     cfg.discontinuous = discontinuous;
+0234     [master, master_map] = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);
+0235 
+0236     <span class="keyword">if</span> ismember(<span class="string">'threshold'</span>,sync_channels.Properties.VariableNames)
+0237       <span class="comment">%zeroing supra treshold regions of master</span>
+0238       threshold = sync_channels.threshold(<span class="keyword">...</span>
+0239         strcmp(sync_channels.filetype,master_filetype) &amp; <span class="keyword">...</span>
+0240         strcmp(sync_channels.channel,master_channel) &amp; <span class="keyword">...</span>
+0241         strcmp(sync_channels.chantype,master_chantype));
+0242       
+0243       <span class="keyword">if</span> ~isnan(threshold)
+0244         fprintf(<span class="string">'Threshold found for channel ''%s'' of filetype ''%s'' \nZeroing where abs &gt; %f \n'</span>,<span class="keyword">...</span>
+0245           master_channel,master_filetype,threshold);  
+0246         
+0247         cfg1=[];
+0248         cfg1.threshold = threshold;
+0249         sat = <a href="../../bml/annot/bml_annot_detect.html" class="code" title="function annot = bml_annot_detect(cfg, env)">bml_annot_detect</a>(cfg1,<a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(master));
+0250         
+0251         cfg2=[];
+0252         cfg2.value=0;
+0253         cfg2.annot=sat;
+0254         master = <a href="../../bml/signal/bml_mask.html" class="code" title="function masked = bml_mask(cfg, raw)">bml_mask</a>(cfg2,master);
+0255       <span class="keyword">end</span>
+0256     <span class="keyword">end</span>
+0257     
+0258     <span class="keyword">if</span> high_pass
+0259       master.trial{1} = ft_preproc_highpassfilter(master.trial{1},<span class="keyword">...</span>
+0260                         master.fsample, high_pass_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);
+0261     <span class="keyword">end</span>
+0262 
+0263     row = master_chunk_roi_os(:,sync_roi_vars);
+0264     row.chantype = repmat({master_chantype},height(row),1);
+0265     row.chunk_id = repmat(chunk_id,height(row),1);
+0266     row.warpfactor = ones(height(row),1);
+0267     row.sync_channel = master_channel;
+0268     row.sync_type = {<span class="string">'master'</span>};
+0269     sync_roi = [sync_roi;row];
+0270 
+0271     <span class="keyword">if</span> praat &amp;&amp; ~dryrun
+0272       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_master_'</span>,master_filetype),master);  
+0273     <span class="keyword">end</span>
+0274 
+0275     <span class="keyword">for</span> slave_i=1:length(slave_filetypes)
+0276       filetype_chunk_roi_os=extended_chunk_roi_os(string(extended_chunk_roi_os.filetype)==slave_filetypes(slave_i),:);
+0277       slave_channel = sync_channels.channel{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
+0278       slave_chantype = sync_channels.chantype{strcmp(sync_channels.filetype,slave_filetypes(slave_i))};
+0279 
+0280       cfg = []; <span class="comment">%creating slave raw with sync channel for entire session</span>
+0281       cfg.ft_feedback = ft_feedback;
+0282       cfg.channel = slave_channel; 
+0283       cfg.chantype = slave_chantype;
+0284       cfg.roi = filetype_chunk_roi_os;
+0285       cfg.dryrun = dryrun;
+0286       cfg.discontinuous=discontinuous;
+0287       <span class="keyword">if</span> predictive_loading &amp;&amp; length(slave_filetype_delta_t{slave_i})&gt;5
+0288         cfg.roi.t1 = cfg.roi.t1 + trimmean(slave_filetype_delta_t{slave_i},50);
+0289         cfg.roi.t2 = cfg.roi.t2 + trimmean(slave_filetype_delta_t{slave_i},50);
+0290       <span class="keyword">end</span>
+0291       [slave, slave_map] = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);  
+0292 
+0293       <span class="keyword">if</span> ismember(<span class="string">'threshold'</span>,sync_channels.Properties.VariableNames)
+0294          <span class="comment">%zeroing supra treshold regions of slave</span>
+0295         threshold = sync_channels.threshold(<span class="keyword">...</span>
+0296           strcmp(sync_channels.filetype,slave_filetypes(slave_i)) &amp; <span class="keyword">...</span>
+0297           strcmp(sync_channels.channel,slave_channel) &amp; <span class="keyword">...</span>
+0298           strcmp(sync_channels.chantype,slave_chantype));
+0299       
+0300         <span class="keyword">if</span> ~isnan(threshold)
+0301           fprintf(<span class="string">'Threshold found for channel ''%s'' of filetype ''%s'' \nZeroing where abs &gt; %f \n'</span>,<span class="keyword">...</span>
+0302             slave_channel,slave_filetypes(slave_i),threshold);  
+0303 
+0304           cfg1=[];
+0305           cfg1.threshold = threshold;
+0306           sat = <a href="../../bml/annot/bml_annot_detect.html" class="code" title="function annot = bml_annot_detect(cfg, env)">bml_annot_detect</a>(cfg1,<a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(slave));
+0307 
+0308           cfg2=[];
+0309           cfg2.value=0;
+0310           cfg2.annot=sat;
+0311           slave = <a href="../../bml/signal/bml_mask.html" class="code" title="function masked = bml_mask(cfg, raw)">bml_mask</a>(cfg2,slave);
+0312         <span class="keyword">end</span>
+0313       <span class="keyword">end</span>
+0314       
+0315       <span class="keyword">if</span> high_pass &amp;&amp; ~dryrun
+0316         slave.trial{1} = ft_preproc_highpassfilter(slave.trial{1},<span class="keyword">...</span>
+0317                         slave.fsample, 5, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);
+0318       <span class="keyword">end</span>
+0319 
+0320       <span class="comment">%envelope alingment and warping</span>
+0321       <span class="keyword">if</span> ~dryrun
+0322         cfg=[]; cfg.ft_feedback=ft_feedback;
+0323         cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
+0324         cfg.method=<span class="string">'envelope'</span>; cfg.env_freq=env_freq; cfg.scan=env_scan;
+0325         cfg.penalty_wt0_min=env_penalty_wt0_min; cfg.penalty_ws1=env_penalty_ws1;
+0326         wc_env = <a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>(cfg,master,slave);
+0327         slave.time{1} = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_env, 1:length(slave.time{1}));
+0328       <span class="keyword">else</span>  
+0329         wc_env = [];
+0330         wc_env.s1 = min(slave_map.raw1);
+0331         wc_env.s2 = max(slave_map.raw2);
+0332         wc_env.t1 = min(slave_map.t1);
+0333         wc_env.t2 = max(slave_map.t2);
+0334         wc_env.wt0=0; 
+0335         wc_env.ws1=1; 
+0336       <span class="keyword">end</span>
+0337 
+0338       <span class="keyword">if</span> lpf &amp;&amp; ~dryrun <span class="comment">%low-pass frequency filter alignment and warping</span>
+0339           cfg=[]; cfg.ft_feedback=ft_feedback;
+0340           cfg.resample_freq=resample_freq; cfg.timewarp=timewarp;
+0341           cfg.method=<span class="string">'low-pass-filter'</span>; cfg.scan=lpf_scan;
+0342           cfg.lpf_freq=min([master.fsample,slave.fsample,lpf_max_freq]);
+0343           cfg.penalty_wt0_min=lpf_penalty_wt0_min; cfg.penalty_ws1=lpf_penalty_ws1;
+0344           wc_lpf = <a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>(cfg,master,slave);
+0345           slave.time{1} = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_lpf, 1:length(slave.time{1}));
+0346       <span class="keyword">else</span>
+0347           wc_lpf = wc_env;
+0348           wc_lpf.ws1 = 1;
+0349       <span class="keyword">end</span>
+0350 
+0351       <span class="comment">%saving sync info</span>
+0352       row = filetype_chunk_roi_os(:,sync_roi_vars);
+0353       <span class="keyword">if</span> height(row) ~= height(slave_map)
+0354         row = row(ismember(row.name,slave_map.name),:);
+0355       <span class="keyword">end</span>
+0356       row.s1 = slave_map.s1;
+0357       row.s2 = slave_map.s2; 
+0358       row.t1 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_lpf,slave_map.raw1);
+0359       row.t2 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(wc_lpf,slave_map.raw2);
+0360       row.starts = row.t1 - 0.5./row.Fs;
+0361       row.ends = row.t2 + 0.5./row.Fs;
+0362       row.chantype=repmat({slave_chantype},height(row),1);
+0363       row.sync_channel = repmat({slave_channel},height(row),1);
+0364       row.sync_type = repmat({<span class="string">'slave'</span>},height(row),1);
+0365       row.warpfactor = repmat(wc_env.ws1*wc_lpf.ws1,height(row),1);
+0366       row.chunk_id = repmat(chunk_id,height(row),1);
+0367       sync_roi = [sync_roi; row];
+0368 
+0369       <span class="comment">%saving displacement for predictive loading</span>
+0370       slave_filetype_delta_t{slave_i} = [slave_filetype_delta_t{slave_i},mean(row.t1 - slave_map.t1)];
+0371       
+0372       <span class="keyword">if</span> praat &amp;&amp; ~dryrun
+0373         slave_crop = <a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>(master,slave);
+0374         <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_slave_'</span>,slave_filetypes(slave_i)),slave_crop);
+0375       <span class="keyword">end</span>
+0376     <span class="keyword">end</span>
+0377   <span class="keyword">end</span>
+0378 <span class="keyword">end</span>
+0379 
+0380 sync_roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(sync_roi);
+0381 
+0382 <span class="keyword">for</span> slave_i=1:length(slave_filetypes)
+0383   sync_roi_i = sync_roi(strcmp(sync_roi.filetype,slave_filetypes{slave_i}),:);
+0384   chantype = unique(sync_roi_i.chantype);
+0385   sync_channel = unique(sync_roi_i.sync_channel);
+0386   fprintf(<span class="string">'Summary for slave filetype %s, chantype %s, sync_channel %s \n.'</span>,<span class="keyword">...</span>
+0387     slave_filetypes{slave_i},chantype{1},sync_channel{1});
+0388   sync_roi_i(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'name'</span>,<span class="string">'session_id'</span>,<span class="string">'warpfactor'</span>})
+0389 <span class="keyword">end</span>
+0390 
+0391 
+0392</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

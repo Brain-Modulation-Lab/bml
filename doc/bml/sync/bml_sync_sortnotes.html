@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_sync_sortnotes</title>
+  <meta name="keywords" content="bml_sync_sortnotes">
+  <meta name="description" content="BML_SYNC_SORTNOTES">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">sync</a> &gt; bml_sync_sortnotes.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\sync&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_sync_sortnotes
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_SYNC_SORTNOTES</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function sortnotes = bml_sync_sortnotes(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_SYNC_SORTNOTES</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates synchronization chunks</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function sortnotes = bml_sync_sortnotes(cfg)</a>
+0002 <span class="comment">% BML_SYNC_SORTNOTES</span>
+0003 
+0004 roi           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0005 roi           = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
+0006 sortnotes     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'sortnotes'</span>);
+0007 WaveformFreq    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'WaveformFreq'</span>);
+0008 plexon        = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'plexon'</span>);
+0009 timetol         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-3);
+0010 
+0011 partialchunks = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'partialchunks'</span>,false);
+0012 
+0013 assert(~isempty(roi),&quot;roi table required&quot;);
+0014 assert(isfile(plexon),&quot;Valid plexon file required&quot;);
+0015 <span class="comment">% assert(isfile(sortnotes),&quot;Valid sortnotes file required&quot;);</span>
+0016 
+0017 plexon_src    = strrep(plexon,<span class="string">'.plx'</span>,<span class="string">'.mat'</span>);
+0018 <span class="keyword">if</span> ~isfile(plexon_src)
+0019     plexon_src = [];
+0020 <span class="keyword">end</span>
+0021 
+0022 plexon_src      = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'plexon_src'</span>,plexon_src);
+0023 
+0024 FileMapping = [];
+0025 label = [];
+0026 <span class="keyword">if</span> ~isempty(plexon_src) &amp;&amp; isfile(plexon_src)
+0027     src = matfile(plexon_src);
+0028     <span class="keyword">if</span> ismember(<span class="string">'FileMapping'</span>,fieldnames(src))
+0029         FileMapping = src.FileMapping;
+0030     <span class="keyword">end</span>
+0031     <span class="keyword">if</span> ismember(<span class="string">'Channels'</span>,fieldnames(src))
+0032         label = src.Channels;
+0033     <span class="keyword">end</span>
+0034 <span class="keyword">end</span>
+0035 FileMapping   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'FileMapping'</span>,FileMapping);
+0036 label         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,label);
+0037 
+0038 electrode     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'electrode'</span>);
+0039 <span class="keyword">if</span> ~isempty(label) &amp;&amp; ~isempty(electrode) &amp;&amp; <span class="keyword">...</span>
+0040         all(ismember({<span class="string">'electrode'</span>,<span class="string">'channel'</span>},electrode.Properties.VariableNames))
+0041     label=<a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(label,electrode.channel,electrode.electrode);
+0042 <span class="keyword">end</span>
+0043 
+0044 FM_VARS={<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'raw1'</span>,<span class="string">'raw2'</span>};
+0045 SY_VARS={<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'t1'</span>,<span class="string">'s1'</span>,<span class="string">'t2'</span>,<span class="string">'s2'</span>,<span class="string">'name'</span>, <span class="string">'nSamples'</span>};
+0046 
+0047 assert(~isempty(FileMapping),&quot;FileMapping required&quot;);
+0048 assert(all(ismember(FM_VARS,FileMapping.Properties.VariableNames)),&quot;Invalid FileMapping table&quot;);
+0049 assert(all(ismember(SY_VARS,roi.Properties.VariableNames)),&quot;Invalid roi table&quot;);
+0050 
+0051 fm = FileMapping(:,FM_VARS);
+0052 sy = roi(ismember(roi.name,fm.name),SY_VARS);
+0053 syfm=join(sy,fm,<span class="string">'Keys'</span>,<span class="string">'name'</span>);
+0054 
+0055 assert(all(syfm.nSamples_sy==syfm.nSamples_fm), &quot;Inconsistent number of samples&quot;);
+0056 
+0057 <span class="keyword">if</span> partialchunks
+0058     
+0059     syfm.nSamples = syfm.nSamples_sy;
+0060     
+0061     <span class="comment">% first fm file -- assume raw2 corresponds to end of chunk</span>
+0062     syfm.s1(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s1(syfm.raw1 == 1);
+0063     syfm.s2(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s2(syfm.raw1 == 1);    
+0064     
+0065     <span class="comment">% remaining fm files -- assume raw1 corresponds to start of chunk</span>
+0066     syfm.s1(syfm.raw1 &gt; 1) = syfm.raw1(syfm.raw1 &gt; 1) + syfm.s1(syfm.raw1 &gt; 1) - 1;
+0067     syfm.s2(syfm.raw1 &gt; 1) = syfm.raw1(syfm.raw1 &gt; 1) + syfm.s2(syfm.raw1 &gt; 1) - 1;
+0068 
+0069     <span class="comment">%     syfm = syfm((syfm.raw2-syfm.raw1+1) == syfm.nSamples,:);</span>
+0070     <span class="comment">%     assert(~isempty(syfm), &quot;No vaid sync chunks found for consolidation.&quot;);</span>
+0071     
+0072 <span class="keyword">else</span>
+0073     
+0074     syfm = syfm((syfm.raw2-syfm.raw1) == (syfm.s2-syfm.s1),:);
+0075     assert(~isempty(syfm), &quot;No vaid sync chunks found <span class="keyword">for</span> consolidation.&quot;);
+0076     
+0077     syfm.s1=syfm.raw1;
+0078     syfm.s2=syfm.raw2;
+0079     syfm.nSamples = syfm.nSamples_sy;
+0080     
+0081 <span class="keyword">end</span>
+0082 
+0083 cfg1=[];
+0084 cfg1.timetol = timetol; 
+0085 cfg1.roi=syfm;
+0086 cfg1.rowisfile=false;
+0087 spike_sync=<a href="bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(cfg1);
+0088 
+0089 sortnotes.starts = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(spike_sync,sortnotes.starts*WaveformFreq);
+0090 sortnotes.ends = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(spike_sync,sortnotes.ends*WaveformFreq);
+0091 sortnotes = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(sortnotes,<span class="string">'sortnotes'</span>);
+0092 <span class="keyword">end</span>
+0093</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

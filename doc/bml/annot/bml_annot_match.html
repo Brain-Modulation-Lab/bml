@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_match</title>
+  <meta name="keywords" content="bml_annot_match">
+  <meta name="description" content="BML_ANNOT_MATCH matches a raw data object to a template">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_match.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_match
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_MATCH matches a raw data object to a template</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function annot = bml_annot_match(cfg, data, template) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_MATCH matches a raw data object to a template
+
+ Use as
+   annot = bml_annot_match(cfg, data, template)
+
+ data - ft_datatype_raw data object to be annotated
+ template - the pattern to match to
+
+ cfg.threshold - double: The minimum correlation value to be assigned as a positive match
+ cfg.channel - Nx1 cell-array with selection of channels (default = 'all'), see FT_CHANNELSELECTION
+ cfg.template_channel - cellstr with channel of template to use
+ cfg.timeeps - double, epsilon for time. Defaults to 1e-9
+ cfg.scan - annotation table with ranges to scan. If not provided the
+       entire data object will be scanned
+ cfg.max_annot - integer: maximun number of annotations to return
+ cfg.max_annot_per_scan - integer: maximun number of annotations to
+       return per time interval scanned per channel
+ cfg.warn - bool, should warnings be issued? Defaults to true
+
+ returns an annotation table</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_match(cfg, data, template)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_MATCH matches a raw data object to a template</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_annot_match(cfg, data, template)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% data - ft_datatype_raw data object to be annotated</span>
+0009 <span class="comment">% template - the pattern to match to</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% cfg.threshold - double: The minimum correlation value to be assigned as a positive match</span>
+0012 <span class="comment">% cfg.channel - Nx1 cell-array with selection of channels (default = 'all'), see FT_CHANNELSELECTION</span>
+0013 <span class="comment">% cfg.template_channel - cellstr with channel of template to use</span>
+0014 <span class="comment">% cfg.timeeps - double, epsilon for time. Defaults to 1e-9</span>
+0015 <span class="comment">% cfg.scan - annotation table with ranges to scan. If not provided the</span>
+0016 <span class="comment">%       entire data object will be scanned</span>
+0017 <span class="comment">% cfg.max_annot - integer: maximun number of annotations to return</span>
+0018 <span class="comment">% cfg.max_annot_per_scan - integer: maximun number of annotations to</span>
+0019 <span class="comment">%       return per time interval scanned per channel</span>
+0020 <span class="comment">% cfg.warn - bool, should warnings be issued? Defaults to true</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% returns an annotation table</span>
+0023 
+0024 
+0025 <span class="comment">%% Loading parameters</span>
+0026 max_annot         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'max_annot'</span>, inf);
+0027 max_annot_per_scan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'max_annot_per_scan'</span>, inf);
+0028 timeeps           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'timeeps'</span>, 1e-9);
+0029 template_channel  = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg, <span class="string">'template_channel'</span>,[]);
+0030 threshold         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'threshold'</span>, []);
+0031 scan              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'scan'</span>, table());
+0032 warn              = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'warn'</span>, true);
+0033 allow_overlap     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'allow_overlap'</span>, false);
+0034 annot             = table(); <span class="comment">%output table</span>
+0035 
+0036 <span class="comment">%selecting channels from raw</span>
+0037 <span class="keyword">if</span> any(ismember({<span class="string">'channel'</span>},fieldnames(cfg)))
+0038   cfg1=[];
+0039   cfg1.channel = cfg.channel;
+0040   data = ft_selectdata(cfg1,data);
+0041 <span class="keyword">end</span>
+0042 
+0043 <span class="keyword">if</span> isempty(threshold)
+0044   error(<span class="string">'cfg.threshold argument required'</span>)
+0045 <span class="keyword">end</span>
+0046 
+0047 <span class="comment">%selecting channel from template</span>
+0048 <span class="keyword">if</span> isempty(template_channel) 
+0049   <span class="keyword">if</span> ~numel(template.label,1)
+0050     error(<span class="string">'single channel must be selected from template. Use cfg.template_channel to select one.'</span>)
+0051   <span class="keyword">end</span>
+0052 <span class="keyword">else</span>
+0053   <span class="keyword">if</span> ~ismember(template_channel,template.label)
+0054     error(<span class="string">'channel %s not found in template'</span>,template_channel)
+0055   <span class="keyword">end</span>
+0056   cfg=[];
+0057   cfg.channel = template_channel;
+0058     cfg.ft_feedback = <span class="string">'no'</span>;
+0059   cfg.showcallinfo = <span class="string">'no'</span>;
+0060   cfg.trackcallinfo = false;
+0061   template = ft_selectdata(cfg, template);
+0062 <span class="keyword">end</span>
+0063 <span class="keyword">if</span> numel(template.trial) &gt; 1
+0064   error(<span class="string">'template should have a single trial'</span>)
+0065 <span class="keyword">end</span>
+0066 
+0067 <span class="comment">% verifying sampling rate of template</span>
+0068 template.fsample = round(1/mean(diff(template.time{1})));
+0069 Fs = round(1/mean(diff(data.time{1})));
+0070 <span class="keyword">if</span> template.fsample ~= Fs
+0071   cfg=[];
+0072   cfg.resamplefs = Fs;
+0073   template = ft_resampledata(cfg,template);
+0074   template.fsample = Fs;
+0075 <span class="keyword">end</span>
+0076 
+0077 <span class="comment">%normalizing template</span>
+0078 template_std = std(template.trial{1});
+0079 <span class="keyword">if</span> template_std &gt; eps
+0080   template.trial{1} = (template.trial{1} - mean(template.trial{1})) ./ template_std;
+0081 <span class="keyword">else</span>
+0082   <span class="keyword">if</span> warn
+0083     warning(<span class="string">'template has no fluctutations, cannot correlate'</span>)
+0084   <span class="keyword">end</span>
+0085   <span class="keyword">return</span>
+0086 <span class="keyword">end</span>
+0087 
+0088 <span class="keyword">if</span> isempty(scan)
+0089   scan = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(data);
+0090 <span class="keyword">else</span>
+0091   cfg=[];
+0092   cfg.keep = <span class="string">'x'</span>;
+0093   scan = <a href="bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(cfg,scan, <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(data));
+0094   <span class="keyword">if</span> isempty(scan)
+0095     <span class="keyword">if</span> warn
+0096       warning(<span class="string">'No region to scan after intersecting scan with raw. Returning empty table.'</span>)
+0097     <span class="keyword">end</span>
+0098     <span class="keyword">return</span>
+0099   <span class="keyword">end</span>
+0100 <span class="keyword">end</span>
+0101 
+0102 <span class="comment">%redefining trials based on scan</span>
+0103 cfg=[];
+0104 cfg.epoch = scan;
+0105 data = <a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>(cfg,data);
+0106 
+0107 n1 = size(template.trial{1},2);
+0108 template_duration = n1/Fs;
+0109 n_annots = 0;
+0110 <span class="keyword">for</span> s=1:numel(data.trial)
+0111   
+0112   <span class="comment">%getting raw for single trial</span>
+0113   cfg=[];
+0114   cfg.trials = s;
+0115   cfg.ft_feedback = <span class="string">'no'</span>;
+0116   cfg.showcallinfo = <span class="string">'no'</span>;
+0117   cfg.trackcallinfo = false;
+0118   data_s = ft_selectdata(cfg,data);
+0119   
+0120   <span class="keyword">for</span> l=1:length(data_s.label)
+0121     
+0122     <span class="comment">%doing the cross correlation</span>
+0123     <span class="comment">%calculating Pearson's correlation coefficient for cross correlation</span>
+0124     [r, lags] = xcorr(data_s.trial{1}(l,:),template.trial{1}(1,:));
+0125     d2u = xcorr((data_s.trial{1}(l,:)).^2,ones(1,n1));
+0126     du  = xcorr(data_s.trial{1}(l,:),ones(1,n1));
+0127     sqdenom = n1*d2u - du.^2;
+0128     sqdenom(sqdenom &lt; eps) = eps;
+0129     r = r ./ realsqrt(sqdenom);
+0130     
+0131     <span class="comment">%detecting matches</span>
+0132     loop_count = 0;
+0133     n_annots_per_scan = 0;
+0134     search_match = true;
+0135     <span class="keyword">while</span> search_match
+0136       <span class="comment">%figure; plot(lags,r)</span>
+0137       <span class="comment">%figure; plot(data_s.time{1}, data_s.trial{1})</span>
+0138       <span class="comment">%figure; plot(template.time{1}, template.trial{1})</span>
+0139       loop_count = loop_count + 1;
+0140       n_annots = n_annots + 1;
+0141       
+0142       <span class="keyword">if</span> n_annots &gt; max_annot
+0143         error(<span class="string">'more annotations found than max_annot = %i'</span>,max_annot)
+0144       <span class="keyword">end</span>
+0145       
+0146       [max_r, max_idx] = max(r);
+0147       max_ti = lags(max_idx)/Fs + data_s.time{1}(1); <span class="comment">%calculating time in GTC</span>
+0148       max_tf = max_ti + template_duration;
+0149       
+0150       <span class="keyword">if</span> max_r &gt; threshold <span class="comment">%match</span>
+0151         
+0152         <span class="comment">%calculating overlap with previous matches</span>
+0153         overlap = 0;
+0154         <span class="keyword">for</span> i=1:height(annot)
+0155           <span class="keyword">if</span> annot{i,1} &lt;= max_tf &amp;&amp; annot{i,2} &gt; max_ti
+0156             overlap = overlap + (min(max_tf,annot{i,2}) - max(max_ti,annot{i,1}))/template_duration;
+0157           <span class="keyword">end</span>
+0158         <span class="keyword">end</span>
+0159         
+0160         <span class="keyword">if</span> overlap &lt;= allow_overlap
+0161           annot = [annot; cell2table({max_ti,max_tf,max_r})];
+0162           n_annots_per_scan = n_annots_per_scan + 1;
+0163           r(floor(max_idx-n1/2):ceil(max_idx+n1/2))=0;
+0164           search_match = n_annots_per_scan &lt; max_annot_per_scan;
+0165         <span class="keyword">else</span>
+0166           r(floor(max_idx-n1/4):ceil(max_idx+n1/4))=0;
+0167         <span class="keyword">end</span>
+0168       <span class="keyword">else</span>
+0169         search_match = false;
+0170       <span class="keyword">end</span>
+0171     <span class="keyword">end</span>
+0172   <span class="keyword">end</span>  
+0173 <span class="keyword">end</span>
+0174 
+0175 <span class="keyword">if</span> ~isempty(annot)
+0176   annot.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'max_cor'</span>};
+0177   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0178 <span class="keyword">end</span>
+0179 
+0180 
+0181 
+0182 
+0183 
+0184 
+0185 
+0186</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

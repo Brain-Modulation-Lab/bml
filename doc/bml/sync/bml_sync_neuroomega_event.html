@@ -53,7 +53,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>	BML_EVENT2ANNOT creates a annot table from a events structure</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_read_event.html" class="code" title="function event = bml_read_event(cfg)">bml_read_event</a>	BML_READ_EVENT reads fieldtrip's event structures from files</li><li><a href="bml_timealign_annot.html" class="code" title="function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master, slave)">bml_timealign_annot</a>	BML_TIMEALIGN_ANNOT aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function cons = bml_annot_consolidate(cfg, annot)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_event2annot.html" class="code" title="function annot = bml_event2annot(cfg, event)">bml_event2annot</a>	BML_EVENT2ANNOT creates a annot table from a events structure</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_read_event.html" class="code" title="function event = bml_read_event(cfg)">bml_read_event</a>	BML_READ_EVENT reads fieldtrip's event structures from files</li><li><a href="bml_timealign_annot.html" class="code" title="function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master, slave)">bml_timealign_annot</a>	BML_TIMEALIGN_ANNOT aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -157,7 +157,7 @@ This function is called by:
 0093 
 0094 cfg=[];
 0095 cfg.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))&lt;10e-3);
-0096 cont_roi = <a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg,roi);
+0096 cont_roi = <a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function cons = bml_annot_consolidate(cfg, annot)">bml_annot_consolidate</a>(cfg,roi);
 0097 
 0098 consolidated_roi = table();
 0099 <span class="keyword">for</span> i=1:height(cont_roi)
@@ -192,6 +192,6 @@ This function is called by:
 0128 
 0129 sync_roi(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'name'</span>,<span class="string">'warpfactor'</span>})
 0130</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

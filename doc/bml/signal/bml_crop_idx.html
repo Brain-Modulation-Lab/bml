@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_crop_idx</title>
+  <meta name="keywords" content="bml_crop_idx">
+  <meta name="description" content="BML_CROP_IDX calculates sample indices for a time window and file coordinates">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_crop_idx.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_crop_idx
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_CROP_IDX calculates sample indices for a time window and file coordinates</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_CROP_IDX calculates sample indices for a time window and file coordinates
+
+ Use as 
+   [starts_idx,ends_idx] = bml_crop_idx(cfg)
+   [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends)
+   [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, [], samples)
+   [starts_idx,ends_idx] = bml_crop_idx(cfg, [], ends, samples)
+
+ where cfg is a configuration structure or roi table row
+ cfg.starts
+ cfg.ends
+ (cfg.samples)
+ cfg.t1
+ cfg.s1
+ cfg.t2
+ cfg.s2
+ cfg.tol - double: tolerance. Defaults to 1e-3/Fs. 
+ cfg.nSamples - double: optional total number of samples in file
+
+ if starts and ends are given (3 argument call) the values of cfg are
+ ignored</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>	BML_PAD returns a padded version of the raw (crops if necessary)</li><li><a href="bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li><li><a href="../../bml/sync/bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)</a>
+0002 
+0003 <span class="comment">% BML_CROP_IDX calculates sample indices for a time window and file coordinates</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx(cfg)</span>
+0007 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends)</span>
+0008 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, [], samples)</span>
+0009 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx(cfg, [], ends, samples)</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% where cfg is a configuration structure or roi table row</span>
+0012 <span class="comment">% cfg.starts</span>
+0013 <span class="comment">% cfg.ends</span>
+0014 <span class="comment">% (cfg.samples)</span>
+0015 <span class="comment">% cfg.t1</span>
+0016 <span class="comment">% cfg.s1</span>
+0017 <span class="comment">% cfg.t2</span>
+0018 <span class="comment">% cfg.s2</span>
+0019 <span class="comment">% cfg.tol - double: tolerance. Defaults to 1e-3/Fs.</span>
+0020 <span class="comment">% cfg.nSamples - double: optional total number of samples in file</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% if starts and ends are given (3 argument call) the values of cfg are</span>
+0023 <span class="comment">% ignored</span>
+0024 
+0025 <span class="comment">% if istable(cfg)</span>
+0026 <span class="comment">%   if height(cfg) &gt; 1; error('cfg should be a 1 row table'); end</span>
+0027 <span class="comment">%   cfg=table2struct(cfg);</span>
+0028 <span class="comment">% end</span>
+0029 
+0030 pTT = 9; <span class="comment">%pTT = pTimeTolerenace = - log10(timetol)</span>
+0031 
+0032 <span class="keyword">if</span> nargin==1
+0033   starts=round(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'starts'</span>),pTT);
+0034   ends=round(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'ends'</span>),pTT);
+0035   samples=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'samples'</span>);
+0036 <span class="keyword">elseif</span> nargin==3
+0037   samples=[];
+0038 <span class="keyword">elseif</span> nargin~=4
+0039   error(<span class="string">'unsupported call to bml_crop_idx, see usage'</span>);
+0040 <span class="keyword">end</span>
+0041   
+0042 <span class="keyword">if</span> ~isempty(starts) + ~isempty(ends) + ~isempty(samples) ~= 2
+0043   error(<span class="string">'two of the three following parameters are required: ''starts'', ''ends'', ''samples'''</span>); 
+0044 <span class="keyword">end</span>
+0045 
+0046 t1=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t1'</span>);
+0047 s1=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'s1'</span>);
+0048 t2=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t2'</span>);
+0049 s2=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'s2'</span>);
+0050 
+0051 Fs=(s2-s1)/round(t2-t1,pTT);
+0052 
+0053 tol=<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'tol'</span>,1e-2/Fs);
+0054 
+0055 <span class="keyword">if</span> ~isempty(starts)
+0056   starts_idx = round((t2*s1-s2*t1)/(t2-t1)+Fs*starts+tol);
+0057   <span class="comment">%starts_idx = ceil(0.5+(t2*s1-s2*t1)/(t2-t1)+Fs*starts);</span>
+0058 <span class="keyword">end</span>
+0059 
+0060 <span class="keyword">if</span> isempty(ends)
+0061   ends_idx = starts_idx + samples; 
+0062 <span class="keyword">else</span>
+0063   ends_idx = round((t2*s1-s2*t1)/(t2-t1)+Fs*ends-tol);
+0064   <span class="comment">%ends_idx = floor(0.5+(t2*s1-s2*t1)/(t2-t1)+Fs*ends);</span>
+0065 <span class="keyword">end</span>
+0066 
+0067 <span class="keyword">if</span> isempty(starts) 
+0068   starts_idx = ends_idx - samples;
+0069 <span class="keyword">end</span>
+0070</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

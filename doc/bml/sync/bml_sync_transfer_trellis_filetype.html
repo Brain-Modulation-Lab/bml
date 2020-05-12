@@ -116,7 +116,7 @@ This function is called by:
 0051   [~,n,~]=fileparts(row.name{1});
 0052   fn=fullfile(row.folder{1},[n,extension]);
 0053   <span class="keyword">if</span> ~exist(fn,<span class="string">'file'</span>)
-0054     warning(&quot;<span class="comment">%s doesn't exist&quot;,fn);</span>
+0054     warning(&quot;<span class="comment">%s doesn't exist&quot;,fn)</span>
 0055   <span class="keyword">else</span>
 0056     hdr = ft_read_header(fn,<span class="string">'chantype'</span>,sync_chantype);
 0057     
@@ -172,6 +172,6 @@ This function is called by:
 0107 sync = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(sync,<span class="string">'sync'</span>);
 0108 
 0109</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

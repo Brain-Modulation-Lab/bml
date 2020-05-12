@@ -33,12 +33,13 @@
    sync = bml_sync_transfer_neuroomega_chantype(cfg)
 
  This function calculates synchronization rows for neuroomega channels,
- based on a sync channel. Normally neuroomega files are sync with the
+ based on another sync channel. Normally neuroomega files are sync with the
  analog 2750Hz channel. This function creates registries for other
  channels (for example 'macro' and 'micro'), based on the synchronized channel. 
 
  cfg.roi           - original sync table (normaly with chantype=analog)
- cfg.chantype      - char, new chantype. Options are 'micro', 'macro', 'analog'
+ cfg.chantype      - char, new chantype. Options are 'micro', 'macro',
+                     'analog', 'emg'
  cfg.time_channel  - char, channel of new chantype used to extract time
                      use 'CRAW_01___Central', etc. 
                      if not provided uses the first channel of the
@@ -61,6 +62,7 @@
  'add_analog' | 'CADD_ANALOG_IN_1'
  'micro_lfp'  | 'CLFP_01___Central'
  'macro_lfp'  | 'CMacro_LFP_01___Central
+ 'emg'        | 'CEMG_1___01'
  ----------------------------------------</pre></div>
 
 <!-- crossreference -->
@@ -84,134 +86,138 @@ This function is called by:
 0006 <span class="comment">%   sync = bml_sync_transfer_neuroomega_chantype(cfg)</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% This function calculates synchronization rows for neuroomega channels,</span>
-0009 <span class="comment">% based on a sync channel. Normally neuroomega files are sync with the</span>
+0009 <span class="comment">% based on another sync channel. Normally neuroomega files are sync with the</span>
 0010 <span class="comment">% analog 2750Hz channel. This function creates registries for other</span>
 0011 <span class="comment">% channels (for example 'macro' and 'micro'), based on the synchronized channel.</span>
 0012 <span class="comment">%</span>
 0013 <span class="comment">% cfg.roi           - original sync table (normaly with chantype=analog)</span>
-0014 <span class="comment">% cfg.chantype      - char, new chantype. Options are 'micro', 'macro', 'analog'</span>
-0015 <span class="comment">% cfg.time_channel  - char, channel of new chantype used to extract time</span>
-0016 <span class="comment">%                     use 'CRAW_01___Central', etc.</span>
-0017 <span class="comment">%                     if not provided uses the first channel of the</span>
-0018 <span class="comment">%                     correct chantype from the first entry of cfg.roi</span>
-0019 <span class="comment">% cfg.sync_time_channel  - char, channel of original chantype used in sync</span>
-0020 <span class="comment">%                     use 'CANALOG_IN_1', etc</span>
-0021 <span class="comment">%                     if not provided uses the first channel of the</span>
-0022 <span class="comment">%                     correct chantype from the first entry of cfg.roi</span>
-0023 <span class="comment">% cfg.filetype      - char, defaults to 'neuroomega.mat'</span>
-0024 <span class="comment">%</span>
-0025 <span class="comment">% returns an roi table with the new entries for neuroomega files.</span>
-0026 <span class="comment">%</span>
-0027 <span class="comment">% ----------------------------------------</span>
-0028 <span class="comment">% chantype     |   example channel</span>
-0029 <span class="comment">% ----------------------------------------</span>
-0030 <span class="comment">% 'macro'      | 'CMacro_RAW_01___Central'</span>
-0031 <span class="comment">% 'micro'      | 'CRAW_01___Central'</span>
-0032 <span class="comment">% 'micro_hp'   | 'CSPK_01___Central'</span>
-0033 <span class="comment">% 'analog'     | 'CANALOG_IN_1'</span>
-0034 <span class="comment">% 'add_analog' | 'CADD_ANALOG_IN_1'</span>
-0035 <span class="comment">% 'micro_lfp'  | 'CLFP_01___Central'</span>
-0036 <span class="comment">% 'macro_lfp'  | 'CMacro_LFP_01___Central</span>
-0037 <span class="comment">% ----------------------------------------</span>
-0038 <span class="comment">%</span>
-0039 <span class="comment">%</span>
-0040 
-0041 filetype          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'filetype'</span>,<span class="string">'neuroomega.mat'</span>);
-0042 time_channel      = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'time_channel'</span>);
-0043 sync_time_channel = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'sync_time_channel'</span>);
-0044 chantype          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'chantype'</span>);
-0045 roi               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
-0046 
-0047 assert(~isempty(chantype),<span class="string">'chantype required'</span>);
-0048 assert(~isempty(roi),<span class="string">'roi required'</span>);
-0049 
-0050 hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),<span class="string">'chantype'</span>,<span class="string">'chaninfo'</span>);
-0051 <span class="keyword">if</span> isempty(time_channel)
-0052   time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,chantype),:).channel{1};
-0053 <span class="keyword">end</span>
-0054 <span class="keyword">if</span> isempty(sync_time_channel)
-0055   sync_time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,roi.chantype{1}),:).channel{1};
-0056 <span class="keyword">end</span>
-0057 
-0058 time_begin_var      = strcat(time_channel,<span class="string">'_TimeBegin'</span>);
-0059 time_end_var        = strcat(time_channel,<span class="string">'_TimeEnd'</span>);
-0060 sync_time_begin_var = strcat(sync_time_channel,<span class="string">'_TimeBegin'</span>);
-0061 sync_time_end_var   = strcat(sync_time_channel,<span class="string">'_TimeEnd'</span>);
-0062 
-0063 REQUIRED_VARS = {<span class="string">'s1'</span>,<span class="string">'t1'</span>,<span class="string">'s2'</span>,<span class="string">'t2'</span>,<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'chantype'</span>,<span class="string">'filetype'</span>};
-0064 assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),<span class="keyword">...</span>
-0065   <span class="string">'Variables %s required'</span>,strjoin(REQUIRED_VARS))
+0014 <span class="comment">% cfg.chantype      - char, new chantype. Options are 'micro', 'macro',</span>
+0015 <span class="comment">%                     'analog', 'emg'</span>
+0016 <span class="comment">% cfg.time_channel  - char, channel of new chantype used to extract time</span>
+0017 <span class="comment">%                     use 'CRAW_01___Central', etc.</span>
+0018 <span class="comment">%                     if not provided uses the first channel of the</span>
+0019 <span class="comment">%                     correct chantype from the first entry of cfg.roi</span>
+0020 <span class="comment">% cfg.sync_time_channel  - char, channel of original chantype used in sync</span>
+0021 <span class="comment">%                     use 'CANALOG_IN_1', etc</span>
+0022 <span class="comment">%                     if not provided uses the first channel of the</span>
+0023 <span class="comment">%                     correct chantype from the first entry of cfg.roi</span>
+0024 <span class="comment">% cfg.filetype      - char, defaults to 'neuroomega.mat'</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% returns an roi table with the new entries for neuroomega files.</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% ----------------------------------------</span>
+0029 <span class="comment">% chantype     |   example channel</span>
+0030 <span class="comment">% ----------------------------------------</span>
+0031 <span class="comment">% 'macro'      | 'CMacro_RAW_01___Central'</span>
+0032 <span class="comment">% 'micro'      | 'CRAW_01___Central'</span>
+0033 <span class="comment">% 'micro_hp'   | 'CSPK_01___Central'</span>
+0034 <span class="comment">% 'analog'     | 'CANALOG_IN_1'</span>
+0035 <span class="comment">% 'add_analog' | 'CADD_ANALOG_IN_1'</span>
+0036 <span class="comment">% 'micro_lfp'  | 'CLFP_01___Central'</span>
+0037 <span class="comment">% 'macro_lfp'  | 'CMacro_LFP_01___Central</span>
+0038 <span class="comment">% 'emg'        | 'CEMG_1___01'</span>
+0039 <span class="comment">% ----------------------------------------</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">%</span>
+0042 
+0043 filetype          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'filetype'</span>,<span class="string">'neuroomega.mat'</span>);
+0044 time_channel      = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'time_channel'</span>);
+0045 sync_time_channel = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'sync_time_channel'</span>);
+0046 chantype          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'chantype'</span>);
+0047 roi               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0048 
+0049 assert(~isempty(chantype),<span class="string">'chantype required'</span>);
+0050 assert(~isempty(roi),<span class="string">'roi required'</span>);
+0051 
+0052 hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),<span class="string">'chantype'</span>,<span class="string">'chaninfo'</span>);
+0053 <span class="keyword">if</span> isempty(time_channel)
+0054   sel_time_channel = strcmp(hdr1.chaninfo.chantype,chantype);
+0055   assert(sum(sel_time_channel)&gt;0,<span class="string">'no channel of specified chantype'</span>);
+0056   time_channel = hdr1.chaninfo(sel_time_channel,:).channel{1};
+0057 <span class="keyword">end</span>
+0058 <span class="keyword">if</span> isempty(sync_time_channel)
+0059   sync_time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,roi.chantype{1}),:).channel{1};
+0060 <span class="keyword">end</span>
+0061 
+0062 time_begin_var      = strcat(time_channel,<span class="string">'_TimeBegin'</span>);
+0063 time_end_var        = strcat(time_channel,<span class="string">'_TimeEnd'</span>);
+0064 sync_time_begin_var = strcat(sync_time_channel,<span class="string">'_TimeBegin'</span>);
+0065 sync_time_end_var   = strcat(sync_time_channel,<span class="string">'_TimeEnd'</span>);
 0066 
-0067 filetype_roi = roi(strcmp(roi.filetype,filetype),:);
-0068 
-0069 sync=table();
-0070 <span class="keyword">for</span> i=1:height(filetype_roi)
-0071   row=filetype_roi(i,:);
-0072   
-0073   <span class="comment">%creating coordinates of neuroomega channel used for original sync</span>
-0074   orig_coord=[];
-0075   orig_coord.s1=1; orig_coord.s2=row.nSamples;
+0067 REQUIRED_VARS = {<span class="string">'s1'</span>,<span class="string">'t1'</span>,<span class="string">'s2'</span>,<span class="string">'t2'</span>,<span class="string">'folder'</span>,<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'chantype'</span>,<span class="string">'filetype'</span>};
+0068 assert(all(ismember(REQUIRED_VARS,roi.Properties.VariableNames)),<span class="keyword">...</span>
+0069   <span class="string">'Variables %s required'</span>,strjoin(REQUIRED_VARS))
+0070 
+0071 filetype_roi = roi(strcmp(roi.filetype,filetype),:);
+0072 
+0073 sync=table();
+0074 <span class="keyword">for</span> i=1:height(filetype_roi)
+0075   row=filetype_roi(i,:);
 0076   
-0077   <span class="comment">%reading header</span>
-0078   hdr = ft_read_header(fullfile(row.folder{1},row.name{1}),<span class="string">'chantype'</span>,chantype);
-0079   
-0080   <span class="comment">%creating coordinates of neuroomega channel to sync</span>
-0081   coord=[];
-0082   coord.s1=1; coord.s2=hdr.nSamples;
+0077   <span class="comment">%creating coordinates of neuroomega channel used for original sync</span>
+0078   orig_coord=[];
+0079   orig_coord.s1=1; orig_coord.s2=row.nSamples;
+0080   
+0081   <span class="comment">%reading header</span>
+0082   hdr = ft_read_header(fullfile(row.folder{1},row.name{1}),<span class="string">'chantype'</span>,chantype);
 0083   
-0084   <span class="comment">%loading time info from neuroomega file</span>
-0085   <span class="keyword">if</span> ismember(time_begin_var,fields(hdr.orig))
-0086     coord.t1   = hdr.orig.(time_begin_var);
-0087     coord.t2   = hdr.orig.(time_end_var);
-0088     <span class="comment">%(coord.t2 - coord.t1)*hdr.Fs == hdr.nSamples</span>
-0089   <span class="keyword">else</span>
-0090     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
-0091       time_begin_var,fullfile(row.folder{1},row.name{1}), strjoin(hdr.label));
-0092   <span class="keyword">end</span>
-0093   <span class="keyword">if</span> ismember(sync_time_begin_var,fields(hdr.orig))
-0094       orig_coord.t1 = hdr.orig.(sync_time_begin_var);
-0095     orig_coord.t2 = hdr.orig.(sync_time_end_var);
-0096     <span class="comment">%(orig_coord.t2 - orig_coord.t1)*row.Fs == row.nSamples</span>
-0097   <span class="keyword">else</span>
-0098     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
-0099       time_begin_var,fullfile(row.folder{1},row.name{1}), strjoin(hdr.label));
-0100   <span class="keyword">end</span>  
-0101 
-0102   <span class="keyword">if</span> row.s1==1
-0103     <span class="comment">%treating begging of the file differently</span>
-0104     row.t1 = row.t1 + coord.t1 - orig_coord.t1;
-0105   <span class="keyword">else</span>
-0106     <span class="comment">%mapping original samples to new samples</span>
-0107     tmp_t1 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(orig_coord,row.s1);  
-0108     row.s1 = <a href="bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(coord,tmp_t1); <span class="comment">%mapping original s1 to new s1</span>
-0109     <span class="comment">%correcting t1, t2 for rounding errors</span>
-0110     row.t1 = row.t1 + <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(coord,row.s1) - tmp_t1;    
-0111   <span class="keyword">end</span>
-0112   
-0113   <span class="keyword">if</span> row.s2==row.nSamples
-0114     <span class="comment">%treating end of the file differently</span>
-0115     row.s2 = coord.s2;
-0116     row.t2 = row.t2 + coord.t2 - orig_coord.t2;
-0117   <span class="keyword">else</span>
-0118       <span class="comment">%mapping original samples to new samples</span>
-0119     tmp_t2 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(orig_coord,row.s2);   
-0120     row.s2=<a href="bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(coord,tmp_t2); <span class="comment">%mapping original s2 to new s2</span>
-0121     <span class="comment">%correcting t1, t2 for rounding errors</span>
-0122     row.t2 = row.t2 + <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(coord,row.s2) - tmp_t2;
-0123   <span class="keyword">end</span>
-0124 
-0125   row.nSamples=hdr.nSamples;
-0126   row.chantype=chantype;
-0127   row.Fs=hdr.Fs;
-0128   row.starts = row.t1 - 0.5 ./ row.Fs;
-0129   row.ends = row.t2 + 0.5 ./ row.Fs;
-0130   sync = [sync; row];
-0131 
-0132 <span class="keyword">end</span>
-0133 
-0134 sync = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(sync);
+0084   <span class="comment">%creating coordinates of neuroomega channel to sync</span>
+0085   coord=[];
+0086   coord.s1=1; coord.s2=hdr.nSamples;
+0087   
+0088   <span class="comment">%loading time info from neuroomega file</span>
+0089   <span class="keyword">if</span> ismember(time_begin_var,fields(hdr.orig))
+0090     coord.t1   = hdr.orig.(time_begin_var);
+0091     coord.t2   = hdr.orig.(time_end_var);
+0092     <span class="comment">%(coord.t2 - coord.t1)*hdr.Fs == hdr.nSamples</span>
+0093   <span class="keyword">else</span>
+0094     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
+0095       time_begin_var,fullfile(row.folder{1},row.name{1}), strjoin(hdr.label));
+0096   <span class="keyword">end</span>
+0097   <span class="keyword">if</span> ismember(sync_time_begin_var,fields(hdr.orig))
+0098       orig_coord.t1 = hdr.orig.(sync_time_begin_var);
+0099     orig_coord.t2 = hdr.orig.(sync_time_end_var);
+0100     <span class="comment">%(orig_coord.t2 - orig_coord.t1)*row.Fs == row.nSamples</span>
+0101   <span class="keyword">else</span>
+0102     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
+0103       time_begin_var,fullfile(row.folder{1},row.name{1}), strjoin(hdr.label));
+0104   <span class="keyword">end</span>  
+0105 
+0106   <span class="keyword">if</span> row.s1==1
+0107     <span class="comment">%treating begging of the file differently</span>
+0108     row.t1 = row.t1 + coord.t1 - orig_coord.t1;
+0109   <span class="keyword">else</span>
+0110     <span class="comment">%mapping original samples to new samples</span>
+0111     tmp_t1 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(orig_coord,row.s1);  
+0112     row.s1 = <a href="bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(coord,tmp_t1); <span class="comment">%mapping original s1 to new s1</span>
+0113     <span class="comment">%correcting t1, t2 for rounding errors</span>
+0114     row.t1 = row.t1 + <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(coord,row.s1) - tmp_t1;    
+0115   <span class="keyword">end</span>
+0116   
+0117   <span class="keyword">if</span> row.s2==row.nSamples
+0118     <span class="comment">%treating end of the file differently</span>
+0119     row.s2 = coord.s2;
+0120     row.t2 = row.t2 + coord.t2 - orig_coord.t2;
+0121   <span class="keyword">else</span>
+0122       <span class="comment">%mapping original samples to new samples</span>
+0123     tmp_t2 = <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(orig_coord,row.s2);   
+0124     row.s2=<a href="bml_time2idx.html" class="code" title="function idx=bml_time2idx(cfg, time, skipFactor)">bml_time2idx</a>(coord,tmp_t2); <span class="comment">%mapping original s2 to new s2</span>
+0125     <span class="comment">%correcting t1, t2 for rounding errors</span>
+0126     row.t2 = row.t2 + <a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(coord,row.s2) - tmp_t2;
+0127   <span class="keyword">end</span>
+0128 
+0129   row.nSamples=hdr.nSamples;
+0130   row.chantype=chantype;
+0131   row.Fs=hdr.Fs;
+0132   row.starts = row.t1 - 0.5 ./ row.Fs;
+0133   row.ends = row.t2 + 0.5 ./ row.Fs;
+0134   sync = [sync; row];
 0135 
-0136</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0136 <span class="keyword">end</span>
+0137 
+0138 sync = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(sync);
+0139 
+0140</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

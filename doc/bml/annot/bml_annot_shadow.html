@@ -34,8 +34,9 @@
 
  cfg.direction - double: if positive the shadow is in future time 
            (defaults to 1)
- cfg.max_duration - double: maximal allowed duration of shadow
- cfg.gap_duration - double: duraton of gap between annot and shadow
+ cfg.max_duration - double: maximal allowed duration of shadow. 
+ cfg.gap_duration - double: duratton of gap between annot and shadow.
+           Defaults to 0
 
  shadow inherits all variable names from annot</pre></div>
 
@@ -61,47 +62,48 @@ This function is called by:
 0007 <span class="comment">%</span>
 0008 <span class="comment">% cfg.direction - double: if positive the shadow is in future time</span>
 0009 <span class="comment">%           (defaults to 1)</span>
-0010 <span class="comment">% cfg.max_duration - double: maximal allowed duration of shadow</span>
-0011 <span class="comment">% cfg.gap_duration - double: duraton of gap between annot and shadow</span>
-0012 <span class="comment">%</span>
-0013 <span class="comment">% shadow inherits all variable names from annot</span>
-0014 
-0015 direction      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'direction'</span>,1);
-0016 gap_duration    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'gap_duration'</span>,0);
-0017 max_duration    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'max_duration'</span>);
-0018 
-0019 assert(isempty(<a href="bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>(annot)),&quot;annot should not contain overlaps&quot;)
-0020 
-0021 shadow = annot;
-0022 <span class="keyword">if</span> direction &gt; 0 <span class="comment">%shadow into future</span>
-0023   
-0024   <span class="keyword">for</span> i=1:(height(annot)-1)
-0025     shadow.starts(i) = annot.ends(i) + gap_duration;
-0026     shadow.ends(i) = annot.starts(i+1);
-0027   <span class="keyword">end</span>
-0028   shadow.starts(end) = annot.ends(end) + gap_duration;
-0029   shadow.ends(end) = inf;
-0030   <span class="keyword">if</span> ~isempty(max_duration)
-0031     filtvec = shadow.ends-shadow.starts&gt;max_duration;
-0032     shadow.ends(filtvec) = shadow.starts(filtvec) + max_duration;
-0033   <span class="keyword">end</span>
-0034   
-0035 <span class="keyword">else</span> <span class="comment">%shadow into pass</span>
-0036   
-0037   shadow.starts(1) = -inf;
-0038   shadow.ends(1) = annot.starts(1) - gap_duration;
-0039   <span class="keyword">for</span> i=2:height(annot)
-0040     shadow.starts(i) = annot.ends(i-1) ;
-0041     shadow.ends(i) = annot.starts(i) - gap_duration;
-0042   <span class="keyword">end</span>
-0043   <span class="keyword">if</span> ~isempty(max_duration)
-0044     filtvec = shadow.ends-shadow.starts&gt;max_duration;
-0045     shadow.starts(filtvec) = shadow.ends(filtvec) - max_duration;
-0046   <span class="keyword">end</span>
-0047   
-0048 <span class="keyword">end</span>
-0049 
-0050 shadow = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(shadow);</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0010 <span class="comment">% cfg.max_duration - double: maximal allowed duration of shadow.</span>
+0011 <span class="comment">% cfg.gap_duration - double: duratton of gap between annot and shadow.</span>
+0012 <span class="comment">%           Defaults to 0</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% shadow inherits all variable names from annot</span>
+0015 
+0016 direction      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'direction'</span>,1);
+0017 gap_duration    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'gap_duration'</span>,0);
+0018 max_duration    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'max_duration'</span>);
+0019 
+0020 assert(isempty(<a href="bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>(annot)),&quot;annot should not contain overlaps&quot;)
+0021 
+0022 shadow = annot;
+0023 <span class="keyword">if</span> direction &gt; 0 <span class="comment">%shadow into future</span>
+0024   
+0025   <span class="keyword">for</span> i=1:(height(annot)-1)
+0026     shadow.starts(i) = annot.ends(i) + gap_duration;
+0027     shadow.ends(i) = annot.starts(i+1);
+0028   <span class="keyword">end</span>
+0029   shadow.starts(end) = annot.ends(end) + gap_duration;
+0030   shadow.ends(end) = inf;
+0031   <span class="keyword">if</span> ~isempty(max_duration)
+0032     filtvec = shadow.ends-shadow.starts&gt;max_duration;
+0033     shadow.ends(filtvec) = shadow.starts(filtvec) + max_duration;
+0034   <span class="keyword">end</span>
+0035   
+0036 <span class="keyword">else</span> <span class="comment">%shadow into pass</span>
+0037   
+0038   shadow.starts(1) = -inf;
+0039   shadow.ends(1) = annot.starts(1) - gap_duration;
+0040   <span class="keyword">for</span> i=2:height(annot)
+0041     shadow.starts(i) = annot.ends(i-1) ;
+0042     shadow.ends(i) = annot.starts(i) - gap_duration;
+0043   <span class="keyword">end</span>
+0044   <span class="keyword">if</span> ~isempty(max_duration)
+0045     filtvec = shadow.ends-shadow.starts&gt;max_duration;
+0046     shadow.starts(filtvec) = shadow.ends(filtvec) - max_duration;
+0047   <span class="keyword">end</span>
+0048   
+0049 <span class="keyword">end</span>
+0050 
+0051 shadow = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(shadow);</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

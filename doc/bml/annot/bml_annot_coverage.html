@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_coverage</title>
+  <meta name="keywords" content="bml_annot_coverage">
+  <meta name="description" content="BML_ANNOT_COVERAGE calculates the fraction of denominator (y) covered by">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_coverage.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_coverage
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_COVERAGE calculates the fraction of denominator (y) covered by</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function coverage = bml_annot_coverage(cfg, x, y) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_COVERAGE calculates the fraction of denominator (y) covered by
+ numerator (x)
+
+ Use as
+   coverage = bml_annot_coverage(cfg, x, y);
+   coverage = bml_annot_coverage(x, y);
+
+ The first argument cfg is a optional configuration structure with
+ the following optional fields:
+
+ cfg.groupby - grouping variable assigned to numerator, and also to denominator 
+   if colname is present.
+ cfg.groupby_x - cellstr indicating grouping columns of x (numerator). If empty
+   (default), all rows of x are considered in the same group. 
+ cfg.groupby_y - cellstr indicating grouping columns of y (denominator). If empty
+   (default), all rows of y are considered for all groups of x.
+ cfg.colname - str, name of output column. Defaults to 'coverage'
+
+ x, y - annot tables with fields 'starts' and 'ends'.
+
+ Returns an annotation table with the same variables as 'y' plus
+ and additional coverage variable. If groupby is given, each row of 
+ y is expanded into a group of size given by the number of levels of
+ groupby. The grouping variable of x is included in coverage.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function coverage = bml_annot_coverage(cfg, x, y)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_COVERAGE calculates the fraction of denominator (y) covered by</span>
+0004 <span class="comment">% numerator (x)</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Use as</span>
+0007 <span class="comment">%   coverage = bml_annot_coverage(cfg, x, y);</span>
+0008 <span class="comment">%   coverage = bml_annot_coverage(x, y);</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% The first argument cfg is a optional configuration structure with</span>
+0011 <span class="comment">% the following optional fields:</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% cfg.groupby - grouping variable assigned to numerator, and also to denominator</span>
+0014 <span class="comment">%   if colname is present.</span>
+0015 <span class="comment">% cfg.groupby_x - cellstr indicating grouping columns of x (numerator). If empty</span>
+0016 <span class="comment">%   (default), all rows of x are considered in the same group.</span>
+0017 <span class="comment">% cfg.groupby_y - cellstr indicating grouping columns of y (denominator). If empty</span>
+0018 <span class="comment">%   (default), all rows of y are considered for all groups of x.</span>
+0019 <span class="comment">% cfg.colname - str, name of output column. Defaults to 'coverage'</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% x, y - annot tables with fields 'starts' and 'ends'.</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% Returns an annotation table with the same variables as 'y' plus</span>
+0024 <span class="comment">% and additional coverage variable. If groupby is given, each row of</span>
+0025 <span class="comment">% y is expanded into a group of size given by the number of levels of</span>
+0026 <span class="comment">% groupby. The grouping variable of x is included in coverage.</span>
+0027 
+0028 <span class="keyword">if</span> nargin == 2
+0029   y = x;
+0030   x = cfg;
+0031   cfg = [];
+0032 <span class="keyword">elseif</span> nargin ~= 3
+0033   error(<span class="string">'incorrect use of bml_annot_coverage. See help.'</span>);
+0034 <span class="keyword">end</span>
+0035 
+0036 groupby    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby'</span>,[]);
+0037 groupby_x  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby_numerator'</span>,groupby);
+0038 groupby_y  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby_denominator'</span>,<span class="keyword">...</span>
+0039                 intersect(groupby, y.Properties.VariableNames));
+0040 coverage_colname = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'colname'</span>,<span class="string">'coverage'</span>);
+0041 
+0042 <span class="comment">%ToDo: allow grouping by several variables</span>
+0043 <span class="keyword">if</span> isempty(groupby_y)
+0044   group_y = false;
+0045   <span class="keyword">if</span> isempty(groupby_x)
+0046     x.groupby_ = ones(height(x),1);
+0047     groupby_x = {<span class="string">'groupby_'</span>};
+0048     groups={1};
+0049   <span class="keyword">else</span>
+0050     <span class="keyword">if</span> sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
+0051       error(<span class="string">'groupby should match one (and only one) column of numerator'</span>);
+0052     <span class="keyword">end</span>
+0053     groups = unique(x{:,groupby_x});
+0054   <span class="keyword">end</span>
+0055 <span class="keyword">else</span>
+0056   <span class="keyword">if</span> sum(strcmp(y.Properties.VariableNames, groupby_y))~=1
+0057     error(<span class="string">'groupby should match one (and only one) column of y (denominator)'</span>);
+0058   <span class="keyword">end</span>
+0059   group_y = true;
+0060   groups = unique(y{:,groupby_y});  
+0061     <span class="keyword">if</span> isempty(groupby_x)
+0062     error(&quot;can't group only by y&quot;)
+0063   <span class="keyword">else</span>
+0064     <span class="keyword">if</span> sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
+0065       error(<span class="string">'groupby should match one (and only one) column of numerator'</span>);
+0066     <span class="keyword">end</span>
+0067   <span class="keyword">end</span>
+0068 <span class="keyword">end</span>
+0069 
+0070 width_y = width(y);
+0071 coverage = cell(numel(groups) .* height(y) ,width_y + 2);
+0072 idx=1;
+0073 <span class="keyword">for</span> g=1:numel(groups)
+0074   <span class="keyword">if</span> iscellstr(groups(g))
+0075     x_g = x(strcmp(x{:,groupby_x},groups(g)),:);
+0076     <span class="keyword">if</span> group_y
+0077       y_g = y(strcmp(y{:,groupby_y},groups(g)),:);
+0078     <span class="keyword">else</span>
+0079       y_g=y;
+0080     <span class="keyword">end</span>
+0081   <span class="keyword">else</span>
+0082     x_g = x(x{:,groupby_x}==groups{g},:);    
+0083     <span class="keyword">if</span> group_y
+0084       y_g = y(y{:,groupby_y}==groups{g},:);
+0085     <span class="keyword">else</span>
+0086       y_g=y;
+0087     <span class="keyword">end</span>
+0088   <span class="keyword">end</span>
+0089   <span class="keyword">if</span> ~isempty(x_g)
+0090     <span class="comment">%x_g = sortrows(x_g,'starts');</span>
+0091     <span class="keyword">for</span> j=1:height(y_g)
+0092       i=1;
+0093       t=y_g.starts(j);
+0094       cvg=0;
+0095       <span class="keyword">while</span> i &lt;= height(x_g) &amp;&amp; t &lt; y_g.ends(j)
+0096         <span class="keyword">if</span> x_g.starts(i) &lt; y_g.ends(j) &amp;&amp; x_g.ends(i) &gt; t
+0097           s=max(x_g.starts(i),t);
+0098           e=min(x_g.ends(i),y_g.ends(j));
+0099           cvg=cvg+e-s;
+0100           t=e;
+0101           <span class="keyword">if</span> e &lt; y_g.ends(j)
+0102             i = i + 1;
+0103           <span class="keyword">end</span>
+0104         <span class="keyword">elseif</span> x_g.ends(i) &lt;= t
+0105           i=i+1;
+0106         <span class="keyword">elseif</span> x_g.starts(i) &gt;= y_g.ends(j)
+0107           <span class="keyword">break</span>
+0108         <span class="keyword">else</span>
+0109           keyboard
+0110           error(<span class="string">'error in bml_annot_coverage'</span>);
+0111         <span class="keyword">end</span>
+0112       <span class="keyword">end</span>
+0113       coverage(idx,1:width_y) = table2cell(y_g(j,1:width_y));
+0114       coverage(idx,width_y+1) = groups(g);
+0115       coverage{idx,width_y+2} = cvg/y_g.duration(j);
+0116       idx=idx+1;
+0117     <span class="keyword">end</span>
+0118   <span class="keyword">else</span> <span class="comment">%x_g is empty</span>
+0119     coverage(idx:(idx+height(y_g)-1),1:width_y) = table2cell(y_g(:,1:width_y));
+0120     coverage(idx:(idx+height(y_g)-1),width_y+1) = groups(g);
+0121     coverage(idx:(idx+height(y_g)-1),width_y+2) = {0};
+0122     idx=idx+height(y_g);  
+0123   <span class="keyword">end</span>
+0124 <span class="keyword">end</span>
+0125 
+0126 coverage = cell2table(coverage(1:(idx-1),:));
+0127 <span class="keyword">if</span> ismember(groupby_x,y.Properties.VariableNames)
+0128   groupby_x = {<span class="string">'groupby_'</span>};
+0129 <span class="keyword">end</span>
+0130 coverage.Properties.VariableNames = [y.Properties.VariableNames,groupby_x,coverage_colname];
+0131 <span class="keyword">if</span> any(strcmp(<span class="string">'groupby_'</span>,coverage.Properties.VariableNames))
+0132   coverage.groupby_ = [];
+0133 <span class="keyword">end</span>
+0134 
+0135 coverage.id=[];
+0136 coverage = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(coverage);
+0137 
+0138 
+0139</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

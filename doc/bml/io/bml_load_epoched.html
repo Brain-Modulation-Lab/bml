@@ -42,8 +42,18 @@
  cfg.load_empty - logical, indicates how to proceed if a the
            electrode annotation for a channel doesn't span the entire 
            epoch. In this case the channel is 'empty'. defaults to true.
- cfg.relabel - optinbal cellstr with new names of channels. 
+ cfg.relabel - optinal cellstr with new names of channels. 
+ cfg.extrapolate_sync - bool, if true (default) allows to load parts of 
+           files outside synchronization chunks. 
  cfg.warn - logical indicating if warnings should be issued
+ cfg.timetol_consolidate - time tolerance passed to bml_sync_consolidate. 
+           Defaults to 1e-3.
+ cfg.reorder_channels - bool indicating if channels should be reordered as defined
+           in the electrode table. If false ('default') the order in which
+           they are stored in memory is maintained. 
+ cfg.match_labels - logical, indicates if labels of all files should be
+           the same. Defaulst to true. If false a warning will be issued
+           when concatenating files with different labels. 
 
  cfg... further arguments for BML_LOAD_CONTINUOUS 
  cfg.chantype
@@ -63,7 +73,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the domain</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+<li><a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function cons = bml_annot_consolidate(cfg, annot)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_reorder_channels.html" class="code" title="function reordered = bml_reorder_channels(cfg,data)">bml_reorder_channels</a>	BML_REORDER_CHANNELS changes the order of the channels of a raw</li><li><a href="../../bml/sync/bml_sync_confluence.html" class="code" title="function confluent = bml_sync_confluence(cfg)">bml_sync_confluence</a>	BML_SYNC_CONFLUENCE is an alias for BML_ROI_CONFLUENCE</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates synchronization chunks</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the collection (or domain)</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -89,158 +99,200 @@ This function is called by:
 0015 <span class="comment">% cfg.load_empty - logical, indicates how to proceed if a the</span>
 0016 <span class="comment">%           electrode annotation for a channel doesn't span the entire</span>
 0017 <span class="comment">%           epoch. In this case the channel is 'empty'. defaults to true.</span>
-0018 <span class="comment">% cfg.relabel - optinbal cellstr with new names of channels.</span>
-0019 <span class="comment">% cfg.warn - logical indicating if warnings should be issued</span>
-0020 <span class="comment">%</span>
-0021 <span class="comment">% cfg... further arguments for BML_LOAD_CONTINUOUS</span>
-0022 <span class="comment">% cfg.chantype</span>
-0023 <span class="comment">% cfg.channel</span>
-0024 <span class="comment">%</span>
-0025 <span class="comment">% --- resampling arguments ---</span>
-0026 <span class="comment">% cfg.resamplefs</span>
-0027 <span class="comment">% cfg.detrend</span>
-0028 <span class="comment">% cfg.demean</span>
-0029 <span class="comment">% cfg.feedback</span>
+0018 <span class="comment">% cfg.relabel - optinal cellstr with new names of channels.</span>
+0019 <span class="comment">% cfg.extrapolate_sync - bool, if true (default) allows to load parts of</span>
+0020 <span class="comment">%           files outside synchronization chunks.</span>
+0021 <span class="comment">% cfg.warn - logical indicating if warnings should be issued</span>
+0022 <span class="comment">% cfg.timetol_consolidate - time tolerance passed to bml_sync_consolidate.</span>
+0023 <span class="comment">%           Defaults to 1e-3.</span>
+0024 <span class="comment">% cfg.reorder_channels - bool indicating if channels should be reordered as defined</span>
+0025 <span class="comment">%           in the electrode table. If false ('default') the order in which</span>
+0026 <span class="comment">%           they are stored in memory is maintained.</span>
+0027 <span class="comment">% cfg.match_labels - logical, indicates if labels of all files should be</span>
+0028 <span class="comment">%           the same. Defaulst to true. If false a warning will be issued</span>
+0029 <span class="comment">%           when concatenating files with different labels.</span>
 0030 <span class="comment">%</span>
-0031 <span class="comment">% returns a FT_DATATYPE_RAW with one trial per epoch.</span>
-0032 <span class="comment">% file_raw_map is the mapping between files and samples in trials</span>
-0033 <span class="comment">% loaded_epoch are the efectively loaded epochs</span>
-0034 
-0035 roi           = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>),<span class="string">'roi'</span>);
-0036 epoch         = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'epoch'</span>),<span class="string">'epoch'</span>);
-0037 resamplefs    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'resamplefs'</span>);
-0038 detrend       = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'detrend'</span>,<span class="string">'no'</span>);
-0039 demean        = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'demean'</span>,<span class="string">'no'</span>);
-0040 feedback      = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'feedback'</span>,<span class="string">'no'</span>);
-0041 electrode     = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'electrode'</span>),<span class="string">'electrode'</span>);
-0042 relabel       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'relabel'</span>);
-0043 warn          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
-0044 allow_missing = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'allow_missing'</span>,false);
-0045 load_empty    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'load_empty'</span>,true);
-0046 
-0047 cfg.roi = [];
-0048 cfg.epoch = [];
-0049 cfg.resamplefs=[];
-0050 cfg.detrend = [];
-0051 cfg.demean = [];
-0052 cfg.electrode = [];
-0053 
-0054 cfg_resample = [];
-0055 <span class="keyword">if</span> ~isempty(resamplefs)
-0056   cfg_resample.resamplefs = resamplefs;
-0057   cfg_resample.detrend = detrend;
-0058   cfg_resample.demean = demean;
-0059   cfg_resample.feedback = feedback;
-0060 <span class="keyword">end</span>
-0061 
-0062 assert(istable(epoch),&quot;epoch required&quot;);
-0063 <span class="keyword">if</span> ~ismember(<span class="string">'epoch_id'</span>,epoch.Properties.VariableNames)
-0064   epoch.epoch_id = epoch.id;
-0065 <span class="keyword">end</span>
-0066 
-0067 first = true;
-0068 raw = {};
-0069 file_raw_map = [];
-0070 loaded_epoch = table();
+0031 <span class="comment">% cfg... further arguments for BML_LOAD_CONTINUOUS</span>
+0032 <span class="comment">% cfg.chantype</span>
+0033 <span class="comment">% cfg.channel</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">% --- resampling arguments ---</span>
+0036 <span class="comment">% cfg.resamplefs</span>
+0037 <span class="comment">% cfg.detrend</span>
+0038 <span class="comment">% cfg.demean</span>
+0039 <span class="comment">% cfg.feedback</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">% returns a FT_DATATYPE_RAW with one trial per epoch.</span>
+0042 <span class="comment">% file_raw_map is the mapping between files and samples in trials</span>
+0043 <span class="comment">% loaded_epoch are the efectively loaded epochs</span>
+0044 
+0045 roi           = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>),<span class="string">'roi'</span>);
+0046 epoch         = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'epoch'</span>),<span class="string">'epoch'</span>);
+0047 resamplefs    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'resamplefs'</span>);
+0048 detrend       = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'detrend'</span>,<span class="string">'no'</span>);
+0049 demean        = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'demean'</span>,<span class="string">'no'</span>);
+0050 feedback      = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'feedback'</span>,<span class="string">'no'</span>);
+0051 relabel       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'relabel'</span>);
+0052 warn          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
+0053 allow_missing = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'allow_missing'</span>,false);
+0054 load_empty    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'load_empty'</span>,true);
+0055 extrapolate_sync = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'extrapolate_sync'</span>,true);
+0056 timetol_cons  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol_consolidate'</span>,1e-3);
+0057 reorder_c     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'reorder_channels'</span>,false);
+0058 
+0059 <span class="keyword">if</span> isfield(cfg,<span class="string">'timetol'</span>)
+0060   warning(<span class="string">'cfg.timetol is deprecated for bml_load_epoched. Use cfg.timetol_consolidate instead'</span>);
+0061   timetol_cons = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-3);
+0062 <span class="keyword">end</span>
+0063 
+0064 electrode     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'electrode'</span>,[]);
+0065 <span class="keyword">if</span> istable(electrode) &amp;&amp; isempty(electrode) 
+0066   error(<span class="string">'Empty electrode table'</span>)
+0067 <span class="keyword">elseif</span> isempty(electrode) &amp;&amp; reorder_c
+0068   error(<span class="string">'electrode table required if cfg.reorder_channels is set to true'</span>);
+0069 <span class="keyword">end</span>
+0070 electrode     = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(electrode,<span class="string">'electrode'</span>);
 0071 
-0072 <span class="keyword">for</span> i=1:height(epoch)
-0073   fprintf(&quot;\n --- Loading epoch id <span class="comment">%i (%i of %i) --- \n&quot;,epoch.id(i),i,height(epoch));</span>
-0074   
-0075   i_loaded_epoch = epoch(i,:);
-0076   cfg_keep_x = struct(<span class="string">'keep'</span>,<span class="string">'x'</span>);
-0077   cfg.roi = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(cfg_keep_x, roi, epoch(i,:));
-0078   <span class="keyword">if</span> height(cfg.roi)&gt;0
-0079     cfg.roi = <a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(cfg.roi);
-0080 
-0081     <span class="keyword">if</span> ~isempty(electrode)
-0082       <span class="keyword">if</span> load_empty
-0083         cfg.electrode = electrode;
-0084         cfg.electrode.starts(:) = min(cfg.roi.starts);
-0085         cfg.electrode.ends(:) = max(cfg.roi.ends);
-0086       <span class="keyword">else</span>
-0087         <span class="comment">%intersecting electrodes with ROIs</span>
-0088         cfg.electrode = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(cfg_keep_x, electrode, cfg.roi);
-0089         <span class="comment">%consolidating electrode rows corresponding to same epoched and channel</span>
-0090         <span class="comment">%(for neuroomega files it can get split because of the chunking)</span>
-0091         <span class="keyword">if</span> isempty(cfg.electrode)
-0092           error(&quot;No electrodes left after intersection with roi. Check electrodes starts and ends, or use load_empty = true.&quot;)
-0093         <span class="keyword">end</span>
-0094       <span class="keyword">end</span>
-0095       cfg.electrode=sortrows(cfg.electrode,<span class="keyword">...</span>
-0096         <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>({<span class="string">'filetype'</span>,<span class="string">'channel'</span>,<span class="string">'starts'</span>},cfg.electrode.Properties.VariableNames));
-0097       cfg.electrode.id=(1:height(cfg.electrode))';
-0098       
-0099       cfg1=[];
-0100       cfg1.criterion = @(x) (length(unique(x.filetype))==1) &amp;&amp; (length(unique(x.channel))==1);                        
-0101       cfg.electrode=<a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function annot = bml_annot_consolidate(cfg, x)">bml_annot_consolidate</a>(cfg1,cfg.electrode);
-0102     <span class="keyword">else</span>
-0103       cfg.electrode = [];
-0104     <span class="keyword">end</span>
-0105 
-0106     [i_raw,i_file_raw_map] = <a href="bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);
-0107     i_file_raw_map.epoch_id(:) = epoch.id(i);
-0108 
-0109     <span class="keyword">if</span> ~isempty(cfg_resample)
-0110       i_raw = ft_resampledata(cfg_resample,i_raw);
-0111     <span class="keyword">end</span>
-0112 
-0113     <span class="keyword">if</span> first <span class="comment">%initializing stuff</span>
-0114       <span class="keyword">if</span> isempty(relabel)
-0115         label = i_raw.label;
-0116       <span class="keyword">else</span>
-0117         assert(numel(relabel)==numel(i_raw.label), &quot;incorrect length <span class="keyword">for</span> relabel&quot;);
-0118         label = relabel;
-0119         i_raw.label = label;
-0120       <span class="keyword">end</span>
-0121       raw = {i_raw};
-0122       i_file_raw_map.trial(:) = 1;
-0123       file_raw_map = i_file_raw_map;
-0124       <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(i_raw))
-0125         hdr=i_raw.hdr;
-0126       <span class="keyword">else</span>
-0127         hdr=[];
-0128       <span class="keyword">end</span>
-0129       i_loaded_epoch.id=1;
-0130       first = false;
-0131     <span class="keyword">else</span>
-0132       <span class="keyword">if</span> ~isequal(label,i_raw.label)
-0133         <span class="keyword">if</span> warn &amp;&amp; isempty(relabel)
-0134           warning(<span class="string">'inconsistent channel names. Renaming.'</span>)
-0135         <span class="keyword">end</span>
-0136         i_raw.label = label;
-0137       <span class="keyword">end</span>   
-0138       raw = [raw, i_raw];
-0139       i_trial = max(file_raw_map.trial)+1;
-0140       i_file_raw_map.trial(:) = i_trial;
-0141       file_raw_map = [file_raw_map; i_file_raw_map];
-0142       i_loaded_epoch.id=i_trial;
-0143     <span class="keyword">end</span>
-0144 
-0145     loaded_epoch = [loaded_epoch; i_loaded_epoch];
-0146   <span class="keyword">else</span>
-0147     <span class="keyword">if</span> warn &amp;&amp; allow_missing
-0148       warning(&quot;No roi info <span class="keyword">for</span> epoch <span class="comment">%i (epoch_id = %i)&quot;,i,epoch.epoch_id(i));</span>
-0149     <span class="keyword">elseif</span> ~allow_missing
-0150       error(&quot;No roi info <span class="keyword">for</span> epoch <span class="comment">%i (epoch_id = %i)&quot;,i,epoch.epoch_id(i));</span>
-0151     <span class="keyword">end</span>
-0152   <span class="keyword">end</span>
-0153 <span class="keyword">end</span>
-0154 
-0155 cfg=[];
-0156 cfg.appenddim = <span class="string">'rpt'</span>;
-0157 raw = ft_appenddata(cfg, raw{:});
-0158 
-0159 <span class="keyword">if</span> ~isempty(hdr)
-0160   raw.hdr = hdr;
-0161 <span class="keyword">end</span>
-0162 
-0163 file_raw_map.id=[];
-0164 file_raw_map = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(file_raw_map);
-0165 
-0166 
-0167 
-0168 
-0169</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0072 cfg.roi = [];
+0073 cfg.epoch = [];
+0074 cfg.resamplefs=[];
+0075 cfg.detrend = [];
+0076 cfg.demean = [];
+0077 cfg.electrode = [];
+0078 
+0079 cfg_resample = [];
+0080 <span class="keyword">if</span> ~isempty(resamplefs)
+0081   cfg_resample.trackcallinfo=false;
+0082   cfg_resample.resamplefs = resamplefs;
+0083   cfg_resample.detrend = detrend;
+0084   cfg_resample.demean = demean;
+0085   cfg_resample.feedback = feedback;
+0086 <span class="keyword">end</span>
+0087 
+0088 assert(istable(epoch) &amp;&amp; height(epoch)&gt;0,&quot;epoch required&quot;);
+0089 <span class="keyword">if</span> ~ismember(<span class="string">'epoch_id'</span>,epoch.Properties.VariableNames)
+0090   epoch.epoch_id = epoch.id;
+0091 <span class="keyword">end</span>
+0092 
+0093 first = true;
+0094 raw = {};
+0095 file_raw_map = [];
+0096 loaded_epoch = table();
+0097 
+0098 <span class="keyword">for</span> i=1:height(epoch)
+0099   fprintf(&quot;\n --- Loading epoch id <span class="comment">%i (%i of %i) --- \n&quot;,epoch.id(i),i,height(epoch));</span>
+0100   i_loaded_epoch = epoch(i,:);
+0101   croi = <a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(roi,epoch(i,:)); <span class="comment">%selecting sync entries for current epoch</span>
+0102   <span class="keyword">if</span> height(croi)&gt;0
+0103     cfg1=[];
+0104     cfg1.roi = croi;
+0105     cfg1.timetol = timetol_cons;
+0106     croi = <a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(cfg1); <span class="comment">%consolidating entries</span>
+0107     <span class="keyword">if</span> extrapolate_sync
+0108       croi = <a href="../../bml/sync/bml_sync_confluence.html" class="code" title="function confluent = bml_sync_confluence(cfg)">bml_sync_confluence</a>(croi); <span class="comment">%taking files to confluence</span>
+0109       <span class="comment">%this steps allows to load sections of files not in sync table</span>
+0110     <span class="keyword">end</span>
+0111     cfg_keep_x = struct(<span class="string">'keep'</span>,<span class="string">'x'</span>);
+0112     cfg.roi = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(cfg_keep_x, croi, epoch(i,:));
+0113 
+0114     <span class="keyword">if</span> ~isempty(electrode)
+0115       <span class="keyword">if</span> load_empty
+0116         cfg.electrode = electrode;
+0117         cfg.electrode.starts(:) = min(cfg.roi.starts);
+0118         cfg.electrode.ends(:) = max(cfg.roi.ends);
+0119       <span class="keyword">else</span>
+0120         <span class="comment">%intersecting electrodes with ROIs</span>
+0121         cfg.electrode = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(cfg_keep_x, electrode, cfg.roi);
+0122         <span class="comment">%consolidating electrode rows corresponding to same epoched and channel</span>
+0123         <span class="comment">%(for neuroomega files it can get split because of the chunking)</span>
+0124         <span class="keyword">if</span> isempty(cfg.electrode)
+0125           error(&quot;No electrodes left after intersection with roi. Check electrodes starts and ends, or use load_empty = true.&quot;)
+0126         <span class="keyword">end</span>
+0127       <span class="keyword">end</span>
+0128       cfg.electrode=sortrows(cfg.electrode,<span class="keyword">...</span>
+0129         <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>({<span class="string">'filetype'</span>,<span class="string">'channel'</span>,<span class="string">'starts'</span>},cfg.electrode.Properties.VariableNames));
+0130       cfg.electrode.id=(1:height(cfg.electrode))';
+0131       
+0132       cfg1=[];
+0133       cfg1.criterion = @(x) (length(unique(x.filetype))==1) &amp;&amp; (length(unique(x.channel))==1);                        
+0134       cfg.electrode=<a href="../../bml/annot/bml_annot_consolidate.html" class="code" title="function cons = bml_annot_consolidate(cfg, annot)">bml_annot_consolidate</a>(cfg1,cfg.electrode);
+0135     <span class="keyword">else</span>
+0136       cfg.electrode = [];
+0137     <span class="keyword">end</span>
+0138 
+0139     [i_raw,i_file_raw_map] = <a href="bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);
+0140     i_file_raw_map.epoch_id(:) = epoch.id(i);
+0141 
+0142     <span class="keyword">if</span> ~isempty(cfg_resample)
+0143       i_raw = ft_resampledata(cfg_resample,i_raw);
+0144     <span class="keyword">end</span>
+0145 
+0146     <span class="keyword">if</span> first <span class="comment">%initializing stuff</span>
+0147       <span class="keyword">if</span> isempty(relabel)
+0148         label = i_raw.label;
+0149       <span class="keyword">else</span>
+0150         assert(numel(relabel)==numel(i_raw.label), &quot;incorrect length <span class="keyword">for</span> relabel&quot;);
+0151         label = relabel;
+0152         i_raw.label = label;
+0153       <span class="keyword">end</span>
+0154       raw = {i_raw};
+0155       i_file_raw_map.trial(:) = 1;
+0156       file_raw_map = i_file_raw_map;
+0157       <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(i_raw))
+0158         hdr=i_raw.hdr;
+0159       <span class="keyword">else</span>
+0160         hdr=[];
+0161       <span class="keyword">end</span>
+0162       i_loaded_epoch.id=1;
+0163       first = false;
+0164     <span class="keyword">else</span>
+0165       <span class="keyword">if</span> ~isequal(label,i_raw.label)
+0166         <span class="keyword">if</span> warn &amp;&amp; isempty(relabel)
+0167           warning(<span class="string">'inconsistent channel names. Renaming.'</span>)
+0168         <span class="keyword">end</span>
+0169         i_raw.label = label;
+0170       <span class="keyword">end</span>   
+0171       raw = [raw, i_raw];
+0172       i_trial = max(file_raw_map.trial)+1;
+0173       i_file_raw_map.trial(:) = i_trial;
+0174       file_raw_map = [file_raw_map; i_file_raw_map];
+0175       i_loaded_epoch.id=i_trial;
+0176     <span class="keyword">end</span>
+0177 
+0178     loaded_epoch = [loaded_epoch; i_loaded_epoch];
+0179   <span class="keyword">else</span>
+0180     <span class="keyword">if</span> warn &amp;&amp; allow_missing
+0181       warning(&quot;No roi info <span class="keyword">for</span> epoch <span class="comment">%i (epoch_id = %i)&quot;,i,epoch.epoch_id(i));</span>
+0182     <span class="keyword">elseif</span> ~allow_missing
+0183       error(&quot;No roi info <span class="keyword">for</span> epoch <span class="comment">%i (epoch_id = %i)&quot;,i,epoch.epoch_id(i));</span>
+0184     <span class="keyword">end</span>
+0185   <span class="keyword">end</span>
+0186 <span class="keyword">end</span>
+0187 
+0188 cfg=[];
+0189 cfg.appenddim = <span class="string">'rpt'</span>;
+0190 cfg.trackcallinfo = false;
+0191 cfg.showcallinfo = <span class="string">'no'</span>;
+0192 cfg.keepsampleinfo = <span class="string">'no'</span>; 
+0193 raw = ft_appenddata(cfg, raw{:});
+0194 
+0195 <span class="keyword">if</span> ~isempty(hdr)
+0196   raw.hdr = hdr;
+0197 <span class="keyword">end</span>
+0198 
+0199 <span class="keyword">if</span> reorder_c
+0200   cfg1=[];
+0201   cfg1.label = unique(electrode.electrode,<span class="string">'stable'</span>);
+0202   raw = <a href="../../bml/signal/bml_reorder_channels.html" class="code" title="function reordered = bml_reorder_channels(cfg,data)">bml_reorder_channels</a>(cfg1,raw);
+0203 <span class="keyword">end</span>
+0204 
+0205 file_raw_map.id=[];
+0206 file_raw_map = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(file_raw_map);
+0207 
+0208 
+0209 
+0210 
+0211</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

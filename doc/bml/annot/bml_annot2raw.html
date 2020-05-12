@@ -4,7 +4,7 @@
 <head>
   <title>Description of bml_annot2raw</title>
   <meta name="keywords" content="bml_annot2raw">
-  <meta name="description" content="BML_ANNOT2RAW creates a ft_datatype_raw of zeros with ones at annot times">
+  <meta name="description" content="BML_ANNOT2RAW creates a ft_datatype_raw from and annotation table">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>BML_ANNOT2RAW creates a ft_datatype_raw of zeros with ones at annot times</strong></div>
+<div class="box"><strong>BML_ANNOT2RAW creates a ft_datatype_raw from and annotation table</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="box"><strong>function raw = bml_annot2raw(cfg, annot) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> BML_ANNOT2RAW creates a ft_datatype_raw of zeros with ones at annot times
+<div class="fragment"><pre class="comment"> BML_ANNOT2RAW creates a ft_datatype_raw from and annotation table
  
  Use as
    raw = bml_annot2raw(cfg, annot)
@@ -38,11 +38,24 @@
    raw = bml_annot2raw(cfg.template)
 
  cfg.roi - roi table from which to construct raw
- cfg.label - cellstr, names of channels in new raw. Defaults to 'annot'
+ cfg.label - cellstr, names of channels in new raw. Defaults to 'annot' if
+     annot_label_colname is not provided. 
  cfg.annot_label - string, indicates channel on which events should be
-     added. Defaults to cfg.label{1}
+     added. Defaults to cfg.label{1}. 
+ cfg.label_colname - cellstr, indicating name of column of annot
+     containging the channel's label the current annotation should be
+     added to. If not given, all annotations are added 
+     to same channel defined by annot_label.  
+ cfg.annot_label_colname - (deprecated) same as label_colname 
  cfg.template - raw to use as template
- annot - annotation table. If omitted a raw of zeros is returned.
+ cfg.count - boolean indicating if number in raw should indicate number of
+     annotations at that time point. Defaults to true. If false,
+     presence/absence is reported. 
+ cfg.fill_function - function handle. Should take two arguments and
+     returne a matrix of specified size. Defaults to zeros. Common alternatives
+     are '@(x,y) nan(x,y)', '@(x,y) ones(x,y)', '@(x,y) randn(x,y)', etc.
+ annot - annotation table. If omitted a raw of zeros (or as determined by 
+     fill_function) is returned.
 
  returns a FT_DATAYE_RAW structure with ones during the annotations</pre></div>
 
@@ -50,7 +63,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/sync/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the domain</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the collection (or domain)</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -61,7 +74,7 @@ This function is called by:
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function raw = bml_annot2raw(cfg, annot)</a>
 0002 
-0003 <span class="comment">% BML_ANNOT2RAW creates a ft_datatype_raw of zeros with ones at annot times</span>
+0003 <span class="comment">% BML_ANNOT2RAW creates a ft_datatype_raw from and annotation table</span>
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%   raw = bml_annot2raw(cfg, annot)</span>
@@ -72,78 +85,176 @@ This function is called by:
 0011 <span class="comment">%   raw = bml_annot2raw(cfg.template)</span>
 0012 <span class="comment">%</span>
 0013 <span class="comment">% cfg.roi - roi table from which to construct raw</span>
-0014 <span class="comment">% cfg.label - cellstr, names of channels in new raw. Defaults to 'annot'</span>
-0015 <span class="comment">% cfg.annot_label - string, indicates channel on which events should be</span>
-0016 <span class="comment">%     added. Defaults to cfg.label{1}</span>
-0017 <span class="comment">% cfg.template - raw to use as template</span>
-0018 <span class="comment">% annot - annotation table. If omitted a raw of zeros is returned.</span>
-0019 <span class="comment">%</span>
-0020 <span class="comment">% returns a FT_DATAYE_RAW structure with ones during the annotations</span>
-0021 
-0022 <span class="keyword">if</span> istable(cfg)
-0023   cfg = struct(<span class="string">'roi'</span>,cfg);
-0024 <span class="keyword">elseif</span> isstruct(cfg) &amp;&amp; all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(cfg)))  
-0025     cfg = struct(<span class="string">'template'</span>,cfg);
-0026 <span class="keyword">end</span>
-0027 roi         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
-0028 template    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'template'</span>);
-0029 label       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,{<span class="string">'annot'</span>});
-0030 
-0031 assert(~isempty(roi) || ~isempty(template),<span class="string">'cfg.roi or cfg.template required'</span>);
-0032 
-0033 <span class="comment">%creating raw</span>
-0034 <span class="keyword">if</span> ~isempty(roi) <span class="comment">%from roi</span>
-0035   raw=[];
-0036   raw.time=cell(1,height(roi));
-0037   raw.trial=cell(1,height(roi));
-0038   raw.fsample=roi.Fs(1);
-0039   raw.label = label;
-0040   assert(length(unique(roi.Fs))==1, &quot;Inconsistent Fs in roi&quot;);
-0041   <span class="keyword">for</span> i=1:height(roi)
-0042     <span class="comment">%assert(height(roi)==1,&quot;can't deal with more than one sync chunk after consolidation for now&quot;);</span>
-0043     raw.time{i}=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),roi.s1(i):roi.s2(i));
-0044     raw.trial{i}=zeros(length(label),size(raw.time{1},2));
-0045   <span class="keyword">end</span>
-0046 <span class="keyword">elseif</span> ~isempty(template) <span class="comment">%from template</span>
-0047   raw = template;
-0048   <span class="keyword">for</span> i=1:length(raw.trial)
-0049     raw.trial{i}=zeros(length(label),size(raw.time{i},2));
-0050   <span class="keyword">end</span>
-0051   roi = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(raw);
-0052 <span class="keyword">else</span>
-0053   error(<span class="string">'cfg.roi or cfg.template required'</span>);
-0054 <span class="keyword">end</span>
-0055 
-0056 <span class="keyword">if</span> nargin == 2
-0057   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
-0058   
-0059   <span class="comment">% assert(isempty(bml_annot_overlap(annot)),'annot contains overlaps');</span>
-0060   <span class="comment">% if all(annot.duration==0)</span>
-0061   <span class="comment">%   annot = bml_annot_extend(annot,mean(diff(raw.time{1}))/2);</span>
-0062   <span class="comment">% end</span>
-0063   
-0064   description = annot.Properties.Description;
-0065   <span class="keyword">if</span> isempty(description) 
-0066     description = <span class="string">'annot'</span>;
-0067   <span class="keyword">end</span>
-0068   <span class="keyword">if</span> length(raw.label)==1 &amp;&amp; strcmp(raw.label{1},<span class="string">'annot'</span>)
-0069     raw.label={description};
+0014 <span class="comment">% cfg.label - cellstr, names of channels in new raw. Defaults to 'annot' if</span>
+0015 <span class="comment">%     annot_label_colname is not provided.</span>
+0016 <span class="comment">% cfg.annot_label - string, indicates channel on which events should be</span>
+0017 <span class="comment">%     added. Defaults to cfg.label{1}.</span>
+0018 <span class="comment">% cfg.label_colname - cellstr, indicating name of column of annot</span>
+0019 <span class="comment">%     containging the channel's label the current annotation should be</span>
+0020 <span class="comment">%     added to. If not given, all annotations are added</span>
+0021 <span class="comment">%     to same channel defined by annot_label.</span>
+0022 <span class="comment">% cfg.annot_label_colname - (deprecated) same as label_colname</span>
+0023 <span class="comment">% cfg.template - raw to use as template</span>
+0024 <span class="comment">% cfg.count - boolean indicating if number in raw should indicate number of</span>
+0025 <span class="comment">%     annotations at that time point. Defaults to true. If false,</span>
+0026 <span class="comment">%     presence/absence is reported.</span>
+0027 <span class="comment">% cfg.fill_function - function handle. Should take two arguments and</span>
+0028 <span class="comment">%     returne a matrix of specified size. Defaults to zeros. Common alternatives</span>
+0029 <span class="comment">%     are '@(x,y) nan(x,y)', '@(x,y) ones(x,y)', '@(x,y) randn(x,y)', etc.</span>
+0030 <span class="comment">% annot - annotation table. If omitted a raw of zeros (or as determined by</span>
+0031 <span class="comment">%     fill_function) is returned.</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">% returns a FT_DATAYE_RAW structure with ones during the annotations</span>
+0034 
+0035 <span class="keyword">if</span> istable(cfg)
+0036   cfg = struct(<span class="string">'roi'</span>,cfg);
+0037 <span class="keyword">elseif</span> isstruct(cfg) &amp;&amp; all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(cfg)))  
+0038     cfg = struct(<span class="string">'template'</span>,cfg);
+0039 <span class="keyword">end</span>
+0040 roi         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>);
+0041 template    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'template'</span>);
+0042 count       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'count'</span>,true);
+0043 label       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,[]);
+0044 annot_label    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'annot_label'</span>,[]);
+0045 annot_label_colname = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'annot_label_colname'</span>,[]);
+0046 label_colname =  <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label_colname'</span>,annot_label_colname);
+0047 fill_function = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'fill_function'</span>,@(x,y) zeros(x,y));
+0048 
+0049 <span class="keyword">if</span> nargin == 2
+0050   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
+0051 <span class="keyword">else</span>
+0052   annot = [];
+0053 <span class="keyword">end</span>
+0054 
+0055 <span class="keyword">if</span> ~isempty(label)
+0056   label = cellstr(label);
+0057   <span class="keyword">if</span> size(label,1) &lt; size(label,2)
+0058     label = label';
+0059   <span class="keyword">end</span>
+0060 <span class="keyword">end</span>
+0061 
+0062 <span class="keyword">if</span> isempty(label_colname)
+0063   <span class="keyword">if</span> isempty(label)
+0064     <span class="keyword">if</span> isempty(template)
+0065       label = {<span class="string">'annot'</span>}; <span class="comment">%default</span>
+0066     <span class="keyword">else</span>
+0067       fprintf(<span class="string">'using labels from template'</span>);
+0068       label = template.label;
+0069     <span class="keyword">end</span>
 0070   <span class="keyword">end</span>
-0071   annot_label    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'annot_label'</span>,raw.label{1});
-0072   annot_idx   = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(annot_label,raw.label);
-0073   
-0074   <span class="keyword">for</span> t=1:height(roi)
-0075     t_annot = <a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(annot,roi(t,:));
-0076     <span class="keyword">for</span> i=1:height(t_annot)
-0077       [s,e] = <a href="../../bml/sync/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(t,:), t_annot.starts(i), t_annot.ends(i));
-0078       raw.trial{t}(annot_idx,s:e)=1;
-0079     <span class="keyword">end</span>
-0080   <span class="keyword">end</span>
-0081 <span class="keyword">end</span>
-0082 
-0083 
-0084 
-0085</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0071   <span class="keyword">if</span> isempty(annot_label)
+0072     annot_label = label{1}; <span class="comment">%default</span>
+0073   <span class="keyword">end</span>
+0074   
+0075 <span class="keyword">else</span> <span class="comment">%label_colname present</span>
+0076   <span class="keyword">if</span> istable(annot)
+0077     <span class="keyword">if</span> isempty(annot)
+0078       warning(<span class="string">'empty annot table passed to bml_annot2raw'</span>);
+0079       ul =[];
+0080     <span class="keyword">elseif</span> sum(strcmp(annot.Properties.VariableNames, label_colname))~=1
+0081       error(<span class="string">'cfg.label_colname should match a column of annot'</span>);
+0082     <span class="keyword">else</span>  
+0083       ul = unique(annot{:,label_colname});      
+0084     <span class="keyword">end</span>
+0085     <span class="keyword">if</span> isempty(label)
+0086       <span class="keyword">if</span> isempty(template)
+0087         <span class="keyword">if</span> ~isempty(ul)
+0088           fprintf(<span class="string">'using levels of %s as labels\n'</span>, label_colname{1})
+0089           label = ul;
+0090         <span class="keyword">else</span>
+0091           label = {<span class="string">'annot'</span>};
+0092         <span class="keyword">end</span>
+0093       <span class="keyword">else</span>
+0094         fprintf(<span class="string">'using labels from template\n'</span>); 
+0095         label = template.label;
+0096       <span class="keyword">end</span>
+0097     <span class="keyword">end</span>
+0098     <span class="keyword">if</span> ~isempty(annot_label)
+0099       fprintf(<span class="string">'cfg.label_colname found in annot, ignoring cfg.annot_label \n'</span>);
+0100     <span class="keyword">end</span>
+0101   <span class="keyword">else</span>
+0102     error(<span class="string">'label_annot specified but no annot table given'</span>);
+0103   <span class="keyword">end</span>
+0104 <span class="keyword">end</span>
+0105 
+0106 assert(~isempty(roi) || ~isempty(template),<span class="string">'cfg.roi or cfg.template required'</span>);
+0107 
+0108 <span class="comment">%creating raw</span>
+0109 <span class="keyword">if</span> ~isempty(roi) <span class="comment">%from roi</span>
+0110   raw=[];
+0111   raw.time=cell(1,height(roi));
+0112   raw.trial=cell(1,height(roi));
+0113   raw.fsample=roi.Fs(1);
+0114   raw.label = label;
+0115   assert(length(unique(roi.Fs))==1, &quot;Inconsistent Fs in roi&quot;);
+0116   <span class="keyword">for</span> i=1:height(roi)
+0117     raw.time{i}=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),roi.s1(i):roi.s2(i));
+0118     raw.trial{i}=fill_function(length(label),size(raw.time{i},2));
+0119   <span class="keyword">end</span>
+0120 <span class="keyword">elseif</span> ~isempty(template) <span class="comment">%from template</span>
+0121   raw = template;
+0122   <span class="keyword">for</span> i=1:length(raw.trial)
+0123     raw.trial{i}=fill_function(length(label),size(raw.time{i},2));
+0124   <span class="keyword">end</span>
+0125   raw.label = label;
+0126   roi = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(raw);
+0127 <span class="keyword">else</span>
+0128   error(<span class="string">'cfg.roi or cfg.template required'</span>);
+0129 <span class="keyword">end</span>
+0130 
+0131 <span class="keyword">if</span> istable(annot)
+0132   
+0133   description = annot.Properties.Description;
+0134   <span class="keyword">if</span> isempty(description) 
+0135     description = <span class="string">'annot'</span>;
+0136   <span class="keyword">end</span>
+0137   <span class="keyword">if</span> length(raw.label)==1 &amp;&amp; strcmp(raw.label{1},<span class="string">'annot'</span>)
+0138     raw.label={description};
+0139   <span class="keyword">end</span>
+0140   
+0141   <span class="comment">%assigning all annotation to same channel of raw</span>
+0142   <span class="keyword">if</span> isempty(label_colname)
+0143     annot_idx   = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(annot_label,raw.label);
+0144     <span class="keyword">if</span> annot_idx &gt; 0 &amp;&amp; annot_idx &lt;= numel(raw.label)
+0145       <span class="keyword">for</span> t=1:height(roi)
+0146         t_annot = <a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(annot,roi(t,:));
+0147         <span class="keyword">for</span> i=1:height(t_annot)
+0148           [s,e] = <a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(t,:), t_annot.starts(i), t_annot.ends(i));
+0149           <span class="keyword">if</span> count
+0150             raw.trial{t}(annot_idx,s:e)=raw.trial{t}(annot_idx,s:e)+1;
+0151           <span class="keyword">else</span>
+0152             raw.trial{t}(annot_idx,s:e)=1;
+0153           <span class="keyword">end</span>
+0154         <span class="keyword">end</span>
+0155       <span class="keyword">end</span>
+0156     <span class="keyword">end</span>
+0157   
+0158   <span class="keyword">elseif</span> ~isempty(annot) <span class="comment">%annotations assing to specific channels</span>
+0159 
+0160     <span class="comment">%iterating over labels</span>
+0161     <span class="keyword">for</span> i_l=1:numel(label)
+0162       annot_l = annot(strcmp(annot{:,label_colname},label{i_l}),:);
+0163       annot_idx = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(label{i_l},raw.label);
+0164       <span class="keyword">if</span> annot_idx &gt; 0 &amp;&amp; annot_idx &lt;= numel(raw.label)
+0165         <span class="keyword">for</span> t=1:height(roi)
+0166           t_annot_l = <a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(annot_l,roi(t,:));
+0167           <span class="keyword">for</span> i=1:height(t_annot_l)
+0168             [s,e] = <a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(t,:), t_annot_l.starts(i), t_annot_l.ends(i));
+0169             <span class="keyword">if</span> count
+0170               raw.trial{t}(annot_idx,s:e)=raw.trial{t}(annot_idx,s:e)+1;
+0171             <span class="keyword">else</span>
+0172               raw.trial{t}(annot_idx,s:e)=1;
+0173             <span class="keyword">end</span>
+0174           <span class="keyword">end</span>
+0175         <span class="keyword">end</span>
+0176       <span class="keyword">end</span>
+0177     <span class="keyword">end</span>    
+0178   <span class="keyword">end</span>
+0179 <span class="keyword">end</span>
+0180 
+0181 
+0182 
+0183</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

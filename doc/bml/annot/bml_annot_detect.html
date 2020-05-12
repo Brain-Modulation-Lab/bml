@@ -35,6 +35,10 @@
  cfg.threshold - double len 1 or 2: lower/upper threshold for the segmentation
  cfg.max_annots - integer: maximun number of regions of interest in a
        envelope
+ cfg.trials - 1xN, trial indices on which to perform detection. Defaults
+       to all trials of env
+ cfg.channel - Nx1 cell-array with selection of channels (default = 'all'), see FT_CHANNELSELECTION
+ cfg.timeeps - double, epsilon for time. Defaults to 1e-9
 
  returns an annotation table</pre></div>
 
@@ -42,10 +46,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/sync/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-</ul>
+<li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
 <!-- crossreference -->
 
 
@@ -61,75 +65,121 @@ This function is called by:
 0008 <span class="comment">% cfg.threshold - double len 1 or 2: lower/upper threshold for the segmentation</span>
 0009 <span class="comment">% cfg.max_annots - integer: maximun number of regions of interest in a</span>
 0010 <span class="comment">%       envelope</span>
-0011 <span class="comment">%</span>
-0012 <span class="comment">% returns an annotation table</span>
-0013 
-0014 max_annots        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'max_annots'</span>, inf);
-0015 threshold         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'threshold'</span>);
-0016 <span class="keyword">if</span> ~isempty(threshold)
-0017   assert(length(threshold)&lt;=2,&quot;threshold should be of length 1 or 2&quot;);
-0018   lower_threshold = threshold(1);
-0019   upper_threshold = threshold(end);
-0020 <span class="keyword">else</span>
-0021   lower_threshold = [];
-0022   upper_threshold = [];
-0023 <span class="keyword">end</span>
-0024 upper_threshold   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'upper_threshold'</span>, upper_threshold);
-0025 lower_threshold   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'lower_threshold'</span>, lower_threshold);
-0026 assert(~isempty(upper_threshold) &amp; ~isempty(lower_threshold),&quot;cfg.threshold required&quot;);
-0027 
-0028 assert(numel(env.label)==1,&quot;One channel in env expected <span class="keyword">for</span> detection&quot;);
-0029 
-0030 annot = table();
-0031 <span class="keyword">for</span> i=1:numel(env.trial)
-0032   i_env = ft_selectdata(struct(<span class="string">'trial'</span>,i,<span class="string">'feedback'</span>,<span class="string">'no'</span>), env);
-0033   env_coord = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(i_env);
-0034   
-0035   zero_cross_ixs = find(abs(diff(sign(env.trial{i}-lower_threshold)))&gt;=1);
-0036   reset_value=min([min(env.trial{i}),0]);
-0037   search_detect = true;
-0038   loop_count = 0;
-0039   <span class="keyword">while</span> search_detect
-0040       loop_count = loop_count + 1;
-0041     [env_max, env_max_ix] = max(env.trial{i});       
-0042     assert(loop_count &lt;= max_annots, &quot;More annots detected than max_annots&quot;);
-0043         
-0044     <span class="keyword">if</span> env_max &gt; upper_threshold
-0045         <span class="comment">%finding start and end of current annot</span>
-0046       <span class="keyword">if</span> isempty(zero_cross_ixs)
-0047         starts = env.time{i}(1)-0.5/env.fsample;
-0048         ends = env.time{i}(end)+0.5/env.fsample;
-0049       <span class="keyword">elseif</span> env_max_ix &lt;= zero_cross_ixs(1)
-0050         starts = env.time{i}(1)-0.5/env.fsample;
-0051         ends = env.time{i}(zero_cross_ixs(1))+0.5/env.fsample;
-0052       <span class="keyword">elseif</span> env_max_ix &gt; zero_cross_ixs(end)
-0053           starts = env.time{i}(zero_cross_ixs(end))-0.5/env.fsample;
-0054         ends = env.time{i}(end)+0.5/env.fsample;
-0055       <span class="keyword">else</span>
-0056           zc_ix = find(diff(sign(zero_cross_ixs-env_max_ix)),1);
-0057         starts = env.time{i}(zero_cross_ixs(zc_ix))-0.5/env.fsample;
-0058         ends = env.time{i}(zero_cross_ixs(zc_ix+1))+0.5/env.fsample;
-0059       <span class="keyword">end</span>
-0060             
-0061       overlaps = false;
-0062       <span class="keyword">for</span> j=1:height(annot)
-0063         row = annot(j,:);
-0064         <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
-0065           overlaps = true;
-0066         <span class="keyword">end</span>
-0067       <span class="keyword">end</span>
-0068       <span class="keyword">if</span> ~overlaps
-0069         annot = [annot; table(starts,ends,env_max,i)];
-0070       <span class="keyword">end</span>
-0071       [s,e] = <a href="../../bml/sync/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(env_coord,starts,ends);
-0072       env.trial{i}(1,s:e)=reset_value;
-0073     <span class="keyword">else</span>
-0074         search_detect = false;
-0075     <span class="keyword">end</span>
-0076   <span class="keyword">end</span>
-0077 <span class="keyword">end</span>
-0078 
-0079 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0011 <span class="comment">% cfg.trials - 1xN, trial indices on which to perform detection. Defaults</span>
+0012 <span class="comment">%       to all trials of env</span>
+0013 <span class="comment">% cfg.channel - Nx1 cell-array with selection of channels (default = 'all'), see FT_CHANNELSELECTION</span>
+0014 <span class="comment">% cfg.timeeps - double, epsilon for time. Defaults to 1e-9</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% returns an annotation table</span>
+0017 
+0018 max_annots        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'max_annots'</span>, inf);
+0019 threshold         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'threshold'</span>);
+0020 timeeps           = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'timeeps'</span>, 1e-9);
+0021 trials            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'trials'</span>, 1:numel(env.trial));
+0022 
+0023 <span class="keyword">if</span> any(ismember({<span class="string">'channel'</span>},fieldnames(cfg)))
+0024   cfg1=[];
+0025   cfg1.channel = cfg.channel;
+0026   env = ft_selectdata(cfg1,env);
+0027 <span class="keyword">end</span>
+0028 
+0029 <span class="keyword">if</span> ~isempty(threshold)
+0030   assert(length(threshold)&lt;=2,&quot;threshold should be of length 1 or 2&quot;);
+0031   lower_threshold = threshold(1);
+0032   upper_threshold = threshold(end);
+0033 <span class="keyword">else</span>
+0034   lower_threshold = [];
+0035   upper_threshold = [];
+0036 <span class="keyword">end</span>
+0037 upper_threshold   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'upper_threshold'</span>, upper_threshold);
+0038 lower_threshold   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'lower_threshold'</span>, lower_threshold);
+0039 <span class="comment">%parallel          = bml_getopt(cfg, 'parallel', 'no');</span>
+0040 <span class="comment">%ToDo paralelize this</span>
+0041 
+0042 assert(~isempty(upper_threshold) &amp; ~isempty(lower_threshold),&quot;cfg.threshold required&quot;);
+0043 
+0044 annot = table();
+0045 <span class="keyword">for</span> i=trials
+0046   fprintf(&quot;\n&quot;);
+0047 
+0048   cfg1=[];
+0049   cfg1.trials=i;
+0050   cfg1.feedback=<span class="string">'no'</span>;
+0051   cfg1.trackcallinfo=false;
+0052   env_coord = <a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>(ft_selectdata(cfg1,env));
+0053 
+0054     fprintf(&quot;Detecting trial <span class="comment">%i, labels: \n&quot;,i);</span>
+0055      
+0056   <span class="comment">%ToDo: parallelize this</span>
+0057   <span class="keyword">for</span> l=1:numel(env.label)
+0058     label = env.label(l);
+0059     fprintf(&quot;<span class="comment">%s &quot;,label{1});</span>
+0060     <span class="keyword">if</span> mod(l,10)==0
+0061       fprintf(&quot;\n&quot;,label{1});
+0062     <span class="keyword">end</span>
+0063     
+0064     zero_cross_ixs = find(abs(diff(sign(env.trial{i}(l,:)-lower_threshold),1,2))&gt;=1);
+0065 
+0066     <span class="comment">%dealing with negative values for reset</span>
+0067     reset_value=min(env.trial{i}(l,:),[],2);
+0068     reset_value(reset_value&gt;0)=0;
+0069 
+0070     search_detect = true;
+0071     loop_count = 0;
+0072     annot_l = table();
+0073     <span class="keyword">while</span> search_detect
+0074       loop_count = loop_count + 1;
+0075       [env_max, env_max_ix] = max(env.trial{i}(l,:),[],2,<span class="string">'omitnan'</span>);       
+0076       assert(loop_count &lt;= max_annots, &quot;More annots detected than max_annots&quot;);
+0077 
+0078       <span class="keyword">if</span> env_max &gt; upper_threshold
+0079         <span class="comment">%finding start and end of current annot</span>
+0080         <span class="keyword">if</span> isempty(zero_cross_ixs)
+0081           starts = env.time{i}(1)-0.5/env.fsample;
+0082           ends = env.time{i}(end)+0.5/env.fsample;
+0083         <span class="keyword">elseif</span> env_max_ix &lt;= zero_cross_ixs(1)
+0084           starts = env.time{i}(1)-0.5/env.fsample;
+0085           ends = env.time{i}(zero_cross_ixs(1))+0.5/env.fsample;
+0086         <span class="keyword">elseif</span> env_max_ix &gt; zero_cross_ixs(end)
+0087           starts = env.time{i}(zero_cross_ixs(end))-0.5/env.fsample;
+0088           ends = env.time{i}(end)+0.5/env.fsample;
+0089         <span class="keyword">else</span>
+0090           zc_ix = find(diff(sign(zero_cross_ixs-env_max_ix)),1);
+0091           starts = env.time{i}(zero_cross_ixs(zc_ix))-0.5/env.fsample;
+0092           ends = env.time{i}(zero_cross_ixs(zc_ix+1))+0.5/env.fsample;
+0093         <span class="keyword">end</span>
+0094 
+0095         overlaps = false;
+0096         <span class="keyword">for</span> j=1:height(annot_l)
+0097           row = annot_l(j,:);
+0098           <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
+0099             <span class="comment">%attemping to make contiguous</span>
+0100             <span class="keyword">if</span> abs(row.starts - ends) &lt; timeeps
+0101               ends = row.starts;
+0102             <span class="keyword">end</span>
+0103             <span class="keyword">if</span> abs(row.ends - starts) &lt; timeeps 
+0104               starts = row.ends;
+0105             <span class="keyword">end</span>
+0106             <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
+0107               overlaps = true;
+0108             <span class="keyword">end</span>
+0109           <span class="keyword">end</span>
+0110         <span class="keyword">end</span>
+0111         <span class="keyword">if</span> ~overlaps
+0112           trial = i;
+0113           annot_l = [annot_l; table(starts,ends,env_max,trial,label)];
+0114         <span class="keyword">end</span>
+0115         [s,e] = <a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(env_coord,starts,ends);
+0116         env.trial{i}(l,s:e)=reset_value;
+0117       <span class="keyword">else</span>
+0118         search_detect = false;
+0119       <span class="keyword">end</span>
+0120     <span class="keyword">end</span>
+0121     annot = [annot; annot_l];
+0122   <span class="keyword">end</span>
+0123 <span class="keyword">end</span>
+0124 fprintf(&quot;\n&quot;);
+0125 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

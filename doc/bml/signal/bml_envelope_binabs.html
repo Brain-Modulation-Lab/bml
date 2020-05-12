@@ -36,7 +36,7 @@
    env = bml_envelope_binabs(data)
    env = bml_envelope_binabs(cfg, data)
 
- cfg is a configureation struct with the following fields
+ cfg is a configuration struct with the following fields
  cfg.freq - integer: intended output sampling frequency (default 100Hz)
  cfg.bin_size - integer: size of the bin. If given overwrites cfg.target_fsample
 
@@ -51,7 +51,7 @@ This function calls:
 <li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li></ul>
+<li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li><li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li></ul>
 <!-- crossreference -->
 
 
@@ -68,7 +68,7 @@ This function is called by:
 0009 <span class="comment">%   env = bml_envelope_binabs(data)</span>
 0010 <span class="comment">%   env = bml_envelope_binabs(cfg, data)</span>
 0011 <span class="comment">%</span>
-0012 <span class="comment">% cfg is a configureation struct with the following fields</span>
+0012 <span class="comment">% cfg is a configuration struct with the following fields</span>
 0013 <span class="comment">% cfg.freq - integer: intended output sampling frequency (default 100Hz)</span>
 0014 <span class="comment">% cfg.bin_size - integer: size of the bin. If given overwrites cfg.target_fsample</span>
 0015 <span class="comment">%</span>
@@ -87,8 +87,8 @@ This function is called by:
 0028     data.fsample = round(1/mean(diff(data.time{1})),9,<span class="string">'significant'</span>);
 0029 <span class="keyword">end</span>
 0030 
-0031 freq            = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'freq'</span>,DEFAULT_TARGET_FSAMPLE);
-0032 bin_size        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'bin_size'</span>,round(data.fsample/freq));
+0031 freq      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'freq'</span>,DEFAULT_TARGET_FSAMPLE);
+0032 bin_size    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'bin_size'</span>,round(data.fsample/freq));
 0033     
 0034 <span class="keyword">if</span> abs(data.fsample/freq - bin_size) &gt; 0.1
 0035   warning(char(strcat(<span class="string">'Specified envelope freq '</span>,num2str(freq),<span class="string">' not possible. Using '</span>,num2str(data.fsample/bin_size))));
@@ -129,6 +129,6 @@ This function is called by:
 0070 <span class="keyword">end</span>
 0071 
 0072</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

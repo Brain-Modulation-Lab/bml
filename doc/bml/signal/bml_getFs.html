@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_getFs</title>
+  <meta name="keywords" content="bml_getFs">
+  <meta name="description" content="BML_GETFS returns the sampling frequency of a raw object">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_getFs.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_getFs
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_GETFS returns the sampling frequency of a raw object</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function Fs = bml_getFs(cfg, raw) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_GETFS returns the sampling frequency of a raw object
+
+ Use as
+   Fs = bml_getFs(cfg, raw)
+   Fs = bml_getFs(raw)
+
+ cfg - configuration structure with fields
+ cfg.tolerance
+ raw - ft_datatype_raw object
+
+ returns a double with the sampling rate</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Fs = bml_getFs(cfg, raw)</a>
+0002 
+0003 <span class="comment">% BML_GETFS returns the sampling frequency of a raw object</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   Fs = bml_getFs(cfg, raw)</span>
+0007 <span class="comment">%   Fs = bml_getFs(raw)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg - configuration structure with fields</span>
+0010 <span class="comment">% cfg.tolerance</span>
+0011 <span class="comment">% raw - ft_datatype_raw object</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% returns a double with the sampling rate</span>
+0014 
+0015 <span class="keyword">if</span> ~exist(<span class="string">'raw'</span>,<span class="string">'var'</span>)  
+0016   raw=cfg;
+0017   cfg=[];
+0018 <span class="keyword">end</span>
+0019 
+0020 timetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-9);
+0021 reltimetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'reltimetol'</span>,1e-6);
+0022 freqsignif = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'freqsignif'</span>,4);
+0023 
+0024 <span class="comment">%checking within trial consistency</span>
+0025 timetol_offenders = [];
+0026 reltimetol_offenders = [];
+0027 median_dt = nan(1,length(raw.time));
+0028 <span class="keyword">for</span> t=1:length(raw.time)
+0029   dts = diff(raw.time{t});
+0030   median_dt(t)=median(dts);
+0031   <span class="keyword">if</span> range(dts) &gt; timetol
+0032     timetol_offenders = [timetol_offenders, t];
+0033   <span class="keyword">end</span>
+0034     <span class="keyword">if</span> range(dts)/median_dt(t) &gt; reltimetol
+0035     reltimetol_offenders = [reltimetol_offenders, t];
+0036   <span class="keyword">end</span>
+0037 <span class="keyword">end</span>
+0038 
+0039 <span class="keyword">if</span> ~isempty(timetol_offenders)
+0040   warning(&quot;trials <span class="comment">%s don't comply with timetol of %f&quot;,toString(timetol_offenders),timetol)</span>
+0041 <span class="keyword">end</span>
+0042 <span class="keyword">if</span> ~isempty(reltimetol_offenders)
+0043   warning(&quot;trials <span class="comment">%s don't comply with reltimetol of %f&quot;,toString(reltimetol_offenders),reltimetol)</span>
+0044 <span class="keyword">end</span>
+0045 
+0046 mean_median_dt = mean(median_dt);
+0047 
+0048 <span class="comment">%checking across trials consistency</span>
+0049 <span class="keyword">if</span> range(median_dt) &gt; timetol
+0050   warning(&quot;timetol violated across trials&quot;)
+0051 <span class="keyword">end</span>
+0052 <span class="keyword">if</span> range(median_dt)/mean_median_dt &gt; reltimetol
+0053   warning(&quot;reltimetol violated across trials&quot;)
+0054 <span class="keyword">end</span>
+0055 
+0056 Fs = round(1/mean_median_dt,freqsignif,<span class="string">'signif'</span>);
+0057 
+0058 
+0059 
+0060 
+0061 
+0062 
+0063 
+0064 
+0065 
+0066</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

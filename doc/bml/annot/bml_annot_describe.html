@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_describe</title>
+  <meta name="keywords" content="bml_annot_describe">
+  <meta name="description" content="BML_ANNOT_DESCRIBE returns a table containing a description of each">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_describe.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_describe
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_DESCRIBE returns a table containing a description of each</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function desc = bml_annot_describe(cfg,annot) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_DESCRIBE returns a table containing a description of each
+ numeric column of annot. 
+
+ Use as
+   desc = bml_annot_describe(cfg,annot)
+   desc = bml_annot_describe(annot)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/stat/bml_robust_std.html" class="code" title="function std = bml_robust_std(data, center)">bml_robust_std</a>	BML_ROBUST_STD calculates a row-wise robust estimation of the standard deviation</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function desc = bml_annot_describe(cfg,annot)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_DESCRIBE returns a table containing a description of each</span>
+0004 <span class="comment">% numeric column of annot.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Use as</span>
+0007 <span class="comment">%   desc = bml_annot_describe(cfg,annot)</span>
+0008 <span class="comment">%   desc = bml_annot_describe(annot)</span>
+0009 
+0010 <span class="keyword">if</span> nargin == 1
+0011   annot = cfg;
+0012   cfg=[];
+0013 <span class="keyword">end</span>
+0014 
+0015 stats = {<span class="string">'mean'</span>,<span class="string">'median'</span>,<span class="string">'std'</span>,@(x)<a href="../../bml/stat/bml_robust_std.html" class="code" title="function std = bml_robust_std(data, center)">bml_robust_std</a>(x'),<span class="string">'min'</span>,<span class="string">'max'</span>,<span class="string">'numel'</span>};
+0016 groupby = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'groupby'</span>, []);
+0017 
+0018 colsel = varfun(@isnumeric,annot,<span class="string">'output'</span>,<span class="string">'uniform'</span>);
+0019 <span class="keyword">if</span> ~isempty(groupby)
+0020   colsel = colsel |  ismember(annot.Properties.VariableNames,groupby);
+0021 <span class="keyword">end</span>
+0022 
+0023 desc1 = grpstats(annot(:,colsel),groupby,stats);
+0024 desc1.Properties.VariableNames = strrep(desc1.Properties.VariableNames,<span class="string">'Fun4'</span>,<span class="string">'rstd'</span>);
+0025 sdesc = stack(desc1,setdiff(desc1.Properties.VariableNames,groupby),<span class="keyword">...</span>
+0026   <span class="string">'NewDataVariableName'</span>,<span class="string">'value'</span>,<span class="string">'IndexVariableName'</span>,<span class="string">'fun_var'</span>);
+0027 sdesc.fun_var = cellstr(sdesc.fun_var);
+0028 sdesc = sdesc(~strcmp(sdesc.fun_var,<span class="string">'GroupCount'</span>),:);
+0029 [fun,var]=strtok(sdesc.fun_var,<span class="string">'_'</span>);
+0030 var = strip(var,<span class="string">'left'</span>,<span class="string">'_'</span>);
+0031 sdesc.fun = fun;
+0032 sdesc.variable = var;
+0033 sdesc.fun_var=[];
+0034 desc=unstack(sdesc,<span class="string">'value'</span>,<span class="string">'fun'</span>);
+0035 
+0036 
+0037 
+0038 
+0039 
+0040 
+0041 
+0042 
+0043 
+0044</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

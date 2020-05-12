@@ -179,82 +179,95 @@ This function is called by:
 0082 time_end       = strcat(time_channel,<span class="string">'_TimeEnd'</span>);
 0083 
 0084 <span class="keyword">for</span> i=1:height(info)
-0085   hdr = ft_read_header(fullfile(info.folder{i},info.name{i}),<span class="string">'chantype'</span>,chantype);
-0086   hdr_table.chantype(i) = {strjoin(unique(hdr.chantype))};
-0087   hdr_table.Fs(i) = {hdr.Fs};
-0088   hdr_table.nSamples(i) = {hdr.nSamples};
-0089   hdr_table.nChans(i) = {hdr.nChans};  
-0090   hdr_table.nTrials(i) = {hdr.nTrials};    
-0091   hdr_table.chanunit(i) = {strjoin(unique(hdr.chanunit))}; 
-0092 
-0093   <span class="keyword">if</span> ismember(time_begin,fields(hdr.orig))
-0094     hdr_table.time_begin(i) = {hdr.orig.(time_begin)};
-0095     hdr_table.time_end(i) = {hdr.orig.(time_end)};
-0096   <span class="keyword">else</span>
-0097     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
-0098       time_begin,fullfile(cfg.path,info.name{i}), strjoin(hdr.label));
-0099   <span class="keyword">end</span>
-0100 <span class="keyword">end</span>
-0101 hdr_table.Fs = cell2mat(hdr_table.Fs);
-0102 hdr_table.nSamples = cell2mat(hdr_table.nSamples);
-0103 hdr_table.nChans = cell2mat(hdr_table.nChans);
-0104 hdr_table.nTrials = cell2mat(hdr_table.nTrials);
-0105 hdr_table.time_begin = cell2mat(hdr_table.time_begin);
-0106 hdr_table.time_end = cell2mat(hdr_table.time_end);
-0107 
-0108 info = [info hdr_table];
-0109 
-0110 <span class="keyword">if</span> ~isempty(info_mpx) <span class="comment">%loading date from .mpx OS info if available</span>
-0111   info_mpx.basename = erase(info_mpx.name,<span class="string">'.mpx'</span>);
-0112   info_mpx=info_mpx(:,{<span class="string">'basename'</span>,<span class="string">'date'</span>,<span class="string">'datenum'</span>});
-0113   
-0114   info.date=[];
-0115   info.datenum=[];
-0116   info.basename = erase(info.name,<span class="string">'.mat'</span>);
-0117   
-0118   <span class="comment">%checking that all mat files have correspondent mpx file</span>
-0119   mat_with_no_mpx = setdiff(info.basename,info_mpx.basename);
-0120   <span class="keyword">if</span> numel(mat_with_no_mpx)&gt;0
-0121     <span class="keyword">if</span> numel(mat_with_no_mpx)&lt;10
-0122       warning(&quot;the following files don't have correspondent .mpx file: <span class="comment">%s&quot;, strjoin(mat_with_no_mpx));</span>
-0123     <span class="keyword">else</span>
-0124       warning(&quot;<span class="comment">%i .mat files don't have correspondent .mpx file&quot;, numel(mat_with_no_mpx));</span>
-0125     <span class="keyword">end</span>
-0126     mat_with_no_mpx=table(mat_with_no_mpx);
-0127     mat_with_no_mpx.Properties.VariableNames = {<span class="string">'basename'</span>};
-0128     mat_with_no_mpx.date(:) = {<span class="string">''</span>};
-0129     mat_with_no_mpx.datenum(:) = NaN;
-0130     info_mpx = [info_mpx; mat_with_no_mpx];
-0131   <span class="keyword">end</span>
-0132   
-0133   info=join(info,info_mpx,<span class="string">'Keys'</span>,<span class="string">'basename'</span>);
-0134 
-0135   <span class="comment">%adjusting time_end to bml_date2sec origin.</span>
-0136   ends = info.time_end+nanmedian(<a href="../../bml/utils/bml_date2sec.html" class="code" title="function sec=bml_date2sec(date,t0)">bml_date2sec</a>(info.date)-info.time_end);
-0137   <span class="comment">%NOTE: time_start and time_end are time coordinates of the first and</span>
-0138   <span class="comment">%last data point. Duration is the length of the 'represented' time</span>
-0139   <span class="comment">%therefore the correct way of calculating duration is as follows:</span>
-0140   info.duration = info.time_end - info.time_begin + 1./info.Fs; 
-0141   starts = ends - info.duration;
-0142   info = [table(starts,ends,<span class="string">'VariableNames'</span>,{<span class="string">'starts'</span>,<span class="string">'ends'</span>}), info];
-0143   info.basename = [];
-0144   <span class="comment">%info=sortrows(info,'starts');</span>
-0145   info = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(info);
-0146 <span class="keyword">else</span>
-0147   warning(<span class="string">'Specify cfg.mpx_path for starts/ends calculation'</span>)
-0148   info=sortrows(info,<span class="string">'time_begin'</span>);
-0149 <span class="keyword">end</span>
-0150 
-0151 <span class="keyword">for</span> i=1:numel(rm_vars)
-0152   <span class="keyword">if</span> ismember(rm_vars(i),info.Properties.VariableNames)
-0153     info.(rm_vars{i}) = [];
-0154   <span class="keyword">end</span>
-0155 <span class="keyword">end</span>  
-0156   
-0157 
-0158 
-0159 
-0160</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0085   <span class="keyword">try</span>
+0086     hdr = ft_read_header(fullfile(info.folder{i},info.name{i}),<span class="string">'chantype'</span>,chantype);
+0087   <span class="keyword">catch</span>
+0088     fprintf(&quot;Could not open header <span class="keyword">for</span> file <span class="comment">%s \n&quot;, info.name{i});</span>
+0089     hdr_table.chantype(i) = {<span class="string">''</span>};
+0090     hdr_table.Fs(i) = {NaN};
+0091     hdr_table.nSamples(i) = {NaN};
+0092     hdr_table.nChans(i) = {NaN};  
+0093     hdr_table.nTrials(i) = {NaN};    
+0094     hdr_table.chanunit(i) = {<span class="string">''</span>}; 
+0095     hdr_table.time_begin(i) = {NaN};
+0096     hdr_table.time_end(i) = {NaN};
+0097     <span class="keyword">continue</span>
+0098   <span class="keyword">end</span>
+0099   hdr_table.chantype(i) = {strjoin(unique(hdr.chantype))};
+0100   hdr_table.Fs(i) = {hdr.Fs};
+0101   hdr_table.nSamples(i) = {hdr.nSamples};
+0102   hdr_table.nChans(i) = {hdr.nChans};  
+0103   hdr_table.nTrials(i) = {hdr.nTrials};    
+0104   hdr_table.chanunit(i) = {strjoin(unique(hdr.chanunit))}; 
+0105 
+0106   <span class="keyword">if</span> ismember(time_begin,fields(hdr.orig))
+0107     hdr_table.time_begin(i) = {hdr.orig.(time_begin)};
+0108     hdr_table.time_end(i) = {hdr.orig.(time_end)};
+0109   <span class="keyword">else</span>
+0110     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
+0111       time_begin,fullfile(cfg.path,info.name{i}), strjoin(hdr.label));
+0112   <span class="keyword">end</span>
+0113 <span class="keyword">end</span>
+0114 hdr_table.Fs = cell2mat(hdr_table.Fs);
+0115 hdr_table.nSamples = cell2mat(hdr_table.nSamples);
+0116 hdr_table.nChans = cell2mat(hdr_table.nChans);
+0117 hdr_table.nTrials = cell2mat(hdr_table.nTrials);
+0118 hdr_table.time_begin = cell2mat(hdr_table.time_begin);
+0119 hdr_table.time_end = cell2mat(hdr_table.time_end);
+0120 
+0121 info = [info hdr_table];
+0122 
+0123 <span class="keyword">if</span> ~isempty(info_mpx) <span class="comment">%loading date from .mpx OS info if available</span>
+0124   info_mpx.basename = erase(info_mpx.name,<span class="string">'.mpx'</span>);
+0125   info_mpx=info_mpx(:,{<span class="string">'basename'</span>,<span class="string">'date'</span>,<span class="string">'datenum'</span>});
+0126   
+0127   info.date=[];
+0128   info.datenum=[];
+0129   info.basename = erase(info.name,<span class="string">'.mat'</span>);
+0130   
+0131   <span class="comment">%checking that all mat files have correspondent mpx file</span>
+0132   mat_with_no_mpx = setdiff(info.basename,info_mpx.basename);
+0133   <span class="keyword">if</span> numel(mat_with_no_mpx)&gt;0
+0134     <span class="keyword">if</span> numel(mat_with_no_mpx)&lt;10
+0135       warning(&quot;the following files don't have correspondent .mpx file: <span class="comment">%s&quot;, strjoin(mat_with_no_mpx));</span>
+0136     <span class="keyword">else</span>
+0137       warning(&quot;<span class="comment">%i .mat files don't have correspondent .mpx file&quot;, numel(mat_with_no_mpx));</span>
+0138     <span class="keyword">end</span>
+0139     mat_with_no_mpx=table(mat_with_no_mpx);
+0140     mat_with_no_mpx.Properties.VariableNames = {<span class="string">'basename'</span>};
+0141     mat_with_no_mpx.date(:) = {<span class="string">''</span>};
+0142     mat_with_no_mpx.datenum(:) = NaN;
+0143     info_mpx = [info_mpx; mat_with_no_mpx];
+0144   <span class="keyword">end</span>
+0145   
+0146   info=join(info,info_mpx,<span class="string">'Keys'</span>,<span class="string">'basename'</span>);
+0147 
+0148   <span class="comment">%adjusting time_end to bml_date2sec origin.</span>
+0149   ends = info.time_end+nanmedian(<a href="../../bml/utils/bml_date2sec.html" class="code" title="function sec=bml_date2sec(date,t0)">bml_date2sec</a>(info.date)-info.time_end);
+0150   <span class="comment">%NOTE: time_start and time_end are time coordinates of the first and</span>
+0151   <span class="comment">%last data point. Duration is the length of the 'represented' time</span>
+0152   <span class="comment">%therefore the correct way of calculating duration is as follows:</span>
+0153   info.duration = info.time_end - info.time_begin + 1./info.Fs; 
+0154   starts = ends - info.duration;
+0155   info = [table(starts,ends,<span class="string">'VariableNames'</span>,{<span class="string">'starts'</span>,<span class="string">'ends'</span>}), info];
+0156   info.basename = [];
+0157   <span class="comment">%info=sortrows(info,'starts');</span>
+0158   info = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(info);
+0159 <span class="keyword">else</span>
+0160   warning(<span class="string">'Specify cfg.mpx_path for starts/ends calculation'</span>)
+0161   info=sortrows(info,<span class="string">'time_begin'</span>);
+0162 <span class="keyword">end</span>
+0163 
+0164 <span class="keyword">for</span> i=1:numel(rm_vars)
+0165   <span class="keyword">if</span> ismember(rm_vars(i),info.Properties.VariableNames)
+0166     info.(rm_vars{i}) = [];
+0167   <span class="keyword">end</span>
+0168 <span class="keyword">end</span>  
+0169   
+0170 
+0171 
+0172 
+0173</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

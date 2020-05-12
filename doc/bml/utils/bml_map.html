@@ -24,7 +24,7 @@
 <div class="box"><strong>BML_MAP maps elements based on given domain and codomain</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>function mapped = bml_map(element,domain,codomain) </strong></div>
+<div class="box"><strong>function mapped = bml_map(element,domain,codomain,non_domain) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> BML_MAP maps elements based on given domain and codomain
@@ -32,9 +32,10 @@
  Use as
    mapped = bml_map(element,domain,codomain)
 
- element - cellstr, cell or array
- domain - cellstr, cell or array. Possible elements to match with
- codomain - cellstr, cell or array. Corresponding elements
+ element - cellstr, cell or array in column format
+ domain - cellstr, cell or array. Possible elements to match with in column format
+ codomain - cellstr, cell or array. Corresponding elements in column format
+ non_domain - optional value to be returned if element is not in domain
 
  returns the corresponding codomain element for each given domain element</pre></div>
 
@@ -45,44 +46,61 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_plexon2annot.html" class="code" title="function [annot, spike] = bml_plexon2annot(cfg)">bml_plexon2annot</a>	BML_PLEXON2ANNOT loads spike events from plexon file</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_reorder_channels.html" class="code" title="function reordered = bml_reorder_channels(cfg,data)">bml_reorder_channels</a>	BML_REORDER_CHANNELS changes the order of the channels of a raw</li><li><a href="../../bml/signal/bml_rereference.html" class="code" title="function [ref,U] = bml_rereference(cfg,raw)">bml_rereference</a>	BML_REREFERENCE applies re-referencing scheme to raw</li></ul>
+<li><a href="../../bml/anat/bml_anat_coord2label.html" class="code" title="function anat_labels = bml_anat_coord2label(cfg, coord)">bml_anat_coord2label</a>	BML_ANAT_LCOORD2LABEL returns a label from an atlas corresponding to a</li><li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annotation table from CodingMatrix</li><li><a href="../../bml/annot/bml_plexon2annot.html" class="code" title="function [annot, spike] = bml_plexon2annot(cfg)">bml_plexon2annot</a>	BML_PLEXON2ANNOT loads spike events from plexon file</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_reorder_channels.html" class="code" title="function reordered = bml_reorder_channels(cfg,data)">bml_reorder_channels</a>	BML_REORDER_CHANNELS changes the order of the channels of a raw</li><li><a href="../../bml/signal/bml_rereference.html" class="code" title="function [ref,U] = bml_rereference(cfg,raw)">bml_rereference</a>	BML_REREFERENCE applies re-referencing scheme to raw</li><li><a href="../../bml/sync/bml_sync_sortnotes.html" class="code" title="function sortnotes = bml_sync_sortnotes(cfg)">bml_sync_sortnotes</a>	BML_SYNC_SORTNOTES</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function mapped = bml_map(element,domain,codomain)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function mapped = bml_map(element,domain,codomain,non_domain)</a>
 0002 
 0003 <span class="comment">% BML_MAP maps elements based on given domain and codomain</span>
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%   mapped = bml_map(element,domain,codomain)</span>
 0007 <span class="comment">%</span>
-0008 <span class="comment">% element - cellstr, cell or array</span>
-0009 <span class="comment">% domain - cellstr, cell or array. Possible elements to match with</span>
-0010 <span class="comment">% codomain - cellstr, cell or array. Corresponding elements</span>
-0011 <span class="comment">%</span>
-0012 <span class="comment">% returns the corresponding codomain element for each given domain element</span>
-0013 
-0014 <span class="keyword">if</span> ischar(element)
-0015   element = {element};
-0016 <span class="keyword">end</span>
-0017 
-0018 <span class="keyword">if</span> iscellstr(element)
-0019   assert(iscellstr(domain),<span class="string">'incompatible elements and domain'</span>);  
-0020   <span class="comment">%assert(iscellstr(codomain),'incompatible elements and codomain');</span>
-0021   mapped = cellfun(@(x) codomain(find(strcmp(domain,x),1)),element,<span class="string">'UniformOutput'</span>,true);
-0022 <span class="keyword">elseif</span> iscell(element)
-0023   assert(iscell(domain),<span class="string">'incompatible elements and domain'</span>);
-0024   <span class="comment">%assert(iscell(codomain),'incompatible elements and codomain');</span>
-0025   mapped = cellfun(@(x) codomain(find(domain==x,1)),element,<span class="string">'UniformOutput'</span>,true);  
-0026 <span class="keyword">elseif</span> isnumeric(element)
-0027   assert(isnumeric(domain),<span class="string">'incompatible elements and domain'</span>);   
-0028   <span class="comment">%assert(isnumeric(codomain),'incompatible elements and codomain');</span>
-0029   mapped = arrayfun(@(x) codomain(find(domain==x,1)),element); 
-0030 <span class="keyword">else</span> 
-0031   error(<span class="string">'unknown type for element'</span>);
-0032 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0008 <span class="comment">% element - cellstr, cell or array in column format</span>
+0009 <span class="comment">% domain - cellstr, cell or array. Possible elements to match with in column format</span>
+0010 <span class="comment">% codomain - cellstr, cell or array. Corresponding elements in column format</span>
+0011 <span class="comment">% non_domain - optional value to be returned if element is not in domain</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% returns the corresponding codomain element for each given domain element</span>
+0014 
+0015 <span class="keyword">if</span> ischar(element)
+0016   element = {element};
+0017 <span class="keyword">end</span>
+0018 
+0019 <span class="keyword">if</span> size(element,2) &gt; size(element,1); element=element'; <span class="keyword">end</span>
+0020 <span class="keyword">if</span> size(domain,2) &gt; size(domain,1); domain=domain'; <span class="keyword">end</span>
+0021 <span class="keyword">if</span> size(codomain,2) &gt; size(codomain,1); codomain=codomain'; <span class="keyword">end</span>
+0022 
+0023 assert(size(element,2)&lt;=1,<span class="string">'element should be column vector'</span>);
+0024 assert(size(domain,2)&lt;=1,<span class="string">'domain should be column vector'</span>);
+0025 assert(size(codomain,2)&lt;=1,<span class="string">'codomain should be column vector'</span>);
+0026 
+0027 <span class="keyword">if</span> exist(<span class="string">'non_domain'</span>,<span class="string">'var'</span>)
+0028     out_of_domain = setdiff(element,domain);
+0029     <span class="keyword">if</span> ~isempty(out_of_domain)
+0030         <span class="keyword">if</span> ischar(non_domain)
+0031             non_domain = {non_domain};
+0032         <span class="keyword">end</span>
+0033         domain = cat(1,domain,out_of_domain);
+0034         codomain = cat(1,codomain,repmat(non_domain,length(out_of_domain),1));
+0035     <span class="keyword">end</span>
+0036 <span class="keyword">end</span>
+0037 
+0038 <span class="keyword">if</span> iscellstr(element)
+0039   assert(iscellstr(domain),<span class="string">'incompatible elements and domain'</span>);
+0040   mapped = cellfun(@(x) codomain(find(strcmp(domain,x),1)),element,<span class="string">'UniformOutput'</span>,true);
+0041 <span class="keyword">elseif</span> iscell(element)
+0042   assert(iscell(domain),<span class="string">'incompatible elements and domain'</span>);
+0043   mapped = cellfun(@(x) codomain(find(domain==x,1)),element,<span class="string">'UniformOutput'</span>,true);  
+0044 <span class="keyword">elseif</span> isnumeric(element)
+0045   assert(isnumeric(domain),<span class="string">'incompatible elements and domain'</span>);   
+0046   mapped = arrayfun(@(x) codomain(find(domain==x,1)),element); 
+0047 <span class="keyword">else</span> 
+0048   error(<span class="string">'unknown type for element'</span>);
+0049 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_freqanalysis_power_wavelet</title>
+  <meta name="keywords" content="bml_freqanalysis_power_wavelet">
+  <meta name="description" content="BML_FREQANALYSIS_POWER_WAVELET performs 'morlet' wavelet time-frequency">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">timefreq</a> &gt; bml_freqanalysis_power_wavelet.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\timefreq&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_freqanalysis_power_wavelet
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_FREQANALYSIS_POWER_WAVELET performs 'morlet' wavelet time-frequency</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [freq] = bml_freqanalysis_power_wavelet(cfg, data) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_FREQANALYSIS_POWER_WAVELET performs 'morlet' wavelet time-frequency 
+ power analysis using mulitplication in the frequency domain. This function 
+ is a wrapper over ft_freqanalysis. 
+
+ Use as
+   [freq] = bml_freqanalysis_wavelet(cfg, data)
+
+   cfg.foi         = vector 1 x numfoi, frequencies of interest
+                   defaults to round(10.^(0.00:0.05:2.4),2,'signif')
+
+   cfg.toilim      = [begin end], time range of interest. Defaults to
+                     largest range possible across trials. Wider epochs
+                     than toilim can be used to define edge buffer zones.  
+   cfg.dt          = time step of time-frequency representation (width of pixel)
+                     This parameter should be selected based on the
+                     uncertatunty in events used for time-locking.
+                     Defaults to 20ms. 
+   cfg.width       = 'width', or number of cycles, of the wavelet (default = 7)
+   cfg.gwidth      = determines the length of the used wavelets in standard
+                     deviations of the implicit Gaussian kernel and should
+                     be choosen &gt;= 3; (default = 3)
+
+ Sigma in the frequency domain (sf) at frequency f0 is defined as: sf = f0/width
+ Sigma in the temporal domain (st) at frequency f0 is defined as: st = 1/(2*pi*sf)
+ 
+ width   fmultfactor   overlap
+     7      10^(1/3)      1.3%
+     7      10^(1/4)      5.8%
+     7      10^(1/5)     12.7%
+     7      10^(1/6)     20.3%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [freq] = bml_freqanalysis_power_wavelet(cfg, data)</a>
+0002 
+0003 <span class="comment">% BML_FREQANALYSIS_POWER_WAVELET performs 'morlet' wavelet time-frequency</span>
+0004 <span class="comment">% power analysis using mulitplication in the frequency domain. This function</span>
+0005 <span class="comment">% is a wrapper over ft_freqanalysis.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Use as</span>
+0008 <span class="comment">%   [freq] = bml_freqanalysis_wavelet(cfg, data)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%   cfg.foi         = vector 1 x numfoi, frequencies of interest</span>
+0011 <span class="comment">%                   defaults to round(10.^(0.00:0.05:2.4),2,'signif')</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%   cfg.toilim      = [begin end], time range of interest. Defaults to</span>
+0014 <span class="comment">%                     largest range possible across trials. Wider epochs</span>
+0015 <span class="comment">%                     than toilim can be used to define edge buffer zones.</span>
+0016 <span class="comment">%   cfg.dt          = time step of time-frequency representation (width of pixel)</span>
+0017 <span class="comment">%                     This parameter should be selected based on the</span>
+0018 <span class="comment">%                     uncertatunty in events used for time-locking.</span>
+0019 <span class="comment">%                     Defaults to 20ms.</span>
+0020 <span class="comment">%   cfg.width       = 'width', or number of cycles, of the wavelet (default = 7)</span>
+0021 <span class="comment">%   cfg.gwidth      = determines the length of the used wavelets in standard</span>
+0022 <span class="comment">%                     deviations of the implicit Gaussian kernel and should</span>
+0023 <span class="comment">%                     be choosen &gt;= 3; (default = 3)</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% Sigma in the frequency domain (sf) at frequency f0 is defined as: sf = f0/width</span>
+0026 <span class="comment">% Sigma in the temporal domain (st) at frequency f0 is defined as: st = 1/(2*pi*sf)</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% width   fmultfactor   overlap</span>
+0029 <span class="comment">%     7      10^(1/3)      1.3%</span>
+0030 <span class="comment">%     7      10^(1/4)      5.8%</span>
+0031 <span class="comment">%     7      10^(1/5)     12.7%</span>
+0032 <span class="comment">%     7      10^(1/6)     20.3%</span>
+0033 
+0034 cfg.width        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'width'</span>,7);
+0035 cfg.gwidth       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'gwidth'</span>,3);
+0036 cfg.foi          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'foi'</span>,round(10.^(0.30:0.05:2.4),2,<span class="string">'signif'</span>));
+0037 
+0038 <span class="comment">% dealing with requested times of interest</span>
+0039 dt        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'dt'</span>,0.020); <span class="comment">%width of pixels in returned matrix</span>
+0040 epoch     = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(data);
+0041 toirange  = [max(epoch.starts), min(epoch.ends)];
+0042 toirange  = round(toirange,9);
+0043 toilim    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'toilim'</span>,toirange);
+0044 toilim    = round(toilim,9);
+0045 <span class="comment">% cfg.toi = (ceil(toilim(1)./dt):1:floor(toilim(2)./dt)).*dt;</span>
+0046 
+0047 <span class="comment">%dealing with times of interest required not to loose data at high</span>
+0048 <span class="comment">%frequencies. The time resolution neccesary for the tf analysis depends on</span>
+0049 <span class="comment">%the highest frequency used.</span>
+0050 dtsubsampfactor  = ceil((2.*max(cfg.foi)./cfg.width).*dt); <span class="comment">%dt sampling factor for high frequencies</span>
+0051 dthf             = dt ./ dtsubsampfactor; <span class="comment">%dt required for high frequencie</span>
+0052 cfg.toi = ( (ceil(toirange(1)./dt)*dtsubsampfactor):1:(floor(toirange(2)./dt)*dtsubsampfactor-1) ) .* dthf;
+0053 
+0054 <span class="comment">% calling fieldtrip function</span>
+0055 cfg.output       = <span class="string">'pow'</span>;
+0056 cfg.method       = <span class="string">'wavelet'</span>;
+0057 cfg.feedback     = <span class="string">'no'</span>;
+0058 cfg.keeptrials   = <span class="string">'yes'</span>;
+0059 cfg.keeptapers   = <span class="string">'no'</span>;
+0060 cfg.pad          = <span class="string">'nextpow2'</span>;
+0061 
+0062 freq = ft_freqanalysis(cfg, data);
+0063 
+0064 <span class="comment">% checking dimension order</span>
+0065 <span class="keyword">if</span> ~strcmp(freq.dimord,<span class="string">'rpt_chan_freq_time'</span>)
+0066   error(<span class="string">'incorrect dimord'</span>)
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="comment">% averaging samples in groups of dtsubsampfactor. Sub sampling to dt.</span>
+0070 s2 = size(freq.time,2);
+0071 m = s2 - mod(s2,dtsubsampfactor);
+0072 tmp = reshape(round(freq.time(1:m),9,<span class="string">'signif'</span>),dtsubsampfactor,[]);
+0073 freq.time = mean(tmp,1);
+0074 
+0075 s = size(freq.powspctrm);
+0076 tmp = reshape(freq.powspctrm(:,:,:,1:m),s(1),s(2),s(3),dtsubsampfactor,m./dtsubsampfactor);
+0077 freq.powspctrm = squeeze(mean(tmp,4));
+0078 
+0079 <span class="comment">% selecting toilim</span>
+0080 cfg1=[];
+0081 cfg1.latency = toilim;
+0082 freq = ft_selectdata(cfg1,freq);
+0083 
+0084</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

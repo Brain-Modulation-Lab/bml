@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_crop_idx_valid</title>
+  <meta name="keywords" content="bml_crop_idx_valid">
+  <meta name="description" content="BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_crop_idx_valid.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_crop_idx_valid
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates
+
+ Same as BML_CROP_IDX but bounds the starts and ends sample to the 1 and
+ nSample if necesarry
+
+ Use as 
+   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg)
+   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, starts, ends)
+   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, starts, [], samples)
+   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, [], ends, samples)
+
+ where cfg is a configuration structure or roi table row
+ cfg.starts
+ cfg.ends
+ (cfg.samples)
+ cfg.t1
+ cfg.s1
+ cfg.t2
+ cfg.s2
+ cfg.nSamples - double: total number of samples in file
+ cfg.tol - double: tolerance. Defaults to 1e-3/Fs. 
+
+ if starts and ends are given (3 argument call) the values of cfg are
+ ignored</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a ft_datatype_raw from and annotation table</li><li><a href="../../bml/annot/bml_annot_detect.html" class="code" title="function annot = bml_annot_detect(cfg, env)">bml_annot_detect</a>	BML_ANNOT_DETECT identifies annotations thresholding an envelope signal</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="bml_mask.html" class="code" title="function masked = bml_mask(cfg, raw)">bml_mask</a>	BML_MASK creates a new raw file with the specified values masked</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)</a>
+0002 
+0003 <span class="comment">% BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Same as BML_CROP_IDX but bounds the starts and ends sample to the 1 and</span>
+0006 <span class="comment">% nSample if necesarry</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Use as</span>
+0009 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg)</span>
+0010 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, starts, ends)</span>
+0011 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, starts, [], samples)</span>
+0012 <span class="comment">%   [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, [], ends, samples)</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% where cfg is a configuration structure or roi table row</span>
+0015 <span class="comment">% cfg.starts</span>
+0016 <span class="comment">% cfg.ends</span>
+0017 <span class="comment">% (cfg.samples)</span>
+0018 <span class="comment">% cfg.t1</span>
+0019 <span class="comment">% cfg.s1</span>
+0020 <span class="comment">% cfg.t2</span>
+0021 <span class="comment">% cfg.s2</span>
+0022 <span class="comment">% cfg.nSamples - double: total number of samples in file</span>
+0023 <span class="comment">% cfg.tol - double: tolerance. Defaults to 1e-3/Fs.</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% if starts and ends are given (3 argument call) the values of cfg are</span>
+0026 <span class="comment">% ignored</span>
+0027 
+0028 
+0029 nSamples  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'nSamples'</span>,[]);
+0030 assert(~isempty(nSamples),<span class="string">'cfg.nSamples required'</span>);
+0031 
+0032 [starts_idx,ends_idx] = <a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(cfg, varargin{:});
+0033 
+0034 <span class="comment">% bounding to begging and end of file</span>
+0035 <span class="keyword">if</span> starts_idx&lt;1
+0036   starts_idx=1;
+0037 <span class="keyword">elseif</span> starts_idx&gt;nSamples
+0038    error(<span class="string">'starts index exceeds number of samples in file'</span>);
+0039 <span class="keyword">end</span>
+0040 <span class="keyword">if</span> ends_idx&gt;nSamples
+0041   ends_idx=nSamples;
+0042 <span class="keyword">elseif</span> ends_idx&lt;=0
+0043   error(<span class="string">'ends index %i before first sample'</span>,ends_idx);
+0044 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

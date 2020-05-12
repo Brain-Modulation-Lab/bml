@@ -52,10 +52,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li></ul>
+<li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li><li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
+<li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annotation table from CodingMatrix</li><li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
 <!-- crossreference -->
 
 
@@ -92,8 +92,8 @@ This function is called by:
 0029 nChans = length(slave.label);
 0030 
 0031 <span class="comment">%calculating mapping between master and slave trials</span>
-0032 annot_master = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(master);
-0033 annot_slave  = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(slave);
+0032 annot_master = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(master);
+0033 annot_slave  = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(slave);
 0034 master_slave = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(annot_master,annot_slave);
 0035 assert(~isempty(master_slave), &quot;Can't conform. No master trials correspond to any slave trials.&quot;);
 0036 master_slave.master_frac = master_slave.duration/master_slave.master_duration;
@@ -144,54 +144,56 @@ This function is called by:
 0081   cfg.lpfiltdir = <span class="string">'twopass'</span>; <span class="comment">%for zero lag</span>
 0082   cfg.lpinstabilityfix = <span class="string">'no'</span>;
 0083   cfg.lpfiltwintype = <span class="string">'hamming'</span>;
-0084   slave = ft_preprocessing(cfg,slave);
-0085 <span class="keyword">end</span>
-0086 
-0087 <span class="comment">%interpolating subset of slave trials to master times</span>
-0088 cfg=[]; cfg.time=sub_master_time; cfg.method=<span class="string">'pchip'</span>;
-0089 cfg.feedback=<span class="string">'no'</span>;
-0090 sub_conformed=ft_resampledata(cfg,<a href="../../bml/sync/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(sub_slave,starts,ends));
-0091 
-0092 <span class="comment">%adding empty slave trials if necessary</span>
-0093 conformed=[];
-0094 conformed.label = slave.label;
-0095 conformed.trial = cell(1,master_N);
-0096 conformed.time = cell(1,master_N);
-0097 <span class="keyword">for</span> i=1:master_N
-0098   <span class="keyword">if</span> sub_ms_map(i)&gt;0
-0099       conformed.time{i}=sub_conformed.time{sub_ms_map(i)};
-0100     conformed.trial{i}=sub_conformed.trial{sub_ms_map(i)};
-0101   <span class="keyword">else</span>
-0102     conformed.time{i}=master.time{i};
-0103     conformed.trial{i}=zeros(nChans,length(conformed.time{i}));
-0104   <span class="keyword">end</span>
-0105 <span class="keyword">end</span>
-0106 
-0107 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(slave))
-0108   conformed.hdr=slave.hdr;
-0109 <span class="keyword">else</span>
-0110   conformed.hdr=[];
-0111 <span class="keyword">end</span>
-0112 
-0113 <span class="comment">%creating header</span>
-0114 conformed.hdr.nChans = length(conformed.label);
-0115 conformed.hdr.Fs=round(1/mean(diff(conformed.time{1})));
-0116 conformed.hdr.label=conformed.label;
-0117 
-0118 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(master))
-0119   conformed.fsample = master.fsample;
-0120   conformed.hdr.Fs = master.fsample;
-0121 <span class="keyword">elseif</span> ismember(<span class="string">'fsample'</span>,fields(conformed))
-0122   conformed = rmfield(conformed,<span class="string">'fsample'</span>);
-0123 <span class="keyword">end</span>
-0124 
-0125 
+0084   cfg.trackcallinfo = false;
+0085   cfg.showcallinfo = <span class="string">'no'</span>;
+0086   <span class="keyword">if</span> ~isfield(slave,<span class="string">'sampleinfo'</span>)
+0087     <span class="comment">%adding sample info if missing. Assuming contiguity.</span>
+0088     s = cumsum(cellfun(@(x) size(x,2),slave.time,<span class="string">'UniformOutput'</span>,true));
+0089     slave.sampleinfo = [[0, s(1:(end-1))]' + 1, s'];
+0090   <span class="keyword">end</span>
+0091   slave = ft_preprocessing(cfg,slave);
+0092 <span class="keyword">end</span>
+0093 
+0094 <span class="comment">%interpolating subset of slave trials to master times</span>
+0095 cfg=[]; cfg.time=sub_master_time; cfg.method=<span class="string">'pchip'</span>;
+0096 cfg.feedback=<span class="string">'no'</span>;
+0097 cfg.trackcallinfo = false;
+0098 cfg.showcallinfo = <span class="string">'no'</span>;
+0099 sub_conformed=ft_resampledata(cfg,<a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(sub_slave,starts,ends));
+0100 
+0101 <span class="comment">%adding empty slave trials if necessary</span>
+0102 conformed=[];
+0103 conformed.label = slave.label;
+0104 conformed.trial = cell(1,master_N);
+0105 conformed.time = cell(1,master_N);
+0106 <span class="keyword">for</span> i=1:master_N
+0107   <span class="keyword">if</span> sub_ms_map(i)&gt;0
+0108       conformed.time{i}=sub_conformed.time{sub_ms_map(i)};
+0109     conformed.trial{i}=sub_conformed.trial{sub_ms_map(i)};
+0110   <span class="keyword">else</span>
+0111     conformed.time{i}=master.time{i};
+0112     conformed.trial{i}=zeros(nChans,length(conformed.time{i}));
+0113   <span class="keyword">end</span>
+0114 <span class="keyword">end</span>
+0115 
+0116 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(slave))
+0117   conformed.hdr=slave.hdr;
+0118 <span class="keyword">else</span>
+0119   conformed.hdr=[];
+0120 <span class="keyword">end</span>
+0121 
+0122 <span class="comment">%creating header</span>
+0123 conformed.hdr.nChans = length(conformed.label);
+0124 conformed.hdr.Fs=round(1/mean(diff(conformed.time{1})));
+0125 conformed.hdr.label=conformed.label;
 0126 
-0127 
-0128 
-0129 <span class="comment">% if ismember('hdr',fieldnames(master))</span>
-0130 <span class="comment">%   conformed.hdr=master.hdr;</span>
-0131 <span class="comment">% end</span></pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0127 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(master))
+0128   conformed.fsample = master.fsample;
+0129   conformed.hdr.Fs = master.fsample;
+0130 <span class="keyword">elseif</span> ismember(<span class="string">'fsample'</span>,fields(conformed))
+0131   conformed = rmfield(conformed,<span class="string">'fsample'</span>);
+0132 <span class="keyword">end</span>
+0133</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

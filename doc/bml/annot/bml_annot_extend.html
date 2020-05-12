@@ -83,15 +83,20 @@ This function is called by:
 0027   error(<span class="string">'incorrect call. See usage'</span>)
 0028 <span class="keyword">end</span>
 0029 
-0030 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
-0031 annot.starts = annot.starts - ext1;
-0032 annot.ends = annot.ends + ext2;
-0033 
-0034 extended = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
-0035 
-0036 
-0037 
-0038</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0030 <span class="keyword">if</span> isempty(annot)
+0031   extended = annot;
+0032   <span class="keyword">return</span>
+0033 <span class="keyword">end</span>
+0034 
+0035 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0036 annot.starts = annot.starts - ext1;
+0037 annot.ends = annot.ends + ext2;
+0038 
+0039 extended = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0040 
+0041 
+0042 
+0043</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

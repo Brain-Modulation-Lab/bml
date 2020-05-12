@@ -7,7 +7,7 @@ GIT_PATH = 'E:\MATLAB';
 
 cd(GIT_PATH)
 %rmdir('bml/doc') 
-m2html('mfiles',{'bml/bml_defaults.m','bml/annot','bml/io','bml/signal','bml/sync','bml/utils'},...
+m2html('mfiles',{'bml/bml_defaults.m','bml/annot','bml/io','bml/signal','bml/sync','bml/utils','bml/anat','bml/plot','bml/stat','bml/timefreq'},...
   'htmldir','bml/doc', 'global','on');
 
 fid = fopen('bml/info.xml','wt');

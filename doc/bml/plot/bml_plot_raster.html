@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_plot_raster</title>
+  <meta name="keywords" content="bml_plot_raster">
+  <meta name="description" content="BML_PLOT_RASTER plots a raster for each trial">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">plot</a> &gt; bml_plot_raster.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\plot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_plot_raster
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_PLOT_RASTER plots a raster for each trial</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function bml_plot_raster(cfg, raw) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_PLOT_RASTER plots a raster for each trial
+
+ Use as
+   bml_plot_raster(cfg, raw);
+   bml_plot_raster(raw);
+
+ The first argument cfg is a configuration structure, which can contain
+ the following field:
+ cfg.trial - 
+ cfg.trial_name - string. defualts to 'trial'
+ cfg.panels - length 2 integer vector specifying panel's columns and rows
+ cfg.colorbar - bool</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bml_plot_raster(cfg, raw)</a>
+0002 
+0003 <span class="comment">% BML_PLOT_RASTER plots a raster for each trial</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   bml_plot_raster(cfg, raw);</span>
+0007 <span class="comment">%   bml_plot_raster(raw);</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% The first argument cfg is a configuration structure, which can contain</span>
+0010 <span class="comment">% the following field:</span>
+0011 <span class="comment">% cfg.trial -</span>
+0012 <span class="comment">% cfg.trial_name - string. defualts to 'trial'</span>
+0013 <span class="comment">% cfg.panels - length 2 integer vector specifying panel's columns and rows</span>
+0014 <span class="comment">% cfg.colorbar - bool</span>
+0015 
+0016 <span class="keyword">if</span> nargin==1
+0017   raw=cfg;
+0018   cfg=[];
+0019 <span class="keyword">elseif</span> nargin~=2
+0020   error(<span class="string">'incorrect number of argumens in call to bml_plot_raster'</span>)
+0021 <span class="keyword">end</span>
+0022 
+0023 panels = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'panels'</span>,[]);
+0024 colbar = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'colorbar'</span>,false);
+0025 trial_name = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'trial_name'</span>,<span class="string">'trial'</span>);
+0026 
+0027 T = numel(raw.trial);
+0028 <span class="keyword">if</span> isempty(panels)
+0029   panels = ceil(sqrt(T));
+0030   panels = [panels, ceil(T/panels)];
+0031 <span class="keyword">end</span>
+0032 
+0033 <span class="keyword">for</span> t=1:T
+0034   subplot(panels(1),panels(2),t);
+0035   image(raw.trial{t},<span class="string">'CDataMapping'</span>,<span class="string">'scaled'</span>);
+0036   title([trial_name,<span class="string">' '</span>,num2str(t)]);
+0037   <span class="keyword">if</span> colbar; colorbar(); <span class="keyword">end</span>
+0038 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -24,28 +24,37 @@
 <div class="box"><strong>BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>function annot = bml_annot_consolidate(cfg, x) </strong></div>
+<div class="box"><strong>function cons = bml_annot_consolidate(cfg, annot) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> BML_ANNOT_CONSOLIDATE returns a consolidated annotation table
 
  Use as
-   annot = bml_annot_consolidate(cfg, annot1);
+   cons = bml_annot_consolidate(cfg, annot);
+   cons = bml_annot_consolidate(annot);
 
  The first argument cfg is a configuration structure, which can contain
  the following field:
  cfg.criterion - function handle: consolidation criteria. This function should
              accept a table of candidate annotations to consolidate and 
              return a true or false.  
+             defaults to @(x) (x.starts(end) &lt;= max(x.ends(1:(end-1))))
+             that is, a row is consolidated with the previous if the
+             starts time of the row is smaller than the largest ends time
+             of the previous rows. 
  cfg.description - string: description of the output annot table
  cfg.additive - cellstr with names of variables to be treated as additive 
              defaults to empty
+ cfg.groupby - cellstr indicating name of column of annot by which to group
+             the rows before consolidating. If missing no grouping is
+             done.
 
  Returns a annotation table with the folloing variables:
    cons_duration - sum of the consolidated durations
    id_starts - first original id of the consolidated row
    id_ends - last original id of the consolidated row
    cons_n - number of consolidated rows
+   cons_group - consolidation group id, only if groupby was specified
  
  EXAMPLES
  ========
@@ -67,7 +76,7 @@ This function calls:
 <li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="../../bml/io/bml_load_epoched.html" class="code" title="function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)">bml_load_epoched</a>	BML_LOAD_EPOCHED loads an epoched raw from one or more files</li><li><a href="../../bml/sync/bml_roi2coord.html" class="code" title="function coord = bml_roi2coord(cfg, roi)">bml_roi2coord</a>	BML_ROI2COORD calculates raw coordinates for entries in roi</li><li><a href="../../bml/sync/bml_sync_audio_event.html" class="code" title="function sync_roi = bml_sync_audio_event(cfg)">bml_sync_audio_event</a>	bml_sync_audio_event synchronizes zoom audio files according to</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/sync/bml_sync_neuroomega_event.html" class="code" title="function sync_roi = bml_sync_neuroomega_event(cfg)">bml_sync_neuroomega_event</a>	BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events</li></ul>
+<li><a href="bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="bml_annot_union.html" class="code" title="function annot = bml_annot_union(cfg, x, y)">bml_annot_union</a>	BML_ANNOT_UNION returns the union of two annotation tables</li><li><a href="../../bml/io/bml_load_epoched.html" class="code" title="function [raw, loaded_epoch, file_raw_map] = bml_load_epoched(cfg)">bml_load_epoched</a>	BML_LOAD_EPOCHED loads an epoched raw from one or more files</li><li><a href="../../bml/sync/bml_roi2coord.html" class="code" title="function coord = bml_roi2coord(cfg, roi)">bml_roi2coord</a>	BML_ROI2COORD calculates raw coordinates for entries in roi</li><li><a href="../../bml/sync/bml_sync_audio_event.html" class="code" title="function sync_roi = bml_sync_audio_event(cfg)">bml_sync_audio_event</a>	bml_sync_audio_event synchronizes zoom audio files according to</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates synchronization chunks</li><li><a href="../../bml/sync/bml_sync_neuroomega_event.html" class="code" title="function sync_roi = bml_sync_neuroomega_event(cfg)">bml_sync_neuroomega_event</a>	BML_SYNC_NEUROOMEGA_EVENT synchronizes neuroomega files based on events</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
@@ -75,134 +84,190 @@ This function is called by:
 <li><a href="#_sub1" class="code">function collapsed = collapse_table_rows(merge_s,additive)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_consolidate(cfg, x)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function cons = bml_annot_consolidate(cfg, annot)</a>
 0002 
 0003 <span class="comment">% BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</span>
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
-0006 <span class="comment">%   annot = bml_annot_consolidate(cfg, annot1);</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% The first argument cfg is a configuration structure, which can contain</span>
-0009 <span class="comment">% the following field:</span>
-0010 <span class="comment">% cfg.criterion - function handle: consolidation criteria. This function should</span>
-0011 <span class="comment">%             accept a table of candidate annotations to consolidate and</span>
-0012 <span class="comment">%             return a true or false.</span>
-0013 <span class="comment">% cfg.description - string: description of the output annot table</span>
-0014 <span class="comment">% cfg.additive - cellstr with names of variables to be treated as additive</span>
-0015 <span class="comment">%             defaults to empty</span>
-0016 <span class="comment">%</span>
-0017 <span class="comment">% Returns a annotation table with the folloing variables:</span>
-0018 <span class="comment">%   cons_duration - sum of the consolidated durations</span>
-0019 <span class="comment">%   id_starts - first original id of the consolidated row</span>
-0020 <span class="comment">%   id_ends - last original id of the consolidated row</span>
-0021 <span class="comment">%   cons_n - number of consolidated rows</span>
-0022 <span class="comment">%</span>
-0023 <span class="comment">% EXAMPLES</span>
-0024 <span class="comment">% ========</span>
-0025 <span class="comment">%</span>
-0026 <span class="comment">% %detecting stretches of constant depth in neuroomega</span>
-0027 <span class="comment">% cfg=[];</span>
-0028 <span class="comment">% cfg.criterion = @(x) (length(unique(x.depth))==1) &amp;&amp; (abs((max(x.ends)-min(x.starts))-sum(x.duration))&lt;10e-3);</span>
-0029 <span class="comment">% neuro_cons_depth = bml_annot_consolidate(cfg,info_neuroomega);</span>
-0030 <span class="comment">%</span>
-0031 <span class="comment">% %grouping annotations in fours</span>
-0032 <span class="comment">% cfg=[];</span>
-0033 <span class="comment">% cfg.criterion = @(x) height(x)&lt;=4</span>
-0034 <span class="comment">% grouped_annot = bml_annot_consolidate(cfg,annot);</span>
-0035 
-0036 x = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(x,[],inputname(2));
-0037 
-0038 description = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'description'</span>, [<span class="string">'cons_'</span> x.Properties.Description]);
-0039 criterion   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'criterion'</span>,[]);
-0040 additive    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'additive'</span>,{});
-0041 
-0042 <span class="keyword">if</span> ~isa(criterion, <span class="string">'function_handle'</span>)
-0043   error(<span class="string">'''criterion'' should be a function handle'</span>);
-0044 <span class="keyword">end</span>
-0045 
-0046 i=1; j=1;
-0047 tmp=<a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(x(1,:),additive);
-0048 annot = cell2table(cell(0,width(tmp))); 
-0049 annot.Properties.VariableNames = tmp.Properties.VariableNames;
-0050 
-0051 <span class="keyword">if</span> height(x)&lt;=1
-0052   annot = <a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(x,additive);
-0053   annot.id=[];
-0054   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,description);
-0055   <span class="keyword">return</span>
-0056 <span class="keyword">end</span>
-0057 
-0058 <span class="keyword">while</span> i&lt;=height(x)
-0059   <span class="keyword">if</span> j==1 
-0060     curr_s=<a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(x(i,:),additive);
-0061   <span class="keyword">end</span>
-0062   
-0063   merge_s = x(i:(i+j),:);
-0064   
-0065   <span class="keyword">if</span> criterion(merge_s)
-0066     curr_s = <a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(merge_s,additive);
-0067     j = j + 1;
-0068     <span class="keyword">if</span> i + j &gt; height(x)
-0069       annot = [annot; curr_s];
-0070       i = height(x)+1;
-0071     <span class="keyword">end</span>
-0072   <span class="keyword">else</span>
-0073       annot = [annot;curr_s];
-0074     i = i + j;
-0075     j = 1;
-0076     <span class="keyword">if</span> i == height(x) <span class="comment">%adding last register</span>
-0077       curr_s = <a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(x(i,:),additive);
-0078       annot = [annot; curr_s];
-0079       i = height(x)+1;
-0080     <span class="keyword">end</span>
+0006 <span class="comment">%   cons = bml_annot_consolidate(cfg, annot);</span>
+0007 <span class="comment">%   cons = bml_annot_consolidate(annot);</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% The first argument cfg is a configuration structure, which can contain</span>
+0010 <span class="comment">% the following field:</span>
+0011 <span class="comment">% cfg.criterion - function handle: consolidation criteria. This function should</span>
+0012 <span class="comment">%             accept a table of candidate annotations to consolidate and</span>
+0013 <span class="comment">%             return a true or false.</span>
+0014 <span class="comment">%             defaults to @(x) (x.starts(end) &lt;= max(x.ends(1:(end-1))))</span>
+0015 <span class="comment">%             that is, a row is consolidated with the previous if the</span>
+0016 <span class="comment">%             starts time of the row is smaller than the largest ends time</span>
+0017 <span class="comment">%             of the previous rows.</span>
+0018 <span class="comment">% cfg.description - string: description of the output annot table</span>
+0019 <span class="comment">% cfg.additive - cellstr with names of variables to be treated as additive</span>
+0020 <span class="comment">%             defaults to empty</span>
+0021 <span class="comment">% cfg.groupby - cellstr indicating name of column of annot by which to group</span>
+0022 <span class="comment">%             the rows before consolidating. If missing no grouping is</span>
+0023 <span class="comment">%             done.</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% Returns a annotation table with the folloing variables:</span>
+0026 <span class="comment">%   cons_duration - sum of the consolidated durations</span>
+0027 <span class="comment">%   id_starts - first original id of the consolidated row</span>
+0028 <span class="comment">%   id_ends - last original id of the consolidated row</span>
+0029 <span class="comment">%   cons_n - number of consolidated rows</span>
+0030 <span class="comment">%   cons_group - consolidation group id, only if groupby was specified</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% EXAMPLES</span>
+0033 <span class="comment">% ========</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">% %detecting stretches of constant depth in neuroomega</span>
+0036 <span class="comment">% cfg=[];</span>
+0037 <span class="comment">% cfg.criterion = @(x) (length(unique(x.depth))==1) &amp;&amp; (abs((max(x.ends)-min(x.starts))-sum(x.duration))&lt;10e-3);</span>
+0038 <span class="comment">% neuro_cons_depth = bml_annot_consolidate(cfg,info_neuroomega);</span>
+0039 <span class="comment">%</span>
+0040 <span class="comment">% %grouping annotations in fours</span>
+0041 <span class="comment">% cfg=[];</span>
+0042 <span class="comment">% cfg.criterion = @(x) height(x)&lt;=4</span>
+0043 <span class="comment">% grouped_annot = bml_annot_consolidate(cfg,annot);</span>
+0044 
+0045 <span class="keyword">if</span> nargin == 1
+0046   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cfg,[],inputname(1));
+0047   cfg = [];
+0048 <span class="keyword">elseif</span> nargin == 2
+0049   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
+0050 <span class="keyword">else</span>
+0051   error(<span class="string">'incorrect number of arguments in call to bml_annot_consolidate'</span>);
+0052 <span class="keyword">end</span>
+0053 
+0054 description = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'description'</span>, [<span class="string">'cons_'</span> annot.Properties.Description]);
+0055 criterion   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'criterion'</span>,[]);
+0056 additive    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'additive'</span>,{});
+0057 groupby     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby'</span>,[]);
+0058 
+0059 <span class="keyword">if</span> isempty(annot)
+0060   cons = annot;
+0061   <span class="keyword">return</span>
+0062 <span class="keyword">end</span>
+0063 
+0064 <span class="keyword">if</span> isempty(criterion)
+0065   fprintf(<span class="string">'consolidating by default overlap/contiguity criterion\n'</span>)
+0066   criterion = @(x) (x.starts(end) &lt;= max(x.ends(1:(end-1))));
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="keyword">if</span> ~isa(criterion, <span class="string">'function_handle'</span>)
+0070   error(<span class="string">'''criterion'' should be a function handle'</span>);
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">%ToDo: allow grouping by several variables</span>
+0074 <span class="keyword">if</span> isempty(groupby)
+0075   annot.groupby_=ones(height(annot),1);
+0076   groupby = {<span class="string">'groupby_'</span>};
+0077   groups={1};
+0078 <span class="keyword">else</span>
+0079     <span class="keyword">if</span> sum(strcmp(annot.Properties.VariableNames, groupby))~=1
+0080     error(<span class="string">'groupby should match one (and only one) column of annot'</span>);
 0081   <span class="keyword">end</span>
-0082 <span class="keyword">end</span>
-0083 
-0084 annot.id=[];
-0085 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,description);
-0086 
-0087 
-0088 
-0089 <a name="_sub1" href="#_subfunctions" class="code">function collapsed = collapse_table_rows(merge_s,additive)</a>
-0090 <span class="comment">%</span>
-0091 <span class="comment">% Private function. Collapses a table to a record</span>
-0092 
-0093 collapsed = table(<span class="keyword">...</span>
-0094   min(merge_s.starts),<span class="keyword">...</span>
-0095   max(merge_s.ends),<span class="keyword">...</span>
-0096   sum(merge_s.duration),<span class="keyword">...</span>
-0097   min(merge_s.id),<span class="keyword">...</span>
-0098   max(merge_s.id),<span class="keyword">...</span>
-0099   length(merge_s.id),<span class="keyword">...</span>
-0100   <span class="string">'VariableNames'</span>,{<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'cons_duration'</span>,<span class="string">'id_starts'</span>,<span class="string">'id_ends'</span>,<span class="string">'cons_n'</span>});
-0101   
-0102 vars = setdiff(merge_s.Properties.VariableNames,[collapsed.Properties.VariableNames,additive]);
-0103 row=[];
-0104 <span class="keyword">for</span> i=1:length(vars)
-0105   uval = unique(merge_s.(vars{i}));
-0106   <span class="keyword">if</span> length(uval)==1
-0107     row.(vars{i}) = uval;
-0108   <span class="keyword">elseif</span> iscell(uval)
-0109     row.(vars{i}) = {[]};   
-0110   <span class="keyword">elseif</span> isa(uval,<span class="string">'datetime'</span>)
-0111     row.(vars{i}) = NaT;
-0112   <span class="keyword">else</span>
-0113     row.(vars{i}) = nan;
-0114   <span class="keyword">end</span>
-0115 <span class="keyword">end</span>
-0116 
-0117 <span class="comment">%dealing with additive vars</span>
-0118 <span class="keyword">for</span> i=1:length(additive)
-0119   uval = sum(merge_s.(additive{i}));
-0120   row.(vars{i}) = uval;
-0121 <span class="keyword">end</span>
-0122 
-0123 collapsed = [collapsed, struct2table(row)];
-0124 
-0125 
-0126 
-0127 
-0128</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0082   groups = unique(annot{:,groupby});
+0083 <span class="keyword">end</span>
+0084 
+0085 cons = table();
+0086 <span class="keyword">for</span> g=1:numel(groups)
+0087   <span class="keyword">if</span> iscellstr(groups(g))
+0088     annot_g = annot(strcmp(annot{:,groupby},groups(g)),:);
+0089   <span class="keyword">else</span>
+0090     annot_g = annot(annot{:,groupby}==groups{g},:);    
+0091   <span class="keyword">end</span>
+0092   
+0093   i=1; j=1;
+0094   tmp=<a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(annot_g(1,:),additive);
+0095   cons_g = cell2table(cell(0,width(tmp))); 
+0096   cons_g.Properties.VariableNames = tmp.Properties.VariableNames;
+0097 
+0098   <span class="keyword">if</span> height(annot_g)&lt;=1
+0099     cons_g = <a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(annot_g,additive);
+0100     cons_g.id=[];
+0101     cons_g = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cons_g,description);
+0102     cons = [cons; cons_g];
+0103     <span class="keyword">continue</span>
+0104   <span class="keyword">end</span>
+0105 
+0106   <span class="keyword">while</span> i&lt;=height(annot_g)
+0107     <span class="keyword">if</span> j==1 
+0108       curr_s=<a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(annot_g(i,:),additive);
+0109     <span class="keyword">end</span>
+0110 
+0111     merge_s = annot_g(i:(i+j),:);
+0112 
+0113     <span class="keyword">if</span> criterion(merge_s)
+0114       curr_s = <a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(merge_s,additive);
+0115       j = j + 1;
+0116       <span class="keyword">if</span> i + j &gt; height(annot_g)
+0117         cons_g = [cons_g; curr_s];
+0118         i = height(annot_g)+1;
+0119       <span class="keyword">end</span>
+0120     <span class="keyword">else</span>
+0121       cons_g = [cons_g;curr_s];
+0122       i = i + j;
+0123       j = 1;
+0124       <span class="keyword">if</span> i == height(annot_g) <span class="comment">%adding last register</span>
+0125         curr_s = <a href="#_sub1" class="code" title="subfunction collapsed = collapse_table_rows(merge_s,additive)">collapse_table_rows</a>(annot_g(i,:),additive);
+0126         cons_g = [cons_g; curr_s];
+0127         i = height(annot_g)+1;
+0128       <span class="keyword">end</span>
+0129     <span class="keyword">end</span>
+0130   <span class="keyword">end</span>
+0131   cons = [cons; cons_g];
+0132 <span class="keyword">end</span>
+0133 cons.id=[];
+0134 cons = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cons,description);
+0135 
+0136 <span class="keyword">if</span> any(strcmp(<span class="string">'groupby_'</span>,cons.Properties.VariableNames))
+0137   cons.groupby_ = [];
+0138 <span class="keyword">end</span>
+0139 
+0140 <a name="_sub1" href="#_subfunctions" class="code">function collapsed = collapse_table_rows(merge_s,additive)</a>
+0141 <span class="comment">%</span>
+0142 <span class="comment">% Private function. Collapses a table to a record</span>
+0143 
+0144 collapsed = table(<span class="keyword">...</span>
+0145   min(merge_s.starts),<span class="keyword">...</span>
+0146   max(merge_s.ends),<span class="keyword">...</span>
+0147   sum(merge_s.duration),<span class="keyword">...</span>
+0148   min(merge_s.id),<span class="keyword">...</span>
+0149   max(merge_s.id),<span class="keyword">...</span>
+0150   length(merge_s.id),<span class="keyword">...</span>
+0151   <span class="string">'VariableNames'</span>,{<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'cons_duration'</span>,<span class="string">'id_starts'</span>,<span class="string">'id_ends'</span>,<span class="string">'cons_n'</span>});
+0152   
+0153 vars = setdiff(merge_s.Properties.VariableNames,[collapsed.Properties.VariableNames,additive]);
+0154 row=[];
+0155 <span class="keyword">for</span> i=1:length(vars)
+0156   merge_s_var_i = merge_s.(vars{i});
+0157   <span class="keyword">if</span> iscell(merge_s_var_i) &amp;&amp; numel(merge_s_var_i)==1 &amp;&amp; isempty(merge_s_var_i{1})
+0158     row.(vars{i}) = {[]};
+0159   <span class="keyword">else</span>
+0160     uval = unique(merge_s_var_i);
+0161     <span class="keyword">if</span> length(uval)==1
+0162       row.(vars{i}) = uval;
+0163     <span class="keyword">elseif</span> iscell(uval)
+0164       row.(vars{i}) = {[]};   
+0165     <span class="keyword">elseif</span> isa(uval,<span class="string">'datetime'</span>)
+0166       row.(vars{i}) = NaT;
+0167     <span class="keyword">else</span>
+0168       row.(vars{i}) = nan;
+0169     <span class="keyword">end</span>
+0170   <span class="keyword">end</span>
+0171 <span class="keyword">end</span>
+0172 
+0173 <span class="comment">%dealing with additive vars</span>
+0174 <span class="keyword">for</span> i=1:length(additive)
+0175   uval = sum(merge_s.(additive{i}));
+0176   row.(vars{i}) = uval;
+0177 <span class="keyword">end</span>
+0178 
+0179 collapsed = [collapsed, struct2table(row)];
+0180 
+0181 
+0182 
+0183 
+0184</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

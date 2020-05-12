@@ -71,32 +71,37 @@ This function is called by:
 0018   error(<span class="string">'incorrect number of arguments'</span>);
 0019 <span class="keyword">end</span>
 0020 
-0021 timetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-5);
-0022 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
-0023 
-0024 i=1; j=2;
-0025 overlap = cell2table(cell(0,4)); 
-0026 overlap.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'id1'</span>,<span class="string">'id2'</span>};
-0027 <span class="keyword">while</span> i&lt;=height(annot) &amp;&amp; j&lt;=height(annot)
-0028   <span class="comment">%if annot.starts(i) &lt; annot.ends(j) &amp;&amp; annot.ends(i) &gt; annot.starts(j)</span>
-0029   <span class="keyword">if</span> annot.ends(j) - annot.starts(i) &gt; timetol &amp;&amp; <span class="keyword">...</span>
-0030      annot.ends(i) - annot.starts(j) &gt; timetol
-0031     overlap = [overlap;{<span class="keyword">...</span>
-0032       max(annot.starts(i),annot.starts(j)),<span class="keyword">...</span>
-0033       min(annot.ends(i),annot.ends(j)),<span class="keyword">...</span>
-0034       annot.id(i),<span class="keyword">...</span>
-0035       annot.id(j)}];
-0036       j = j + 1;
-0037   <span class="keyword">elseif</span> annot.ends(i) - annot.starts(j) &lt;= timetol
-0038     i=i+1;
-0039     j=i+1;
-0040   <span class="keyword">elseif</span> annot.ends(j) - annot.starts(i) &lt;= timetol
-0041     j=j+1;
-0042   <span class="keyword">else</span>
-0043     annot([i j],:)
-0044     error(<span class="string">'Unsupported input annotations tables'</span>);
-0045   <span class="keyword">end</span>
-0046 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0021 <span class="keyword">if</span> height(annot)==1
+0022   overlap = [];
+0023   <span class="keyword">return</span>
+0024 <span class="keyword">end</span>
+0025 
+0026 timetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-5);
+0027 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0028 
+0029 i=1; j=2;
+0030 overlap = cell2table(cell(0,4)); 
+0031 overlap.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'id1'</span>,<span class="string">'id2'</span>};
+0032 <span class="keyword">while</span> i&lt;=height(annot) &amp;&amp; j&lt;=height(annot)
+0033   <span class="comment">%if annot.starts(i) &lt; annot.ends(j) &amp;&amp; annot.ends(i) &gt; annot.starts(j)</span>
+0034   <span class="keyword">if</span> annot.ends(j) - annot.starts(i) &gt; timetol &amp;&amp; <span class="keyword">...</span>
+0035      annot.ends(i) - annot.starts(j) &gt; timetol
+0036     overlap = [overlap;{<span class="keyword">...</span>
+0037       max(annot.starts(i),annot.starts(j)),<span class="keyword">...</span>
+0038       min(annot.ends(i),annot.ends(j)),<span class="keyword">...</span>
+0039       annot.id(i),<span class="keyword">...</span>
+0040       annot.id(j)}];
+0041       j = j + 1;
+0042   <span class="keyword">elseif</span> annot.ends(i) - annot.starts(j) &lt;= timetol
+0043     i=i+1;
+0044     j=i+1;
+0045   <span class="keyword">elseif</span> annot.ends(j) - annot.starts(i) &lt;= timetol
+0046     j=j+1;
+0047   <span class="keyword">else</span>
+0048     annot([i j],:)
+0049     error(<span class="string">'Unsupported input annotations tables'</span>);
+0050   <span class="keyword">end</span>
+0051 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

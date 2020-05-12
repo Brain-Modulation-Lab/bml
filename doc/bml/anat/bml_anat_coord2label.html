@@ -1,0 +1,284 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_anat_coord2label</title>
+  <meta name="keywords" content="bml_anat_coord2label">
+  <meta name="description" content="BML_ANAT_LCOORD2LABEL returns a label from an atlas corresponding to a">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">anat</a> &gt; bml_anat_coord2label.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\anat&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_anat_coord2label
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANAT_LCOORD2LABEL returns a label from an atlas corresponding to a</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function anat_labels = bml_anat_coord2label(cfg, coord) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANAT_LCOORD2LABEL returns a label from an atlas corresponding to a
+ given coordinate
+
+ Use as
+   anat_labels = bml_anat_label_coord(cfg, coord);
+
+ The first argument cfg is a configuration structure, which can contain
+ the following fields:
+ cfg.atlas - name of the atlas to use 
+ cfg.max_assign - integer &gt;= 1, max number of labels assigned to each electrode. Defaults to 1. 
+ cfg.profile - either 'sphere' or 'gaussian'. Defaulst to 'gaussian'.
+ cfg.sigma - float, indicating gaussian sigma parameter in mm.
+             if length of sigma equals number of rows in coord, these are
+             interpreted as electrode specifc sigmas
+ cfg.radius - radius in mm around each electrode coordinate to consider in
+             label assignation. Defaults to 3mm.
+             if length of radius equals number of rows in coord, these are
+             interpreted as electrode specifc radii
+ cfg.atlas_path - path to volume atlas repository. Defaults to lead-dbs's
+             icbm 2009b nlin asym labeling folder
+ cfg.keys - table with code to structure key. By default the .txt file 
+             associated with the nifti file is used 
+ cfg.exclude_labels - vector with integer labels to exclude. Defaults yto
+             [0], normally assigned to CSF or no label
+ cfg.label_column_basename - string. Basename for added columns to coord with
+             label information. Defauls to first part of atlas name. 
+ cfg.return_coords - bool indicating if coordinates should be returned in
+             anat_labels table. defaulst to false
+
+ coord - table with electrode coordinates. The first three columns ending 
+ with  _x, _y, _z will be used as x,y,z coordinates. Note that the coordinates have to be
+ in the same space as the atlas. Normally this is going to be in mni space
+ (template: MNI152 ICBM NLIN ASYM 2009b, frame: RAS AC). 
+
+ Returns a table with labels for each electrode according to the
+ atlas. If max_labels &gt; 1, that number of columns are added with all
+ assigned labels, by order of coverage.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function anat_labels = bml_anat_coord2label(cfg, coord)</a>
+0002 
+0003 <span class="comment">% BML_ANAT_LCOORD2LABEL returns a label from an atlas corresponding to a</span>
+0004 <span class="comment">% given coordinate</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Use as</span>
+0007 <span class="comment">%   anat_labels = bml_anat_label_coord(cfg, coord);</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% The first argument cfg is a configuration structure, which can contain</span>
+0010 <span class="comment">% the following fields:</span>
+0011 <span class="comment">% cfg.atlas - name of the atlas to use</span>
+0012 <span class="comment">% cfg.max_assign - integer &gt;= 1, max number of labels assigned to each electrode. Defaults to 1.</span>
+0013 <span class="comment">% cfg.profile - either 'sphere' or 'gaussian'. Defaulst to 'gaussian'.</span>
+0014 <span class="comment">% cfg.sigma - float, indicating gaussian sigma parameter in mm.</span>
+0015 <span class="comment">%             if length of sigma equals number of rows in coord, these are</span>
+0016 <span class="comment">%             interpreted as electrode specifc sigmas</span>
+0017 <span class="comment">% cfg.radius - radius in mm around each electrode coordinate to consider in</span>
+0018 <span class="comment">%             label assignation. Defaults to 3mm.</span>
+0019 <span class="comment">%             if length of radius equals number of rows in coord, these are</span>
+0020 <span class="comment">%             interpreted as electrode specifc radii</span>
+0021 <span class="comment">% cfg.atlas_path - path to volume atlas repository. Defaults to lead-dbs's</span>
+0022 <span class="comment">%             icbm 2009b nlin asym labeling folder</span>
+0023 <span class="comment">% cfg.keys - table with code to structure key. By default the .txt file</span>
+0024 <span class="comment">%             associated with the nifti file is used</span>
+0025 <span class="comment">% cfg.exclude_labels - vector with integer labels to exclude. Defaults yto</span>
+0026 <span class="comment">%             [0], normally assigned to CSF or no label</span>
+0027 <span class="comment">% cfg.label_column_basename - string. Basename for added columns to coord with</span>
+0028 <span class="comment">%             label information. Defauls to first part of atlas name.</span>
+0029 <span class="comment">% cfg.return_coords - bool indicating if coordinates should be returned in</span>
+0030 <span class="comment">%             anat_labels table. defaulst to false</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% coord - table with electrode coordinates. The first three columns ending</span>
+0033 <span class="comment">% with  _x, _y, _z will be used as x,y,z coordinates. Note that the coordinates have to be</span>
+0034 <span class="comment">% in the same space as the atlas. Normally this is going to be in mni space</span>
+0035 <span class="comment">% (template: MNI152 ICBM NLIN ASYM 2009b, frame: RAS AC).</span>
+0036 <span class="comment">%</span>
+0037 <span class="comment">% Returns a table with labels for each electrode according to the</span>
+0038 <span class="comment">% atlas. If max_labels &gt; 1, that number of columns are added with all</span>
+0039 <span class="comment">% assigned labels, by order of coverage.</span>
+0040 
+0041 <span class="keyword">if</span> ~exist(<span class="string">'ea_space'</span>,<span class="string">'file'</span>); error(<span class="string">'leaddbs toolbox required in path'</span>); <span class="keyword">end</span>
+0042 
+0043 atlas_path     = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'atlas_path'</span>,ea_space([], <span class="string">'labeling'</span>));
+0044 atlas          = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'atlas'</span>,<span class="string">'AICHA (Joliot 2015)'</span>);
+0045 keys           = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'keys'</span>,atlas);
+0046 max_assign     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'max_assign'</span>,1);
+0047 sigma          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'sigma'</span>,1);
+0048 radius         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'radius'</span>,3);
+0049 profile        = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'profile'</span>,<span class="string">'gaussian'</span>);
+0050 return_coords  = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'return_coords'</span>,false);
+0051 exclude_labels = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'exclude_labels'</span>,0);
+0052 lab_col_bn = strsplit(atlas,<span class="string">' '</span>);
+0053 <span class="keyword">if</span> iscell(lab_col_bn); lab_col_bn = lab_col_bn{1}; <span class="keyword">end</span>
+0054 lab_col_bn = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'label_column_basename'</span>,lab_col_bn);
+0055 
+0056 
+0057 <span class="comment">%getting coordinates</span>
+0058 <span class="keyword">if</span> ~istable(coord); error(<span class="string">'coord should be table'</span>); <span class="keyword">end</span>
+0059 col_idx_x = find(endsWith(coord.Properties.VariableNames,<span class="string">'_x'</span>),1);
+0060 col_idx_y = find(endsWith(coord.Properties.VariableNames,<span class="string">'_y'</span>),1);
+0061 col_idx_z = find(endsWith(coord.Properties.VariableNames,<span class="string">'_z'</span>),1);
+0062 <span class="keyword">if</span> isempty(col_idx_x) || isempty(col_idx_y) || isempty(col_idx_z)
+0063     error(<span class="string">'_x _y and _z columns required'</span>);
+0064 <span class="keyword">end</span>
+0065 XYZ_mm = [coord{:,col_idx_x}, coord{:,col_idx_y}, coord{:,col_idx_z}];
+0066 XYZ_mm = [XYZ_mm ones(size(XYZ_mm,1),1)];
+0067 
+0068 <span class="comment">%initializaing radii and sigmas</span>
+0069 <span class="keyword">if</span> length(sigma)==1
+0070   sigma = repmat(sigma,height(coord),1);
+0071 <span class="keyword">elseif</span> length(sigma)~=height(coord)
+0072   error(<span class="string">'sigma should be of length 1 or equal to the number of rows of coord'</span>)
+0073 <span class="keyword">end</span>
+0074 
+0075 <span class="keyword">if</span> length(radius)==1
+0076   radius = repmat(radius,height(coord),1);
+0077 <span class="keyword">elseif</span> length(radius)~=height(coord)
+0078   error(<span class="string">'radius should be of length 1 or equal to the number of rows of coord'</span>)
+0079 <span class="keyword">end</span>
+0080 
+0081 anat_labels = coord;
+0082 <span class="keyword">if</span> ~return_coords
+0083     col_idxs = sort([col_idx_x,col_idx_y,col_idx_z],<span class="string">'ascend'</span>);
+0084     anat_labels(:,col_idxs(3))=[];
+0085     anat_labels(:,col_idxs(2))=[];
+0086     anat_labels(:,col_idxs(1))=[];
+0087 <span class="keyword">end</span>
+0088 
+0089 <span class="comment">%initializing columns</span>
+0090 <span class="keyword">for</span> i=1:max_assign       
+0091     col_Li = [lab_col_bn <span class="string">'_label_'</span> num2str(i)];
+0092     col_Wi = [lab_col_bn <span class="string">'_weight_'</span> num2str(i)];
+0093     <span class="keyword">if</span> ismember(col_Li,anat_labels.Properties.VariableNames)
+0094         fprintf(<span class="string">'recalculating %s \n'</span>,col_Li)
+0095         anat_labels(:,col_Li) = repmat({<span class="string">''</span>},height(anat_labels),1);
+0096     <span class="keyword">else</span>
+0097         anat_labels = [anat_labels,<span class="keyword">...</span>
+0098                        array2table(repmat({<span class="string">''</span>},height(anat_labels),1),<span class="string">'VariableNames'</span>,{col_Li})]; 
+0099     <span class="keyword">end</span>
+0100 
+0101     <span class="keyword">if</span> ismember(col_Wi,anat_labels.Properties.VariableNames)
+0102         fprintf(<span class="string">'recalculating %s \n'</span>,col_Wi)
+0103         anat_labels(:,col_Wi) = NaN(height(anat_labels),1);
+0104     <span class="keyword">else</span>
+0105         anat_labels = [anat_labels,<span class="keyword">...</span>
+0106                        array2table(repmat({<span class="string">''</span>},height(anat_labels),1),<span class="string">'VariableNames'</span>,{col_Wi})];
+0107     <span class="keyword">end</span>
+0108 <span class="keyword">end</span>
+0109 
+0110 <span class="comment">%getting labels nifti</span>
+0111 fname_nii = [atlas_path atlas <span class="string">'.nii'</span>];
+0112 <span class="keyword">if</span> ~isfile(fname_nii); error(<span class="string">'atlas nifti file not found at %s'</span>,fname_nii); <span class="keyword">end</span>
+0113 nii=ea_load_nii(fname_nii);
+0114 vx2mm = ea_get_affine(fname_nii);
+0115 
+0116 <span class="comment">%getting labels keys</span>
+0117 <span class="keyword">if</span> ~istable(keys)
+0118     fname_txt = [atlas_path keys <span class="string">'.txt'</span>];
+0119     <span class="keyword">if</span> ~isfile(fname_txt); error(<span class="string">'atlas keys file not found at %s'</span>,fname_txt); <span class="keyword">end</span>
+0120     keys = readtable(fname_txt,<span class="string">'Format'</span>,<span class="string">'%d %s'</span>,<span class="string">'ReadVariableNames'</span>,false,<span class="string">'TextType'</span>,<span class="string">'char'</span>);
+0121     keys.Properties.VariableNames = {<span class="string">'id'</span>,<span class="string">'label'</span>};
+0122 <span class="keyword">end</span>
+0123     
+0124 <span class="comment">% Row Column and Slice versors in real world coords</span>
+0125 vR=vx2mm(1:3,1:3)*[1;0;0]; n_vR = norm(vR);
+0126 vC=vx2mm(1:3,1:3)*[0;1;0]; n_vC = norm(vC);
+0127 vS=vx2mm(1:3,1:3)*[0;0;1]; n_vS = norm(vS);
+0128 
+0129 <span class="comment">%helper function for matlab 2017b</span>
+0130 sum_all = @(M) sum(M(:)); <span class="comment">%use sum(M,'all') in 2018b</span>
+0131 
+0132 <span class="comment">%label assignation</span>
+0133 RCS_vx=(vx2mm\XYZ_mm')';
+0134 <span class="keyword">for</span> e=1:size(RCS_vx,1) <span class="comment">%for each electrode</span>
+0135   
+0136     <span class="comment">%definig built-in profile functions</span>
+0137     <span class="keyword">if</span> ischar(profile)
+0138         <span class="keyword">if</span> strcmp(profile,<span class="string">'sphere'</span>)
+0139             profile = @(v) norm(v)&lt;=radius(e);
+0140         <span class="keyword">elseif</span> strcmp(profile,<span class="string">'gaussian'</span>)
+0141             profile = @(v) exp(-(norm(v)^2)/(2*sigma(e)^2));
+0142         <span class="keyword">else</span>
+0143             error(<span class="string">'profile should be a ''sphere'', ''gaussian'' or a function hadle'</span>)
+0144         <span class="keyword">end</span>
+0145     <span class="keyword">elseif</span> isa(profile,<span class="string">'function_handle'</span>)
+0146 
+0147     <span class="keyword">else</span>
+0148         error(<span class="string">'profile should be a ''sphere'', ''gaussian'' or a function hadle'</span>)
+0149     <span class="keyword">end</span>
+0150 
+0151     <span class="comment">%box 'radii'</span>
+0152     radius_R = ceil(radius(e)./n_vR);
+0153     radius_C = ceil(radius(e)./n_vC);
+0154     radius_S = ceil(radius(e)./n_vS);
+0155     
+0156     vx_precise = RCS_vx(e,1:3);
+0157     vx = round(vx_precise);
+0158     <span class="keyword">if</span> ~any(ismissing(vx))
+0159         range_R = max(1,vx(1)-radius_R):min(nii.dim(1),vx(1)+radius_R);
+0160         range_C = max(1,vx(2)-radius_C):min(nii.dim(2),vx(2)+radius_C);
+0161         range_S = max(1,vx(3)-radius_S):min(nii.dim(3),vx(3)+radius_S);
+0162         
+0163         <span class="comment">% creating weighting cube based on precise voxel coords to avoid</span>
+0164         <span class="comment">% rounding error</span>
+0165         w_cube = zeros(length(range_R),length(range_C),length(range_S));
+0166         <span class="keyword">for</span> i=1:length(range_R)
+0167             <span class="keyword">for</span> j=1:length(range_C)
+0168                 <span class="keyword">for</span> k=1:length(range_S)
+0169                     r_prime = [range_R(i),range_C(j),range_S(k)] - vx_precise; 
+0170                     w_cube(i,j,k)=profile(vx2mm(1:3,1:3)*(r_prime)');
+0171                 <span class="keyword">end</span> 
+0172             <span class="keyword">end</span>
+0173         <span class="keyword">end</span>
+0174         w_cube = w_cube./sum_all(w_cube);
+0175         
+0176         <span class="comment">% calculating weights for each label</span>
+0177         labs = unique(round(nii.img(range_R,range_C,range_S)));
+0178         labs = setdiff(labs, exclude_labels);
+0179         w = zeros(length(labs),1);
+0180         <span class="keyword">for</span> l=1:length(labs)
+0181             w(l) = sum_all(w_cube .* (round(nii.img(range_R,range_C,range_S)) == labs(l)));
+0182         <span class="keyword">end</span>
+0183         
+0184         [w, sort_idx] = sort(w,<span class="string">'descend'</span>);
+0185         labs = labs(sort_idx);
+0186         labs = labs(w &gt; eps);
+0187         w = w(w &gt; eps);
+0188         
+0189         labs = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(labs,keys.id,keys.label,<span class="string">'NaN'</span>);
+0190         
+0191         <span class="keyword">if</span> ~isempty(labs)
+0192             <span class="keyword">for</span> i=1:min(max_assign,length(labs))
+0193                 anat_labels{e,[lab_col_bn <span class="string">'_label_'</span> num2str(i)]}=labs(i);
+0194                 anat_labels{e,[lab_col_bn <span class="string">'_weight_'</span> num2str(i)]}={w(i)};      
+0195             <span class="keyword">end</span>
+0196         <span class="keyword">end</span>
+0197         
+0198     <span class="keyword">end</span>
+0199 <span class="keyword">end</span>
+0200 
+0201</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

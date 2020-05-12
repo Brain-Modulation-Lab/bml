@@ -53,7 +53,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates file synchronization chunks</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li></ul>
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>	BML_SYNC_CONSOLIDATE consolidates synchronization chunks</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -92,89 +92,141 @@ This function is called by:
 0028 roi           = <a href="bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
 0029 assert(~isempty(roi),&quot;roi table required&quot;);
 0030 
-0031 plexon        = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'plexon'</span>);
-0032 assert(isfile(plexon),&quot;Valid plexon file required&quot;);
-0033 
-0034 plexon_src    = strrep(plexon,<span class="string">'.plx'</span>,<span class="string">'.mat'</span>);
-0035 <span class="keyword">if</span> ~isfile(plexon_src)
-0036   plexon_src = [];
-0037 <span class="keyword">end</span>
-0038 
-0039 plexon_src      = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'plexon_src'</span>,plexon_src);
+0031 timetol       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-3);
+0032 
+0033 plexon        = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'plexon'</span>);
+0034 assert(isfile(plexon),&quot;Valid plexon file required&quot;);
+0035 
+0036 plexon_src    = strrep(plexon,<span class="string">'.plx'</span>,<span class="string">'.mat'</span>);
+0037 <span class="keyword">if</span> ~isfile(plexon_src)
+0038   plexon_src = [];
+0039 <span class="keyword">end</span>
 0040 
-0041 FileMapping = [];
-0042 label = [];
-0043 <span class="keyword">if</span> ~isempty(plexon_src) &amp;&amp; isfile(plexon_src)
-0044   src = matfile(plexon_src);
-0045   <span class="keyword">if</span> ismember(<span class="string">'FileMapping'</span>,fieldnames(src))
-0046     FileMapping = src.FileMapping;
-0047   <span class="keyword">end</span>
-0048   <span class="keyword">if</span> ismember(<span class="string">'Channels'</span>,fieldnames(src))
-0049     label = src.Channels;
-0050   <span class="keyword">end</span>  
-0051 <span class="keyword">end</span>
-0052 FileMapping   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'FileMapping'</span>,FileMapping);
-0053 label         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,label);
-0054 
-0055 electrode     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'electrode'</span>);
-0056 <span class="keyword">if</span> ~isempty(label) &amp;&amp; ~isempty(electrode) &amp;&amp; <span class="keyword">...</span>
-0057     all(ismember({<span class="string">'electrode'</span>,<span class="string">'channel'</span>},electrode.Properties.VariableNames))
-0058   label=<a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain)">bml_map</a>(label,electrode.channel,electrode.electrode);
-0059 <span class="keyword">end</span>
-0060 
-0061 <span class="comment">%loading fieldtrip spike structure from plexon file</span>
-0062 spike= ft_read_spike(plexon);
-0063 
-0064 <span class="keyword">if</span> isempty(label)
-0065   label = spike.label;
-0066 <span class="keyword">end</span>
-0067 <span class="keyword">if</span> size(label,2) &lt; size(label,1)
-0068   label = label';
-0069 <span class="keyword">end</span>
-0070 spike.label = label;
-0071 
-0072 FM_VARS={<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'raw1'</span>,<span class="string">'raw2'</span>};
-0073 SY_VARS={<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'t1'</span>,<span class="string">'s1'</span>,<span class="string">'t2'</span>,<span class="string">'s2'</span>,<span class="string">'name'</span>, <span class="string">'nSamples'</span>};
-0074 
-0075 assert(~isempty(FileMapping),&quot;FileMapping required&quot;);
-0076 assert(length(label)==length(spike.label),&quot;Incorrect label&quot;);
-0077 assert(all(ismember(FM_VARS,FileMapping.Properties.VariableNames)),&quot;Invalid FileMapping table&quot;);
-0078 assert(all(ismember(SY_VARS,roi.Properties.VariableNames)),&quot;Invalid roi table&quot;);
-0079 
-0080 annot=table();
-0081 <span class="keyword">for</span> i=1:length(spike.timestamp)
-0082   <span class="keyword">if</span> ~isempty(spike.timestamp{i})
-0083     
-0084     <span class="comment">%creating sync table for the spike data</span>
-0085     assert(max(spike.timestamp{i}) &lt;= max(FileMapping.raw2), &quot;Invalid timestamp&quot;);
-0086     
-0087     fm = FileMapping(:,FM_VARS);
-0088     sy = roi(ismember(roi.name,fm.name),SY_VARS);    
-0089     syfm=join(sy,fm,<span class="string">'Keys'</span>,<span class="string">'name'</span>);
-0090     
-0091     assert(all(syfm.nSamples_sy==syfm.nSamples_fm), &quot;Inconsistent number of samples&quot;);
-0092 
-0093     syfm.s1=syfm.raw1;
-0094     syfm.s2=syfm.raw2;
-0095     syfm.nSamples = syfm.nSamples_sy;
-0096     
-0097     cfg1=[];
-0098     cfg1.roi=syfm;
-0099     cfg1.rowisfile=false;
-0100     spike_sync=<a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(cfg1);
-0101     
-0102     <span class="comment">%creating table with spikes</span>
-0103     st = table(<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(spike_sync,spike.timestamp{i})',spike.unit{i}');
-0104     st.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'unit'</span>};
-0105     st.channel(:)=label(i);
-0106     st.spike_idx=(1:height(st))';
-0107     
-0108     annot=[annot;st];
-0109   <span class="keyword">end</span>  
-0110 <span class="keyword">end</span>
-0111 
-0112 annot.ends = annot.starts;
-0113 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0041 plexon_src      = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'plexon_src'</span>,plexon_src);
+0042 
+0043 FileMapping = [];
+0044 label = [];
+0045 <span class="keyword">if</span> ~isempty(plexon_src) &amp;&amp; isfile(plexon_src)
+0046   src = matfile(plexon_src);
+0047   <span class="keyword">if</span> ismember(<span class="string">'FileMapping'</span>,fieldnames(src))
+0048     FileMapping = src.FileMapping;
+0049   <span class="keyword">end</span>
+0050   <span class="keyword">if</span> ismember(<span class="string">'Channels'</span>,fieldnames(src))
+0051     label = src.Channels;
+0052   <span class="keyword">end</span>  
+0053 <span class="keyword">end</span>
+0054 FileMapping   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'FileMapping'</span>,FileMapping);
+0055 label         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,label);
+0056 
+0057 electrode     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'electrode'</span>);
+0058 <span class="keyword">if</span> ~isempty(label) &amp;&amp; ~isempty(electrode) &amp;&amp; <span class="keyword">...</span>
+0059     all(ismember({<span class="string">'electrode'</span>,<span class="string">'channel'</span>},electrode.Properties.VariableNames))
+0060   label=<a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(label,electrode.channel,electrode.electrode);
+0061 <span class="keyword">end</span>
+0062 
+0063 partialchunks = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'partialchunks'</span>,false);
+0064 
+0065 <span class="comment">%loading fieldtrip spike structure from plexon file</span>
+0066 spike= ft_read_spike(plexon);
+0067 
+0068 <span class="keyword">if</span> isempty(label)
+0069   label = spike.label;
+0070 <span class="keyword">end</span>
+0071 <span class="keyword">if</span> size(label,2) &lt; size(label,1)
+0072   label = label';
+0073 <span class="keyword">end</span>
+0074 spike.label = label;
+0075 
+0076 FM_VARS={<span class="string">'name'</span>,<span class="string">'nSamples'</span>,<span class="string">'Fs'</span>,<span class="string">'raw1'</span>,<span class="string">'raw2'</span>};
+0077 SY_VARS={<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'t1'</span>,<span class="string">'s1'</span>,<span class="string">'t2'</span>,<span class="string">'s2'</span>,<span class="string">'name'</span>, <span class="string">'nSamples'</span>};
+0078 
+0079 assert(~isempty(FileMapping),&quot;FileMapping required&quot;);
+0080 assert(length(label)==length(spike.label),&quot;Incorrect label&quot;);
+0081 assert(all(ismember(FM_VARS,FileMapping.Properties.VariableNames)),&quot;Invalid FileMapping table&quot;);
+0082 assert(all(ismember(SY_VARS,roi.Properties.VariableNames)),&quot;Invalid roi table&quot;);
+0083 
+0084 <span class="comment">%% WJL deal with Plexon files with degenerate channels</span>
+0085 <span class="keyword">if</span> length(spike.timestamp)&gt;length(label)
+0086     fprintf(<span class="string">'BML_PLEXON2ANNOT: Consolidating degenerate channels.\n'</span>)
+0087     PlexonChannelNames = unique({spike.hdr.ChannelHeader.Name});
+0088     <span class="keyword">if</span> length(PlexonChannelNames) ~= length(label)
+0089         fprintf(<span class="string">'BML_PLEXON2ANNOT: Channel number does not match.\n'</span>)
+0090     <span class="keyword">else</span>
+0091         chmap = {};
+0092         <span class="keyword">for</span> ch = 1:length(label)
+0093         chmap{ch} = find( cellfun(@(x) find(strcmp(x, PlexonChannelNames)), {spike.hdr.ChannelHeader.Name})==ch &amp; <span class="keyword">...</span>
+0094             ~cellfun(@isempty, spike.timestamp) );
+0095         <span class="keyword">end</span>
+0096         
+0097         <span class="keyword">if</span> any(cellfun(@(x) length(x)~=1, chmap))
+0098             fprintf(<span class="string">'BML_PLEXON2ANNOT: Cannot match up channels.\n'</span>)
+0099         <span class="keyword">else</span>
+0100         chmap = cell2mat(chmap);
+0101         <span class="comment">% remap channels</span>
+0102         spike.timestamp = spike.timestamp(chmap);
+0103         spike.unit = spike.unit(chmap);
+0104         spike.waveform = spike.waveform(chmap);
+0105         <span class="keyword">end</span>
+0106     <span class="keyword">end</span>
+0107 <span class="keyword">end</span>
+0108 
+0109 annot=table();
+0110 <span class="keyword">for</span> i=1:length(spike.timestamp)
+0111   <span class="keyword">if</span> ~isempty(spike.timestamp{i})
+0112     
+0113     <span class="comment">%creating sync table for the spike data</span>
+0114     assert(max(spike.timestamp{i}) &lt;= max(FileMapping.raw2), &quot;Invalid timestamp&quot;);
+0115     
+0116     fm = FileMapping(:,FM_VARS);
+0117     sy = roi(ismember(roi.name,fm.name),SY_VARS);    
+0118     syfm=join(sy,fm,<span class="string">'Keys'</span>,<span class="string">'name'</span>);
+0119 
+0120     assert(all(syfm.nSamples_sy==syfm.nSamples_fm), &quot;Inconsistent number of samples&quot;);
+0121 
+0122     <span class="keyword">if</span> partialchunks
+0123         
+0124         syfm.nSamples = syfm.nSamples_sy;
+0125         
+0126         <span class="comment">% first fm file -- assume raw2 corresponds to end of chunk</span>
+0127         syfm.s1(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s1(syfm.raw1 == 1);
+0128         syfm.s2(syfm.raw1 == 1) = syfm.raw2(syfm.raw1 == 1) - syfm.nSamples(syfm.raw1 == 1) + syfm.s2(syfm.raw1 == 1);
+0129         
+0130         <span class="comment">% remaining fm files -- assume raw1 corresponds to start of chunk</span>
+0131         syfm.s1(syfm.raw1 &gt; 1) = syfm.raw1(syfm.raw1 &gt; 1) + syfm.s1(syfm.raw1 &gt; 1) - 1;
+0132         syfm.s2(syfm.raw1 &gt; 1) = syfm.raw1(syfm.raw1 &gt; 1) + syfm.s2(syfm.raw1 &gt; 1) - 1;
+0133         
+0134         <span class="comment">%     syfm = syfm((syfm.raw2-syfm.raw1+1) == syfm.nSamples,:);</span>
+0135         <span class="comment">%     assert(~isempty(syfm), &quot;No vaid sync chunks found for consolidation.&quot;);</span>
+0136         
+0137     <span class="keyword">else</span>
+0138         
+0139         syfm = syfm((syfm.raw2-syfm.raw1) == (syfm.s2-syfm.s1),:);
+0140         assert(~isempty(syfm), &quot;No vaid sync chunks found <span class="keyword">for</span> consolidation.&quot;);
+0141         
+0142         syfm.s1=syfm.raw1;
+0143         syfm.s2=syfm.raw2;
+0144         syfm.nSamples = syfm.nSamples_sy;
+0145         
+0146     <span class="keyword">end</span>
+0147     
+0148     cfg1=[];
+0149     cfg1.roi=syfm;
+0150     cfg1.rowisfile=false;
+0151     cfg1.timetol = timetol;
+0152     spike_sync=<a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(cfg1);
+0153     
+0154     <span class="comment">%creating table with spikes</span>
+0155     st = table(<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(spike_sync,spike.timestamp{i})',spike.unit{i}');
+0156     st.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'unit'</span>};
+0157     st.channel(:)=label(i);
+0158     st.spike_idx=(1:height(st))';
+0159     
+0160     annot=[annot;st];
+0161   <span class="keyword">end</span>  
+0162 <span class="keyword">end</span>
+0163 
+0164 annot.ends = annot.starts;
+0165 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

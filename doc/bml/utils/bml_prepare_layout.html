@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_prepare_layout</title>
+  <meta name="keywords" content="bml_prepare_layout">
+  <meta name="description" content="BML_PREPARE_LAYOUT is a wrapper over ft_prepare_layout">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">utils</a> &gt; bml_prepare_layout.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\utils&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_prepare_layout
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_PREPARE_LAYOUT is a wrapper over ft_prepare_layout</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [lay,nx,ny] = bml_prepare_layout(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_PREPARE_LAYOUT is a wrapper over ft_prepare_layout
+
+ Use as
+   lay = bml_prepare_layout(cfg)
+   lay = bml_prepare_layout(cfg.layout)
+   [lay,nx,ny] = bml_prepare_layout(___)
+
+ cfg.configuration structure to pass to ft_prepare_layout
+ cfg.layout      = filename containg the input layout (*.lay file)
+ cfg.skipscale   = 'yes' or 'no', whether the scale should be included in the layout or not (default = 'yes')
+ cfg.outline     = string, how to create the outline, can be 'circle', 'convex', 'headshape', 'mri' or 'no' (default is 'no')
+ cfg.mask        = string, how to create the mask, can be 'circle', 'convex', 'headshape', 'mri' or 'no' (default is 'no')
+ cfg.tight       = 'yes' or 'no', whether the width and height should be
+                   modified to achieve a tight layout when plotting.
+                   Dafaults to 'yes'. 
+ cfg.x_space     = float, fractional separation in x direction. Defaults to 0.02.
+ cfg.y_space     = float, fractional separation in y direction. Defaults to 0.02
+ cfg.comment_position = [x,y] float, with x and y position for the legent
+                   in the [0,1] range. Also can be one of &quot;center&quot;, &quot;left&quot;, &quot;right&quot;,
+                   &quot;bottom&quot;, &quot;top&quot;
+ cfg.rotate      = float, degrees by which to rotate the layout
+ cfg.center      = [x,y] coord of center for rotation. Defaults to [0,0]
+
+ returns a layout object lay, and the amount of colums (nx) and rows (ny)
+ of the layout</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [lay,nx,ny] = bml_prepare_layout(cfg)</a>
+0002 
+0003 <span class="comment">% BML_PREPARE_LAYOUT is a wrapper over ft_prepare_layout</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   lay = bml_prepare_layout(cfg)</span>
+0007 <span class="comment">%   lay = bml_prepare_layout(cfg.layout)</span>
+0008 <span class="comment">%   [lay,nx,ny] = bml_prepare_layout(___)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% cfg.configuration structure to pass to ft_prepare_layout</span>
+0011 <span class="comment">% cfg.layout      = filename containg the input layout (*.lay file)</span>
+0012 <span class="comment">% cfg.skipscale   = 'yes' or 'no', whether the scale should be included in the layout or not (default = 'yes')</span>
+0013 <span class="comment">% cfg.outline     = string, how to create the outline, can be 'circle', 'convex', 'headshape', 'mri' or 'no' (default is 'no')</span>
+0014 <span class="comment">% cfg.mask        = string, how to create the mask, can be 'circle', 'convex', 'headshape', 'mri' or 'no' (default is 'no')</span>
+0015 <span class="comment">% cfg.tight       = 'yes' or 'no', whether the width and height should be</span>
+0016 <span class="comment">%                   modified to achieve a tight layout when plotting.</span>
+0017 <span class="comment">%                   Dafaults to 'yes'.</span>
+0018 <span class="comment">% cfg.x_space     = float, fractional separation in x direction. Defaults to 0.02.</span>
+0019 <span class="comment">% cfg.y_space     = float, fractional separation in y direction. Defaults to 0.02</span>
+0020 <span class="comment">% cfg.comment_position = [x,y] float, with x and y position for the legent</span>
+0021 <span class="comment">%                   in the [0,1] range. Also can be one of &quot;center&quot;, &quot;left&quot;, &quot;right&quot;,</span>
+0022 <span class="comment">%                   &quot;bottom&quot;, &quot;top&quot;</span>
+0023 <span class="comment">% cfg.rotate      = float, degrees by which to rotate the layout</span>
+0024 <span class="comment">% cfg.center      = [x,y] coord of center for rotation. Defaults to [0,0]</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% returns a layout object lay, and the amount of colums (nx) and rows (ny)</span>
+0027 <span class="comment">% of the layout</span>
+0028 
+0029 <span class="keyword">if</span> ~isstruct(cfg)
+0030   cfg=struct(<span class="string">'layout'</span>,cfg);
+0031 <span class="keyword">end</span>
+0032 
+0033 cfg.skipscale = <a href="bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'skipscale'</span>,<span class="string">'yes'</span>);
+0034 cfg.outline   = <a href="bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'outline'</span>,<span class="string">'no'</span>);
+0035 cfg.mask      = <a href="bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'mask'</span>,<span class="string">'no'</span>);
+0036 tight         = <a href="bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'tight'</span>,<span class="string">'yes'</span>);
+0037 x_space       = <a href="bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'x_space'</span>,0.02);
+0038 y_space       = <a href="bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'y_space'</span>,0.02);
+0039 comment_position = <a href="bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'comment_position'</span>);
+0040 rotate        = <a href="bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'rotate'</span>,0);
+0041 center        = <a href="bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'center'</span>,[0,0]);
+0042 
+0043 assert(size(center,1)==1 &amp;&amp; size(center,2)==2, <span class="string">'center should be a 1x2 float'</span>)
+0044 
+0045 lay = ft_prepare_layout(cfg);
+0046    
+0047 <span class="comment">%checking for regular layout</span>
+0048 isel = ~(ismember(lay.label,{<span class="string">'COMNT'</span>,<span class="string">'SCALE'</span>}));
+0049 ux = unique(lay.pos(isel,1));
+0050 uy = unique(lay.pos(isel,2));  
+0051 nx = length(ux);
+0052 ny = length(uy);
+0053 
+0054 <span class="keyword">if</span> length(uy)&gt;1
+0055   uydiff = unique(diff(uy)); 
+0056 <span class="keyword">else</span>
+0057   uydiff = 1;
+0058 <span class="keyword">end</span>
+0059 <span class="keyword">if</span> length(ux)&gt;1
+0060   uxdiff = unique(diff(ux));
+0061 <span class="keyword">else</span>
+0062   uxdiff = uydiff;
+0063 <span class="keyword">end</span>
+0064 
+0065 <span class="keyword">if</span> strcmp(tight,<span class="string">'yes'</span>)
+0066   <span class="keyword">if</span> length(uxdiff)&gt;1 || length(uydiff)&gt;1
+0067     warning(<span class="string">'irregular layout in %s'</span>, cfg.layout);
+0068   <span class="keyword">end</span>
+0069   
+0070   lay.width = lay.width*uxdiff(1)*(1-x_space);
+0071   lay.height = lay.height*uydiff(1)*(1-y_space);      
+0072 <span class="keyword">end</span>
+0073 
+0074 uw = unique(lay.width);
+0075 uh = unique(lay.height);
+0076 x0 = min(ux);
+0077 x1 = max(ux);
+0078 y0 = min(uy);
+0079 y1 = max(uy);
+0080 
+0081 <span class="keyword">if</span> abs(mod(rotate,360))&gt;1
+0082   <span class="comment">%rotating</span>
+0083 
+0084   r = rotate * pi/180;
+0085   rM = [cos(r), -sin(r); sin(r), cos(r)];
+0086   rpos = (rM * (lay.pos(isel,:) - center)')' + center;
+0087   lay.pos(isel,:) = round(rpos, -(ceil(log10(max(max(rpos,[],1),[],2)))-5));
+0088 <span class="keyword">end</span>
+0089 
+0090 <span class="keyword">if</span> ~isempty(comment_position)
+0091     k = find(strcmp(<span class="string">'COMNT'</span>, lay.label));  
+0092   
+0093   
+0094   <span class="keyword">if</span> isnumeric(comment_position)
+0095     lay.pos(k, 1) = (x1-x0) * comment_position(1) + x0;
+0096     lay.pos(k, 2) = (y1-y0) * comment_position(2) + y0;   
+0097   <span class="keyword">else</span>
+0098     <span class="keyword">switch</span> comment_position{1}
+0099       <span class="keyword">case</span> <span class="string">'left'</span>
+0100         lay.pos(k, 1) = x0 - 0.75*uw(1);
+0101         lay.pos(k, 2) = (y1+y0)/2; 
+0102       <span class="keyword">case</span> <span class="string">'right'</span>
+0103         lay.pos(k, 1) = x1 + 0.75*uw(1);
+0104         lay.pos(k, 2) = (y1+y0)/2; 
+0105       <span class="keyword">case</span> <span class="string">'bottom'</span>
+0106         lay.pos(k, 1) = (x0+x1)/2;
+0107         lay.pos(k, 2) = y0 - 0.75*uh(1);     
+0108       <span class="keyword">case</span> <span class="string">'top'</span>        
+0109         lay.pos(k, 1) = (x0+x1)/2;
+0110         lay.pos(k, 2) = y1 + 0.75*uh(1);   
+0111       <span class="keyword">case</span> <span class="string">'center'</span>
+0112         lay.pos(k, 1) = (x0+x1)/2;
+0113         lay.pos(k, 2) = (y1+y0)/2;   
+0114     <span class="keyword">end</span>
+0115   <span class="keyword">end</span>
+0116 <span class="keyword">end</span>
+0117 
+0118 
+0119 
+0120 
+0121 
+0122 
+0123 
+0124 
+0125 
+0126 
+0127</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

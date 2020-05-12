@@ -77,7 +77,7 @@ This function calls:
 <li><a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>	BML_ENVELOPE_BINABS Calculate envelope of a signal using the binabs method</li><li><a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>	BML_PAD returns a padded version of the raw (crops if necessary)</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annot table from CodingMatrix</li><li><a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li></ul>
+<li><a href="../../bml/annot/bml_coding2annot.html" class="code" title="function annot = bml_coding2annot(cfg)">bml_coding2annot</a>	BML_CODING2ANNOT creates annotation table from CodingMatrix</li><li><a href="bml_timewarp.html" class="code" title="function warpedcoords = bml_timewarp(cfg, master, slave)">bml_timewarp</a>	BML_TIMEWARP aligns and linearly warps slave to master</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
@@ -193,79 +193,83 @@ This function is called by:
 0106   <span class="comment">%common resample frequency</span>
 0107   cfg=[]; cfg.feedback=ft_feedback;
 0108   cfg.resamplefs=resample_freq;
-0109   master = ft_resampledata(cfg, master);
-0110   cfg=[]; cfg.feedback=ft_feedback;
-0111   cfg.time=master.time; cfg.method=<span class="string">'linear'</span>;
-0112   slave = ft_resampledata(cfg, slave);
-0113 
-0114   <span class="comment">%checking slave resampling</span>
-0115   <span class="keyword">if</span> abs(slave.fsample/master.fsample-1) &lt; freqreltol
-0116     slave.fsample = master.fsample;
-0117   <span class="keyword">else</span>
-0118     error(<span class="string">'failed to resample slave to master''s time'</span>);
-0119   <span class="keyword">end</span>
-0120   is_nan=isnan(slave.trial{1});
-0121   <span class="keyword">if</span> sum(is_nan)&gt;0
-0122     master.trial{1} = master.trial{1}(:,~is_nan);
-0123     master.time{1} = master.time{1}(:,~is_nan);
-0124     slave.trial{1} = slave.trial{1}(:,~is_nan);
-0125     slave.time{1} = slave.time{1}(:,~is_nan);
-0126   <span class="keyword">end</span>
-0127 
-0128   <span class="comment">%methods</span>
-0129   <span class="keyword">if</span> ismember(lower(method),{<span class="string">'env'</span>,<span class="string">'envelope'</span>})  <span class="comment">%envelope correlation</span>
-0130     cfg=[]; cfg.freq = env_freq; <span class="comment">%calculating envelops</span>
-0131     master = <a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(cfg,master);
-0132     slave = <a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(cfg,slave);
-0133     try_polarity=false;
-0134 
-0135   <span class="keyword">elseif</span> ismember(lower(method),{<span class="string">'lpf'</span>,<span class="string">'low-pass-filter'</span>})  <span class="comment">%low-pass-filter</span>
-0136     master.trial{1} = ft_preproc_lowpassfilter(master.trial{1},<span class="keyword">...</span>
-0137                       master.fsample, lpf_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);
-0138     slave.trial{1} = ft_preproc_lowpassfilter(slave.trial{1},<span class="keyword">...</span>
-0139                       slave.fsample, lpf_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);              
-0140     try_polarity=true;                
-0141 
-0142   <span class="keyword">else</span>
-0143     error(<span class="string">'unknown method'</span>);
-0144   <span class="keyword">end</span>
+0109   cfg.trackcallinfo=false;
+0110   cfg.showcallinfo=<span class="string">'no'</span>;
+0111   master = ft_resampledata(cfg, master);
+0112   cfg=[]; cfg.feedback=ft_feedback;
+0113   cfg.time=master.time; cfg.method=<span class="string">'linear'</span>;
+0114   cfg.trackcallinfo=false;
+0115   cfg.showcallinfo=<span class="string">'no'</span>;
+0116   slave = ft_resampledata(cfg, slave);
+0117 
+0118   <span class="comment">%checking slave resampling</span>
+0119   <span class="keyword">if</span> abs(slave.fsample/master.fsample-1) &lt; freqreltol
+0120     slave.fsample = master.fsample;
+0121   <span class="keyword">else</span>
+0122     error(<span class="string">'failed to resample slave to master''s time'</span>);
+0123   <span class="keyword">end</span>
+0124   is_nan=isnan(slave.trial{1});
+0125   <span class="keyword">if</span> sum(is_nan)&gt;0
+0126     master.trial{1} = master.trial{1}(:,~is_nan);
+0127     master.time{1} = master.time{1}(:,~is_nan);
+0128     slave.trial{1} = slave.trial{1}(:,~is_nan);
+0129     slave.time{1} = slave.time{1}(:,~is_nan);
+0130   <span class="keyword">end</span>
+0131 
+0132   <span class="comment">%methods</span>
+0133   <span class="keyword">if</span> ismember(lower(method),{<span class="string">'env'</span>,<span class="string">'envelope'</span>})  <span class="comment">%envelope correlation</span>
+0134     cfg=[]; cfg.freq = env_freq; <span class="comment">%calculating envelops</span>
+0135     master = <a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(cfg,master);
+0136     slave = <a href="../../bml/signal/bml_envelope_binabs.html" class="code" title="function env = bml_envelope_binabs(cfg, data)">bml_envelope_binabs</a>(cfg,slave);
+0137     try_polarity=false;
+0138 
+0139   <span class="keyword">elseif</span> ismember(lower(method),{<span class="string">'lpf'</span>,<span class="string">'low-pass-filter'</span>})  <span class="comment">%low-pass-filter</span>
+0140     master.trial{1} = ft_preproc_lowpassfilter(master.trial{1},<span class="keyword">...</span>
+0141                       master.fsample, lpf_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);
+0142     slave.trial{1} = ft_preproc_lowpassfilter(slave.trial{1},<span class="keyword">...</span>
+0143                       slave.fsample, lpf_freq, 4, <span class="string">'but'</span>, <span class="string">'twopass'</span>);              
+0144     try_polarity=true;                
 0145 
-0146   <span class="comment">%normalizing data</span>
-0147   master.trial{1} = (master.trial{1} - master_median) / master_std;
-0148   slave.trial{1} = (slave.trial{1} - slave_median) / slave_std;
+0146   <span class="keyword">else</span>
+0147     error(<span class="string">'unknown method'</span>);
+0148   <span class="keyword">end</span>
 0149 
-0150   <span class="comment">%correlation</span>
-0151   [corr,lag]=xcorr(master.trial{1}(1,:), slave.trial{1}(1,:),<span class="keyword">...</span>
-0152                     floor(max(abs(scan))*master.fsample),<span class="string">'coeff'</span>);
-0153   [max_corr_idx,max_corr] = <a href="#_sub1" class="code" title="subfunction [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)">find_delta_corr</a>(corr,lag,penalty_tau,penalty_n);  
-0154 
-0155   <span class="keyword">if</span> try_polarity                              
-0156     [corr_m,lag_m]=xcorr(master.trial{1}(1,:), (-1).* slave.trial{1}(1,:),<span class="keyword">...</span>
-0157                       floor(max(abs(scan))*master.fsample),<span class="string">'coeff'</span>);                 
-0158     [max_corr_idx_m,max_corr_m] = <a href="#_sub1" class="code" title="subfunction [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)">find_delta_corr</a>(corr_m,lag_m,penalty_tau,penalty_n);   
-0159     <span class="keyword">if</span> max_corr_m &gt; max_corr
-0160       slave.trial{1}=(-1).* slave.trial{1};
-0161       max_corr_idx = max_corr_idx_m;
-0162       max_corr = max_corr_m;
-0163       lag=lag_m;
-0164     <span class="keyword">end</span>
-0165   <span class="keyword">end</span>
-0166 
-0167   slave_delta_t = lag(max_corr_idx)/master.fsample;
-0168   slave.time{1} = slave.time{1} + slave_delta_t;
-0169 
-0170 <span class="keyword">end</span>
-0171 
-0172 <span class="comment">% private function</span>
-0173 <a name="_sub1" href="#_subfunctions" class="code">function [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)</a>
-0174   <span class="keyword">if</span> ~isempty(penalty_tau)
-0175     [~,max_corr_idx]=max(corr./((penalty_tau*master.fsample)^penalty_n + abs(lag).^penalty_n));
-0176     max_corr=corr(max_corr_idx);
-0177   <span class="keyword">else</span>
-0178     [max_corr,max_corr_idx]=max(corr);
-0179   <span class="keyword">end</span>
-0180 
-0181 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0150   <span class="comment">%normalizing data</span>
+0151   master.trial{1} = (master.trial{1} - master_median) / master_std;
+0152   slave.trial{1} = (slave.trial{1} - slave_median) / slave_std;
+0153 
+0154   <span class="comment">%correlation</span>
+0155   [corr,lag]=xcorr(master.trial{1}(1,:), slave.trial{1}(1,:),<span class="keyword">...</span>
+0156                     floor(max(abs(scan))*master.fsample),<span class="string">'coeff'</span>);
+0157   [max_corr_idx,max_corr] = <a href="#_sub1" class="code" title="subfunction [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)">find_delta_corr</a>(corr,lag,penalty_tau,penalty_n);  
+0158 
+0159   <span class="keyword">if</span> try_polarity                              
+0160     [corr_m,lag_m]=xcorr(master.trial{1}(1,:), (-1).* slave.trial{1}(1,:),<span class="keyword">...</span>
+0161                       floor(max(abs(scan))*master.fsample),<span class="string">'coeff'</span>);                 
+0162     [max_corr_idx_m,max_corr_m] = <a href="#_sub1" class="code" title="subfunction [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)">find_delta_corr</a>(corr_m,lag_m,penalty_tau,penalty_n);   
+0163     <span class="keyword">if</span> max_corr_m &gt; max_corr
+0164       slave.trial{1}=(-1).* slave.trial{1};
+0165       max_corr_idx = max_corr_idx_m;
+0166       max_corr = max_corr_m;
+0167       lag=lag_m;
+0168     <span class="keyword">end</span>
+0169   <span class="keyword">end</span>
+0170 
+0171   slave_delta_t = lag(max_corr_idx)/master.fsample;
+0172   slave.time{1} = slave.time{1} + slave_delta_t;
+0173 
+0174 <span class="keyword">end</span>
+0175 
+0176 <span class="comment">% private function</span>
+0177 <a name="_sub1" href="#_subfunctions" class="code">function [max_corr_idx,max_corr] = find_delta_corr(corr,lag,penalty_tau,penalty_n)</a>
+0178   <span class="keyword">if</span> ~isempty(penalty_tau)
+0179     [~,max_corr_idx]=max(corr./((penalty_tau*master.fsample)^penalty_n + abs(lag).^penalty_n));
+0180     max_corr=corr(max_corr_idx);
+0181   <span class="keyword">else</span>
+0182     [max_corr,max_corr_idx]=max(corr);
+0183   <span class="keyword">end</span>
+0184 
+0185 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

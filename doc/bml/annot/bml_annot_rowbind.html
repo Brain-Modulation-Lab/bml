@@ -4,7 +4,7 @@
 <head>
   <title>Description of bml_annot_rowbind</title>
   <meta name="keywords" content="bml_annot_rowbind">
-  <meta name="description" content="BML_ANNOT_ROWBIND binds tables by rows, conforming to first table">
+  <meta name="description" content="BML_ANNOT_ROWBIND binds tables by rows, conforming to first non-empty table">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>BML_ANNOT_ROWBIND binds tables by rows, conforming to first table</strong></div>
+<div class="box"><strong>BML_ANNOT_ROWBIND binds tables by rows, conforming to first non-empty table</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="box"><strong>function annot = bml_annot_rowbind(varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> BML_ANNOT_ROWBIND binds tables by rows, conforming to first table
+<div class="fragment"><pre class="comment"> BML_ANNOT_ROWBIND binds tables by rows, conforming to first non-empty table
 
  Use as
     annot = bml_annot_rowbind(annot1, annot2, annot3, ...)</pre></div>
@@ -39,7 +39,7 @@ This function calls:
 <li><a href="bml_annot_conform_to.html" class="code" title="function conformed = bml_annot_conform_to(template, annot)">bml_annot_conform_to</a>	BML_ANNOT_CONFORM_TO conforms an annotation table to the shape of an other</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-</ul>
+<li><a href="bml_annot_union.html" class="code" title="function annot = bml_annot_union(cfg, x, y)">bml_annot_union</a>	BML_ANNOT_UNION returns the union of two annotation tables</li></ul>
 <!-- crossreference -->
 
 
@@ -47,18 +47,30 @@ This function is called by:
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_rowbind(varargin)</a>
 0002 
-0003 <span class="comment">% BML_ANNOT_ROWBIND binds tables by rows, conforming to first table</span>
+0003 <span class="comment">% BML_ANNOT_ROWBIND binds tables by rows, conforming to first non-empty table</span>
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%    annot = bml_annot_rowbind(annot1, annot2, annot3, ...)</span>
 0007 
-0008 annot = varargin{1};
-0009 <span class="keyword">for</span> i=2:numel(varargin)
-0010   annot = [annot; <a href="bml_annot_conform_to.html" class="code" title="function conformed = bml_annot_conform_to(template, annot)">bml_annot_conform_to</a>(annot, varargin{i})];
-0011 <span class="keyword">end</span>
-0012 
-0013 annot.id=[];
-0014 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0008 annot = table();
+0009 <span class="keyword">for</span> i=1:numel(varargin)
+0010   <span class="keyword">if</span> ~isempty(varargin{i})
+0011     <span class="keyword">if</span> isempty(annot)
+0012       annot = varargin{i};
+0013     <span class="keyword">else</span>
+0014       annot = [annot; <a href="bml_annot_conform_to.html" class="code" title="function conformed = bml_annot_conform_to(template, annot)">bml_annot_conform_to</a>(annot, varargin{i})];
+0015     <span class="keyword">end</span>
+0016   <span class="keyword">end</span>
+0017 <span class="keyword">end</span>
+0018 
+0019 <span class="keyword">if</span> ~isempty(annot)
+0020     <span class="keyword">if</span> ismember(<span class="string">'id'</span>,annot.Properties.VariableNames)
+0021       annot.id=[];
+0022     <span class="keyword">end</span>
+0023     <span class="keyword">if</span> all(ismember({<span class="string">'starts'</span>,<span class="string">'ends'</span>},annot.Properties.VariableNames))
+0024       annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0025     <span class="keyword">end</span>
+0026 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

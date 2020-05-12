@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_union</title>
+  <meta name="keywords" content="bml_annot_union">
+  <meta name="description" content="BML_ANNOT_UNION returns the union of two annotation tables">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_union.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_union
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_UNION returns the union of two annotation tables</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function annot = bml_annot_union(cfg, x, y) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_UNION returns the union of two annotation tables
+
+ Use as
+   annot = bml_annot_union(x)
+   annot = bml_annot_union(x, y);
+   annot = bml_annot_union(cfg, x);
+   annot = bml_annot_union(cfg, x, y);
+
+ The first argument cfg is a optional configuration structure, which can contain
+ the following optional fields:
+
+ cfg.description - string: description for output annotation
+ cfg.timetol - float, time tolerance for the union operation. Defaults to
+           1e-3 (1 ms).
+ cfg.groupby - string: indicates variable name by which to group the rows
+           before intersecting. Variable has to be present in x and y. If
+           variable names are not the same in both tables, use
+           cfg.grouby_x and cfg.groupby_y.
+ cfg.groupby_x - string: 'x' groupby variable name
+ cfg.groupby_y - string: 'y' groupby variable name
+
+ x, y - annot tables with fields 'starts' and 'ends'.
+
+ Returns an annotation table with the format of x, calculated as the union
+ of x and y.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_consolidate.html" class="code" title="function cons = bml_annot_consolidate(cfg, annot)">bml_annot_consolidate</a>	BML_ANNOT_CONSOLIDATE returns a consolidated annotation table</li><li><a href="bml_annot_rowbind.html" class="code" title="function annot = bml_annot_rowbind(varargin)">bml_annot_rowbind</a>	BML_ANNOT_ROWBIND binds tables by rows, conforming to first non-empty table</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_union(cfg, x, y)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_UNION returns the union of two annotation tables</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_annot_union(x)</span>
+0007 <span class="comment">%   annot = bml_annot_union(x, y);</span>
+0008 <span class="comment">%   annot = bml_annot_union(cfg, x);</span>
+0009 <span class="comment">%   annot = bml_annot_union(cfg, x, y);</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% The first argument cfg is a optional configuration structure, which can contain</span>
+0012 <span class="comment">% the following optional fields:</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% cfg.description - string: description for output annotation</span>
+0015 <span class="comment">% cfg.timetol - float, time tolerance for the union operation. Defaults to</span>
+0016 <span class="comment">%           1e-3 (1 ms).</span>
+0017 <span class="comment">% cfg.groupby - string: indicates variable name by which to group the rows</span>
+0018 <span class="comment">%           before intersecting. Variable has to be present in x and y. If</span>
+0019 <span class="comment">%           variable names are not the same in both tables, use</span>
+0020 <span class="comment">%           cfg.grouby_x and cfg.groupby_y.</span>
+0021 <span class="comment">% cfg.groupby_x - string: 'x' groupby variable name</span>
+0022 <span class="comment">% cfg.groupby_y - string: 'y' groupby variable name</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% x, y - annot tables with fields 'starts' and 'ends'.</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Returns an annotation table with the format of x, calculated as the union</span>
+0027 <span class="comment">% of x and y.</span>
+0028 
+0029 
+0030 <span class="keyword">if</span> nargin ==1
+0031     x=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cfg,[],inputname(1));
+0032   cfg=[];
+0033   y=[];
+0034 <span class="keyword">elseif</span> nargin == 2
+0035   <span class="keyword">if</span> isstruct(cfg)
+0036     x=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(x,[],inputname(2)); 
+0037     y=[];
+0038     description = [<span class="string">'union_'</span> x.Properties.Description];
+0039   <span class="keyword">elseif</span> istable(cfg)
+0040     y=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(x,[],inputname(2));
+0041     x=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cfg,[],inputname(1));
+0042     cfg=[];
+0043     description = [<span class="string">'union_'</span> x.Properties.Description <span class="string">'_'</span> y.Properties.Description];
+0044   <span class="keyword">else</span>
+0045     error(<span class="string">'incorrect use of bml_annot_union'</span>);
+0046   <span class="keyword">end</span>
+0047 <span class="keyword">elseif</span> nargin == 3
+0048   x=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(x,[],inputname(2));
+0049   y=<a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(y,[],inputname(3));
+0050   description = [<span class="string">'uniont_'</span> x.Properties.Description <span class="string">'_'</span> y.Properties.Description];
+0051   description = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'description'</span>,description);
+0052 <span class="keyword">else</span>
+0053   error(<span class="string">'incorrect use of bml_annot_union'</span>);
+0054 <span class="keyword">end</span>
+0055 
+0056 timetol   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-3);
+0057 groupby   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby'</span>,[]);
+0058 groupby_x = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby_x'</span>,groupby);
+0059 groupby_y = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby_y'</span>,groupby);
+0060 
+0061 <span class="keyword">if</span> isempty(x.Properties.Description); x.Properties.Description = <span class="string">'x'</span>; <span class="keyword">end</span>
+0062 <span class="keyword">if</span> ~isempty(y)
+0063   <span class="keyword">if</span> isempty(y.Properties.Description); y.Properties.Description = <span class="string">'y'</span>; <span class="keyword">end</span>
+0064 
+0065   <span class="keyword">if</span> strcmp(x.Properties.Description,y.Properties.Description)
+0066     x.Properties.Description = [x.Properties.Description <span class="string">'_x'</span>];
+0067     y.Properties.Description = [y.Properties.Description <span class="string">'_y'</span>];
+0068   <span class="keyword">end</span>
+0069   
+0070   <span class="keyword">if</span> ~isempty(groupby_x) &amp;&amp; ~isempty(groupby_y) 
+0071     <span class="comment">%creating grouping vraible in 'y' table with same name as x</span>
+0072     y.(groupby_x{1}) = y.(groupby_y{1});
+0073   <span class="keyword">elseif</span> ~(isempty(groupby_x) &amp;&amp; isempty(groupby_y))
+0074     error(<span class="string">'incorrect call to bml_annot_union'</span>);
+0075   <span class="keyword">end</span>
+0076   
+0077   x = <a href="bml_annot_rowbind.html" class="code" title="function annot = bml_annot_rowbind(varargin)">bml_annot_rowbind</a>(x,y);
+0078   
+0079 <span class="keyword">end</span>
+0080 
+0081 cfg1=[];
+0082 cfg1.criterion = @(x) max(x.ends) - min(x.starts) - sum(x.duration) &lt; timetol;
+0083 cfg1.groupby = groupby_x;
+0084 annot = <a href="bml_annot_consolidate.html" class="code" title="function cons = bml_annot_consolidate(cfg, annot)">bml_annot_consolidate</a>(cfg1,x);
+0085 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,description);
+0086 
+0087 
+0088 
+0089 
+0090</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

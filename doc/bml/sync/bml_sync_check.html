@@ -37,7 +37,8 @@
             'filetype','sync_channel','sync_type','chunk_id'. Contains 
             a coarse alignment of the files, normally inferred from the
             OS 'Date-Modified' metadata.
-   cfg.praat - logical: should synchronized files be opened in praat for
+   cfg.praat - logical: should synchronized files be opened in praat.
+           Defaults to true.
    cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
            functions</pre></div>
 
@@ -45,7 +46,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>	BML_PRAAT opens FT_DATATYPE_RAWs in praat</li></ul>
+<li><a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>	BML_ROI_TABLE transforms a table into an ROI table [internal]</li><li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/signal/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>	BML_PRAAT opens FT_DATATYPE_RAWs in praat</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -66,76 +67,78 @@ This function is called by:
 0010 <span class="comment">%            'filetype','sync_channel','sync_type','chunk_id'. Contains</span>
 0011 <span class="comment">%            a coarse alignment of the files, normally inferred from the</span>
 0012 <span class="comment">%            OS 'Date-Modified' metadata.</span>
-0013 <span class="comment">%   cfg.praat - logical: should synchronized files be opened in praat for</span>
-0014 <span class="comment">%   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip</span>
-0015 <span class="comment">%           functions</span>
-0016 
-0017 sync_roi_vars = {<span class="string">'session_id'</span>,<span class="string">'session_part'</span>,<span class="string">'filetype'</span>,<span class="string">'sync_channel'</span>,<span class="string">'sync_type'</span>,<span class="string">'chunk_id'</span>};
-0018 
-0019 <span class="keyword">if</span> istable(cfg)
-0020   cfg = struct(<span class="string">'roi'</span>,cfg);
-0021 <span class="keyword">end</span>
-0022 
-0023 sync_roi            = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>),<span class="string">'roi_os'</span>);
-0024 praat               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'praat'</span>,true);
-0025 ft_feedback         = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'ft_feedback'</span>,<span class="string">'no'</span>);
-0026 
-0027 assert(~isempty(sync_roi),<span class="string">'empty sync roi table'</span>);
-0028 assert(all(ismember(sync_roi_vars,sync_roi.Properties.VariableNames)),<span class="keyword">...</span>
-0029   &quot;roi table should have vars <span class="comment">%s&quot;,strjoin(sync_roi_vars));</span>
-0030 
-0031 <span class="comment">%loading sync channels</span>
-0032 chunk_ids=unique(sync_roi.chunk_id);
-0033 <span class="keyword">for</span> chunk_i=1:length(chunk_ids)
-0034   chunk_id = chunk_ids(chunk_i);
-0035   master_roi = sync_roi((sync_roi.chunk_id==chunk_id) &amp; (sync_roi.sync_type==&quot;master&quot;),:);
-0036   slave_roi = sync_roi((sync_roi.chunk_id==chunk_id) &amp; (sync_roi.sync_type==&quot;slave&quot;),:);
-0037   
-0038   master_filename = unique(master_roi.name);
-0039   master_folder = unique(master_roi.name);
-0040   
-0041   assert(length(master_filename)==1 &amp; length(master_folder)==1,<span class="keyword">...</span>
-0042     &quot;More than one master file <span class="keyword">for</span> chunk <span class="comment">%i&quot;,chunk_id);</span>
-0043   assert(length(unique(master_roi.s1))==1,&quot;Inconsistent s1 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
-0044   assert(length(unique(master_roi.s2))==1,&quot;Inconsistent s2 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
-0045   assert(length(unique(master_roi.t1))==1,&quot;Inconsistent t1 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
-0046   assert(length(unique(master_roi.t2))==1,&quot;Inconsistent t2 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
-0047   assert(length(unique(master_roi.starts))==1,&quot;Inconsistent starts <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
-0048   assert(length(unique(master_roi.ends))==1,&quot;Inconsistent ends <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
-0049   
-0050   cfg=[];
-0051   cfg.roi=master_roi(1,:);
-0052   cfg.channel=unique(master_roi.sync_channel);
-0053   master = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);
-0054   
-0055   <span class="keyword">if</span> praat
-0056       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_master_'</span>,master_filename),master);  
-0057   <span class="keyword">end</span>
-0058   
-0059   <span class="keyword">for</span> slave_i=1:height(slave_roi)  
-0060     
-0061     cfg=[];
-0062     cfg.roi=slave_roi(slave_i,:);
-0063     cfg.channel=unique(slave_roi.sync_channel(slave_i));
-0064     slave = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);    
-0065     
-0066     <span class="keyword">if</span> praat
-0067       t1=master.time{1}(1);
-0068       t2=master.time{1}(end);
-0069       cfg=[]; cfg.time=master.time; cfg.method=<span class="string">'pchip'</span>;
-0070       cfg.feedback=ft_feedback;
-0071       slave_crop=ft_resampledata(cfg,<a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave,t1,t2));
-0072       slave_crop.fsample = master.fsample;
-0073       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_slave_'</span>,slave_roi.name(slave_i)),slave_crop);
-0074     <span class="keyword">end</span>
-0075 
-0076   <span class="keyword">end</span>
-0077 <span class="keyword">end</span>
-0078 
-0079 
+0013 <span class="comment">%   cfg.praat - logical: should synchronized files be opened in praat.</span>
+0014 <span class="comment">%           Defaults to true.</span>
+0015 <span class="comment">%   cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip</span>
+0016 <span class="comment">%           functions</span>
+0017 
+0018 sync_roi_vars = {<span class="string">'session_id'</span>,<span class="string">'session_part'</span>,<span class="string">'filetype'</span>,<span class="string">'sync_channel'</span>,<span class="string">'sync_type'</span>,<span class="string">'chunk_id'</span>};
+0019 
+0020 <span class="keyword">if</span> istable(cfg)
+0021   cfg = struct(<span class="string">'roi'</span>,cfg);
+0022 <span class="keyword">end</span>
+0023 
+0024 sync_roi            = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'roi'</span>),<span class="string">'roi_os'</span>);
+0025 praat               = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'praat'</span>,true);
+0026 ft_feedback         = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'ft_feedback'</span>,<span class="string">'no'</span>);
+0027 
+0028 assert(~isempty(sync_roi),<span class="string">'empty sync roi table'</span>);
+0029 assert(all(ismember(sync_roi_vars,sync_roi.Properties.VariableNames)),<span class="keyword">...</span>
+0030   &quot;roi table should have vars <span class="comment">%s&quot;,strjoin(sync_roi_vars));</span>
+0031 
+0032 <span class="comment">%loading sync channels</span>
+0033 chunk_ids=unique(sync_roi.chunk_id);
+0034 <span class="keyword">for</span> chunk_i=1:length(chunk_ids)
+0035   chunk_id = chunk_ids(chunk_i);
+0036   master_roi = sync_roi((sync_roi.chunk_id==chunk_id) &amp; (sync_roi.sync_type==&quot;master&quot;),:);
+0037   slave_roi = sync_roi((sync_roi.chunk_id==chunk_id) &amp; (sync_roi.sync_type==&quot;slave&quot;),:);
+0038   
+0039   master_filename = unique(master_roi.name);
+0040   master_folder = unique(master_roi.name);
+0041 
+0042     assert(~isempty(master_filename), &quot;No master file found <span class="keyword">for</span> <span class="keyword">for</span> chunk <span class="comment">%i&quot;,chunk_id);</span>
+0043   assert(length(master_filename)==1 &amp; length(master_folder)==1,<span class="keyword">...</span>
+0044     &quot;More than one master file <span class="keyword">for</span> chunk <span class="comment">%i&quot;,chunk_id);</span>
+0045   assert(length(unique(master_roi.s1))==1,&quot;Inconsistent s1 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
+0046   assert(length(unique(master_roi.s2))==1,&quot;Inconsistent s2 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
+0047   assert(length(unique(master_roi.t1))==1,&quot;Inconsistent t1 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
+0048   assert(length(unique(master_roi.t2))==1,&quot;Inconsistent t2 <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
+0049   assert(length(unique(master_roi.starts))==1,&quot;Inconsistent starts <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
+0050   assert(length(unique(master_roi.ends))==1,&quot;Inconsistent ends <span class="keyword">for</span> master of chunk <span class="comment">%i&quot;, chunk_id);</span>
+0051   
+0052   cfg=[];
+0053   cfg.roi=master_roi(1,:);
+0054   cfg.channel=unique(master_roi.sync_channel);
+0055   master = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);
+0056   
+0057   <span class="keyword">if</span> praat
+0058       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_master_'</span>,master_filename),master);  
+0059   <span class="keyword">end</span>
+0060   
+0061   <span class="keyword">for</span> slave_i=1:height(slave_roi)  
+0062     
+0063     cfg=[];
+0064     cfg.roi=slave_roi(slave_i,:);
+0065     cfg.channel=unique(slave_roi.sync_channel(slave_i));
+0066     slave = <a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>(cfg);    
+0067     
+0068     <span class="keyword">if</span> praat
+0069       t1=master.time{1}(1);
+0070       t2=master.time{1}(end);
+0071       cfg=[]; cfg.time=master.time; cfg.method=<span class="string">'pchip'</span>;
+0072       cfg.feedback=ft_feedback;
+0073       slave_crop=ft_resampledata(cfg,<a href="../../bml/signal/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave,t1,t2));
+0074       slave_crop.fsample = master.fsample;
+0075       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_slave_'</span>,slave_roi.name(slave_i)),slave_crop);
+0076     <span class="keyword">end</span>
+0077 
+0078   <span class="keyword">end</span>
+0079 <span class="keyword">end</span>
 0080 
 0081 
-0082</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0082 
+0083 
+0084</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

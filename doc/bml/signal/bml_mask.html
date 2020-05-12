@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_mask</title>
+  <meta name="keywords" content="bml_mask">
+  <meta name="description" content="BML_MASK creates a new raw file with the specified values masked">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_mask.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_mask
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_MASK creates a new raw file with the specified values masked</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function masked = bml_mask(cfg, raw) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_MASK creates a new raw file with the specified values masked
+ 
+ Use as
+   raw = bml_mask(cfg, raw)
+   raw = bml_annot2raw(cfg.annot, mask)
+
+ cfg.annot - annotation table specifying which values to mask
+ cfg.label - str or cellstr indicating label(s) to mask. Default to 
+   raw.label
+ cfg.label_colname - str indicating annot column with label
+   specification. Defaults to empty, in which case 
+   cfg.label is used for all annotations. If present, overwrites cfg.label. 
+ cfg.value - value used to mask. Defaults to NaN.
+ cfg.complete_trial - bool, indicates if complete trial is to be masked if
+   any part of it is masked. Defalts to false. If label_colname is given
+   the msking is done per label. 
+ cfg.remask_nan - bool, indicating if usign NaNs to remask. Defaults to
+   false. Mutually exclusive with cfg.annot
+
+ raw - FT_DATAYE_RAW object
+
+ returns a masked FT_DATAYE_RAW structure</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>	BML_ANNOT_FILTER returns the annots that intersect with the filter</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>	BML_CROP_IDX_VALID calculates valid sample indices for a time window and file coordinates</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the collection (or domain)</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001  <a name="_sub0" href="#_subfunctions" class="code">function masked = bml_mask(cfg, raw)</a>
+0002 
+0003 <span class="comment">% BML_MASK creates a new raw file with the specified values masked</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   raw = bml_mask(cfg, raw)</span>
+0007 <span class="comment">%   raw = bml_annot2raw(cfg.annot, mask)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg.annot - annotation table specifying which values to mask</span>
+0010 <span class="comment">% cfg.label - str or cellstr indicating label(s) to mask. Default to</span>
+0011 <span class="comment">%   raw.label</span>
+0012 <span class="comment">% cfg.label_colname - str indicating annot column with label</span>
+0013 <span class="comment">%   specification. Defaults to empty, in which case</span>
+0014 <span class="comment">%   cfg.label is used for all annotations. If present, overwrites cfg.label.</span>
+0015 <span class="comment">% cfg.value - value used to mask. Defaults to NaN.</span>
+0016 <span class="comment">% cfg.complete_trial - bool, indicates if complete trial is to be masked if</span>
+0017 <span class="comment">%   any part of it is masked. Defalts to false. If label_colname is given</span>
+0018 <span class="comment">%   the msking is done per label.</span>
+0019 <span class="comment">% cfg.remask_nan - bool, indicating if usign NaNs to remask. Defaults to</span>
+0020 <span class="comment">%   false. Mutually exclusive with cfg.annot</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% raw - FT_DATAYE_RAW object</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% returns a masked FT_DATAYE_RAW structure</span>
+0025 
+0026 <span class="keyword">if</span> istable(cfg)
+0027   cfg = struct(<span class="string">'annot'</span>,cfg);
+0028 <span class="keyword">end</span>
+0029 annot          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'annot'</span>);
+0030 label          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
+0031 label_colname  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label_colname'</span>,[]);
+0032 value          = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'value'</span>,NaN);
+0033 complete_trial = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'complete_trial'</span>,false);
+0034 remask_nan     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'remask_nan'</span>,false);
+0035 
+0036 masked = raw;
+0037 roi = <a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(raw);
+0038 
+0039 <span class="comment">%assert(xor(~isempty(annot),istrue(remask_nan)),'cfg.annot or cfg.remask_nan  required');</span>
+0040 <span class="keyword">if</span> isempty(annot) &amp;&amp; ~istrue(remask_nan)
+0041   <span class="comment">%nothing to mask</span>
+0042   <span class="keyword">return</span> 
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="keyword">if</span> remask_nan
+0046   <span class="keyword">if</span> ~isempty(label_colname); warning(<span class="string">'label_colname ignored'</span>); <span class="keyword">end</span>
+0047   <span class="keyword">if</span> ~isempty(setdiff(masked.label,label)) 
+0048     error(<span class="string">'sorry, label selection for remask_nan not implemented'</span>);
+0049   <span class="keyword">end</span>
+0050   <span class="keyword">if</span> complete_trial <span class="comment">%masking complete row if NaN is detected</span>
+0051     <span class="keyword">for</span> t=1:numel(masked.trial)
+0052       masked.trial{t}(any(isnan(masked.trial{t}),2),:)=value;
+0053     <span class="keyword">end</span>
+0054   <span class="keyword">else</span> <span class="comment">%masking only NaNs</span>
+0055     <span class="keyword">if</span> isnan(value)
+0056       warning(<span class="string">'Remasking NaNs with NaNs. Nothing done.'</span>);
+0057       <span class="keyword">return</span>
+0058     <span class="keyword">end</span>
+0059     <span class="keyword">for</span> t=1:numel(masked.trial)
+0060       masked.trial{t}(isnan(masked.trial{t}))=value;
+0061     <span class="keyword">end</span>    
+0062   <span class="keyword">end</span>
+0063   <span class="keyword">return</span>
+0064 <span class="keyword">end</span>
+0065 
+0066 <span class="keyword">if</span> isempty(label_colname)
+0067   <span class="comment">%label_colname not specified using label info.</span>
+0068     annot_idx   = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(label,masked.label);
+0069   <span class="keyword">for</span> t=1:height(roi)
+0070     t_annot = <a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(annot,roi(t,:));
+0071     <span class="keyword">for</span> i=1:height(t_annot)
+0072       <span class="keyword">if</span> complete_trial
+0073         masked.trial{t}(annot_idx,:)=value;       
+0074       <span class="keyword">else</span>
+0075         [s,e] = <a href="bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(t,:), t_annot.starts(i), t_annot.ends(i));
+0076         masked.trial{t}(annot_idx,s:e)=value;
+0077       <span class="keyword">end</span>
+0078     <span class="keyword">end</span>
+0079   <span class="keyword">end</span>
+0080 
+0081 <span class="keyword">else</span> <span class="comment">%annotations assigned to specific channels</span>
+0082   <span class="keyword">if</span> sum(strcmp(annot.Properties.VariableNames,label_colname))~=1
+0083     error(<span class="string">'label_colname should match a column of annot'</span>);
+0084   <span class="keyword">end</span>
+0085 
+0086   <span class="comment">%iterating over labels of annot_label_colname</span>
+0087   ul = unique(annot{:,label_colname});
+0088   <span class="keyword">for</span> t=1:height(roi)
+0089     t_annot = <a href="../../bml/annot/bml_annot_filter.html" class="code" title="function filtered = bml_annot_filter(cfg, annot, filter_annot)">bml_annot_filter</a>(annot,roi(t,:));    
+0090     <span class="keyword">for</span> i_ul=1:numel(ul)
+0091       t_annot_l = t_annot(strcmp(t_annot{:,label_colname},ul{i_ul}),:);
+0092       t_annot_idx = <a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(ul{i_ul},masked.label);
+0093       <span class="keyword">if</span> t_annot_idx &gt; 0 &amp;&amp; t_annot_idx &lt;= numel(masked.label)   
+0094         <span class="keyword">for</span> i=1:height(t_annot_l)
+0095             <span class="keyword">if</span> complete_trial
+0096             masked.trial{t}(t_annot_idx,:)=value;       
+0097           <span class="keyword">else</span>
+0098             [s,e] = <a href="bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(t,:), t_annot_l.starts(i), t_annot_l.ends(i));
+0099             masked.trial{t}(t_annot_idx,s:e)=value;
+0100           <span class="keyword">end</span>
+0101         <span class="keyword">end</span>
+0102       <span class="keyword">end</span>
+0103     <span class="keyword">end</span>
+0104   <span class="keyword">end</span>
+0105 <span class="keyword">end</span>
+0106</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

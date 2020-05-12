@@ -31,28 +31,37 @@
 
  Use as
    redefined = bml_redefinetrial(cfg, raw)
+   [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 
- raw - FT_DATAYPR_RAW to be re-epoched with time in global coordinates
+ raw - FT_DATAYPE_RAW to be re-epoched with time in global coordinates
  cfg - configuraton structure
  cfg.epoch - ANNOT table with new epoching
- cfg.t0 - reference time for each epoch. If not specified the time is kept in
+ cfg.timelock - reference time for timelocking each epoch. If not specified the time is kept in
           global time coordinates. Can be string or char that matches a 
           variable of cfg.epoch, or a numeric vector of the same length than cfg.epoch
+ cfg.timesnap - bool, if true times are snapped to 'round' value according
+          to sampling rate. Defaults to true if timelock is given, false
+          if not.
+ cfg.timesignif - number of significant digits to consider for smapling rate
+          during time snapping. Defaults to 4. 
+ cfg.t0 - same as timelock. Deprecated. 
  cfg.regularize - if true, resulting times are forced to be equal.
-          Defaults to false
+          Defaults to false. [NOT IMPLEMENTED]
  cfg.warn - logical indicating if warnings should be issued. Defaults to true
 
- returns a raw with new trials. The epoch ANNOT is added as a new field in the 
- raw, changing the id to match the index of the corresponding trials if necessary.</pre></div>
+ returns a raw with new trials. The epoch ANNOT also returned changing the 
+ id to match the index of the corresponding trials if
+ necessary. The original id is returned in a new epoch_id variable, if
+ this variable didn't exist.</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="../../bml/sync/bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-</ul>
+<li><a href="../../bml/annot/bml_annot_calculate.html" class="code" title="function annot = bml_annot_calculate(cfg, raw, varargin)">bml_annot_calculate</a>	BML_ANNOT_CALCULATE calculate scalar values from specific annotations in</li><li><a href="../../bml/annot/bml_annot_match.html" class="code" title="function annot = bml_annot_match(cfg, data, template)">bml_annot_match</a>	BML_ANNOT_MATCH matches a raw data object to a template</li></ul>
 <!-- crossreference -->
 
 
@@ -64,120 +73,154 @@ This function is called by:
 0004 <span class="comment">%</span>
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%   redefined = bml_redefinetrial(cfg, raw)</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% raw - FT_DATAYPR_RAW to be re-epoched with time in global coordinates</span>
-0009 <span class="comment">% cfg - configuraton structure</span>
-0010 <span class="comment">% cfg.epoch - ANNOT table with new epoching</span>
-0011 <span class="comment">% cfg.t0 - reference time for each epoch. If not specified the time is kept in</span>
-0012 <span class="comment">%          global time coordinates. Can be string or char that matches a</span>
-0013 <span class="comment">%          variable of cfg.epoch, or a numeric vector of the same length than cfg.epoch</span>
-0014 <span class="comment">% cfg.regularize - if true, resulting times are forced to be equal.</span>
-0015 <span class="comment">%          Defaults to false</span>
-0016 <span class="comment">% cfg.warn - logical indicating if warnings should be issued. Defaults to true</span>
-0017 <span class="comment">%</span>
-0018 <span class="comment">% returns a raw with new trials. The epoch ANNOT is added as a new field in the</span>
-0019 <span class="comment">% raw, changing the id to match the index of the corresponding trials if necessary.</span>
-0020 
-0021 epoch      = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'epoch'</span>),<span class="string">'epoch'</span>);
-0022 t0         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t0'</span>);
-0023 regularize = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'regularize'</span>,false);
-0024 warn       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
-0025 
-0026 <span class="keyword">if</span> regularize
-0027   keyboard <span class="comment">%have to implement this</span>
-0028 <span class="keyword">end</span>
+0007 <span class="comment">%   [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% raw - FT_DATAYPE_RAW to be re-epoched with time in global coordinates</span>
+0010 <span class="comment">% cfg - configuraton structure</span>
+0011 <span class="comment">% cfg.epoch - ANNOT table with new epoching</span>
+0012 <span class="comment">% cfg.timelock - reference time for timelocking each epoch. If not specified the time is kept in</span>
+0013 <span class="comment">%          global time coordinates. Can be string or char that matches a</span>
+0014 <span class="comment">%          variable of cfg.epoch, or a numeric vector of the same length than cfg.epoch</span>
+0015 <span class="comment">% cfg.timesnap - bool, if true times are snapped to 'round' value according</span>
+0016 <span class="comment">%          to sampling rate. Defaults to true if timelock is given, false</span>
+0017 <span class="comment">%          if not.</span>
+0018 <span class="comment">% cfg.timesignif - number of significant digits to consider for smapling rate</span>
+0019 <span class="comment">%          during time snapping. Defaults to 4.</span>
+0020 <span class="comment">% cfg.t0 - same as timelock. Deprecated.</span>
+0021 <span class="comment">% cfg.regularize - if true, resulting times are forced to be equal.</span>
+0022 <span class="comment">%          Defaults to false. [NOT IMPLEMENTED]</span>
+0023 <span class="comment">% cfg.warn - logical indicating if warnings should be issued. Defaults to true</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% returns a raw with new trials. The epoch ANNOT also returned changing the</span>
+0026 <span class="comment">% id to match the index of the corresponding trials if</span>
+0027 <span class="comment">% necessary. The original id is returned in a new epoch_id variable, if</span>
+0028 <span class="comment">% this variable didn't exist.</span>
 0029 
-0030 <span class="keyword">if</span> ~isempty(t0)
-0031   <span class="keyword">if</span> isstring(t0) || ischar(t0)
-0032     t0 = cellstr(t0);
-0033   <span class="keyword">end</span>
-0034     
-0035   <span class="keyword">if</span> iscellstr(t0)
-0036     assert(numel(t0)==1,&quot;single t0 variable required&quot;);
-0037     <span class="keyword">if</span> ismember(t0,epoch.Properties.VariableNames)
-0038       t0 = epoch.(t0{1});
-0039     <span class="keyword">else</span>
-0040       error(&quot;t0 doesn't match any variable in epoch&quot;);
-0041     <span class="keyword">end</span>
-0042   <span class="keyword">end</span>
-0043   
-0044   <span class="keyword">if</span> isnumeric(t0)
-0045     assert(length(t0)==height(epoch),&quot;incorrect length <span class="keyword">for</span> t0&quot;);
-0046   <span class="keyword">else</span>
-0047     error(&quot;t0 should be a numeric vector, or be the name of a numeric variable in epoch&quot;);
-0048   <span class="keyword">end</span>
-0049 <span class="keyword">end</span>
-0050 
-0051 <span class="comment">%creating output raw</span>
-0052 redefined = [];
-0053 redefined.trial = {};
-0054 redefined.time = {};
-0055 redefined_epoch = table();
-0056 redefined.label = raw.label;
-0057 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(raw))
-0058   redefined.hdr = raw.hdr;
-0059 <span class="keyword">end</span>
-0060 
-0061 <span class="comment">%extracting trial info from raw</span>
-0062 raw_trial = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(raw)">bml_raw2annot</a>(raw),<span class="string">'raw'</span>);
-0063 raw_trial.midpoint = (raw_trial.starts + raw_trial.ends)/2;
-0064 
-0065 <span class="comment">%looping though epochs</span>
-0066 <span class="keyword">for</span> i=1:height(epoch)
-0067   
-0068   <span class="comment">%intersecting epochs with raw's trials</span>
-0069   new_row = epoch(i,:);
-0070   i_raw_trial = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(struct(<span class="string">'keep'</span>,<span class="string">'x'</span>),raw_trial,epoch(i,:));
-0071   
-0072   <span class="comment">%if no intersection, move to next epoch</span>
-0073   <span class="keyword">if</span> isempty(i_raw_trial)
-0074     <span class="keyword">if</span> warn
-0075       warning(&quot;epoch <span class="comment">%i not found in raw&quot;,i);</span>
-0076     <span class="keyword">end</span>
-0077     <span class="keyword">continue</span>
-0078   <span class="keyword">end</span>
-0079   
-0080   <span class="comment">%selecting best intersection (largest duration and centered)</span>
-0081   <span class="keyword">if</span> height(i_raw_trial)&gt;1
-0082     max_duration=max(i_raw_trial.duration);
-0083     i_raw_trial = i_raw_trial(i_raw_trial.duration == max_duration,:);
-0084     [~,min_i]=min(abs((i_raw_trial.starts+i_raw_trial.ends)/2 - i_raw_trial.midpoint));
-0085     i_raw_trial = i_raw_trial(min_i,:);  
-0086     <span class="comment">%if warn</span>
-0087     <span class="comment">%  warning(&quot;several trials of raw match to epoch %i. Selecting trial %i&quot;,i,i_raw_trial.raw_id(min_i));</span>
-0088     <span class="comment">%end</span>
-0089   <span class="keyword">end</span>
-0090   
-0091   <span class="comment">%partial epoch</span>
-0092   <span class="keyword">if</span> (epoch.duration(i) &gt; i_raw_trial.duration) &amp;&amp; warn
-0093     warning(<span class="string">'partial epoch %i loaded'</span>,i);
-0094   <span class="keyword">end</span>
-0095   
-0096   new_row.starts = i_raw_trial.starts;
-0097   new_row.ends = i_raw_trial.ends;
-0098   
-0099   <span class="comment">%cropping</span>
-0100   [s,e]=<a href="../../bml/sync/bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(i_raw_trial,i_raw_trial.starts,i_raw_trial.ends);
-0101 
-0102     <span class="keyword">if</span> s &lt; 1; s=1; <span class="keyword">end</span>
-0103     <span class="keyword">if</span> e &gt; i_raw_trial.nSamples; e = i_raw_trial.nSamples; <span class="keyword">end</span>
-0104 
-0105   <span class="comment">%creating trial</span>
-0106   new_row.id = numel(redefined.trial) + 1;
-0107   redefined.trial{new_row.id} = raw.trial{i_raw_trial.raw_id}(:,s:e);
-0108   redefined.time{new_row.id} = raw.time{i_raw_trial.raw_id}(:,s:e);
-0109   redefined_epoch = [redefined_epoch; new_row];
-0110   <span class="comment">%cropped.sampleinfo(i,:) = [s,e];</span>
-0111   
-0112   <span class="comment">%changing time reference if t0 is present</span>
-0113   <span class="keyword">if</span> ~isempty(t0)
-0114     redefined.time{new_row.id} = redefined.time{new_row.id} - t0(i);
+0030 epoch      = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'epoch'</span>),<span class="string">'epoch'</span>);
+0031 t0         = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'t0'</span>);
+0032 timelock   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timelock'</span>);
+0033 regularize = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'regularize'</span>,false);
+0034 warn       = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
+0035 
+0036 <span class="keyword">if</span> isempty(timelock) &amp;&amp; ~isempty(t0)
+0037   warning(<span class="string">'t0 option deprecated. Use timelock instead'</span>);
+0038   timelock = t0;
+0039 <span class="keyword">end</span>
+0040 
+0041 timesnap   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timesnap'</span>,~isempty(timelock));
+0042 timesignif = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timesignif'</span>,4);
+0043 
+0044 <span class="keyword">if</span> regularize
+0045   error(<span class="string">'regularize not implemented'</span>)
+0046 <span class="keyword">end</span>
+0047 
+0048 <span class="keyword">if</span> ~isempty(timelock)
+0049   <span class="keyword">if</span> isstring(timelock) || ischar(timelock)
+0050     timelock = cellstr(timelock);
+0051   <span class="keyword">end</span>
+0052     
+0053   <span class="keyword">if</span> iscellstr(timelock)
+0054     assert(numel(timelock)==1,&quot;single t0 variable required&quot;);
+0055     <span class="keyword">if</span> ismember(timelock,epoch.Properties.VariableNames)
+0056       timelock = epoch.(timelock{1});
+0057     <span class="keyword">else</span>
+0058       error(&quot;t0 doesn't match any variable in epoch&quot;);
+0059     <span class="keyword">end</span>
+0060   <span class="keyword">end</span>
+0061   
+0062   <span class="keyword">if</span> isnumeric(timelock)
+0063     assert(length(timelock)==height(epoch),&quot;incorrect length <span class="keyword">for</span> timelock&quot;);
+0064   <span class="keyword">else</span>
+0065     error(&quot;timelock should be a numeric vector, or be the name of a numeric variable in epoch&quot;);
+0066   <span class="keyword">end</span>
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="keyword">if</span> ~ismember(<span class="string">'epoch_id'</span>,epoch.Properties.VariableNames)
+0070   epoch.epoch_id = epoch.id;
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">%creating output raw</span>
+0074 redefined = [];
+0075 redefined.trial = {};
+0076 redefined.time = {};
+0077 redefined_epoch = table();
+0078 redefined.label = raw.label;
+0079 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(raw))
+0080   redefined.hdr = raw.hdr;
+0081 <span class="keyword">end</span>
+0082 
+0083 <span class="comment">%extracting trial info from raw</span>
+0084 raw_trial = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(raw),<span class="string">'raw'</span>);
+0085 raw_trial.midpoint = (raw_trial.starts + raw_trial.ends)/2;
+0086 
+0087 <span class="keyword">if</span> timesnap
+0088   raw_trial.Fs = round(raw_trial.Fs,timesignif,<span class="string">'significant'</span>);
+0089 <span class="keyword">end</span>
+0090 <span class="keyword">if</span> regularize &amp;&amp; length(uniquetol(raw_trial.Fs))&gt;1
+0091   error(<span class="string">'different sampling rates for different trials of raw. Can''t regularize'</span>);
+0092 <span class="keyword">end</span>
+0093 
+0094 <span class="comment">%looping though epochs</span>
+0095 <span class="keyword">for</span> i=1:height(epoch)
+0096   
+0097   <span class="comment">%intersecting epochs with raw's trials</span>
+0098   new_row = epoch(i,:);
+0099   i_raw_trial = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(struct(<span class="string">'keep'</span>,<span class="string">'x'</span>),raw_trial,new_row);
+0100 
+0101   <span class="comment">%if no intersection, move to next epoch</span>
+0102   <span class="keyword">if</span> isempty(i_raw_trial)
+0103     <span class="keyword">if</span> warn
+0104       warning(&quot;epoch <span class="comment">%i not found in raw&quot;,i);</span>
+0105     <span class="keyword">end</span>
+0106     <span class="keyword">continue</span>
+0107   <span class="keyword">end</span>
+0108   
+0109   <span class="comment">%selecting best intersection (largest duration and centered)</span>
+0110   <span class="keyword">if</span> height(i_raw_trial)&gt;1
+0111     max_duration=max(i_raw_trial.duration);
+0112     i_raw_trial = i_raw_trial(i_raw_trial.duration == max_duration,:);
+0113     [~,min_i]=min(abs((i_raw_trial.starts+i_raw_trial.ends)/2 - i_raw_trial.midpoint));
+0114     i_raw_trial = i_raw_trial(min_i,:);  
 0115   <span class="keyword">end</span>
-0116  
-0117 <span class="keyword">end</span>
-0118 
-0119 
-0120</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0116 
+0117   <span class="comment">%partial epoch</span>
+0118   timetol = epoch.duration(i)*(10^(-timesignif));
+0119   <span class="keyword">if</span> (abs(epoch.duration(i) - i_raw_trial.duration) &gt; timetol) &amp;&amp; warn
+0120     warning(<span class="string">'partial epoch %i loaded'</span>,i);
+0121   <span class="keyword">end</span>
+0122   
+0123   new_row.starts = i_raw_trial.starts;
+0124   new_row.ends = i_raw_trial.ends;
+0125   
+0126   <span class="comment">%cropping</span>
+0127   [s,e]=<a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(i_raw_trial,i_raw_trial.starts,i_raw_trial.ends);
+0128 
+0129     <span class="keyword">if</span> s &lt; 1; s=1; <span class="keyword">end</span>
+0130     <span class="keyword">if</span> e &gt; i_raw_trial.nSamples; e = i_raw_trial.nSamples; <span class="keyword">end</span>
+0131 
+0132   <span class="comment">%creating trial</span>
+0133   new_row.id = numel(redefined.trial) + 1;
+0134   redefined.trial{new_row.id} = raw.trial{i_raw_trial.raw_id}(:,s:e);
+0135   new_time =  raw.time{i_raw_trial.raw_id}(:,s:e);
+0136   <span class="comment">%changing time reference if t0 is present</span>
+0137   <span class="keyword">if</span> ~isempty(timelock)
+0138     new_time = new_time - timelock(i);
+0139   <span class="keyword">end</span>
+0140   <span class="keyword">if</span> timesnap
+0141     sT = round(1/i_raw_trial.Fs(1),timesignif,<span class="string">'significant'</span>);
+0142     len_t = length(new_time);
+0143     mid_idx = ceil(len_t/2);
+0144     mid_time = sT*round(new_time(mid_idx)/sT,0);
+0145     new_time = (((-mid_idx+1):(len_t-mid_idx)) .* sT) + mid_time;
+0146   <span class="keyword">end</span>
+0147   redefined.time{new_row.id} = new_time;
+0148   redefined_epoch = [redefined_epoch; new_row];
+0149   <span class="comment">%cropped.sampleinfo(i,:) = [s,e];</span>
+0150 
+0151 <span class="keyword">end</span>
+0152 
+0153 redefined = ft_datatype_raw(redefined);
+0154</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

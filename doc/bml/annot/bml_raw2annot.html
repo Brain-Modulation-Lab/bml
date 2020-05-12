@@ -24,10 +24,21 @@
 <div class="box"><strong>BML_RAW2ANNOT creates an annotation table from a raw</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>function annot = bml_raw2annot(raw) </strong></div>
+<div class="box"><strong>function annot = bml_raw2annot(cfg, raw) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> BML_RAW2ANNOT creates an annotation table from a raw
+
+ Use as
+   annot = bml_raw2annot(raw)
+   annot = bml_raw2annot(cfg, raw)
+
+ cfg.label_colname = string indicating name of column with labels. If
+   empty (default) a single row is returned per trial. If  
+   label_colname is given, a row is returned for each label of each trial,
+   with the label specified in column 'label_colname'.
+ cfg.per_label = bool, defults to false. If true, label_colname is set to
+   'label'. Deprecated, use 'label_colname' instead. 
 
  raw - FT_DATATYPE_RAW
 
@@ -36,76 +47,121 @@
    'starts' time represented by the trial
      'ends' time represented by the trial
    'duration' in seconds
+   'trial' 
    's1' double, first sample sync coord
    't1' double, time of first sample sample sync coord
    's2' double, second sample sync coord
    't2' double, time of second sample sample sync coord
    'Fs' double, sampling rate
-   'nSamples' double, number of samples in raw</pre></div>
+   'nSamples' double, number of samples in raw
+   ('label') string with label name, present if cfg.per_label==true</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li></ul>
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/signal/bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>	BML_GETFS returns the sampling frequency of a raw object</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a ft_datatype_raw of zeros with ones at annot times</li><li><a href="bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>	BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time</li><li><a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li></ul>
+<li><a href="bml_annot2raw.html" class="code" title="function raw = bml_annot2raw(cfg, annot)">bml_annot2raw</a>	BML_ANNOT2RAW creates a ft_datatype_raw from and annotation table</li><li><a href="bml_annot2spike.html" class="code" title="function spike = bml_annot2spike(cfg, annot, raw)">bml_annot2spike</a>	BML_ANNOT2SPIKE creates a ft_datatype_spike structure from an annotation table</li><li><a href="bml_annot_calculate.html" class="code" title="function annot = bml_annot_calculate(cfg, raw, varargin)">bml_annot_calculate</a>	BML_ANNOT_CALCULATE calculate scalar values from specific annotations in</li><li><a href="bml_annot_match.html" class="code" title="function annot = bml_annot_match(cfg, data, template)">bml_annot_match</a>	BML_ANNOT_MATCH matches a raw data object to a template</li><li><a href="../../bml/signal/bml_conform_to.html" class="code" title="function conformed = bml_conform_to(master, slave)">bml_conform_to</a>	BML_CONFORM_TO conforms a slave ft_datatype_raw to the master's time</li><li><a href="../../bml/signal/bml_mask.html" class="code" title="function masked = bml_mask(cfg, raw)">bml_mask</a>	BML_MASK creates a new raw file with the specified values masked</li><li><a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li><li><a href="../../bml/timefreq/bml_freqanalysis_power_wavelet.html" class="code" title="function [freq] = bml_freqanalysis_power_wavelet(cfg, data)">bml_freqanalysis_power_wavelet</a>	BML_FREQANALYSIS_POWER_WAVELET performs 'morlet' wavelet time-frequency</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_raw2annot(raw)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_raw2annot(cfg, raw)</a>
 0002 
 0003 <span class="comment">% BML_RAW2ANNOT creates an annotation table from a raw</span>
 0004 <span class="comment">%</span>
-0005 <span class="comment">% raw - FT_DATATYPE_RAW</span>
-0006 <span class="comment">%</span>
-0007 <span class="comment">% returns an ANNOT table with variables</span>
-0008 <span class="comment">%   'id' corresponds to the trial</span>
-0009 <span class="comment">%   'starts' time represented by the trial</span>
-0010 <span class="comment">%     'ends' time represented by the trial</span>
-0011 <span class="comment">%   'duration' in seconds</span>
-0012 <span class="comment">%   's1' double, first sample sync coord</span>
-0013 <span class="comment">%   't1' double, time of first sample sample sync coord</span>
-0014 <span class="comment">%   's2' double, second sample sync coord</span>
-0015 <span class="comment">%   't2' double, time of second sample sample sync coord</span>
-0016 <span class="comment">%   'Fs' double, sampling rate</span>
-0017 <span class="comment">%   'nSamples' double, number of samples in raw</span>
-0018 
-0019 annot = table();
-0020 <span class="keyword">for</span> i=1:numel(raw.trial)
-0021   id = i;
-0022   nSamples = size(raw.trial{i},2);
-0023   
-0024   <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(raw))
-0025     Fs = raw.fsample;
-0026   <span class="keyword">else</span>
-0027     Fs = round(1/mean(diff(raw.time{i})),9,<span class="string">'significant'</span>);
-0028   <span class="keyword">end</span>
-0029   
-0030 <span class="comment">%   if ismember('sampleinfo',fields(raw))</span>
-0031 <span class="comment">%     s1 = raw.sampleinfo(i,1);</span>
-0032 <span class="comment">%     s2 = raw.sampleinfo(i,2);</span>
-0033 <span class="comment">%   else</span>
-0034 <span class="comment">%     s1 = 1;</span>
-0035 <span class="comment">%     s2 = nSamples;</span>
-0036 <span class="comment">%   end</span>
-0037   s1 = 1;
-0038   s2 = nSamples;     
-0039 
-0040   t1 = raw.time{i}(1);
-0041   t2 = raw.time{i}(end);
-0042   
-0043   starts = t1 - 0.5/Fs;
-0044   ends = t2 + 0.5/Fs;
-0045   
-0046   annot = [annot; table(id,starts,ends,s1,t1,s2,t2,Fs,nSamples)];
-0047   
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_raw2annot(raw)</span>
+0007 <span class="comment">%   annot = bml_raw2annot(cfg, raw)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% cfg.label_colname = string indicating name of column with labels. If</span>
+0010 <span class="comment">%   empty (default) a single row is returned per trial. If</span>
+0011 <span class="comment">%   label_colname is given, a row is returned for each label of each trial,</span>
+0012 <span class="comment">%   with the label specified in column 'label_colname'.</span>
+0013 <span class="comment">% cfg.per_label = bool, defults to false. If true, label_colname is set to</span>
+0014 <span class="comment">%   'label'. Deprecated, use 'label_colname' instead.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% raw - FT_DATATYPE_RAW</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% returns an ANNOT table with variables</span>
+0019 <span class="comment">%   'id' corresponds to the trial</span>
+0020 <span class="comment">%   'starts' time represented by the trial</span>
+0021 <span class="comment">%     'ends' time represented by the trial</span>
+0022 <span class="comment">%   'duration' in seconds</span>
+0023 <span class="comment">%   'trial'</span>
+0024 <span class="comment">%   's1' double, first sample sync coord</span>
+0025 <span class="comment">%   't1' double, time of first sample sample sync coord</span>
+0026 <span class="comment">%   's2' double, second sample sync coord</span>
+0027 <span class="comment">%   't2' double, time of second sample sample sync coord</span>
+0028 <span class="comment">%   'Fs' double, sampling rate</span>
+0029 <span class="comment">%   'nSamples' double, number of samples in raw</span>
+0030 <span class="comment">%   ('label') string with label name, present if cfg.per_label==true</span>
+0031 
+0032 
+0033 <span class="keyword">if</span> nargin == 1
+0034   raw = cfg;
+0035   cfg = [];
+0036   description = inputname(1);
+0037 <span class="keyword">elseif</span> nargin == 2
+0038   description = inputname(2);
+0039 <span class="keyword">else</span>
+0040   error(<span class="string">'Incorrect usage of bml_raw2annot'</span>)
+0041 <span class="keyword">end</span>
+0042 
+0043 per_label = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'per_label'</span>,false);
+0044 <span class="keyword">if</span> per_label
+0045     label_colname = <span class="string">'label'</span>;
+0046 <span class="keyword">else</span>
+0047   label_colname = [];
 0048 <span class="keyword">end</span>
-0049 
-0050 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,inputname(1));</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0049 label_colname = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label_colname'</span>,label_colname);
+0050 
+0051 
+0052 
+0053 <span class="keyword">if</span> ~isempty(label_colname)
+0054   labels = raw.label;
+0055 <span class="keyword">else</span>
+0056   labels = {<span class="string">'roi'</span>};
+0057 <span class="keyword">end</span>
+0058 
+0059 annot = table();
+0060 <span class="keyword">for</span> l=1:numel(labels)
+0061   label = labels(l);
+0062   annot_l=table();
+0063   <span class="keyword">for</span> i=1:numel(raw.trial)
+0064     trial = i;
+0065     nSamples = size(raw.trial{i},2);
+0066 
+0067     <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(raw))
+0068       Fs = raw.fsample;
+0069     <span class="keyword">else</span>
+0070       Fs = <a href="../../bml/signal/bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>(raw);
+0071       <span class="comment">%Fs = round(1/mean(diff(raw.time{i})),9,'significant');</span>
+0072     <span class="keyword">end</span>
+0073 
+0074     s1 = 1;
+0075     s2 = nSamples;     
+0076     t1 = raw.time{i}(1);
+0077     t2 = raw.time{i}(end);
+0078     starts = t1 - 0.5/Fs;
+0079     ends = t2 + 0.5/Fs;
+0080 
+0081     annot_l = [annot_l; table(starts,ends,trial,s1,t1,s2,t2,Fs,nSamples,label)];
+0082   <span class="keyword">end</span>
+0083   annot = [annot; annot_l];
+0084 <span class="keyword">end</span>
+0085 
+0086 <span class="keyword">if</span> isempty(label_colname)
+0087   annot.label = [];
+0088 <span class="keyword">elseif</span> ~strcmp(label_colname,<span class="string">'label'</span>)
+0089   annot.(label_colname{1}) = annot.label;
+0090   annot.label = [];
+0091 <span class="keyword">end</span>
+0092 
+0093 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],description);</pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

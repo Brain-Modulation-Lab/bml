@@ -33,13 +33,13 @@
    data = bml_hstack(cfg, raw1, raw2, raw3, ..., rawN)
  where the configuration can be empty.
 
- cfg.timetol - double: time tolerance in seconds
+ cfg.timetol - double: tolerance for frequencies
  cfg.timeref - string: either 'common', 'independent' or 'auto'
                if 'auto' it is set to common if raws are time contiguous
  cfg.match_labels - logical: indicates if same labels (channel names)
                should be enforced for concatenation. If false and all
                raws have the same number of labels, concatenation will
-               proceed with a warning. Defaults to true. 
+               proceed with a warning. Defaults to true.
 
  returns a time-concatenated raw</pre></div>
 
@@ -64,7 +64,7 @@ This function is called by:
 0006 <span class="comment">%   data = bml_hstack(cfg, raw1, raw2, raw3, ..., rawN)</span>
 0007 <span class="comment">% where the configuration can be empty.</span>
 0008 <span class="comment">%</span>
-0009 <span class="comment">% cfg.timetol - double: time tolerance in seconds</span>
+0009 <span class="comment">% cfg.timetol - double: tolerance for frequencies</span>
 0010 <span class="comment">% cfg.timeref - string: either 'common', 'independent' or 'auto'</span>
 0011 <span class="comment">%               if 'auto' it is set to common if raws are time contiguous</span>
 0012 <span class="comment">% cfg.match_labels - logical: indicates if same labels (channel names)</span>
@@ -116,115 +116,125 @@ This function is called by:
 0058 issamenchan = true;
 0059 isequaltrial = true;
 0060 isequalfreq  = true;
-0061 <span class="keyword">for</span> i=2:numel(varargin)
-0062   isequaltime  = isequaltime  &amp;&amp; isequal(varargin{i}.time , varargin{1}.time );
-0063   isequallabel = isequallabel &amp;&amp; isequal(varargin{i}.label, varargin{1}.label);
-0064   issamelabel  = issamelabel  &amp;&amp; isempty(setxor(varargin{i}.label, varargin{1}.label));
-0065   issamenchan  = issamenchan &amp;&amp; (length(varargin{i}.label) == length(varargin{1}.label));
-0066   isequaltrial = isequaltrial &amp;&amp; isequal(numel(varargin{i}.trial),numel(varargin{1}.trial));
-0067   isequalfreq  = isequalfreq &amp;&amp; length(uniquetol([varargin{i}.fsample,varargin{1}.fsample],timetol))==1;
-0068 <span class="keyword">end</span>
-0069 
-0070 <span class="comment">% ft_selectdata cannot create the union of the data contained in cell-arrays</span>
-0071 <span class="comment">% make a dummy without the actual data, but keep trialinfo/sampleinfo/grad/elec/opto</span>
-0072 <span class="comment">% also remove the topo/unmixing/topolabel, if present, otherwise it is not</span>
-0073 <span class="comment">% possible to concatenate raw and comp data. Note that in append_common the</span>
-0074 <span class="comment">% topo etc. is removed anyhow, when appenddim = 'chan'</span>
-0075 dummy = cell(size(varargin));
-0076 <span class="keyword">for</span> i=1:numel(varargin)
-0077   dummy{i} = removefields(varargin{i}, {<span class="string">'trial'</span>, <span class="string">'time'</span>});
-0078   <span class="keyword">if</span> strcmp(cfg.appenddim, <span class="string">'chan'</span>)
-0079     dummy{i} = removefields(dummy{i}, {<span class="string">'topo'</span>, <span class="string">'unmixing'</span>, <span class="string">'topolabel'</span>});
-0080   <span class="keyword">end</span>
-0081   <span class="comment">% add a dummy data field, this causes the datatype to become 'chan'</span>
-0082   dummy{i}.dummy       = ones(numel(dummy{i}.label),1);
-0083   dummy{i}.dummydimord = <span class="string">'chan'</span>;
-0084 <span class="keyword">end</span>
-0085 
-0086 <span class="keyword">if</span> ~isequallabel
-0087   <span class="keyword">if</span> issamelabel
-0088     <span class="keyword">for</span> i=2:length(varargin)
-0089       cfg1=[];
-0090       cfg1.label = varargin{1}.label;
-0091       varargin{i} = <a href="bml_reorder_channels.html" class="code" title="function reordered = bml_reorder_channels(cfg,data)">bml_reorder_channels</a>(cfg1,varargin{i});
-0092     <span class="keyword">end</span>
-0093   <span class="keyword">elseif</span> issamenchan &amp;&amp; ~match_labels
-0094     ft_warning(<span class="string">'concatenating raws with different channel names. Keeping labels of first raw.'</span>)
-0095     <span class="keyword">for</span> i=2:length(varargin)
-0096       varargin{i}.label = varargin{1}.label;
-0097       dummy{i}.label = varargin{1}.label;
-0098     <span class="keyword">end</span>
-0099   <span class="keyword">else</span>
-0100       ft_error(<span class="string">'Same channels required to append data by time'</span>)
-0101   <span class="keyword">end</span>
-0102 <span class="keyword">end</span>
-0103 <span class="keyword">if</span> ~isequaltrial
-0104     ft_error(<span class="string">'Same number of trials required to append data by time'</span>)
-0105 <span class="keyword">end</span>  
-0106 <span class="keyword">if</span> ~isequalfreq
-0107     ft_error(<span class="string">'Same Fs required to append data by time'</span>)        
-0108 <span class="keyword">end</span>
-0109 
-0110 <span class="comment">% don't do any data appending inside the common function</span>
-0111 cfg.parameter = {};
-0112 <span class="comment">% use a low-level function that is shared with the other ft_appendxxx functions</span>
-0113 <span class="comment">% this will handle the trialinfo/sampleinfo/grad/elec/opto</span>
-0114 data = append_common(cfg, dummy{:});
-0115 <span class="comment">% this is the actual data field that will be appended further down</span>
-0116 
-0117 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fieldnames(varargin{1}))
-0118   data.fsample=varargin{1}.fsample;
+0061 <span class="keyword">if</span> isfield(varargin{1},<span class="string">'hdr'</span>) &amp;&amp; isfield(varargin{1}.hdr,<span class="string">'Fs'</span>)
+0062     Fs1 = varargin{1}.hdr.Fs;
+0063 <span class="keyword">elseif</span> isfield(varargin{1},<span class="string">'fsample'</span>)
+0064     Fs1 = varargin{1}.fsample;
+0065     ft_warning(<span class="string">'using deprecated field fsample'</span>);
+0066 <span class="keyword">end</span>
+0067 <span class="keyword">for</span> i=2:numel(varargin)
+0068   isequaltime  = isequaltime  &amp;&amp; isequal(varargin{i}.time , varargin{1}.time );
+0069   isequallabel = isequallabel &amp;&amp; isequal(varargin{i}.label, varargin{1}.label);
+0070   issamelabel  = issamelabel  &amp;&amp; isempty(setxor(varargin{i}.label, varargin{1}.label));
+0071   issamenchan  = issamenchan &amp;&amp; (length(varargin{i}.label) == length(varargin{1}.label));
+0072   isequaltrial = isequaltrial &amp;&amp; isequal(numel(varargin{i}.trial),numel(varargin{1}.trial));
+0073   <span class="keyword">if</span> isfield(varargin{i},<span class="string">'hdr'</span>) &amp;&amp; isfield(varargin{i}.hdr,<span class="string">'Fs'</span>)
+0074     isequalfreq  = isequalfreq &amp;&amp; length(uniquetol([varargin{i}.hdr.Fs,Fs1],timetol))==1;
+0075   <span class="keyword">elseif</span> isfield(varargin{i},<span class="string">'fsample'</span>)
+0076     isequalfreq  = isequalfreq &amp;&amp; length(uniquetol([varargin{i}.fsample,Fs1],timetol))==1;
+0077     ft_warning(<span class="string">'using deprecated field fsample'</span>);
+0078   <span class="keyword">end</span>
+0079 <span class="keyword">end</span>
+0080 
+0081 <span class="comment">% ft_selectdata cannot create the union of the data contained in cell-arrays</span>
+0082 <span class="comment">% make a dummy without the actual data, but keep trialinfo/sampleinfo/grad/elec/opto</span>
+0083 <span class="comment">% also remove the topo/unmixing/topolabel, if present, otherwise it is not</span>
+0084 <span class="comment">% possible to concatenate raw and comp data. Note that in append_common the</span>
+0085 <span class="comment">% topo etc. is removed anyhow, when appenddim = 'chan'</span>
+0086 dummy = cell(size(varargin));
+0087 <span class="keyword">for</span> i=1:numel(varargin)
+0088   dummy{i} = removefields(varargin{i}, {<span class="string">'trial'</span>, <span class="string">'time'</span>});
+0089   <span class="keyword">if</span> strcmp(cfg.appenddim, <span class="string">'chan'</span>)
+0090     dummy{i} = removefields(dummy{i}, {<span class="string">'topo'</span>, <span class="string">'unmixing'</span>, <span class="string">'topolabel'</span>});
+0091   <span class="keyword">end</span>
+0092   <span class="comment">% add a dummy data field, this causes the datatype to become 'chan'</span>
+0093   dummy{i}.dummy       = ones(numel(dummy{i}.label),1);
+0094   dummy{i}.dummydimord = <span class="string">'chan'</span>;
+0095 <span class="keyword">end</span>
+0096 
+0097 <span class="keyword">if</span> ~isequallabel
+0098   <span class="keyword">if</span> issamelabel
+0099     <span class="keyword">for</span> i=2:length(varargin)
+0100       cfg1=[];
+0101       cfg1.label = varargin{1}.label;
+0102       varargin{i} = <a href="bml_reorder_channels.html" class="code" title="function reordered = bml_reorder_channels(cfg,data)">bml_reorder_channels</a>(cfg1,varargin{i});
+0103     <span class="keyword">end</span>
+0104   <span class="keyword">elseif</span> issamenchan &amp;&amp; ~match_labels
+0105     ft_warning(<span class="string">'concatenating raws with different channel names. Keeping labels of first raw.'</span>)
+0106     <span class="keyword">for</span> i=2:length(varargin)
+0107       varargin{i}.label = varargin{1}.label;
+0108       dummy{i}.label = varargin{1}.label;
+0109     <span class="keyword">end</span>
+0110   <span class="keyword">else</span>
+0111       ft_error(<span class="string">'Same channels required to append data by time'</span>)
+0112   <span class="keyword">end</span>
+0113 <span class="keyword">end</span>
+0114 <span class="keyword">if</span> ~isequaltrial
+0115     ft_error(<span class="string">'Same number of trials required to append data by time'</span>)
+0116 <span class="keyword">end</span>
+0117 <span class="keyword">if</span> ~isequalfreq
+0118     ft_error(<span class="string">'Same Fs required to append data by time'</span>)
 0119 <span class="keyword">end</span>
-0120 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fieldnames(varargin{1}))
-0121   data.hdr=varargin{1}.hdr;
-0122 <span class="keyword">end</span>
-0123 <span class="comment">%data.sampleinfo=[];</span>
-0124 
-0125 <span class="keyword">if</span> strcmp(timeref,<span class="string">'auto'</span>)
-0126   <span class="keyword">if</span> <a href="bml_check_contiguity.html" class="code" title="function are_contiguous = bml_check_contiguity(cfg, varargin)">bml_check_contiguity</a>(cfg,varargin{:})
-0127     timeref = <span class="string">'common'</span>;
-0128   <span class="keyword">else</span>
-0129     timeref = <span class="string">'independent'</span>;
-0130   <span class="keyword">end</span>
-0131 <span class="keyword">end</span>
-0132 
-0133 <span class="keyword">if</span> strcmp(timeref,<span class="string">'independent'</span>)
-0134   dat = cell(1,0);
-0135   tim = cell(1,0);
-0136   <span class="keyword">for</span> t=1:numel(varargin{1}.trial)
-0137     trial_dat=[];
-0138     trial_tim=[];
-0139     curtime=varargin{i}.time{t}(1);
-0140     <span class="keyword">for</span> i=1:numel(varargin)
-0141       trial_dat = cat(2, trial_dat, varargin{i}.trial{t});
-0142       time0=varargin{i}.time{t}(1);
-0143       trial_tim = cat(2, trial_tim, curtime-time0+1/data.fsample+varargin{i}.time{t});
-0144       curtime=trial_tim(end);
-0145     <span class="keyword">end</span>
-0146     dat = cat(2, dat, trial_dat);
-0147     tim = cat(2, tim, trial_tim);
-0148   <span class="keyword">end</span>
-0149   data.trial = dat;
-0150   data.time  = tim;      
-0151 <span class="keyword">elseif</span> strcmp(timeref,<span class="string">'common'</span>)
-0152   dat = cell(1,0);
-0153   tim = cell(1,0);
-0154   <span class="keyword">for</span> t=1:numel(varargin{1}.trial)
-0155     trial_dat=[];
-0156     trial_tim=[];
-0157     <span class="keyword">for</span> i=1:numel(varargin)
-0158       trial_dat = cat(2, trial_dat, varargin{i}.trial{t});
-0159       trial_tim = cat(2, trial_tim, varargin{i}.time{t});
-0160     <span class="keyword">end</span>
-0161     dat = cat(2, dat, trial_dat);
-0162     tim = cat(2, tim, trial_tim);
-0163   <span class="keyword">end</span>
-0164   data.trial = dat;
-0165   data.time  = tim; 
-0166 <span class="keyword">else</span>
-0167   error(<span class="string">'unknown cfg.timeref'</span>);
-0168 <span class="keyword">end</span>
-0169</pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0120 
+0121 <span class="comment">% don't do any data appending inside the common function</span>
+0122 cfg.parameter = {};
+0123 <span class="comment">% use a low-level function that is shared with the other ft_appendxxx functions</span>
+0124 <span class="comment">% this will handle the trialinfo/sampleinfo/grad/elec/opto</span>
+0125 data = append_common(cfg, dummy{:});
+0126 <span class="comment">% this is the actual data field that will be appended further down</span>
+0127 
+0128 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fieldnames(varargin{1}))
+0129   data.fsample=varargin{1}.fsample;
+0130 <span class="keyword">end</span>
+0131 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fieldnames(varargin{1}))
+0132   data.hdr=varargin{1}.hdr;
+0133 <span class="keyword">end</span>
+0134 <span class="comment">%data.sampleinfo=[];</span>
+0135 
+0136 <span class="keyword">if</span> strcmp(timeref,<span class="string">'auto'</span>)
+0137   <span class="keyword">if</span> <a href="bml_check_contiguity.html" class="code" title="function are_contiguous = bml_check_contiguity(cfg, varargin)">bml_check_contiguity</a>(cfg,varargin{:})
+0138     timeref = <span class="string">'common'</span>;
+0139   <span class="keyword">else</span>
+0140     timeref = <span class="string">'independent'</span>;
+0141   <span class="keyword">end</span>
+0142 <span class="keyword">end</span>
+0143 
+0144 <span class="keyword">if</span> strcmp(timeref,<span class="string">'independent'</span>)
+0145   dat = cell(1,0);
+0146   tim = cell(1,0);
+0147   <span class="keyword">for</span> t=1:numel(varargin{1}.trial)
+0148     trial_dat=[];
+0149     trial_tim=[];
+0150     curtime=varargin{i}.time{t}(1);
+0151     <span class="keyword">for</span> i=1:numel(varargin)
+0152       trial_dat = cat(2, trial_dat, varargin{i}.trial{t});
+0153       time0=varargin{i}.time{t}(1);
+0154       trial_tim = cat(2, trial_tim, curtime-time0+1/data.fsample+varargin{i}.time{t});
+0155       curtime=trial_tim(end);
+0156     <span class="keyword">end</span>
+0157     dat = cat(2, dat, trial_dat);
+0158     tim = cat(2, tim, trial_tim);
+0159   <span class="keyword">end</span>
+0160   data.trial = dat;
+0161   data.time  = tim;
+0162 <span class="keyword">elseif</span> strcmp(timeref,<span class="string">'common'</span>)
+0163   dat = cell(1,0);
+0164   tim = cell(1,0);
+0165   <span class="keyword">for</span> t=1:numel(varargin{1}.trial)
+0166     trial_dat=[];
+0167     trial_tim=[];
+0168     <span class="keyword">for</span> i=1:numel(varargin)
+0169       trial_dat = cat(2, trial_dat, varargin{i}.trial{t});
+0170       trial_tim = cat(2, trial_tim, varargin{i}.time{t});
+0171     <span class="keyword">end</span>
+0172     dat = cat(2, dat, trial_dat);
+0173     tim = cat(2, tim, trial_tim);
+0174   <span class="keyword">end</span>
+0175   data.trial = dat;
+0176   data.time  = tim;
+0177 <span class="keyword">else</span>
+0178   error(<span class="string">'unknown cfg.timeref'</span>);
+0179 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

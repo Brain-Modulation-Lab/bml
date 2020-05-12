@@ -80,7 +80,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="../../bml/signal/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="../../bml/signal/bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 <li><a href="bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li></ul>
@@ -170,13 +170,13 @@ This function is called by:
 0077 
 0078   <span class="comment">%saving cropped start and end indices of original slave raw</span>
 0079   crop_sc=[]; <span class="comment">%cropped slave coordinates</span>
-0080   [crop_sc.s1, crop_sc.s2]=<a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(sc,ovlp(1),ovlp(2));
+0080   [crop_sc.s1, crop_sc.s2]=<a href="../../bml/signal/bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>(sc,ovlp(1),ovlp(2));
 0081   crop_sc.t1=<a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(sc,crop_sc.s1);
 0082   crop_sc.t2=<a href="bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(sc,crop_sc.s2);
 0083   
 0084   <span class="comment">%cropping raws to overlap region</span>
-0085   master = <a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(master, ovlp(1), ovlp(2));
-0086   slave = <a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave, ovlp(1), ovlp(2));
+0085   master = <a href="../../bml/signal/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(master, ovlp(1), ovlp(2));
+0086   slave = <a href="../../bml/signal/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave, ovlp(1), ovlp(2));
 0087   ovlp_duration = ovlp(2) - ovlp(1);
 0088   
 0089   <span class="comment">%linear warping - wt0, ws1</span>
@@ -207,6 +207,6 @@ This function is called by:
 0114   warpedcoords.ws1 = ws1;
 0115 
 0116 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Tue 25-Sep-2018 10:08:19 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
