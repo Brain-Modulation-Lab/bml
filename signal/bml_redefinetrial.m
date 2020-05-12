@@ -4,6 +4,7 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 %
 % Use as
 %   redefined = bml_redefinetrial(cfg, raw)
+%   [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 %
 % raw - FT_DATAYPE_RAW to be re-epoched with time in global coordinates
 % cfg - configuraton structure
@@ -21,8 +22,8 @@ function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)
 %          Defaults to false. [NOT IMPLEMENTED]
 % cfg.warn - logical indicating if warnings should be issued. Defaults to true
 %
-% returns a raw with new trials. The epoch ANNOT is added as a new field in the 
-% raw, changing the id to match the index of the corresponding trials if
+% returns a raw with new trials. The epoch ANNOT also returned changing the 
+% id to match the index of the corresponding trials if
 % necessary. The original id is returned in a new epoch_id variable, if
 % this variable didn't exist. 
 
