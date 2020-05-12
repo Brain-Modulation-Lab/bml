@@ -18,10 +18,15 @@ function [ref,U] = bml_rereference(cfg,raw)
 %   'CTAR', common trimmed average referencing
 %   'LAR', local average referencing
 %   'VAR', variable average referencing
+%   'bipolar', bipolar referencing
 % cfg.percent - numeric, indicates percentage of labels in group used in
 %   trimmed mean. Defaults to 50. 
 % cfg.crossfading_width - scalar. Width in samples of the crossfading
 %   region. Defaults to 100;
+% cfg.refchan - either cellstr with label to use a reference for all
+%   other channels, or table with label and reference column for custom
+%   bipolar referencing montage
+% cfg.refkeep - bool indicating if reference channels should be kept 
 %
 % raw - ft_datatype_raw to be re-referenced
 % 
@@ -81,10 +86,10 @@ if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
     warning('Using experimental method VAR, susceptible to high amplitude artifacts')
 
     %calculating variance-covariance matrix
-    cfg=[];
-    cfg.covariance = 'yes';
-    cfg.vartrllength = 2;
-    tl_raw=ft_timelockanalysis(cfg,raw);
+    cfg1=[];
+    cfg1.covariance = 'yes';
+    cfg1.vartrllength = 2;
+    tl_raw=ft_timelockanalysis(cfg1,raw);
 
     %grouping matrix into blocks
     COVs = cell(length(ug),1);
@@ -174,6 +179,40 @@ else
         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
       end
     end   
+    
+  elseif ismember(method,{'bipolar'})
+    %loading label again from cfg
+    label   = bml_getopt(cfg,'label',raw.label);
+    refchan = bml_getopt(cfg,'refchan',[]); 
+    
+    %defining reference for each channel to be re-referenced
+    if isempty(refchan)
+      error('reference channel(s) required for bipolar referencing')
+    elseif numel(refchan)==1
+      reftable = table(label);
+      reftable.reference(:) = refchan;
+    elseif numel(refchan) == numel(label)
+      reftable = table(label);
+      reftable.reference = refchan;
+    else
+      error('refchan should have one element, or same number of elements as label');
+    end
+    
+    ref = raw;
+    for t=1:numel(raw.trial)
+      for j=1:height(reftable)
+        ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
+          raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - ...
+          raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
+      end
+    end  
+    
+    if ~bml_getopt(cfg,'refkeep',0)
+      %removing reference channels
+      cfg1=[];
+      cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+      ref = ft_selectdata(cfg1, ref);
+    end
     
   elseif ismember(method,{'LAR','local'})
     error('local average referencing not implemented for data with NaNs')
