@@ -20,5 +20,7 @@ if ~isempty(annot)
     if ismember('id',annot.Properties.VariableNames)
       annot.id=[];
     end
-    annot = bml_annot_table(annot);
+    if all(ismember({'starts','ends'},annot.Properties.VariableNames))
+      annot = bml_annot_table(annot);
+    end
 end
