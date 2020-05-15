@@ -1,15 +1,18 @@
-function [Dtf] = bml_wavtransform(cfg)
+function [Dtf] = bml_wavtransform(cfg, D)
 %%
 % bml_wavtransform
 %   Performs a wavelet transform on timeseries in D.trial. Spectral
 %   decomposition is performed trial-wise, and only the amplitude is
 %   returned unless the keep_phase flag is 'yes'. If keep_amp is set to
-%   'no', amplitude (trail field) is discarded from the output. Dtf is 
+%   'no', amplitude (trial field) is discarded from the output. Dtf is 
 %   returned with the same fields as the input D, but the trial field now 
 %   contains wavelet amplitudes [time x freq x channel].
 %
+%   Use as 
+%     [Dtf] = bml_wavtransform(cfg, D)
+%
 % Inputs:
-%   cfg.D	        fieldptrip object containing timeseries to transform.
+%   D               fieldptrip object containing timeseries to transform.
 %   cfg.fq	        vector of frequencies at which to evaluate the wavelet. 
 %   cfg.width       vector of wavelet c-parameter for corresponding frequencies in fq
 %                   (if length(width)~=length(fq) then width(1) is used for all fq); 
@@ -19,20 +22,16 @@ function [Dtf] = bml_wavtransform(cfg)
 %                   discard to avoid edge artifact.
 %   cfg.keep_phase  'yes' to keep phase info.  Will be returned in phase
 %                   field (default 'no').
-%   cfg.keep_amp  'yes' to keep amplitude info.  Will be returned in trial
+%   cfg.keep_amp    'yes' to keep amplitude info.  Will be returned in trial
 %                   field (default 'yes').
 %   
-if isfield(cfg, 'D')
-    D = cfg.D;
-else
-    fprintf('bml_wavtransform: cfg variable must contain fieldtrip data object.\n');
-    return
+if ~exist('D','var')
+    error('bml_wavtransform: cfg variable must contain fieldtrip data object.\n');
 end
 if isfield(cfg, 'fq')
     fq = cfg.fq;
 else
-    fprintf('bml_wavtransform: cfg variable must contain a vector of frequencies.\n');
-    return
+    error('bml_wavtransform: cfg variable must contain a vector of frequencies.\n');
 end
 if isfield(cfg, 'padding')
     padding = cfg.padding;
