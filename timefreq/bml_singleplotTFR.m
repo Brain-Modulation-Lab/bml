@@ -69,10 +69,6 @@ if ~isempty(bands)
   end
 end
 
-%selecting y axis ticks
-%foi_ticks_wanted = 10 .^ (min(log10(foi)) + linspace(0,1,nyticks) .* range(log10(foi)));
-%foi_ticks_idx = dsearchn(foi',foi_ticks_wanted');
-
 foi_ticks_wanted = [round(min(foi),1),4,8,12,30,60,120,250];
 foi_ticks_idx = polyval(polycoeff,log10(foi_ticks_wanted));
 
@@ -85,30 +81,36 @@ if ~isempty(events)
   if ~ismember('color',events.Properties.VariableNames)
     events.color(:)={'#444444'};
   end
+	if ~ismember('starts_color',events.Properties.VariableNames)
+    events.starts_color=events.color;
+  end
+	if ~ismember('ends_color',events.Properties.VariableNames)
+    events.ends_color=events.color;
+  end
   if ~ismember('linestyle',events.Properties.VariableNames)
     events.linestyle(:)={'-'};
-  end
-  if ~ismember('starts_error',events.Properties.VariableNames)
-    events.error=events.rstd;
   end
   
   for i=1:height(events)
     
-    plot(repmat(events.starts(i),[1,2]),[min(foi_idx)-0.5,max(foi_idx)],...
-      'Color',hex2rgb(events.color{i}),'LineStyle',events.linestyle{i},...
-      'Marker','none');
-    plot(repmat(events.ends(i),[1,2]),[min(foi_idx)-0.5,max(foi_idx)],...
-      'Color',hex2rgb(events.color{i}),'LineStyle',events.linestyle{i},...
-      'Marker','none');
-   if ismember('starts_error',events.Properties.VariableNames) && ~isnan(events.starts_error(i))
-      errorbar(events.starts(i),max(foi_idx),events.starts_error(i),'horizontal',...
-        'Color',hex2rgb(events.color{i}),'Marker','none')
-   end
-	 if ismember('ends_error',events.Properties.VariableNames) && ~isnan(events.ends_error(i))
-      errorbar(events.ends(i),max(foi_idx),events.ends_error(i),'horizontal',...
-        'Color',hex2rgb(events.color{i}),'Marker','none')
-   end 
-   
+    if ~ismissing(events.starts_color(i))
+      plot(repmat(events.starts(i),[1,2]),[min(foi_idx)-0.5,max(foi_idx)],...
+        'Color',hex2rgb(events.starts_color{i}),'LineStyle',events.linestyle{i},...
+        'Marker','none');
+      if ismember('starts_error',events.Properties.VariableNames) && ~isnan(events.starts_error(i))
+        errorbar(events.starts(i),max(foi_idx),events.starts_error(i),'horizontal',...
+          'Color',hex2rgb(events.starts_color{i}),'Marker','none','CapSize',4)
+      end
+    end
+    if ~ismissing(events.ends_color(i))
+      plot(repmat(events.ends(i),[1,2]),[min(foi_idx)-0.5,max(foi_idx)],...
+        'Color',hex2rgb(events.ends_color{i}),'LineStyle',events.linestyle{i},...
+        'Marker','none');
+      if ismember('ends_error',events.Properties.VariableNames) && ~isnan(events.ends_error(i))
+        errorbar(events.ends(i),max(foi_idx),events.ends_error(i),'horizontal',...
+          'Color',hex2rgb(events.ends_color{i}),'Marker','none','CapSize',4)
+      end 
+    end
   end
 end
 
