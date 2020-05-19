@@ -18,16 +18,8 @@ if ~isfield(data,'freq') || isempty(data.freq)
   error('data.freq required');
 end
 
-name =   {'delta',   'theta',  'alpha',   'beta','low gamma','high gamma'}';
-symbol = {'\delta', '\theta', '\alpha',  '\beta', '\gamma_L','\gamma_H'}';
-fstarts = [     1,         4,        8,       12,         30,          60]';
-fends =   [     4,         8,       12,       30,         60,         250]';
-color = {'#EDF8FB','#BFD3E6','#9EBCDA','#8C96C6',  '#8856A7',   '#810F7C'}'; %ColorBrewer BuPu_6
-cannonical_bands = table(name,fstarts,fends,color,symbol);
-clear name fstarts fends color symbol; 
-
 events           = bml_getopt(cfg,'events',table());
-bands            = bml_getopt(cfg,'bands',cannonical_bands);
+bands            = bml_getopt(cfg,'bands',bml_get_canonical_bands());
 
 %nyticks          = bml_getopt(cfg,'nyticks',5);
 foi              = data.freq;
