@@ -53,15 +53,19 @@ else
 end
 
 if isfield(cfg, 'keep_phase')
-    if strcmp(cfg.keep_phase,'yes') || cfg.keep_phase
+    if strcmp(cfg.keep_phase,'yes') || istrue(cfg.keep_phase)
         keep_phase = true;
+    else
+        keep_phase = false;
     end
 else
     keep_phase = false;
 end
 if isfield(cfg, 'keep_amp')
-    if strcmp(cfg.keep_amp,'yes') || cfg.keep_amp
+    if strcmp(cfg.keep_amp,'yes') || istrue(cfg.keep_amp)
         keep_amp = true;
+    else
+        keep_amp = false;
     end
 else
     keep_amp = true;
@@ -136,10 +140,12 @@ for tr = 1:length(D.trial)
       if strcmp(ds, 'average')
         if keep_amp         
           s = size(Dtf.trial{tr});
+          if length(s) == 2; s = [s,1]; end
           Dtf.trial{tr} = squeeze(mean(reshape(Dtf.trial{tr}(:,1:m,:),s(1),downsample_factor,m./downsample_factor,s(3)),2));
         end
         if keep_power        
           s = size(Dtf.power{tr});
+          if length(s) == 2; s = [s,1]; end
           Dtf.power{tr} = squeeze(mean(reshape(Dtf.power{tr}(:,1:m,:),s(1),downsample_factor,m./downsample_factor,s(3)),2));
         end
       elseif strcmp(ds, 'filter')
