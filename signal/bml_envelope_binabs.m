@@ -25,14 +25,14 @@ if nargin==1
 end
 
 if ~ismember('fsample',fields(data))
-	data.fsample = round(1/mean(diff(data.time{1})),9,'significant');
+	data.fsample = bml_getFs(data);
 end
 
 freq      = bml_getopt(cfg,'freq',DEFAULT_TARGET_FSAMPLE);
 bin_size	= bml_getopt(cfg,'bin_size',round(data.fsample/freq));
     
 if abs(data.fsample/freq - bin_size) > 0.1
-  warning(char(strcat('Specified envelope freq ',num2str(freq),' not possible. Using ',num2str(data.fsample/bin_size))));
+  warning(char(strcat('Specified envelope freq ',num2str(freq),' not possible. Using freq = ',num2str(data.fsample/bin_size), ' Hz')));
 end
 
 env=struct();
