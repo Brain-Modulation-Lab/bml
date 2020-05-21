@@ -77,6 +77,9 @@ ug = unique(g);
 [N,~] = histc(g,ug);
 
 if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
+  
+  %% matrix multiplication based methods  
+    
   %creating blocks
   if ismember(method,{'CAR'})
     U_blocks=cellfun(@bml_comavgref_matrix,num2cell(N),'UniformOutput',false);
@@ -118,9 +121,13 @@ if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
   ref = bml_apply(@(x) U*x, raw);
 
 else
+  
+  %% explicit substraction based methods
+    
   %removing null group 
   ug = ug(ug>0);
   
+  %% Common Average Reference
   if ismember(method,{'CAR','common'}) %common average referencing
     ref = raw;
     for t=1:numel(raw.trial)
@@ -131,6 +138,18 @@ else
       end
     end
     
+  %% Common Trimmed Average Reference 
+  elseif ismember(method,{'CTAR'})
+    ref = raw;
+    for t=1:numel(raw.trial)
+      for g=1:numel(ug)
+        %calculating groups common trimmed average
+        commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
+        ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
+      end
+    end  
+    
+  %% Common Average Reference with Cross-Fading
   elseif ismember(method,{'CARCF'}) %common average referencing with cross fading
     cfp = linspace(0,1,ceil(crossfading_width/2)); %crossfading pattern
     cfp = [cfp, fliplr(cfp(2:end))]; 
@@ -158,8 +177,11 @@ else
         commavg = sum(tr .* tw,1) ./ sum(tw,1);
         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
       end
-    end
+    end 
     
+ 
+    
+     %% Common Median Reference 
   elseif ismember(method,{'CMR'})
     ref = raw;
     for t=1:numel(raw.trial)
@@ -168,18 +190,9 @@ else
         commmed = nanmedian(raw.trial{t}(group==ug(g),:),1);
         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
       end
-    end   
+    end  
     
-  elseif ismember(method,{'CTAR'})
-    ref = raw;
-    for t=1:numel(raw.trial)
-      for g=1:numel(ug)
-        %calculating groups common trimmed average
-        commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
-        ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
-      end
-    end   
-    
+  %% Bipolar Reference 
   elseif ismember(method,{'bipolar'})
     %loading label again from cfg
     label   = bml_getopt(cfg,'label',raw.label);
