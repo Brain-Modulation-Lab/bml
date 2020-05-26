@@ -16,8 +16,10 @@
 % cfg.complete_trial - bool, indicates if complete trial is to be masked if
 %   any part of it is masked. Defalts to false. If label_colname is given
 %   the msking is done per label. 
-% cfg.remask_nan - bool, indicating if usign NaNs to remask. Defaults to
-%   false. Mutually exclusive with cfg.annot
+% cfg.remask_nan - bool, indicating if remasking existing NaNs. Defaults to
+%   false. Mutually exclusive with cfg.annot and remask_inf
+% cfg.remask_inf - bool, indicating if remasking existing Infs. Defaults to
+%   false. Mutually exclusive with cfg.annot and remask_nan
 %
 % raw - FT_DATAYE_RAW object
 %
@@ -32,14 +34,32 @@ label_colname  = bml_getopt(cfg,'label_colname',[]);
 value          = bml_getopt(cfg,'value',NaN);
 complete_trial = bml_getopt(cfg,'complete_trial',false);
 remask_nan     = bml_getopt(cfg,'remask_nan',false);
+remask_inf     = bml_getopt(cfg,'remask_inf',false);
 
 masked = raw;
 roi = bml_raw2annot(raw);
 
 %assert(xor(~isempty(annot),istrue(remask_nan)),'cfg.annot or cfg.remask_nan  required');
-if isempty(annot) && ~istrue(remask_nan)
+if isempty(annot) && ~istrue(remask_nan) && ~istrue(remask_inf)
   %nothing to mask
   return 
+end
+
+if remask_inf
+  if ~isempty(label_colname); warning('label_colname ignored'); end
+  if ~isempty(setdiff(masked.label,label)) 
+    error('sorry, label selection for remask_inf not implemented');
+  end
+  if complete_trial %masking complete row if NaN is detected
+    for t=1:numel(masked.trial)
+      masked.trial{t}(any(isinf(masked.trial{t}),2),:)=value;
+    end
+  else %masking only Infs
+    for t=1:numel(masked.trial)
+      masked.trial{t}(isinf(masked.trial{t}))=value;
+    end    
+  end
+  return
 end
 
 if remask_nan
