@@ -61,6 +61,7 @@ for i=trials
       fprintf("\n",label{1});
     end
     
+    assert(~any(isinf(env.trial{i}(l,:))),'envelope cannot contain Inf values');
     zero_cross_ixs = find(abs(diff(sign(env.trial{i}(l,:)-lower_threshold),1,2))>=1);
 
     %dealing with negative values for reset
