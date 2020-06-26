@@ -5,7 +5,7 @@ function renamed = bml_annot_rename(annot,varargin)
 % Use as
 %    renamed = bml_annot_rename(annot, 'old_col1', 'new_col1', 'old_col2', 'new_col2',...)
 
-annot = bml_annot_table(annot);
+%annot = bml_annot_table(annot);
 
 if mod(numel(varargin),2) ~= 0
   error('matching old and new column names required');
