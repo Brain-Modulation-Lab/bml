@@ -1,6 +1,16 @@
 function [alpha, n_comp] = bml_timefreq_wavelet_FWER_corr(cfg)
+% BML_TIMEFRQ_WAVELET_FWER_CORR estimates number of independent comparisons in a time frequency analysis
+%
+% Parameters
+%   cfg.foi - vector with frequencies of interest
+%   cfg.toi - vector with times of interest
+%   cfg.width - width of wavlet (fixed for all freqs). Defaults to 7.
+%   cfg.fwer - family wise error rate. Defaults to 0.05
+%
+% Returns
+%   alpha - significance threshold for uncorrected pvalues
+%   n_comp - Estimated number of independent components
 
-%estimating number of independent comparisons in a time frequency analysis
 method = bml_getopt(cfg,'method','wavelet');
 if ~strcmp(method, 'wavelet')
   error('only method = wavelet supported');

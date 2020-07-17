@@ -62,7 +62,7 @@ for g=1:numel(groups)
     g_name = groups{g};
   else
     annot_g = annot(annot{:,groupby}==groups{g},:);    
-    g_name = num2str(groups(g));
+    g_name = num2str(groups{g});
   end
   
   ngt = height(annot_g);

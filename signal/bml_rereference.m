@@ -46,6 +46,8 @@ crossfading_width = bml_getopt(cfg,'crossfading_width',100);
 %checking for NaNs in data
 raw_has_nan = any(cellfun(@(x) any(any(isnan(x),1),2),raw.trial));
 
+assert(size(label,1)>=size(label,2),"label cell array should be Nx1, not 1xN")
+
 %inferring groups from labels
 if isempty(group)
   sl=split(label,'_');

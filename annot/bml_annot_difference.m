@@ -128,7 +128,7 @@ for g=1:numel(groups_x)
         	annot_g = [annot_g;{x_start,x_end,x_id,groups_x(g)}];         
         end
       else
-          error('Should never get here');
+          error('Should never get here. Is there any annotation with negative duration?');
       end
     end
     if ~isempty(annot_g)
