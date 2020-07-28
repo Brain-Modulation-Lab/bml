@@ -150,5 +150,6 @@ for i=1:height(epoch)
 
 end
 
+redefined.fsample = bml_getFs(redefined);
 redefined = ft_datatype_raw(redefined);
 

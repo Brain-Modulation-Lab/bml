@@ -1,4 +1,3 @@
-
 function annot = bml_annot_calculate(cfg, raw, varargin)
 
 % BML_ANNOT_CALCULATE calculate scalar values from specific annotations in

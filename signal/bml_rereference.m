@@ -214,6 +214,7 @@ else
     end
     
     ref = raw;
+    
     for t=1:numel(raw.trial)
       for j=1:height(reftable)
         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
