@@ -51,12 +51,12 @@ assert(~isempty(roi),'roi required');
 
 hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),'chantype','chaninfo');
 if isempty(time_channel)
-  sel_time_channel = strcmp(hdr1.chaninfo.chantype,chantype);
+  sel_time_channel = strcmp(hdr1.orig.chaninfo.chantype,chantype);
   assert(sum(sel_time_channel)>0,'no channel of specified chantype');
-  time_channel = hdr1.chaninfo(sel_time_channel,:).channel{1};
+  time_channel = hdr1.orig.chaninfo(sel_time_channel,:).channel{1};
 end
 if isempty(sync_time_channel)
-  sync_time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,roi.chantype{1}),:).channel{1};
+  sync_time_channel = hdr1.orig.chaninfo(strcmp(hdr1.orig.chaninfo.chantype,roi.chantype{1}),:).channel{1};
 end
 
 time_begin_var      = strcat(time_channel,'_TimeBegin');
@@ -86,17 +86,17 @@ for i=1:height(filetype_roi)
   coord.s1=1; coord.s2=hdr.nSamples;
   
   %loading time info from neuroomega file
-  if ismember(time_begin_var,fields(hdr.orig))
-    coord.t1   = hdr.orig.(time_begin_var);
-    coord.t2   = hdr.orig.(time_end_var);
+  if ismember(time_begin_var,fields(hdr.orig.orig))
+    coord.t1   = hdr.orig.orig.(time_begin_var);
+    coord.t2   = hdr.orig.orig.(time_end_var);
     %(coord.t2 - coord.t1)*hdr.Fs == hdr.nSamples
   else
     error('%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s',...
       time_begin_var,fullfile(row.folder{1},row.name{1}), strjoin(hdr.label));
   end
-  if ismember(sync_time_begin_var,fields(hdr.orig))
-  	orig_coord.t1 = hdr.orig.(sync_time_begin_var);
-    orig_coord.t2 = hdr.orig.(sync_time_end_var);
+  if ismember(sync_time_begin_var,fields(hdr.orig.orig))
+  	orig_coord.t1 = hdr.orig.orig.(sync_time_begin_var);
+    orig_coord.t2 = hdr.orig.orig.(sync_time_end_var);
     %(orig_coord.t2 - orig_coord.t1)*row.Fs == row.nSamples
   else
     error('%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s',...
