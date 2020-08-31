@@ -650,7 +650,19 @@ function default = default_nan(input)
 end
 
 function default = default_nan3(input)
-  default = padarray(input,[isempty(input),max([0,3-size(input,2)])],nan,'post');
+    %defualt_nan3 ensures array has at least three columns, filling up with
+    %nans where required
+    
+    %Function definition using padarray of Image Processing Toolbox
+    %default = padarray(input,[isempty(input),max([0,3-size(input,2)])],nan,'post');
+  
+    if isempty(input)
+        default = nan(1,3);
+    else
+        padcoln = max([0,3-size(input,2)]);
+        default = [input nan(size(input,1),padcoln)];
+    end
+  
 end
 
 function ise = isectopic(t,syl_onset,syl_offset)
