@@ -1,6 +1,6 @@
 function annot = bml_annot_calculate2(cfg, raw, varargin)
 
-% BML_ANNOT_CALCULATE2 calculates a scalar values from 2 specific annotations in raw
+% BML_ANNOT_CALCULATE2 calculates scalar values from 2 specific annotations in raw
 %
 % Use as
 %    annot = bml_annot_calculate2(cfg, raw, 'feature_1_name', feature_1_fun,
@@ -37,9 +37,9 @@ assert(~isempty(epoch),'epoch table required');
 
 if all(ismember({'id1','starts1','ends1','duration1','channel1','id2','starts2','ends2','duration2','channel2'},...
     epoch.Properties.VariableNames))
-  fprintf('Binary calculation across channels, same epoch.\n');
-elseif all(ismember({'id','starts','ends','duration','channel1','channel2'},epoch.Properties.VariableNames))
   fprintf('Binary calculation across channels and epochs.\n');
+elseif all(ismember({'id','starts','ends','duration','channel1','channel2'},epoch.Properties.VariableNames))
+  fprintf('Binary calculation across channels, same epochs.\n');
   epoch2 = epoch(:,{'id','starts','ends','duration'});
   epoch2.Properties.VariableNames = {'id2','starts2','ends2','duration2'};
   epoch = bml_annot_rename(epoch,'id','id1','starts','starts1','ends','ends1','duration','duration1');
