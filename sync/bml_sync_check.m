@@ -69,6 +69,7 @@ for chunk_i=1:length(chunk_ids)
       t1=master.time{1}(1);
       t2=master.time{1}(end);
       cfg=[]; cfg.time=master.time; cfg.method='pchip';
+      cfg.extrapval = nan;
       cfg.feedback=ft_feedback;
       slave_crop=ft_resampledata(cfg,bml_crop(slave,t1,t2));
       slave_crop.fsample = master.fsample;
