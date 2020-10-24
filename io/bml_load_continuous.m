@@ -73,6 +73,7 @@ electrode     = bml_annot_table(electrode,'electrode');
 
 if isempty(roi)
   raw=[];
+  file_raw_map=[];
   return  
 end
 roi = bml_roi_table(roi);

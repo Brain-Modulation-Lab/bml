@@ -7,7 +7,7 @@ function sync_roi = bml_sync_analog(cfg)
 %
 % cfg - configuration structure (required fields)
 %   cfg.roi - roi table with vars 'id','starts','ends','folder','name',
-%            'nSamples','filetype'. Contains a coarse alignment of the
+%            'nSamples','filetype','Fs'. Contains a coarse alignment of the
 %            files, normally inferred from the OS 'Date-Modified' metadata.
 %            'starts' and 'ends' should be given in seconds from midnight.
 %   cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'

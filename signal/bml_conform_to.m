@@ -93,6 +93,7 @@ end
 
 %interpolating subset of slave trials to master times
 cfg=[]; cfg.time=sub_master_time; cfg.method='pchip';
+cfg.extrapval=nan;
 cfg.feedback='no';
 cfg.trackcallinfo = false;
 cfg.showcallinfo = 'no';
