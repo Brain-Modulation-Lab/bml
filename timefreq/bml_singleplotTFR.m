@@ -1,4 +1,4 @@
-function bml_singleplotTFR(cfg, data)
+ function bml_singleplotTFR(cfg, data)
 
 % BML_SINGLEPLOTTFR is a thin wrapper over ft_singleplotTFR
 % 

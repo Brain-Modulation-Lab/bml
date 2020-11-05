@@ -13,6 +13,10 @@ if ~exist('t0','var')
   t0 = '00:00:00';
 end
 
+if isdatetime(date)
+    date = cellstr(datestr(date));
+end
+
 if ~iscell(date)
   date = {date}; 
 end
@@ -27,4 +31,4 @@ for i=1:numel(date)
   end
 end
 
-sec=(sec-datenum(t0))*24*60*60;
+sec=round((sec-datenum(t0))*24*60*60);

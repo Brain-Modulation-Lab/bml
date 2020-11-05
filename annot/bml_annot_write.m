@@ -20,9 +20,15 @@ if ~exist('filename','var')
   end
 end
 
+[~,~,ext] = fileparts(filename);
+if strcmp(ext,'.tsv')
+    annot.id=[];
+    annot.ends=[];
+end
+
 if ~ismember('delimiter',varargin)
   varargin = [varargin, {'delimiter','\t'}];
 end
 
-writetable(annot,filename,varargin{:});
+writetable(annot,filename,varargin{:},'FileType','text');
 

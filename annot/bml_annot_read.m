@@ -13,10 +13,18 @@ function annot = bml_annot_read(filename,varargin)
 if ~ismember('delimiter',varargin)
   varargin = [varargin, {'delimiter','\t'}];
 end
+if ~ismember('FileType',varargin)
+  varargin = [varargin, {'FileType','text'}];
+end
 if ~ismember('TreatAsEmpty',varargin)
   varargin = [varargin, {'TreatAsEmpty',{'NA'}}];
 end
+
 annot = readtable(filename,varargin{:});
-[~,name,~]=fileparts(filename);
+[~,name,ext]=fileparts(filename);
+if strcmp(ext,'.tsv')
+    annot.ends = annot.starts + annot.duration;
+    annot.id = (1:height(annot))';
+end
 annot = bml_annot_table(annot,name);
 
