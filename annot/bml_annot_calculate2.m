@@ -117,7 +117,7 @@ for i=1:nfeatures
       try
         feature(t,:)=feature_fun(vec1,vec2);
       catch 
-        warning("%s failed on trial %i \n",feature_name,t)
+        warning("%s failed on trial %i \n",feature_name{1},t)
       end
     end
   end
