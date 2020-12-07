@@ -4,7 +4,8 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
   %
   % Use as
   %   slave_delta_t = bml_timealign(cfg, master, slave)
-  %   [slave_delta_t, max_corr] = bml_timealign(cfg, master, slave)
+  %   [slave_delta_t, min_cost] = bml_timealign(cfg, master, slave)
+  %   [slave_delta_t, min_cost, warpfactor] = bml_timealign(cfg, master, slave)
   %
   % cfg is a configuration structure with fields:
   % cfg.scan - double: time window in which to scan for a maximal correlation
@@ -12,6 +13,7 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
   %            if a length 2 vector is given it should be [-a, b], where 'a'
   %            and 'b' are positive numbers in seconds. 
   % cfg.scan_step - double: time step for initial scan in seconds
+  % cfg.cliptime - double: time mismatch at which cost gets clipped. Defaults 1s
   % cfg.timewarp - logical: should time warping be allowed. Defaults to false
   %
   % master - annot table 
@@ -20,12 +22,12 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
   % returns
   % slave_delta_t - double: time in seconds by which to shift the slave to 
   %           align it to master
-  % max_corr - double:
+  % min_cost - double: minimal (optimized) value of the cost function. 
 
   scan      = bml_getopt(cfg, 'scan', 100);
   scan_step = bml_getopt(cfg, 'scan_step', 0.1);
   timewarp  = bml_getopt(cfg, 'timewarp', false);
-  
+  cliptime  = bml_getopt(cfg, 'cliptime', 1);
   master    = bml_annot_table(master);
   slave     = bml_annot_table(slave);
   slave_starts_mean = mean(slave.starts);
@@ -38,7 +40,8 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
     x=slave_starts_minus_mean .* x0(2) + slave_starts_mean + x0(1);
     cost=0;
     for i=1:length(x)
-     cost = cost + min(abs(x(i)-y))^2;
+     %cost = cost + min(abs(x(i)-y))^2;
+     cost = cost + min(min(abs(x(i)-y)),cliptime)^2;
     end
     cost = sqrt(cost);
   end
@@ -50,7 +53,8 @@ function [slave_delta_t, min_cost, warpfactor] = bml_timealign_annot(cfg, master
     x=slave.starts + x0(1);
     cost=0;
     for i=1:length(x)
-     cost = cost + min(abs(x(i)-y))^2;
+     %cost = cost + min(abs(x(i)-y))^2;
+     cost = cost + min(min(abs(x(i)-y)),cliptime)^2;
     end
     cost = sqrt(cost);
   end

@@ -113,7 +113,7 @@ if any(ismissing(roi.warpfactor))
   roi.warpfactor(ismissing(roi.warpfactor)) = nanmean(roi.warpfactor);
 end
 
-midpoint_a = (roi.ends + roi.ends) ./ 2;
+midpoint_a = (roi.starts + roi.ends) ./ 2;
 midpoint_t = (roi.t1 + roi.t2) ./ 2;
 roi.starts = (roi.starts - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;
 roi.ends = (roi.ends - midpoint_a) .* roi.warpfactor + midpoint_a + roi.slave_dt;

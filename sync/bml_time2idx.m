@@ -36,7 +36,7 @@ nSamples=bml_getopt(cfg,'nSamples');
 
 idx = round((t2*s1-s2*t1+(s2-s1).*round(time,pTT))/(t2-t1));
 
-if any(idx<=0); error('negative index'); end
+%if any(idx<=0); error('negative index'); end
 if ~isempty(nSamples)
   if any(idx>nSamples); error('index exceeds number of samples in file'); end
 end
