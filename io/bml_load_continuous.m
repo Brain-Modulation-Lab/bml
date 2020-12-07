@@ -187,12 +187,21 @@ cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
 cfg.feedback=ft_feedback;
 cfg.trackcallinfo=false;
-hdr = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
+if isempty(cfg.chantype) || strcmp(cfg.chantype,{'all'})
+    hdr = ft_read_header(cfg.dataset,'chantype',[]);
+    cfg.chantype = [];
+	%checking nomimal sampling frequencies
+    assert(hdr.Fs*skipFactor==roi.Fs(1),...
+        'File %s has Fs %f, not %f as defined in cfg.roi',...
+        roi.name{1},hdr.Fs,roi.Fs(1));
+else
+	hdr = ft_read_header(cfg.dataset,'chantype',cfg.chantype);
+    %checking nomimal sampling frequencies
+    assert(hdr.Fs*skipFactor==roi.Fs(1),...
+        'File %s chantype %s has Fs %f, not %f as defined in cfg.roi',...
+        roi.name{1},strjoin(cfg.chantype),hdr.Fs,roi.Fs(1));
+end
 
-%checking nomimal sampling frequencies
-assert(hdr.Fs*skipFactor==roi.Fs(1),...
-  'File %s chantype %s has Fs %f, not %f as defined in cfg.roi',...
-  roi.name{1},strjoin(cfg.chantype),hdr.Fs,roi.Fs(1));
 
 if ~dryrun
   raw = ft_preprocessing(cfg);
