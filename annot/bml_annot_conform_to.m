@@ -23,6 +23,14 @@ end
 
 conformed = annot(:,template_vars);
 
+%verifying format 
+for i=1:width(conformed)
+    if iscellstr(template{:,i}) && ~iscellstr(conformed{:,i})
+        if isvector(conformed{:,i}) || ismatrix(conformed{:,i})
+            conformed.(i) = cellstr(num2str(conformed.(i)));
+        end
+    end
+end
 
 
 
