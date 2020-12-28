@@ -17,7 +17,7 @@ if ~ismember('FileType',varargin)
   varargin = [varargin, {'FileType','text'}];
 end
 if ~ismember('TreatAsEmpty',varargin)
-  varargin = [varargin, {'TreatAsEmpty',{'NA'}}];
+  varargin = [varargin, {'TreatAsEmpty',{'n/a'}}];
 end
 
 annot = readtable(filename,varargin{:});
