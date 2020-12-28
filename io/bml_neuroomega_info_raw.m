@@ -76,7 +76,7 @@ hdr_table.Properties.VariableNames = hdr_vars;
 assert(~isempty(chantype),'cfg.chantype required');
 if isempty(time_channel)
   hdr1 = ft_read_header(fullfile(info.folder{1},info.name{1}),'chantype','chaninfo');
-  time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,chantype),:).channel{1};
+  time_channel = hdr1.orig.chaninfo(strcmp(hdr1.orig.chaninfo.chantype,chantype),:).channel{1};
 end
 time_begin     = strcat(time_channel,'_TimeBegin');
 time_end       = strcat(time_channel,'_TimeEnd');
@@ -103,9 +103,9 @@ for i=1:height(info)
   hdr_table.nTrials(i) = {hdr.nTrials};    
   hdr_table.chanunit(i) = {strjoin(unique(hdr.chanunit))}; 
 
-  if ismember(time_begin,fields(hdr.orig))
-    hdr_table.time_begin(i) = {hdr.orig.(time_begin)};
-    hdr_table.time_end(i) = {hdr.orig.(time_end)};
+  if ismember(time_begin,fields(hdr.orig.orig))
+    hdr_table.time_begin(i) = {hdr.orig.orig.(time_begin)};
+    hdr_table.time_end(i) = {hdr.orig.orig.(time_end)};
   else
     error('%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s',...
       time_begin,fullfile(cfg.path,info.name{i}), strjoin(hdr.label));
