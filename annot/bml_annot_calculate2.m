@@ -90,6 +90,7 @@ epoch.ueid1(:) = ueid_db1.ueid;
 epoch.ueid2(:) = ueid_db2.ueid;
 
 epoch = epoch(:,{'annot_pair_id','ueid1','duration1','channel1','ueid2','duration2','channel2'});
+epoch = epoch(~(ismissing(epoch.ueid1)|ismissing(epoch.ueid2)),:); 
 
 if nargin < 4
   error('at least one feature name and function required')
