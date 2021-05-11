@@ -159,7 +159,7 @@ if ~isempty(electrode)
 end
 
 %optimizing channel selection for trellis files
-if ~isempty(channel) && contains(filetype,"trellis")
+if ~isempty(channel) && contains(filetype,"trellis") && ~contains(filetype,".nf6")
   chantype = {['^(',strjoin(channel,'|'),')$']};
   if skipFactor > 1
     chantype{1} = [chantype{1},':',num2str(skipFactor)];
@@ -183,6 +183,7 @@ file_raw_map.skipFactor = skipFactor;
 %loading first raw
 cfg=[]; 
 cfg.chantype=chantype;
+cfg.channel = channel;
 cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
 cfg.feedback=ft_feedback;
@@ -283,7 +284,7 @@ for i=2:height(roi)
     
     delta_s = delta_t*Fs/skipFactor;
     delta_s_int = round(delta_s);
-    assert(delta_s>0,"rois overlap by %f > tolerance = %f correct or increase tolerance",delta_t,timetol); 
+    assert(abs(delta_t)<timetol,"rois overlap by %f > tolerance = %f correct or increase tolerance",delta_t,timetol); 
 
     if abs(delta_s_int - delta_s) < timetol*Fs/skipFactor
       if ismember(discontinuous,{'warn'})
@@ -327,7 +328,7 @@ if dryrun
   raw = [];
 elseif ~isempty(electrode)
   %changing labels from channels to electrodes
-	raw.label = bml_map(raw.label,electrode.channel,electrode.electrode);
+	raw.label = bml_map(raw.label,electrode.channel,electrode.electrode,'NA');
 end
 
 file_raw_map = bml_roi_table(file_raw_map);

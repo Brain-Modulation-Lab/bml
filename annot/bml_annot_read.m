@@ -23,7 +23,11 @@ end
 annot = readtable(filename,varargin{:});
 [~,name,ext]=fileparts(filename);
 if strcmp(ext,'.tsv')
-    annot.ends = annot.starts + annot.duration;
+    try
+        annot.ends = annot.starts + annot.duration;
+    catch
+        annot.ends = annot.onset + annot.duration;
+    end
     annot.id = (1:height(annot))';
 end
 annot = bml_annot_table(annot,name);
