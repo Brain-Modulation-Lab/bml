@@ -47,7 +47,7 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
     slave = master;
     master = cfg;
     cfg = [];
-  elseif nargin ~=3
+  elseif nargin ~= 3
     error('incorrect number of arguments in call');
   end
   

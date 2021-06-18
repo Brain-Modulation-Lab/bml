@@ -20,6 +20,9 @@ function sync_roi = bml_sync_audio_event(cfg)
 %             alingment, defaults to 10. 
 %   cfg.strict - logical. Issue errors if timetol is violated instead of errors. 
 %             Defaults to false. 
+%   cfg.min_ipi - minimal inter-peak-interval used by find peaks. Defaults
+%             to 0.05s
+%   cfg.min_rph - minimal relative peak height, compared to the max value of the file. Defaults to 0.5 
 %
 % returns a roi table
 
@@ -32,6 +35,8 @@ diagnostic_plot   = bml_getopt(cfg,'diagnostic_plot',false);
 timetol           = bml_getopt(cfg,'timetol',1e-6);
 min_events        = bml_getopt(cfg,'min_events',10);
 strict            = bml_getopt(cfg,'strict',false);
+min_ipi           = bml_getopt(cfg,'min_ipi',0.05);
+min_rph           = bml_getopt(cfg,'min_rph',0.5);
 
 assert(~isempty(roi),'roi required');
 assert(~isempty(master_events),'master_events required');
@@ -45,8 +50,8 @@ for i=1:height(roi)
     cfg=[];
     cfg.roi = roi(i,:);
     audio= bml_load_continuous(cfg);
-    min_peak_height = max(abs(audio.trial{1}(1,:)))*0.5;
-    MinPeakDistance = 0.25;
+    min_peak_height = max(abs(audio.trial{1}(1,:)))*min_rph;
+    MinPeakDistance = min_ipi;
     [pks,locs] = findpeaks(abs(audio.trial{1}(1,:)),audio.fsample,...
     'MinPeakHeight',min_peak_height,'MinPeakDistance',MinPeakDistance);
     
