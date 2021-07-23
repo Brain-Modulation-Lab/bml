@@ -328,7 +328,9 @@ if dryrun
   raw = [];
 elseif ~isempty(electrode)
   %changing labels from channels to electrodes
-	raw.label = bml_map(raw.label,electrode.channel,electrode.electrode,'NA');
+  new_label = bml_map(raw.label,electrode.channel,electrode.electrode,'NA');
+  new_label(strcmp(new_label,'NA')) = raw.label(strcmp(new_label,'NA'));
+  raw.label = new_label; 
 end
 
 file_raw_map = bml_roi_table(file_raw_map);

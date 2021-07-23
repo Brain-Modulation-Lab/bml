@@ -217,6 +217,10 @@ else
     
     for t=1:numel(raw.trial)
       for j=1:height(reftable)
+        ridx=find(ismember(raw.label,reftable.reference(j)));
+        if isempty(ridx)
+            error('refchan %s not available to rereference channel %s',reftable.reference{j},reftable.label{j});
+        end 
         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - ...
           raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
