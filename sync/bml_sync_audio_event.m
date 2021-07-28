@@ -24,6 +24,16 @@ function sync_roi = bml_sync_audio_event(cfg)
 %             to 0.05s
 %   cfg.min_rph - minimal relative peak height, compared to the max value of the file. Defaults to 0.5 
 %
+%   Additional arguments passed to bml_timelaign_annot
+%   --------------------------------------------------
+%   cfg.cliptime - double: time mismatch at which cost gets clipped. Defaults 1s
+%   cfg.censor_mismatch - double: time mismatch at which point gets censored
+%   cfg.restrict_master_by - str: column name from master used to group
+%     events. Synchroniztion is restricted to these groups. If slave events
+%     span more than one group, the least represented group events from
+%     master are censored for the alignment. Useful when one wav file
+%     spans more than one trellis file. 
+%
 % returns a roi table
 
 scan_step         = bml_getopt(cfg,'scan_step',0.1);
@@ -47,9 +57,9 @@ all_meanerror = zeros(height(roi),1);
 for i=1:height(roi)
   
   %getting events
-    cfg=[];
-    cfg.roi = roi(i,:);
-    audio= bml_load_continuous(cfg);
+    cfg1=[];
+    cfg1.roi = roi(i,:);
+    audio= bml_load_continuous(cfg1);
     min_peak_height = max(abs(audio.trial{1}(1,:)))*min_rph;
     MinPeakDistance = min_ipi;
     [pks,locs] = findpeaks(abs(audio.trial{1}(1,:)),audio.fsample,...
@@ -65,14 +75,14 @@ for i=1:height(roi)
     ends = starts;
     i_slave_events=bml_annot_table(table(starts,ends));
     i_slave_events.type = repmat({'audio'},[height(i_slave_events),1]);
-    i_slave_events.value = repmat(1,[height(i_slave_events),1]);
+    i_slave_events.value = ones([height(i_slave_events),1]);
     i_slave_events.sample = locs';
     
     %doing time alingment
-    cfg=[]; 
-    cfg.scan=scan; 
-    cfg.scan_step=scan_step; 
-    cfg.timewarp = timewarp; 
+%     cfg=[]; 
+%     cfg.scan=scan; 
+%     cfg.scan_step=scan_step; 
+%     cfg.timewarp = timewarp; 
     [slave_dt, min_cost, warpfactor]=bml_timealign_annot(cfg,master_events,i_slave_events);
     all_slave_dt(i) = slave_dt;
     all_warpfactor(i) = warpfactor;
@@ -108,9 +118,9 @@ roi.slave_dt = all_slave_dt;
 roi.warpfactor = all_warpfactor;
 roi.alignment_error = all_meanerror;
 
-cfg=[];
-cfg.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
-cont_roi = bml_annot_consolidate(cfg,roi);
+cfg1=[];
+cfg1.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
+cont_roi = bml_annot_consolidate(cfg1,roi);
 
 consolidated_roi = table();
 for i=1:height(cont_roi)
