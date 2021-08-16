@@ -8,8 +8,9 @@ function sync_roi = bml_sync_audio_event(cfg)
 %
 %   cfg.master_events - events to align to in annot table in master time
 %   cfg.roi - roi table for zoom audio files to be synchronized
-%   cfg.timewarp - logical: Should slave time be warped? defaults to 
-%            true.
+%   cfg.timewarp - logical: Should slave time be warped? defaults to true.
+%   cfg.foce_same_dt - logical: Should the same dt be forced across all
+%       audio files? defaults to false,
 %   cfg.scan - double: number of seconds to scan for optimal alignment 
 %             (defaults to 100)
 %   cfg.scan_step - double: step size of initial scan for alignment
@@ -40,6 +41,7 @@ scan_step         = bml_getopt(cfg,'scan_step',0.1);
 scan              = bml_getopt(cfg,'scan',100);
 timewarp          = bml_getopt(cfg,'timewarp',false);
 master_events     = bml_getopt(cfg,'master_events');
+force_same_dt     = bml_getopt(cfg,'force_same_dt',false);
 roi               = bml_getopt(cfg,'roi');
 diagnostic_plot   = bml_getopt(cfg,'diagnostic_plot',false);
 timetol           = bml_getopt(cfg,'timetol',1e-6);
@@ -109,7 +111,7 @@ for i=1:height(roi)
   end
 end
 
-if ~timewarp
+if force_same_dt
   all_slave_dt = repmat(nanmean(all_slave_dt),length(all_slave_dt),1);
 end
 

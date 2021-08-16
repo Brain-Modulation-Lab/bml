@@ -22,6 +22,16 @@ function sync_roi = bml_sync_neuroomega_event(cfg)
 %   cfg.strict - logical. Issue errors if timetol is violated instead of errors. 
 %             Defaults to false. 
 %
+%   Additional arguments passed to bml_timelaign_annot
+%   --------------------------------------------------
+%   cfg.cliptime - double: time mismatch at which cost gets clipped. Defaults 1s
+%   cfg.censor_mismatch - double: time mismatch at which point gets censored
+%   cfg.restrict_master_by - str: column name from master used to group
+%     events. Synchroniztion is restricted to these groups. If slave events
+%     span more than one group, the least represented group events from
+%     master are censored for the alignment. Useful when one wav file
+%     spans more than one trellis file. 
+%
 % returns a roi table
 
 scan_step         = bml_getopt(cfg,'scan_step',0.1);
@@ -44,21 +54,21 @@ all_meanerror = zeros(height(roi),1);
 for i=1:height(roi)
   
   %getting events
-	i_slave_events = bml_read_event(roi(i,:));
+  i_slave_events = bml_read_event(roi(i,:));
   if isempty(i_slave_events) || length(i_slave_events) < min_events
     all_slave_dt(i) = nan;
     all_warpfactor(i) = nan;
   else
-    cfg=[]; cfg.Fs = 1; %already in seconds
-    cfg.starts = roi.starts(i);
-    i_slave_events = bml_event2annot(cfg,i_slave_events);
+    cfg1=[]; cfg1.Fs = 1; %already in seconds
+    cfg1.starts = roi.starts(i);
+    i_slave_events = bml_event2annot(cfg1,i_slave_events);
     i_slave_events = bml_annot_table(i_slave_events);
     
     %selecting subset of master events in the vecinity of roi events
     i_master_events = bml_annot_filter(master_events, bml_annot_extend(roi(i,:),coarsetol));
     
     %doing time alingment
-    cfg=[]; 
+    %cfg=[]; 
     cfg.scan=scan; 
     cfg.scan_step=scan_step; 
     cfg.timewarp = timewarp; 
@@ -97,9 +107,9 @@ roi.slave_dt = all_slave_dt;
 roi.warpfactor = all_warpfactor;
 roi.alignment_error = all_meanerror;
 
-cfg=[];
-cfg.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
-cont_roi = bml_annot_consolidate(cfg,roi);
+cfg1=[];
+cfg1.criterion = @(x) (abs((max(x.ends)-min(x.starts))-sum(x.duration))<10e-3);
+cont_roi = bml_annot_consolidate(cfg1,roi);
 
 consolidated_roi = table();
 for i=1:height(cont_roi)
