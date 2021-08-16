@@ -47,7 +47,7 @@ if ~isempty(plexon_src) && isfile(plexon_src)
   if ismember('FileMapping',fieldnames(src))
     FileMapping = src.FileMapping;
   end
-  if ismember('Channels',fieldnames(src))
+  if ismember('Channels',fieldnames(src))label
     label = src.Channels;
   end  
 end

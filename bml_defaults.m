@@ -2,7 +2,7 @@ function bml_defaults
 
 % BML_DEFAULTS loads requried directories to Matlab's path
 
-BML_FOLDERS = {'signal','annot','sync','io','utils','doc','anat','stat','plot','timefreq'};
+BML_FOLDERS = {'signal','annot','sync','io','utils','doc','anat','stat','plot','timefreq','spksunit'};
 
 bmlPath = fileparts(mfilename('fullpath')); % get the full path to this function, strip away 'ft_defaults'
 %bmlPath = strrep(bmlPath, '\', '\\');
