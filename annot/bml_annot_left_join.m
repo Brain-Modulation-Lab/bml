@@ -56,9 +56,9 @@ if ~isempty(select)
     warning('%s variables not found. Available vars are %s',...
       strjoin(select(~select_members)),strjoin(right.Properties.VariableNames));
   end
-  right = right(:,[keys,select(select_members)]);
+  right = right(:,[keys{:},select(select_members)]); % MV: fixed for cell array... before it was right = right(:,[keys,select(select_members)])
 end
 
-joined=outerjoin(left,right,'Keys',keys,'Type','left','MergeKeys',true);
+joined=outerjoin(left,right,'Keys',cellstr(keys),'Type','left','MergeKeys',true); % MV: fixed for cell array... before it was joined=outerjoin(left,right,'Keys',keys,'Type','left','MergeKeys',true);
 
 joined = bml_annot_table(joined,description);
