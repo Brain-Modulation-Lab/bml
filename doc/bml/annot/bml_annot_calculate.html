@@ -63,97 +63,96 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre>0001 
-0002 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_calculate(cfg, raw, varargin)</a>
-0003 
-0004 <span class="comment">% BML_ANNOT_CALCULATE calculate scalar values from specific annotations in</span>
-0005 <span class="comment">% raw</span>
-0006 <span class="comment">%</span>
-0007 <span class="comment">% Use as</span>
-0008 <span class="comment">%    annot = bml_annot_calculate(cfg, raw, 'feature_1_name', feature_1_fun,</span>
-0009 <span class="comment">%                                          'feature_2_name', feature_2_fun,...)</span>
-0010 <span class="comment">%</span>
-0011 <span class="comment">% raw - FT_DATAYPE_RAW in global time coordinates to be used for calculation</span>
-0012 <span class="comment">% feature_1_name - string with column name for new feature</span>
-0013 <span class="comment">% feature_1_fun - function handle to calculate feature 1</span>
-0014 <span class="comment">% feature_2_name - string with column name for new feature</span>
-0015 <span class="comment">% feature_2_fun - function handle to calculate feature 2</span>
-0016 <span class="comment">% cfg - configuraton structure</span>
-0017 <span class="comment">% cfg.epoch - ANNOT table with epochs on which to calculate the feature</span>
-0018 <span class="comment">%          if not provided, the epochs are determined by the raw structure.</span>
-0019 <span class="comment">%          if a channels column is present, it use to select the channel</span>
-0020 <span class="comment">%          for each annotation</span>
-0021 <span class="comment">% cfg.warn - logical indicating if warnings should be issued. Defaults to true</span>
-0022 <span class="comment">% cfg.minduration - minimal duration in seconds of epoch on which to calculate the</span>
-0023 <span class="comment">%          feature. Defaults to 0.001.</span>
-0024 <span class="comment">%</span>
-0025 <span class="comment">% returns an annotation table with new features calculated from raw</span>
-0026 warn        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
-0027 minduration = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'minduration'</span>,0.001);
-0028 epoch_orig = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'epoch'</span>,[]),<span class="string">'epoch'</span>);
-0029 epoch_id_present = ismember(<span class="string">'epoch_id'</span>,epoch_orig.Properties.VariableNames);
-0030 <span class="keyword">if</span> ~epoch_id_present
-0031   epoch_orig.epoch_id = epoch_orig.id;
-0032 <span class="keyword">end</span>
-0033 epoch = epoch_orig;
-0034 
-0035 <span class="keyword">if</span> isempty(epoch)
-0036     epoch = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(raw);
-0037   epoch.epoch_id = epoch.id;
-0038   eraw = raw;
-0039 <span class="keyword">else</span>
-0040   cfg1=[];
-0041   cfg1.epoch = epoch;
-0042   cfg1.warn = warn;
-0043   [eraw, epoch] = <a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>(cfg1,raw);
-0044 <span class="keyword">end</span>
-0045 
-0046 <span class="keyword">if</span> ~ismember(<span class="string">'channel'</span>,epoch.Properties.VariableNames)
-0047   <span class="keyword">if</span> length(eraw.label) == 1
-0048     epoch.channel = repmat(eraw.label,height(epoch),1);
-0049   <span class="keyword">else</span>
-0050     error(<span class="string">'No channel column provided in cfg.epoch and more than one label present in raw'</span>)
-0051   <span class="keyword">end</span>
-0052 <span class="keyword">end</span>
-0053 
-0054 epoch = epoch(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'epoch_id'</span>,<span class="string">'channel'</span>});
-0055 
-0056 <span class="keyword">if</span> nargin &lt; 4
-0057   error(<span class="string">'at least one feature name and function required'</span>)
-0058 <span class="keyword">elseif</span> mod(nargin,2)~=0 
-0059   error(<span class="string">'uneven number of arguments. Pairs of feature names and functions required'</span>)
-0060 <span class="keyword">else</span>
-0061   nfeatures = (nargin - 2)/2;
-0062 <span class="keyword">end</span>
-0063  
-0064 <span class="keyword">for</span> i=1:nfeatures
-0065   feature_name = varargin{(i-1)*2+1};
-0066   feature_fun = varargin{(i-1)*2+2};
-0067   
-0068   <span class="keyword">if</span> ~ismember(feature_name,epoch.Properties.VariableNames)
-0069     epoch.(feature_name) = nan(height(epoch),1);
-0070   <span class="keyword">end</span>
-0071   
-0072   <span class="keyword">for</span> t=1:numel(eraw.trial)
-0073     trial = eraw.trial{t};
-0074     <span class="keyword">if</span> epoch.duration(t) &gt; minduration
-0075       <span class="keyword">try</span>
-0076         epoch{t,feature_name}=feature_fun(trial(<a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(epoch.channel(i),eraw.label),:));
-0077       <span class="keyword">catch</span> 
-0078         warning(&quot;<span class="comment">%s failed on trial %i \n&quot;,feature_name,t)</span>
-0079       <span class="keyword">end</span>
-0080     <span class="keyword">end</span>
-0081   <span class="keyword">end</span>
-0082 <span class="keyword">end</span>
-0083 
-0084 annot = outerjoin(epoch_orig,epoch(:,5:end),<span class="string">'Type'</span>,<span class="string">'left'</span>,<span class="string">'Keys'</span>,<span class="string">'epoch_id'</span>,<span class="string">'MergeKeys'</span>,true);
-0085 
-0086 <span class="keyword">if</span> ~epoch_id_present
-0087   annot.epoch_id = [];
-0088 <span class="keyword">end</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_calculate(cfg, raw, varargin)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_CALCULATE calculate scalar values from specific annotations in</span>
+0004 <span class="comment">% raw</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Use as</span>
+0007 <span class="comment">%    annot = bml_annot_calculate(cfg, raw, 'feature_1_name', feature_1_fun,</span>
+0008 <span class="comment">%                                          'feature_2_name', feature_2_fun,...)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% raw - FT_DATAYPE_RAW in global time coordinates to be used for calculation</span>
+0011 <span class="comment">% feature_1_name - string with column name for new feature</span>
+0012 <span class="comment">% feature_1_fun - function handle to calculate feature 1</span>
+0013 <span class="comment">% feature_2_name - string with column name for new feature</span>
+0014 <span class="comment">% feature_2_fun - function handle to calculate feature 2</span>
+0015 <span class="comment">% cfg - configuraton structure</span>
+0016 <span class="comment">% cfg.epoch - ANNOT table with epochs on which to calculate the feature</span>
+0017 <span class="comment">%          if not provided, the epochs are determined by the raw structure.</span>
+0018 <span class="comment">%          if a channels column is present, it use to select the channel</span>
+0019 <span class="comment">%          for each annotation</span>
+0020 <span class="comment">% cfg.warn - logical indicating if warnings should be issued. Defaults to true</span>
+0021 <span class="comment">% cfg.minduration - minimal duration in seconds of epoch on which to calculate the</span>
+0022 <span class="comment">%          feature. Defaults to 0.001.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% returns an annotation table with new features calculated from raw</span>
+0025 warn        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
+0026 minduration = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'minduration'</span>,0.001);
+0027 epoch_orig = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'epoch'</span>,[]),<span class="string">'epoch'</span>);
+0028 epoch_id_present = ismember(<span class="string">'epoch_id'</span>,epoch_orig.Properties.VariableNames);
+0029 <span class="keyword">if</span> ~epoch_id_present
+0030   epoch_orig.epoch_id = epoch_orig.id;
+0031 <span class="keyword">end</span>
+0032 epoch = epoch_orig;
+0033 
+0034 <span class="keyword">if</span> isempty(epoch)
+0035     epoch = <a href="bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>(raw);
+0036   epoch.epoch_id = epoch.id;
+0037   eraw = raw;
+0038 <span class="keyword">else</span>
+0039   cfg1=[];
+0040   cfg1.epoch = epoch;
+0041   cfg1.warn = warn;
+0042   [eraw, epoch] = <a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>(cfg1,raw);
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="keyword">if</span> ~ismember(<span class="string">'channel'</span>,epoch.Properties.VariableNames)
+0046   <span class="keyword">if</span> length(eraw.label) == 1
+0047     epoch.channel = repmat(eraw.label,height(epoch),1);
+0048   <span class="keyword">else</span>
+0049     error(<span class="string">'No channel column provided in cfg.epoch and more than one label present in raw'</span>)
+0050   <span class="keyword">end</span>
+0051 <span class="keyword">end</span>
+0052 
+0053 epoch = epoch(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'epoch_id'</span>,<span class="string">'channel'</span>});
+0054 
+0055 <span class="keyword">if</span> nargin &lt; 4
+0056   error(<span class="string">'at least one feature name and function required'</span>)
+0057 <span class="keyword">elseif</span> mod(nargin,2)~=0 
+0058   error(<span class="string">'uneven number of arguments. Pairs of feature names and functions required'</span>)
+0059 <span class="keyword">else</span>
+0060   nfeatures = (nargin - 2)/2;
+0061 <span class="keyword">end</span>
+0062  
+0063 <span class="keyword">for</span> i=1:nfeatures
+0064   feature_name = varargin{(i-1)*2+1};
+0065   feature_fun = varargin{(i-1)*2+2};
+0066   
+0067   <span class="keyword">if</span> ~ismember(feature_name,epoch.Properties.VariableNames)
+0068     epoch.(feature_name) = nan(height(epoch),1);
+0069   <span class="keyword">end</span>
+0070   
+0071   <span class="keyword">for</span> t=1:numel(eraw.trial)
+0072     trial = eraw.trial{t};
+0073     <span class="keyword">if</span> epoch.duration(t) &gt; minduration
+0074       <span class="keyword">try</span>
+0075         epoch{t,feature_name}=feature_fun(trial(<a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(epoch.channel(i),eraw.label),:));
+0076       <span class="keyword">catch</span> 
+0077         warning(&quot;<span class="comment">%s failed on trial %i \n&quot;,feature_name,t)</span>
+0078       <span class="keyword">end</span>
+0079     <span class="keyword">end</span>
+0080   <span class="keyword">end</span>
+0081 <span class="keyword">end</span>
+0082 
+0083 annot = outerjoin(epoch_orig,epoch(:,5:end),<span class="string">'Type'</span>,<span class="string">'left'</span>,<span class="string">'Keys'</span>,<span class="string">'epoch_id'</span>,<span class="string">'MergeKeys'</span>,true);
+0084 
+0085 <span class="keyword">if</span> ~epoch_id_present
+0086   annot.epoch_id = [];
+0087 <span class="keyword">end</span>
+0088 
 0089 
-0090 
-0091</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0090</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

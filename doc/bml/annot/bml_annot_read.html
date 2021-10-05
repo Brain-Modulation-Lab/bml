@@ -65,13 +65,25 @@ This function is called by:
 0013 <span class="keyword">if</span> ~ismember(<span class="string">'delimiter'</span>,varargin)
 0014   varargin = [varargin, {<span class="string">'delimiter'</span>,<span class="string">'\t'</span>}];
 0015 <span class="keyword">end</span>
-0016 <span class="keyword">if</span> ~ismember(<span class="string">'TreatAsEmpty'</span>,varargin)
-0017   varargin = [varargin, {<span class="string">'TreatAsEmpty'</span>,{<span class="string">'NA'</span>}}];
+0016 <span class="keyword">if</span> ~ismember(<span class="string">'FileType'</span>,varargin)
+0017   varargin = [varargin, {<span class="string">'FileType'</span>,<span class="string">'text'</span>}];
 0018 <span class="keyword">end</span>
-0019 annot = readtable(filename,varargin{:});
-0020 [~,name,~]=fileparts(filename);
-0021 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,name);
-0022</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0019 <span class="keyword">if</span> ~ismember(<span class="string">'TreatAsEmpty'</span>,varargin)
+0020   varargin = [varargin, {<span class="string">'TreatAsEmpty'</span>,{<span class="string">'NA'</span>}}];
+0021 <span class="keyword">end</span>
+0022 
+0023 annot = readtable(filename,varargin{:});
+0024 [~,name,ext]=fileparts(filename);
+0025 <span class="keyword">if</span> strcmp(ext,<span class="string">'.tsv'</span>)
+0026     <span class="keyword">try</span>
+0027         annot.ends = annot.starts + annot.duration;
+0028     <span class="keyword">catch</span>
+0029         annot.ends = annot.onset + annot.duration;
+0030     <span class="keyword">end</span>
+0031     annot.id = (1:height(annot))';
+0032 <span class="keyword">end</span>
+0033 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,name);
+0034</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -1,0 +1,395 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_fdr_bh</title>
+  <meta name="keywords" content="bml_fdr_bh">
+  <meta name="description" content="fdr_bh() - Executes the Benjamini &amp; Hochberg (1995) and the Benjamini &amp;">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">stat</a> &gt; bml_fdr_bh.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\stat&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_fdr_bh
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>fdr_bh() - Executes the Benjamini &amp; Hochberg (1995) and the Benjamini &amp;</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [h, crit_p, adj_ci_cvrg, adj_p]=bml_fdr_bh(pvals,q,method,report) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> fdr_bh() - Executes the Benjamini &amp; Hochberg (1995) and the Benjamini &amp;
+            Yekutieli (2001) procedure for controlling the false discovery 
+            rate (FDR) of a family of hypothesis tests. FDR is the expected
+            proportion of rejected hypotheses that are mistakenly rejected 
+            (i.e., the null hypothesis is actually true for those tests). 
+            FDR is a somewhat less conservative/more powerful method for 
+            correcting for multiple comparisons than procedures like Bonferroni
+            correction that provide strong control of the family-wise
+            error rate (i.e., the probability that one or more null
+            hypotheses are mistakenly rejected).
+
+            This function also returns the false coverage-statement rate 
+            (FCR)-adjusted selected confidence interval coverage (i.e.,
+            the coverage needed to construct multiple comparison corrected
+            confidence intervals that correspond to the FDR-adjusted p-values).
+
+
+ Usage:
+  &gt;&gt; [h, crit_p, adj_ci_cvrg, adj_p]=fdr_bh(pvals,q,method,report);
+
+ Required Input:
+   pvals - A vector or matrix (two dimensions or more) containing the
+           p-value of each individual test in a family of tests.
+
+ Optional Inputs:
+   q       - The desired false discovery rate. {default: 0.05}
+   method  - ['pdep' or 'dep'] If 'pdep,' the original Bejnamini &amp; Hochberg
+             FDR procedure is used, which is guaranteed to be accurate if
+             the individual tests are independent or positively dependent
+             (e.g., Gaussian variables that are positively correlated or
+             independent).  If 'dep,' the FDR procedure
+             described in Benjamini &amp; Yekutieli (2001) that is guaranteed
+             to be accurate for any test dependency structure (e.g.,
+             Gaussian variables with any covariance matrix) is used. 'dep'
+             is always appropriate to use but is less powerful than 'pdep.'
+             {default: 'pdep'}
+   report  - ['yes' or 'no'] If 'yes', a brief summary of FDR results are
+             output to the MATLAB command line {default: 'no'}
+
+
+ Outputs:
+   h       - A binary vector or matrix of the same size as the input &quot;pvals.&quot;
+             If the ith element of h is 1, then the test that produced the 
+             ith p-value in pvals is significant (i.e., the null hypothesis
+             of the test is rejected).
+   crit_p  - All uncorrected p-values less than or equal to crit_p are 
+             significant (i.e., their null hypotheses are rejected).  If 
+             no p-values are significant, crit_p=0.
+   adj_ci_cvrg - The FCR-adjusted BH- or BY-selected 
+             confidence interval coverage. For any p-values that 
+             are significant after FDR adjustment, this gives you the
+             proportion of coverage (e.g., 0.99) you should use when generating
+             confidence intervals for those parameters. In other words,
+             this allows you to correct your confidence intervals for
+             multiple comparisons. You can NOT obtain confidence intervals 
+             for non-significant p-values. The adjusted confidence intervals
+             guarantee that the expected FCR is less than or equal to q
+             if using the appropriate FDR control algorithm for the  
+             dependency structure of your data (Benjamini &amp; Yekutieli, 2005).
+             FCR (i.e., false coverage-statement rate) is the proportion 
+             of confidence intervals you construct
+             that miss the true value of the parameter. adj_ci=NaN if no
+             p-values are significant after adjustment.
+   adj_p   - All adjusted p-values less than or equal to q are significant
+             (i.e., their null hypotheses are rejected). Note, adjusted 
+             p-values can be greater than 1.
+
+
+ References:
+   Benjamini, Y. &amp; Hochberg, Y. (1995) Controlling the false discovery
+     rate: A practical and powerful approach to multiple testing. Journal
+     of the Royal Statistical Society, Series B (Methodological). 57(1),
+     289-300.
+
+   Benjamini, Y. &amp; Yekutieli, D. (2001) The control of the false discovery
+     rate in multiple testing under dependency. The Annals of Statistics.
+     29(4), 1165-1188.
+
+   Benjamini, Y., &amp; Yekutieli, D. (2005). False discovery rate?adjusted 
+     multiple confidence intervals for selected parameters. Journal of the 
+     American Statistical Association, 100(469), 71?81. doi:10.1198/016214504000001907
+
+
+ Example:
+  nullVars=randn(12,15);
+  [~, p_null]=ttest(nullVars); %15 tests where the null hypothesis
+  %is true
+  effectVars=randn(12,5)+1;
+  [~, p_effect]=ttest(effectVars); %5 tests where the null
+  %hypothesis is false
+  [h, crit_p, adj_ci_cvrg, adj_p]=fdr_bh([p_null p_effect],.05,'pdep','yes');
+  data=[nullVars effectVars];
+  fcr_adj_cis=NaN*zeros(2,20); %initialize confidence interval bounds to NaN
+  if ~isnan(adj_ci_cvrg),
+     sigIds=find(h);
+     fcr_adj_cis(:,sigIds)=tCIs(data(:,sigIds),adj_ci_cvrg); % tCIs.m is available on the
+     %Mathworks File Exchagne
+  end
+
+
+ For a review of false discovery rate control and other contemporary
+ techniques for correcting for multiple comparisons see:
+
+   Groppe, D.M., Urbach, T.P., &amp; Kutas, M. (2011) Mass univariate analysis 
+ of event-related brain potentials/fields I: A critical tutorial review. 
+ Psychophysiology, 48(12) pp. 1711-1725, DOI: 10.1111/j.1469-8986.2011.01273.x 
+ http://www.cogsci.ucsd.edu/~dgroppe/PUBLICATIONS/mass_uni_preprint1.pdf
+
+
+ For a review of FCR-adjusted confidence intervals (CIs) and other techniques 
+ for adjusting CIs for multiple comparisons see:
+
+   Groppe, D.M. (in press) Combating the scientific decline effect with 
+ confidence (intervals). Psychophysiology.
+ http://biorxiv.org/content/biorxiv/early/2015/12/10/034074.full.pdf
+
+
+ Author:
+ David M. Groppe
+ Kutaslab
+ Dept. of Cognitive Science
+ University of California, San Diego
+ March 24, 2010</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% fdr_bh() - Executes the Benjamini &amp; Hochberg (1995) and the Benjamini &amp;</span>
+0002 <span class="comment">%            Yekutieli (2001) procedure for controlling the false discovery</span>
+0003 <span class="comment">%            rate (FDR) of a family of hypothesis tests. FDR is the expected</span>
+0004 <span class="comment">%            proportion of rejected hypotheses that are mistakenly rejected</span>
+0005 <span class="comment">%            (i.e., the null hypothesis is actually true for those tests).</span>
+0006 <span class="comment">%            FDR is a somewhat less conservative/more powerful method for</span>
+0007 <span class="comment">%            correcting for multiple comparisons than procedures like Bonferroni</span>
+0008 <span class="comment">%            correction that provide strong control of the family-wise</span>
+0009 <span class="comment">%            error rate (i.e., the probability that one or more null</span>
+0010 <span class="comment">%            hypotheses are mistakenly rejected).</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%            This function also returns the false coverage-statement rate</span>
+0013 <span class="comment">%            (FCR)-adjusted selected confidence interval coverage (i.e.,</span>
+0014 <span class="comment">%            the coverage needed to construct multiple comparison corrected</span>
+0015 <span class="comment">%            confidence intervals that correspond to the FDR-adjusted p-values).</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Usage:</span>
+0019 <span class="comment">%  &gt;&gt; [h, crit_p, adj_ci_cvrg, adj_p]=fdr_bh(pvals,q,method,report);</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% Required Input:</span>
+0022 <span class="comment">%   pvals - A vector or matrix (two dimensions or more) containing the</span>
+0023 <span class="comment">%           p-value of each individual test in a family of tests.</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% Optional Inputs:</span>
+0026 <span class="comment">%   q       - The desired false discovery rate. {default: 0.05}</span>
+0027 <span class="comment">%   method  - ['pdep' or 'dep'] If 'pdep,' the original Bejnamini &amp; Hochberg</span>
+0028 <span class="comment">%             FDR procedure is used, which is guaranteed to be accurate if</span>
+0029 <span class="comment">%             the individual tests are independent or positively dependent</span>
+0030 <span class="comment">%             (e.g., Gaussian variables that are positively correlated or</span>
+0031 <span class="comment">%             independent).  If 'dep,' the FDR procedure</span>
+0032 <span class="comment">%             described in Benjamini &amp; Yekutieli (2001) that is guaranteed</span>
+0033 <span class="comment">%             to be accurate for any test dependency structure (e.g.,</span>
+0034 <span class="comment">%             Gaussian variables with any covariance matrix) is used. 'dep'</span>
+0035 <span class="comment">%             is always appropriate to use but is less powerful than 'pdep.'</span>
+0036 <span class="comment">%             {default: 'pdep'}</span>
+0037 <span class="comment">%   report  - ['yes' or 'no'] If 'yes', a brief summary of FDR results are</span>
+0038 <span class="comment">%             output to the MATLAB command line {default: 'no'}</span>
+0039 <span class="comment">%</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">% Outputs:</span>
+0042 <span class="comment">%   h       - A binary vector or matrix of the same size as the input &quot;pvals.&quot;</span>
+0043 <span class="comment">%             If the ith element of h is 1, then the test that produced the</span>
+0044 <span class="comment">%             ith p-value in pvals is significant (i.e., the null hypothesis</span>
+0045 <span class="comment">%             of the test is rejected).</span>
+0046 <span class="comment">%   crit_p  - All uncorrected p-values less than or equal to crit_p are</span>
+0047 <span class="comment">%             significant (i.e., their null hypotheses are rejected).  If</span>
+0048 <span class="comment">%             no p-values are significant, crit_p=0.</span>
+0049 <span class="comment">%   adj_ci_cvrg - The FCR-adjusted BH- or BY-selected</span>
+0050 <span class="comment">%             confidence interval coverage. For any p-values that</span>
+0051 <span class="comment">%             are significant after FDR adjustment, this gives you the</span>
+0052 <span class="comment">%             proportion of coverage (e.g., 0.99) you should use when generating</span>
+0053 <span class="comment">%             confidence intervals for those parameters. In other words,</span>
+0054 <span class="comment">%             this allows you to correct your confidence intervals for</span>
+0055 <span class="comment">%             multiple comparisons. You can NOT obtain confidence intervals</span>
+0056 <span class="comment">%             for non-significant p-values. The adjusted confidence intervals</span>
+0057 <span class="comment">%             guarantee that the expected FCR is less than or equal to q</span>
+0058 <span class="comment">%             if using the appropriate FDR control algorithm for the</span>
+0059 <span class="comment">%             dependency structure of your data (Benjamini &amp; Yekutieli, 2005).</span>
+0060 <span class="comment">%             FCR (i.e., false coverage-statement rate) is the proportion</span>
+0061 <span class="comment">%             of confidence intervals you construct</span>
+0062 <span class="comment">%             that miss the true value of the parameter. adj_ci=NaN if no</span>
+0063 <span class="comment">%             p-values are significant after adjustment.</span>
+0064 <span class="comment">%   adj_p   - All adjusted p-values less than or equal to q are significant</span>
+0065 <span class="comment">%             (i.e., their null hypotheses are rejected). Note, adjusted</span>
+0066 <span class="comment">%             p-values can be greater than 1.</span>
+0067 <span class="comment">%</span>
+0068 <span class="comment">%</span>
+0069 <span class="comment">% References:</span>
+0070 <span class="comment">%   Benjamini, Y. &amp; Hochberg, Y. (1995) Controlling the false discovery</span>
+0071 <span class="comment">%     rate: A practical and powerful approach to multiple testing. Journal</span>
+0072 <span class="comment">%     of the Royal Statistical Society, Series B (Methodological). 57(1),</span>
+0073 <span class="comment">%     289-300.</span>
+0074 <span class="comment">%</span>
+0075 <span class="comment">%   Benjamini, Y. &amp; Yekutieli, D. (2001) The control of the false discovery</span>
+0076 <span class="comment">%     rate in multiple testing under dependency. The Annals of Statistics.</span>
+0077 <span class="comment">%     29(4), 1165-1188.</span>
+0078 <span class="comment">%</span>
+0079 <span class="comment">%   Benjamini, Y., &amp; Yekutieli, D. (2005). False discovery rate?adjusted</span>
+0080 <span class="comment">%     multiple confidence intervals for selected parameters. Journal of the</span>
+0081 <span class="comment">%     American Statistical Association, 100(469), 71?81. doi:10.1198/016214504000001907</span>
+0082 <span class="comment">%</span>
+0083 <span class="comment">%</span>
+0084 <span class="comment">% Example:</span>
+0085 <span class="comment">%  nullVars=randn(12,15);</span>
+0086 <span class="comment">%  [~, p_null]=ttest(nullVars); %15 tests where the null hypothesis</span>
+0087 <span class="comment">%  %is true</span>
+0088 <span class="comment">%  effectVars=randn(12,5)+1;</span>
+0089 <span class="comment">%  [~, p_effect]=ttest(effectVars); %5 tests where the null</span>
+0090 <span class="comment">%  %hypothesis is false</span>
+0091 <span class="comment">%  [h, crit_p, adj_ci_cvrg, adj_p]=fdr_bh([p_null p_effect],.05,'pdep','yes');</span>
+0092 <span class="comment">%  data=[nullVars effectVars];</span>
+0093 <span class="comment">%  fcr_adj_cis=NaN*zeros(2,20); %initialize confidence interval bounds to NaN</span>
+0094 <span class="comment">%  if ~isnan(adj_ci_cvrg),</span>
+0095 <span class="comment">%     sigIds=find(h);</span>
+0096 <span class="comment">%     fcr_adj_cis(:,sigIds)=tCIs(data(:,sigIds),adj_ci_cvrg); % tCIs.m is available on the</span>
+0097 <span class="comment">%     %Mathworks File Exchagne</span>
+0098 <span class="comment">%  end</span>
+0099 <span class="comment">%</span>
+0100 <span class="comment">%</span>
+0101 <span class="comment">% For a review of false discovery rate control and other contemporary</span>
+0102 <span class="comment">% techniques for correcting for multiple comparisons see:</span>
+0103 <span class="comment">%</span>
+0104 <span class="comment">%   Groppe, D.M., Urbach, T.P., &amp; Kutas, M. (2011) Mass univariate analysis</span>
+0105 <span class="comment">% of event-related brain potentials/fields I: A critical tutorial review.</span>
+0106 <span class="comment">% Psychophysiology, 48(12) pp. 1711-1725, DOI: 10.1111/j.1469-8986.2011.01273.x</span>
+0107 <span class="comment">% http://www.cogsci.ucsd.edu/~dgroppe/PUBLICATIONS/mass_uni_preprint1.pdf</span>
+0108 <span class="comment">%</span>
+0109 <span class="comment">%</span>
+0110 <span class="comment">% For a review of FCR-adjusted confidence intervals (CIs) and other techniques</span>
+0111 <span class="comment">% for adjusting CIs for multiple comparisons see:</span>
+0112 <span class="comment">%</span>
+0113 <span class="comment">%   Groppe, D.M. (in press) Combating the scientific decline effect with</span>
+0114 <span class="comment">% confidence (intervals). Psychophysiology.</span>
+0115 <span class="comment">% http://biorxiv.org/content/biorxiv/early/2015/12/10/034074.full.pdf</span>
+0116 <span class="comment">%</span>
+0117 <span class="comment">%</span>
+0118 <span class="comment">% Author:</span>
+0119 <span class="comment">% David M. Groppe</span>
+0120 <span class="comment">% Kutaslab</span>
+0121 <span class="comment">% Dept. of Cognitive Science</span>
+0122 <span class="comment">% University of California, San Diego</span>
+0123 <span class="comment">% March 24, 2010</span>
+0124 
+0125 <span class="comment">%%%%%%%%%%%%%%%% REVISION LOG %%%%%%%%%%%%%%%%%</span>
+0126 <span class="comment">%</span>
+0127 <span class="comment">% 5/7/2010-Added FDR adjusted p-values</span>
+0128 <span class="comment">% 5/14/2013- D.H.J. Poot, Erasmus MC, improved run-time complexity</span>
+0129 <span class="comment">% 10/2015- Now returns FCR adjusted confidence intervals</span>
+0130 
+0131 <a name="_sub0" href="#_subfunctions" class="code">function [h, crit_p, adj_ci_cvrg, adj_p]=bml_fdr_bh(pvals,q,method,report)</a>
+0132 
+0133 <span class="keyword">if</span> nargin&lt;1,
+0134     error(<span class="string">'You need to provide a vector or matrix of p-values.'</span>);
+0135 <span class="keyword">else</span>
+0136     <span class="keyword">if</span> ~isempty(find(pvals&lt;0,1)),
+0137         error(<span class="string">'Some p-values are less than 0.'</span>);
+0138     <span class="keyword">elseif</span> ~isempty(find(pvals&gt;1,1)),
+0139         error(<span class="string">'Some p-values are greater than 1.'</span>);
+0140     <span class="keyword">end</span>
+0141 <span class="keyword">end</span>
+0142 
+0143 <span class="keyword">if</span> nargin&lt;2,
+0144     q=.05;
+0145 <span class="keyword">end</span>
+0146 
+0147 <span class="keyword">if</span> nargin&lt;3,
+0148     method=<span class="string">'pdep'</span>;
+0149 <span class="keyword">end</span>
+0150 
+0151 <span class="keyword">if</span> nargin&lt;4,
+0152     report=<span class="string">'no'</span>;
+0153 <span class="keyword">end</span>
+0154 
+0155 s=size(pvals);
+0156 <span class="keyword">if</span> (length(s)&gt;2) || s(1)&gt;1,
+0157     [p_sorted, sort_ids]=sort(reshape(pvals,1,prod(s)));
+0158 <span class="keyword">else</span>
+0159     <span class="comment">%p-values are already a row vector</span>
+0160     [p_sorted, sort_ids]=sort(pvals);
+0161 <span class="keyword">end</span>
+0162 [dummy, unsort_ids]=sort(sort_ids); <span class="comment">%indexes to return p_sorted to pvals order</span>
+0163 m=length(p_sorted); <span class="comment">%number of tests</span>
+0164 
+0165 <span class="keyword">if</span> strcmpi(method,<span class="string">'pdep'</span>),
+0166     <span class="comment">%BH procedure for independence or positive dependence</span>
+0167     thresh=(1:m)*q/m;
+0168     wtd_p=m*p_sorted./(1:m);
+0169     
+0170 <span class="keyword">elseif</span> strcmpi(method,<span class="string">'dep'</span>)
+0171     <span class="comment">%BH procedure for any dependency structure</span>
+0172     denom=m*sum(1./(1:m));
+0173     thresh=(1:m)*q/denom;
+0174     wtd_p=denom*p_sorted./[1:m];
+0175     <span class="comment">%Note, it can produce adjusted p-values greater than 1!</span>
+0176     <span class="comment">%compute adjusted p-values</span>
+0177 <span class="keyword">else</span>
+0178     error(<span class="string">'Argument ''method'' needs to be ''pdep'' or ''dep''.'</span>);
+0179 <span class="keyword">end</span>
+0180 
+0181 <span class="keyword">if</span> nargout&gt;3,
+0182     <span class="comment">%compute adjusted p-values; This can be a bit computationally intensive</span>
+0183     adj_p=zeros(1,m)*NaN;
+0184     [wtd_p_sorted, wtd_p_sindex] = sort( wtd_p );
+0185     nextfill = 1;
+0186     <span class="keyword">for</span> k = 1 : m
+0187         <span class="keyword">if</span> wtd_p_sindex(k)&gt;=nextfill
+0188             adj_p(nextfill:wtd_p_sindex(k)) = wtd_p_sorted(k);
+0189             nextfill = wtd_p_sindex(k)+1;
+0190             <span class="keyword">if</span> nextfill&gt;m
+0191                 <span class="keyword">break</span>;
+0192             <span class="keyword">end</span>;
+0193         <span class="keyword">end</span>;
+0194     <span class="keyword">end</span>;
+0195     adj_p=reshape(adj_p(unsort_ids),s);
+0196 <span class="keyword">end</span>
+0197 
+0198 rej=p_sorted&lt;=thresh;
+0199 max_id=find(rej,1,<span class="string">'last'</span>); <span class="comment">%find greatest significant pvalue</span>
+0200 <span class="keyword">if</span> isempty(max_id),
+0201     crit_p=0;
+0202     h=pvals*0;
+0203     adj_ci_cvrg=NaN;
+0204 <span class="keyword">else</span>
+0205     crit_p=p_sorted(max_id);
+0206     h=pvals&lt;=crit_p;
+0207     adj_ci_cvrg=1-thresh(max_id);
+0208 <span class="keyword">end</span>
+0209 
+0210 <span class="keyword">if</span> strcmpi(report,<span class="string">'yes'</span>),
+0211     n_sig=sum(p_sorted&lt;=crit_p);
+0212     <span class="keyword">if</span> n_sig==1,
+0213         fprintf(<span class="string">'Out of %d tests, %d is significant using a false discovery rate of %f.\n'</span>,m,n_sig,q);
+0214     <span class="keyword">else</span>
+0215         fprintf(<span class="string">'Out of %d tests, %d are significant using a false discovery rate of %f.\n'</span>,m,n_sig,q);
+0216     <span class="keyword">end</span>
+0217     <span class="keyword">if</span> strcmpi(method,<span class="string">'pdep'</span>),
+0218         fprintf(<span class="string">'FDR/FCR procedure used is guaranteed valid for independent or positively dependent tests.\n'</span>);
+0219     <span class="keyword">else</span>
+0220         fprintf(<span class="string">'FDR/FCR procedure used is guaranteed valid for independent or dependent tests.\n'</span>);
+0221     <span class="keyword">end</span>
+0222 <span class="keyword">end</span>
+0223 
+0224 
+0225 
+0226</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

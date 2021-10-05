@@ -118,68 +118,69 @@ This function is called by:
 0061       fprintf(&quot;\n&quot;,label{1});
 0062     <span class="keyword">end</span>
 0063     
-0064     zero_cross_ixs = find(abs(diff(sign(env.trial{i}(l,:)-lower_threshold),1,2))&gt;=1);
-0065 
-0066     <span class="comment">%dealing with negative values for reset</span>
-0067     reset_value=min(env.trial{i}(l,:),[],2);
-0068     reset_value(reset_value&gt;0)=0;
-0069 
-0070     search_detect = true;
-0071     loop_count = 0;
-0072     annot_l = table();
-0073     <span class="keyword">while</span> search_detect
-0074       loop_count = loop_count + 1;
-0075       [env_max, env_max_ix] = max(env.trial{i}(l,:),[],2,<span class="string">'omitnan'</span>);       
-0076       assert(loop_count &lt;= max_annots, &quot;More annots detected than max_annots&quot;);
-0077 
-0078       <span class="keyword">if</span> env_max &gt; upper_threshold
-0079         <span class="comment">%finding start and end of current annot</span>
-0080         <span class="keyword">if</span> isempty(zero_cross_ixs)
-0081           starts = env.time{i}(1)-0.5/env.fsample;
-0082           ends = env.time{i}(end)+0.5/env.fsample;
-0083         <span class="keyword">elseif</span> env_max_ix &lt;= zero_cross_ixs(1)
-0084           starts = env.time{i}(1)-0.5/env.fsample;
-0085           ends = env.time{i}(zero_cross_ixs(1))+0.5/env.fsample;
-0086         <span class="keyword">elseif</span> env_max_ix &gt; zero_cross_ixs(end)
-0087           starts = env.time{i}(zero_cross_ixs(end))-0.5/env.fsample;
-0088           ends = env.time{i}(end)+0.5/env.fsample;
-0089         <span class="keyword">else</span>
-0090           zc_ix = find(diff(sign(zero_cross_ixs-env_max_ix)),1);
-0091           starts = env.time{i}(zero_cross_ixs(zc_ix))-0.5/env.fsample;
-0092           ends = env.time{i}(zero_cross_ixs(zc_ix+1))+0.5/env.fsample;
-0093         <span class="keyword">end</span>
-0094 
-0095         overlaps = false;
-0096         <span class="keyword">for</span> j=1:height(annot_l)
-0097           row = annot_l(j,:);
-0098           <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
-0099             <span class="comment">%attemping to make contiguous</span>
-0100             <span class="keyword">if</span> abs(row.starts - ends) &lt; timeeps
-0101               ends = row.starts;
-0102             <span class="keyword">end</span>
-0103             <span class="keyword">if</span> abs(row.ends - starts) &lt; timeeps 
-0104               starts = row.ends;
-0105             <span class="keyword">end</span>
-0106             <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
-0107               overlaps = true;
-0108             <span class="keyword">end</span>
-0109           <span class="keyword">end</span>
-0110         <span class="keyword">end</span>
-0111         <span class="keyword">if</span> ~overlaps
-0112           trial = i;
-0113           annot_l = [annot_l; table(starts,ends,env_max,trial,label)];
-0114         <span class="keyword">end</span>
-0115         [s,e] = <a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(env_coord,starts,ends);
-0116         env.trial{i}(l,s:e)=reset_value;
-0117       <span class="keyword">else</span>
-0118         search_detect = false;
-0119       <span class="keyword">end</span>
-0120     <span class="keyword">end</span>
-0121     annot = [annot; annot_l];
-0122   <span class="keyword">end</span>
-0123 <span class="keyword">end</span>
-0124 fprintf(&quot;\n&quot;);
-0125 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0064     assert(~any(isinf(env.trial{i}(l,:))),<span class="string">'envelope cannot contain Inf values'</span>);
+0065     zero_cross_ixs = find(abs(diff(sign(env.trial{i}(l,:)-lower_threshold),1,2))&gt;=1);
+0066 
+0067     <span class="comment">%dealing with negative values for reset</span>
+0068     reset_value=min(env.trial{i}(l,:),[],2);
+0069     reset_value(reset_value&gt;0)=0;
+0070 
+0071     search_detect = true;
+0072     loop_count = 0;
+0073     annot_l = table();
+0074     <span class="keyword">while</span> search_detect
+0075       loop_count = loop_count + 1;
+0076       [env_max, env_max_ix] = max(env.trial{i}(l,:),[],2,<span class="string">'omitnan'</span>);       
+0077       assert(loop_count &lt;= max_annots, &quot;More annots detected than max_annots&quot;);
+0078 
+0079       <span class="keyword">if</span> env_max &gt; upper_threshold
+0080         <span class="comment">%finding start and end of current annot</span>
+0081         <span class="keyword">if</span> isempty(zero_cross_ixs)
+0082           starts = env.time{i}(1)-0.5/env.fsample;
+0083           ends = env.time{i}(end)+0.5/env.fsample;
+0084         <span class="keyword">elseif</span> env_max_ix &lt;= zero_cross_ixs(1)
+0085           starts = env.time{i}(1)-0.5/env.fsample;
+0086           ends = env.time{i}(zero_cross_ixs(1))+0.5/env.fsample;
+0087         <span class="keyword">elseif</span> env_max_ix &gt; zero_cross_ixs(end)
+0088           starts = env.time{i}(zero_cross_ixs(end))-0.5/env.fsample;
+0089           ends = env.time{i}(end)+0.5/env.fsample;
+0090         <span class="keyword">else</span>
+0091           zc_ix = find(diff(sign(zero_cross_ixs-env_max_ix)),1);
+0092           starts = env.time{i}(zero_cross_ixs(zc_ix))-0.5/env.fsample;
+0093           ends = env.time{i}(zero_cross_ixs(zc_ix+1))+0.5/env.fsample;
+0094         <span class="keyword">end</span>
+0095 
+0096         overlaps = false;
+0097         <span class="keyword">for</span> j=1:height(annot_l)
+0098           row = annot_l(j,:);
+0099           <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
+0100             <span class="comment">%attemping to make contiguous</span>
+0101             <span class="keyword">if</span> abs(row.starts - ends) &lt; timeeps
+0102               ends = row.starts;
+0103             <span class="keyword">end</span>
+0104             <span class="keyword">if</span> abs(row.ends - starts) &lt; timeeps 
+0105               starts = row.ends;
+0106             <span class="keyword">end</span>
+0107             <span class="keyword">if</span> row.starts &lt; ends &amp;&amp; row.ends &gt; starts
+0108               overlaps = true;
+0109             <span class="keyword">end</span>
+0110           <span class="keyword">end</span>
+0111         <span class="keyword">end</span>
+0112         <span class="keyword">if</span> ~overlaps
+0113           trial = i;
+0114           annot_l = [annot_l; table(starts,ends,env_max,trial,label)];
+0115         <span class="keyword">end</span>
+0116         [s,e] = <a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(env_coord,starts,ends);
+0117         env.trial{i}(l,s:e)=reset_value;
+0118       <span class="keyword">else</span>
+0119         search_detect = false;
+0120       <span class="keyword">end</span>
+0121     <span class="keyword">end</span>
+0122     annot = [annot; annot_l];
+0123   <span class="keyword">end</span>
+0124 <span class="keyword">end</span>
+0125 fprintf(&quot;\n&quot;);
+0126 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

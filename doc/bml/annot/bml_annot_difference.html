@@ -191,7 +191,7 @@ This function is called by:
 0128             annot_g = [annot_g;{x_start,x_end,x_id,groups_x(g)}];         
 0129         <span class="keyword">end</span>
 0130       <span class="keyword">else</span>
-0131           error(<span class="string">'Should never get here'</span>);
+0131           error(<span class="string">'Should never get here. Is there any annotation with negative duration?'</span>);
 0132       <span class="keyword">end</span>
 0133     <span class="keyword">end</span>
 0134     <span class="keyword">if</span> ~isempty(annot_g)
@@ -220,6 +220,6 @@ This function is called by:
 0157 
 0158 
 0159</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

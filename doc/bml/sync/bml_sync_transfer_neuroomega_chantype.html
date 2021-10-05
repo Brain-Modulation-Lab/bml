@@ -131,12 +131,12 @@ This function is called by:
 0051 
 0052 hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),<span class="string">'chantype'</span>,<span class="string">'chaninfo'</span>);
 0053 <span class="keyword">if</span> isempty(time_channel)
-0054   sel_time_channel = strcmp(hdr1.chaninfo.chantype,chantype);
+0054   sel_time_channel = strcmp(hdr1.orig.chaninfo.chantype,chantype);
 0055   assert(sum(sel_time_channel)&gt;0,<span class="string">'no channel of specified chantype'</span>);
-0056   time_channel = hdr1.chaninfo(sel_time_channel,:).channel{1};
+0056   time_channel = hdr1.orig.chaninfo(sel_time_channel,:).channel{1};
 0057 <span class="keyword">end</span>
 0058 <span class="keyword">if</span> isempty(sync_time_channel)
-0059   sync_time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,roi.chantype{1}),:).channel{1};
+0059   sync_time_channel = hdr1.orig.chaninfo(strcmp(hdr1.orig.chaninfo.chantype,roi.chantype{1}),:).channel{1};
 0060 <span class="keyword">end</span>
 0061 
 0062 time_begin_var      = strcat(time_channel,<span class="string">'_TimeBegin'</span>);
@@ -166,17 +166,17 @@ This function is called by:
 0086   coord.s1=1; coord.s2=hdr.nSamples;
 0087   
 0088   <span class="comment">%loading time info from neuroomega file</span>
-0089   <span class="keyword">if</span> ismember(time_begin_var,fields(hdr.orig))
-0090     coord.t1   = hdr.orig.(time_begin_var);
-0091     coord.t2   = hdr.orig.(time_end_var);
+0089   <span class="keyword">if</span> ismember(time_begin_var,fields(hdr.orig.orig))
+0090     coord.t1   = hdr.orig.orig.(time_begin_var);
+0091     coord.t2   = hdr.orig.orig.(time_end_var);
 0092     <span class="comment">%(coord.t2 - coord.t1)*hdr.Fs == hdr.nSamples</span>
 0093   <span class="keyword">else</span>
 0094     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
 0095       time_begin_var,fullfile(row.folder{1},row.name{1}), strjoin(hdr.label));
 0096   <span class="keyword">end</span>
-0097   <span class="keyword">if</span> ismember(sync_time_begin_var,fields(hdr.orig))
-0098       orig_coord.t1 = hdr.orig.(sync_time_begin_var);
-0099     orig_coord.t2 = hdr.orig.(sync_time_end_var);
+0097   <span class="keyword">if</span> ismember(sync_time_begin_var,fields(hdr.orig.orig))
+0098       orig_coord.t1 = hdr.orig.orig.(sync_time_begin_var);
+0099     orig_coord.t2 = hdr.orig.orig.(sync_time_end_var);
 0100     <span class="comment">%(orig_coord.t2 - orig_coord.t1)*row.Fs == row.nSamples</span>
 0101   <span class="keyword">else</span>
 0102     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
@@ -218,6 +218,6 @@ This function is called by:
 0138 sync = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(sync);
 0139 
 0140</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

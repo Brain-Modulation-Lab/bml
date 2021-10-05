@@ -36,10 +36,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li></ul>
+</ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-</ul>
+<li><a href="bml_annot_calculate2.html" class="code" title="function annot = bml_annot_calculate2(cfg, raw, varargin)">bml_annot_calculate2</a>	BML_ANNOT_CALCULATE2 calculates scalar values from 2 specific annotations in raw</li><li><a href="bml_annot_read_tsv.html" class="code" title="function annot = bml_annot_read_tsv(filename,varargin)">bml_annot_read_tsv</a>	BML_ANNOT_READ_TSV reads tab delimited vector BIDS annotation table</li><li><a href="bml_annot_write_tsv.html" class="code" title="function bml_annot_write_tsv(annot,filename,varargin)">bml_annot_write_tsv</a>	BML_ANNOT_WRITE writes an annotation table</li></ul>
 <!-- crossreference -->
 
 
@@ -52,7 +52,7 @@ This function is called by:
 0005 <span class="comment">% Use as</span>
 0006 <span class="comment">%    renamed = bml_annot_rename(annot, 'old_col1', 'new_col1', 'old_col2', 'new_col2',...)</span>
 0007 
-0008 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot);
+0008 <span class="comment">%annot = bml_annot_table(annot);</span>
 0009 
 0010 <span class="keyword">if</span> mod(numel(varargin),2) ~= 0
 0011   error(<span class="string">'matching old and new column names required'</span>);
@@ -70,6 +70,6 @@ This function is called by:
 0023 <span class="keyword">end</span>
 0024 
 0025 renamed = annot;</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

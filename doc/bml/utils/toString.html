@@ -1,0 +1,506 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of toString</title>
+  <meta name="keywords" content="toString">
+  <meta name="description" content="TOSTRING creates a string representation of any MATLAB variable">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">utils</a> &gt; toString.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\utils&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>toString
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>TOSTRING creates a string representation of any MATLAB variable</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function s = toString(v, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">TOSTRING creates a string representation of any MATLAB variable
+   STRINGREP=RPTGEN.TOSTRING(VARIABLE, CHARLIMIT)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function sizeString = locRenderSizeString(sizeVector, isMinimize)</a></li><li><a href="#_sub2" class="code">function string = locRenderStruct(value, charLimit, cr)</a></li><li><a href="#_sub3" class="code">function string = locRenderCell(value, charLimit, cr)</a></li><li><a href="#_sub4" class="code">function string = locRenderStringArray(value, charLimit, cr)</a></li><li><a href="#_sub5" class="code">function string = locRenderViaDISP(value, charLimit, cr)</a></li><li><a href="#_sub6" class="code">function string = locRenderNumeric(value, charLimit, cr)</a></li><li><a href="#_sub7" class="code">function string = locRenderChar(value, charLimit, cr)</a></li><li><a href="#_sub8" class="code">function string = locRenderCellStr(value, charLimit, cr, objType)</a></li><li><a href="#_sub9" class="code">function string = locRenderDAObject(value, charLimit, cr)</a></li><li><a href="#_sub10" class="code">function string = locRenderMCOSObject(value)</a></li><li><a href="#_sub11" class="code">function [charLimit, cr] = locParseInputArgs(varargin)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function s = toString(v, varargin)</a>
+0002 <span class="comment">%TOSTRING creates a string representation of any MATLAB variable</span>
+0003 <span class="comment">%   STRINGREP=RPTGEN.TOSTRING(VARIABLE, CHARLIMIT)</span>
+0004 
+0005 <span class="comment">%   Copyright 1997-2017 The MathWorks, Inc.</span>
+0006 <span class="comment">%--------1---------2---------3---------4---------5---------6---------7---------8</span>
+0007 
+0008 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0009 <span class="comment">% Convert string arguments to character array arguments</span>
+0010 n = numel(varargin);
+0011 <span class="keyword">for</span> i = 1:n
+0012     <span class="keyword">if</span> isstring(varargin{i})
+0013         varargin{i} = char(varargin{i});
+0014     <span class="keyword">end</span>
+0015 <span class="keyword">end</span>
+0016 
+0017 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0018 [charLimit, cr] = <a href="#_sub11" class="code" title="subfunction [charLimit, cr] = locParseInputArgs(varargin)">locParseInputArgs</a>(varargin{:});
+0019 
+0020 <span class="keyword">if</span> ischar(v)
+0021     s = <a href="#_sub7" class="code" title="subfunction string = locRenderChar(value, charLimit, cr)">locRenderChar</a>(v, charLimit, cr);
+0022 <span class="keyword">elseif</span> isstring(v) 
+0023     <span class="keyword">if</span> isscalar(v) 
+0024         s = <a href="#_sub7" class="code" title="subfunction string = locRenderChar(value, charLimit, cr)">locRenderChar</a>(char(v), charLimit, cr);
+0025     <span class="keyword">else</span>
+0026         s = <a href="#_sub4" class="code" title="subfunction string = locRenderStringArray(value, charLimit, cr)">locRenderStringArray</a>(v, charLimit, cr);
+0027     <span class="keyword">end</span>
+0028     
+0029 <span class="keyword">elseif</span> isnumeric(v)
+0030     s = <a href="#_sub6" class="code" title="subfunction string = locRenderNumeric(value, charLimit, cr)">locRenderNumeric</a>(v, charLimit, cr);
+0031 
+0032 <span class="keyword">elseif</span> iscellstr(v)
+0033     s = <a href="#_sub8" class="code" title="subfunction string = locRenderCellStr(value, charLimit, cr, objType)">locRenderCellStr</a>(v, charLimit, cr);
+0034 
+0035 <span class="keyword">elseif</span> iscell(v)
+0036     s = <a href="#_sub3" class="code" title="subfunction string = locRenderCell(value, charLimit, cr)">locRenderCell</a>(v, charLimit, cr);
+0037 
+0038 <span class="keyword">elseif</span> isstruct(v)
+0039     s = <a href="#_sub2" class="code" title="subfunction string = locRenderStruct(value, charLimit, cr)">locRenderStruct</a>(v, charLimit, cr);
+0040 
+0041 <span class="keyword">elseif</span> isobject(v)
+0042     s = <a href="#_sub10" class="code" title="subfunction string = locRenderMCOSObject(value)">locRenderMCOSObject</a>(v);
+0043 
+0044 <span class="keyword">elseif</span> isa(v, <span class="string">'DAStudio.Object'</span>)
+0045     s = <a href="#_sub9" class="code" title="subfunction string = locRenderDAObject(value, charLimit, cr)">locRenderDAObject</a>(v, charLimit, cr);
+0046     
+0047 <span class="keyword">else</span>
+0048     s = <a href="#_sub5" class="code" title="subfunction string = locRenderViaDISP(value, charLimit, cr)">locRenderViaDISP</a>(v, charLimit, cr);
+0049 <span class="keyword">end</span>    
+0050     
+0051 <span class="comment">%-------------------------------------------------------------------------------</span>
+0052 <a name="_sub1" href="#_subfunctions" class="code">function sizeString = locRenderSizeString(sizeVector, isMinimize)</a>
+0053 <span class="comment">% locRenderSizeString accepts a size vector (i.e. the output from SIZE) and</span>
+0054 <span class="comment">% renders it as AxBxC.</span>
+0055 
+0056 <span class="keyword">if</span> ((nargin &gt; 1) &amp;&amp; isMinimize <span class="keyword">...</span>
+0057         &amp;&amp; (length(sizeVector) &lt; 3) <span class="keyword">...</span><span class="comment">   % check length &quot;[1 1]&quot;</span>
+0058         &amp;&amp; (max(sizeVector) == 1))        <span class="comment">% check elements are all 1s</span>
+0059     <span class="comment">% Renders empty if sizeVector is &quot;[1 1]&quot;</span>
+0060     sizeString = <span class="string">''</span>;
+0061 <span class="keyword">else</span>
+0062     <span class="comment">% Render output as &quot;AxBxCx&quot;</span>
+0063     sizeString = sprintf(<span class="string">'%ix'</span>, sizeVector);
+0064     <span class="comment">% Remove trailing x</span>
+0065     sizeString(end) = <span class="string">' '</span>;
+0066 <span class="keyword">end</span>
+0067 
+0068 <span class="comment">%-------------------------------------------------------------------------------</span>
+0069 <a name="_sub2" href="#_subfunctions" class="code">function string = locRenderStruct(value, charLimit, cr)</a>
+0070 
+0071 siz = size(value);
+0072 nDims = length(siz);
+0073 
+0074 <span class="keyword">if</span> ((nDims &gt; 2) || (max(siz) &gt; 1))
+0075     <span class="comment">% 3d or N-d array - always collapse</span>
+0076     compactStruct = 1;
+0077 
+0078 <span class="keyword">else</span>
+0079     <span class="comment">% Render via DISP method for structures</span>
+0080     <span class="comment">% &gt;&gt; aStruct = struct('a',123,'b','xyz');</span>
+0081     <span class="comment">% &gt;&gt; rptgen.toString(aStruct);</span>
+0082     string = <a href="#_sub5" class="code" title="subfunction string = locRenderViaDISP(value, charLimit, cr)">locRenderViaDISP</a>(value, inf, cr);
+0083     compactStruct = (length(string) &gt; charLimit);
+0084 <span class="keyword">end</span>
+0085 
+0086 <span class="keyword">if</span> compactStruct
+0087     <span class="comment">% Test code for following code paths</span>
+0088     <span class="comment">% &gt;&gt; aStruct = struct('a',123,'b','xyz','c',123,'d','xyz','e',1,'f',2);</span>
+0089     <span class="comment">% &gt;&gt; aStructMultiDims = repmat(aStruct,[2 2])</span>
+0090 
+0091     sizStr = <a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(siz, true);
+0092     
+0093     <span class="comment">% Note the %%s used for a possibily another call to SPRINTF</span>
+0094     string = sprintf(<span class="string">'[%s%s w/ fields: %%s]'</span>, sizStr, <span class="string">'struct'</span>);
+0095 
+0096     <span class="keyword">if</span> (length(string) &gt; charLimit+8)
+0097         <span class="comment">% &gt;&gt; rptgen.toString(aStructMultiDims, 10);</span>
+0098         <span class="comment">%      [2x2 struct]</span>
+0099         string = sprintf(<span class="string">'[%s%s]'</span>, sizStr, <span class="string">'struct'</span>);
+0100     
+0101     <span class="keyword">else</span>
+0102         <span class="comment">% Construct list of fieldnames</span>
+0103         f = rptgen.makeSingleLineText(fieldnames(value), <span class="string">', '</span>);
+0104 
+0105         <span class="keyword">if</span> (length(f) &gt; charLimit - length(string))
+0106             f = f(1:charLimit-length(string));
+0107             <span class="keyword">if</span> (length(f) &lt; 3)
+0108                 <span class="comment">% &gt;&gt; rptgen.toString(aStructMultiDims, 20)</span>
+0109                 <span class="comment">%      [2x2 struct w/ fields: ...]</span>
+0110                 f = <span class="string">'...'</span>;
+0111             <span class="keyword">else</span>
+0112                 <span class="comment">% &gt;&gt; rptgen.toString(aStructMultiDims, 40)</span>
+0113                 <span class="comment">%      [2x2 struct w/ fields: a, b, c, d,...]</span>
+0114                 f(end-2:end) = <span class="string">'...'</span>;
+0115             <span class="keyword">end</span>
+0116         <span class="keyword">end</span>
+0117         
+0118         <span class="comment">% Second SPRINTF.  Note, string contains %%s.</span>
+0119         string = sprintf(string, f);
+0120     <span class="keyword">end</span>
+0121 <span class="keyword">end</span>
+0122 
+0123 <span class="comment">% Replace carriage returns</span>
+0124 string = strrep(string, newline, cr);
+0125 
+0126 
+0127 <span class="comment">%-------------------------------------------------------------------------------</span>
+0128 <a name="_sub3" href="#_subfunctions" class="code">function string = locRenderCell(value, charLimit, cr)</a>
+0129 
+0130 siz = size(value);
+0131 nDims = length(siz);
+0132 
+0133 isCollapse = false;
+0134 <span class="keyword">if</span> isempty(value)
+0135     <span class="comment">% &gt;&gt; rptgen.toString({''})</span>
+0136     string = <span class="string">'{}'</span>;
+0137 
+0138 <span class="keyword">elseif</span> (nDims &lt; 3)
+0139     <span class="comment">% 3d or N-d array - always collapse</span>
+0140     <span class="comment">% &gt;&gt; a = cell(2,2);</span>
+0141     <span class="comment">% &gt;&gt; a{1,1} = 11;</span>
+0142     <span class="comment">% &gt;&gt; a{1,2} = '1,2';</span>
+0143     <span class="comment">% &gt;&gt; a{2,1} = 21;</span>
+0144     <span class="comment">% &gt;&gt; a{2,2} = '2,2';</span>
+0145     <span class="comment">% &gt;&gt; rptgen.toString(a)</span>
+0146     <span class="comment">% &gt;&gt; rptgen.toString(a, 5)</span>
+0147     string = <span class="string">'{'</span>;
+0148     <span class="keyword">for</span> i = 1:siz(1)
+0149         j = 1;
+0150         sLength = length(string);
+0151         <span class="keyword">while</span> (j &lt;= siz(2)) &amp;&amp; ~isCollapse
+0152             <span class="comment">% Pass in a character limit roughly corresponding to the percentage</span>
+0153             <span class="comment">% of cells we have left to go</span>
+0154             pctCharLimit = (charLimit-sLength)/((i-1)*siz(2)+j);
+0155 
+0156             string = [ string <span class="keyword">...</span>
+0157                        <span class="string">' '</span> <span class="keyword">...</span>
+0158                        rptgen.toString(value{i,j}, pctCharLimit, <span class="string">' '</span>) <span class="keyword">...</span>
+0159                        <span class="string">' ,'</span> ]; <span class="comment">%#ok</span>
+0160             
+0161             j = j+1;
+0162             sLength = length(string);
+0163             isCollapse = ~(sLength &lt;= charLimit);
+0164         <span class="keyword">end</span>
+0165         string(end) = <span class="string">';'</span>;
+0166 
+0167         <span class="comment">% NOTE* Below was 'string(end+1)=cr;', but this fails when value is not a string</span>
+0168         string = [string cr]; <span class="comment">%#ok</span>
+0169     <span class="keyword">end</span>
+0170     string(end-1) = <span class="string">'}'</span>;
+0171     string(end) = [];
+0172 
+0173 <span class="keyword">else</span>
+0174     <span class="comment">% 3d or N-d array - always collapse</span>
+0175     <span class="comment">% &gt;&gt; a = cell(2,2);</span>
+0176     <span class="comment">% &gt;&gt; a{1,1} = 11;</span>
+0177     <span class="comment">% &gt;&gt; a{1,2} = '1,2';</span>
+0178     <span class="comment">% &gt;&gt; a{2,1} = 21;</span>
+0179     <span class="comment">% &gt;&gt; a{2,2} = '2,2';</span>
+0180     <span class="comment">% rptgen.toString(repmat(a,[2 2 2]))</span>
+0181     isCollapse = true;
+0182 <span class="keyword">end</span>
+0183 
+0184 <span class="keyword">if</span> isCollapse
+0185     string = sprintf(<span class="string">'[%s cell]'</span>, <a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(siz));
+0186 <span class="keyword">end</span>
+0187 
+0188 <span class="comment">%-------------------------------------------------------------------------------</span>
+0189 <a name="_sub4" href="#_subfunctions" class="code">function string = locRenderStringArray(value, charLimit, cr)</a>
+0190 
+0191 value = num2cell(value);
+0192 
+0193 siz = size(value);
+0194 nDims = length(siz);
+0195 
+0196 isCollapse = false;
+0197 <span class="keyword">if</span> isempty(value)
+0198     <span class="comment">% &gt;&gt; rptgen.toString({''})</span>
+0199     string = <span class="string">'[]'</span>;
+0200 
+0201 <span class="keyword">elseif</span> (nDims &lt; 3)
+0202     <span class="comment">% 3d or N-d array - always collapse</span>
+0203     <span class="comment">% &gt;&gt; a = [&quot;a&quot;,&quot;b&quot;;&quot;c&quot;;&quot;d&quot;];</span>
+0204     <span class="comment">% &gt;&gt; rptgen.toString(a)</span>
+0205     <span class="comment">% &gt;&gt; rptgen.toString(a, 5)</span>
+0206     string = <span class="string">'['</span>;
+0207     <span class="keyword">for</span> i = 1:siz(1)
+0208         j = 1;
+0209         sLength = length(string);
+0210         <span class="keyword">while</span> (j &lt;= siz(2)) &amp;&amp; ~isCollapse
+0211             <span class="comment">% Pass in a character limit roughly corresponding to the percentage</span>
+0212             <span class="comment">% of cells we have left to go</span>
+0213             pctCharLimit = (charLimit-sLength)/((i-1)*siz(2)+j);
+0214             
+0215             <span class="keyword">if</span> i &gt; 1
+0216                 leftQuote = <span class="string">' &quot;'</span>;
+0217             <span class="keyword">else</span>
+0218                 leftQuote = <span class="string">'&quot;'</span>;
+0219             <span class="keyword">end</span>
+0220 
+0221             string = [ string <span class="keyword">...</span>
+0222                        leftQuote <span class="keyword">...</span>
+0223                        rptgen.toString(value{i,j}, pctCharLimit) <span class="keyword">...</span>
+0224                        <span class="string">'&quot;,'</span> ]; <span class="comment">%#ok</span>
+0225             
+0226             j = j+1;
+0227             sLength = length(string);
+0228             isCollapse = ~(sLength &lt;= charLimit);
+0229         <span class="keyword">end</span>
+0230         string(end) = <span class="string">';'</span>;
+0231 
+0232         <span class="comment">% NOTE* Below was 'string(end+1)=cr;', but this fails when value is not a string</span>
+0233         string = [string cr]; <span class="comment">%#ok</span>
+0234     <span class="keyword">end</span>
+0235     string(end-1) = <span class="string">']'</span>;
+0236     string(end) = [];
+0237 
+0238 <span class="keyword">else</span>
+0239     <span class="comment">% 3d or N-d array - always collapse</span>
+0240     <span class="comment">% &gt;&gt; a = [&quot;a&quot;,&quot;b&quot;;&quot;c&quot;;&quot;d&quot;];</span>
+0241     <span class="comment">% rptgen.toString(repmat(a,[2 2 2]))</span>
+0242     isCollapse = true;
+0243 <span class="keyword">end</span>
+0244 
+0245 <span class="keyword">if</span> isCollapse
+0246     string = sprintf(<span class="string">'[%s string array]'</span>, <a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(siz));
+0247 <span class="keyword">end</span>
+0248 
+0249 <span class="comment">%-------------------------------------------------------------------------------</span>
+0250 <a name="_sub5" href="#_subfunctions" class="code">function string = locRenderViaDISP(value, charLimit, cr)</a>
+0251 <span class="comment">% value called by EVALC</span>
+0252                                  
+0253 <span class="keyword">try</span>
+0254     string = evalc(<span class="string">'disp(value)'</span>);
+0255 
+0256     <span class="comment">% Eliminate leading and trailing \n's</span>
+0257     string = regexprep(string, <span class="string">'^\n+|\n+$'</span>, <span class="string">''</span>);
+0258 
+0259     <span class="comment">% Replace carriage returns</span>
+0260     string = strrep(string, newline, cr);
+0261     
+0262     forceCollapse = false;
+0263 <span class="keyword">catch</span> ex <span class="comment">%#ok&lt;NASGU&gt;</span>
+0264     forceCollapse = true;
+0265 <span class="keyword">end</span>
+0266 
+0267 <span class="keyword">if</span> (forceCollapse || (length(string) &gt; charLimit))
+0268     siz = size(value);
+0269     string = sprintf(<span class="string">'[%s%s]'</span>, <a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(siz), class(value));
+0270 <span class="keyword">end</span>
+0271 
+0272 <span class="comment">%-------------------------------------------------------------------------------</span>
+0273 <a name="_sub6" href="#_subfunctions" class="code">function string = locRenderNumeric(value, charLimit, cr)</a>
+0274 
+0275 siz = size(value);
+0276 nElem = prod(siz);
+0277 nDims = length(siz);
+0278 
+0279 <span class="comment">% Get typical string length for a given display format</span>
+0280 dispFormat = get(0, <span class="string">'Format'</span>);
+0281 <span class="keyword">switch</span> dispFormat(1)
+0282     <span class="keyword">case</span> <span class="string">'b'</span>
+0283         <span class="comment">% &gt;&gt; format bank</span>
+0284         typNumStrLen = 4;
+0285         precision = 2;
+0286     <span class="keyword">case</span> <span class="string">'l'</span>
+0287         <span class="comment">% &gt;&gt; format long</span>
+0288         typNumStrLen = 17;
+0289         precision = 7;
+0290         
+0291     <span class="keyword">otherwise</span>
+0292         <span class="comment">% &gt;&gt; format short</span>
+0293         typNumStrLen = 6;
+0294         precision = [];
+0295 <span class="keyword">end</span>
+0296 
+0297 <span class="keyword">if</span> ((nDims &gt; 2) || (nElem*typNumStrLen &gt; charLimit))
+0298     <span class="comment">% Show in collapse form</span>
+0299     <span class="comment">% &gt;&gt; rptgen.toString(rand(100), 100)</span>
+0300     <span class="comment">%      [100x100 double]</span>
+0301     string = sprintf(<span class="string">'&lt;%s%s&gt;'</span>, <a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(siz), class(value));
+0302 
+0303 <span class="keyword">elseif</span> (nElem == 1)
+0304     <span class="comment">% Obey current FORMAT setting by using DISP</span>
+0305     <span class="comment">% &gt;&gt; aNumber = int16(255);</span>
+0306     <span class="comment">% &gt;&gt; format hex</span>
+0307     <span class="comment">% &gt;&gt; rptgen.toString(aNumber);</span>
+0308     string = strtrim(<a href="#_sub5" class="code" title="subfunction string = locRenderViaDISP(value, charLimit, cr)">locRenderViaDISP</a>(value, charLimit, cr));
+0309     
+0310 <span class="keyword">elseif</span> (nElem == 0)
+0311     <span class="comment">% &gt;&gt; rptgen.toString(zeros(0));</span>
+0312     string = <span class="string">'[]'</span>;
+0313 
+0314 <span class="keyword">else</span>
+0315     <span class="comment">% Can not use DISP to get the correct display format because DISP depends</span>
+0316     <span class="comment">% on the size of the command window.  Use NUM2STR instead.</span>
+0317     <span class="comment">% NUM2STR works best a FULL matrix (not sparse)</span>
+0318     <span class="comment">% &gt;&gt; aNumber = zeros(5);</span>
+0319     <span class="comment">% &gt;&gt; aSparse = sparse(aNumber);</span>
+0320     <span class="comment">% &gt;&gt; rptgen.toString(aSparse)</span>
+0321     <span class="comment">%      [0  0 ;</span>
+0322     <span class="comment">%       0  0 ]</span>
+0323     <span class="comment">% NOTE: This does not work with FORMAT not defined above.</span>
+0324     <span class="comment">% g947514: Cast value to double to ensure that num2str works with all</span>
+0325     <span class="comment">% numeric types, including fixed-point (fi) types.</span>
+0326     <span class="keyword">if</span> isinteger(value) || isempty(precision)
+0327         <span class="comment">% &gt;&gt; format short</span>
+0328         <span class="comment">% &gt;&gt; rptgen.toString([1 2 3]) % test empty precision</span>
+0329         string = num2str(double(full(value)));
+0330     <span class="keyword">else</span>
+0331         string = num2str(double(full(value)), precision);
+0332     <span class="keyword">end</span>
+0333     brackets = <span class="string">'[]'</span>;
+0334 
+0335     <span class="comment">% Blank columns are the leading and trailing two columns beform the CR</span>
+0336     blankColumn = blanks(size(string,1))';
+0337 
+0338     <span class="comment">% Second to last column</span>
+0339     semicolonColumn = <span class="string">';'</span>;
+0340     semicolonColumn = semicolonColumn(ones(size(string,1),1));
+0341 
+0342     <span class="comment">% Last column, carriage return (CR) column</span>
+0343     crColumn = cr(ones(size(string,1),1));
+0344 
+0345     <span class="comment">% Construct output</span>
+0346     string = [blankColumn, string, blankColumn, semicolonColumn, crColumn];
+0347     string(1,1)       = brackets(1);
+0348     string(<span class="keyword">end</span>,end-1) = brackets(2);
+0349     string(<span class="keyword">end</span>,end)   = <span class="string">' '</span>;
+0350     
+0351     <span class="comment">% Make sure that out is single-line for concatenating w/ others</span>
+0352     string = string';
+0353     string = string(:)';
+0354 
+0355     <span class="comment">% Make sure there are no zeros in the string</span>
+0356     string(string == 0) = <span class="string">' '</span>;
+0357 <span class="keyword">end</span>
+0358 
+0359 <span class="comment">%-------------------------------------------------------------------------------</span>
+0360 <a name="_sub7" href="#_subfunctions" class="code">function string = locRenderChar(value, charLimit, cr)</a>
+0361 
+0362 siz = size(value);
+0363 nElem = prod(siz);
+0364 nDims = length(siz);
+0365     
+0366 <span class="keyword">if</span> (nDims &gt; 2) || (nElem &gt; charLimit)
+0367     <span class="comment">% Multi-dimension text &amp; extremely long text</span>
+0368     <span class="comment">% &gt;&gt; rptgen.toString(repmat('adsfasdf',[3 3 3]))</span>
+0369     <span class="comment">% &gt;&gt; rptgen.toString('adsfasdf', 2)</span>
+0370     string = sprintf(<span class="string">'[%schar]'</span>,<a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(siz));
+0371 
+0372 <span class="keyword">elseif</span> (nDims &gt; 1)
+0373     <span class="comment">% Multiline text</span>
+0374     <span class="comment">% &gt;&gt; rptgen.toString(repmat('ab',[2 2]))</span>
+0375     string = rptgen.makeSingleLineText(value, cr);
+0376 
+0377 <span class="keyword">else</span>
+0378     <span class="comment">% Single line text</span>
+0379     <span class="comment">% &gt;&gt; rptgen.toString('abc')</span>
+0380     string = v;
+0381 <span class="keyword">end</span>
+0382 
+0383 <span class="comment">%-------------------------------------------------------------------------------</span>
+0384 <a name="_sub8" href="#_subfunctions" class="code">function string = locRenderCellStr(value, charLimit, cr, objType)</a>
+0385 
+0386 siz = size(value);
+0387 nDims = length(siz);
+0388 
+0389 <span class="keyword">if</span> (nargin &lt; 4)
+0390     objType = <span class="string">'cellstr'</span>;
+0391 <span class="keyword">end</span>
+0392 
+0393 <span class="keyword">if</span> (nDims &lt; 3) &amp;&amp; (min(siz) == 1)
+0394     <span class="comment">% Handles [nx1] and [1xn] cell array dimensions</span>
+0395     <span class="comment">% &gt;&gt; a = cell(1,2)</span>
+0396     <span class="comment">% &gt;&gt; a{1,1} = '1,1'</span>
+0397     <span class="comment">% &gt;&gt; a{1,2} = '1,2'</span>
+0398     <span class="comment">% &gt;&gt; rptgen.toString(a)</span>
+0399     string = rptgen.makeSingleLineText(value, cr);
+0400     <span class="keyword">if</span> (length(string) &gt; charLimit)
+0401         string = sprintf(<span class="string">'[%s %s]'</span>, <a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(siz), objType);
+0402     <span class="keyword">end</span>
+0403 <span class="keyword">else</span>
+0404     <span class="comment">% Handles [nxm] cell array dimensions, ie [2x2]</span>
+0405     <span class="comment">% &gt;&gt; a = cell(2,2)</span>
+0406     <span class="comment">% &gt;&gt; a{1,1} = '1,1'</span>
+0407     <span class="comment">% &gt;&gt; a{1,2} = '1,2'</span>
+0408     <span class="comment">% &gt;&gt; a{2,1} = '2,1'</span>
+0409     <span class="comment">% &gt;&gt; a{2,2} = '2,2'</span>
+0410     <span class="comment">% &gt;&gt; rptgen.toString(a)</span>
+0411     string = <a href="#_sub3" class="code" title="subfunction string = locRenderCell(value, charLimit, cr)">locRenderCell</a>(value, charLimit, cr);
+0412     
+0413 <span class="keyword">end</span>
+0414 
+0415 <span class="comment">%-------------------------------------------------------------------------------</span>
+0416 <a name="_sub9" href="#_subfunctions" class="code">function string = locRenderDAObject(value, charLimit, cr)</a>
+0417 <span class="comment">% &gt;&gt; a = handle(1);</span>
+0418 <span class="comment">% &gt;&gt; for i = 1:100</span>
+0419 <span class="comment">% &gt;&gt;    a(i) = rptgen.cfr_text</span>
+0420 <span class="comment">% &gt;&gt; end</span>
+0421 <span class="comment">% &gt;&gt; rptgen.toString(a,inf)</span>
+0422 <span class="comment">% &gt;&gt; rptgen.toString(a)</span>
+0423 
+0424 value = value(:);
+0425 vLen = length(value);
+0426 cellStr = cell(1, vLen);
+0427 <span class="keyword">for</span> i = 1:vLen
+0428     cellStr{i} = getDisplayLabel(value(i));
+0429 <span class="keyword">end</span>
+0430 string = <a href="#_sub8" class="code" title="subfunction string = locRenderCellStr(value, charLimit, cr, objType)">locRenderCellStr</a>(cellStr, charLimit, cr, <span class="string">'DAStudio.Object'</span>);
+0431 
+0432 <span class="comment">%-------------------------------------------------------------------------------</span>
+0433 <a name="_sub10" href="#_subfunctions" class="code">function string = locRenderMCOSObject(value)</a>
+0434 sz = size(value);
+0435 szStr = <a href="#_sub1" class="code" title="subfunction sizeString = locRenderSizeString(sizeVector, isMinimize)">locRenderSizeString</a>(sz, true);
+0436 string = sprintf(<span class="string">'&lt;%s %s&gt;'</span>, szStr, class(value));
+0437 
+0438 <span class="comment">%-------------------------------------------------------------------------------</span>
+0439 <a name="_sub11" href="#_subfunctions" class="code">function [charLimit, cr] = locParseInputArgs(varargin)</a>
+0440 
+0441 <span class="keyword">if</span> (nargin == 2)
+0442     charLimit = floor(varargin{1});
+0443     cr = varargin{2};
+0444     
+0445 <span class="keyword">elseif</span> (nargin == 1)
+0446     charLimit = floor(varargin{1});
+0447     cr = newline;
+0448     
+0449 <span class="keyword">else</span> <span class="comment">% nargin == 0</span>
+0450     charLimit = inf;
+0451     cr = newline;
+0452 <span class="keyword">end</span>
+0453 
+0454 <span class="keyword">if</span> (charLimit &lt;= 0)
+0455     charLimit = inf;
+0456 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

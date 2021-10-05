@@ -173,7 +173,7 @@ This function is called by:
 0076 assert(~isempty(chantype),<span class="string">'cfg.chantype required'</span>);
 0077 <span class="keyword">if</span> isempty(time_channel)
 0078   hdr1 = ft_read_header(fullfile(info.folder{1},info.name{1}),<span class="string">'chantype'</span>,<span class="string">'chaninfo'</span>);
-0079   time_channel = hdr1.chaninfo(strcmp(hdr1.chaninfo.chantype,chantype),:).channel{1};
+0079   time_channel = hdr1.orig.chaninfo(strcmp(hdr1.orig.chaninfo.chantype,chantype),:).channel{1};
 0080 <span class="keyword">end</span>
 0081 time_begin     = strcat(time_channel,<span class="string">'_TimeBegin'</span>);
 0082 time_end       = strcat(time_channel,<span class="string">'_TimeEnd'</span>);
@@ -200,9 +200,9 @@ This function is called by:
 0103   hdr_table.nTrials(i) = {hdr.nTrials};    
 0104   hdr_table.chanunit(i) = {strjoin(unique(hdr.chanunit))}; 
 0105 
-0106   <span class="keyword">if</span> ismember(time_begin,fields(hdr.orig))
-0107     hdr_table.time_begin(i) = {hdr.orig.(time_begin)};
-0108     hdr_table.time_end(i) = {hdr.orig.(time_end)};
+0106   <span class="keyword">if</span> ismember(time_begin,fields(hdr.orig.orig))
+0107     hdr_table.time_begin(i) = {hdr.orig.orig.(time_begin)};
+0108     hdr_table.time_end(i) = {hdr.orig.orig.(time_end)};
 0109   <span class="keyword">else</span>
 0110     error(<span class="string">'%s not present as mat variable in %s. \nSpecify cfg.time_channel as one of %s'</span>,<span class="keyword">...</span>
 0111       time_begin,fullfile(cfg.path,info.name{i}), strjoin(hdr.label));
@@ -268,6 +268,6 @@ This function is called by:
 0171 
 0172 
 0173</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

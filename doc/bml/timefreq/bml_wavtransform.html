@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_wavtransform</title>
+  <meta name="keywords" content="bml_wavtransform">
+  <meta name="description" content="%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">timefreq</a> &gt; bml_wavtransform.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\timefreq&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_wavtransform
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [Dtf] = bml_wavtransform(cfg, D) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">%
+ bml_wavtransform
+   Performs a wavelet transform on timeseries in D.trial. Spectral
+   decomposition is performed trial-wise, and only the amplitude is
+   returned unless the keep_phase flag is 'yes'. If keep_amp is set to
+   'no', amplitude (trial field) is discarded from the output. Dtf is 
+   returned with the same fields as the input D, but the trial field now 
+   contains wavelet amplitudes [time x freq x channel].
+
+   Use as 
+     [Dtf] = bml_wavtransform(cfg, D)
+
+ Inputs:
+   D               fieldptrip object containing timeseries to transform.
+   cfg.fq            vector of frequencies at which to evaluate the wavelet. 
+   cfg.width       vector of wavelet c-parameter for corresponding frequencies in fq
+                   (if length(width)~=length(fq) then width(1) is used for all fq); 
+                   note: std in frequency of a given wavelet=fq/width
+                   (default = 7)
+   cfg.padding     time in seconds at the beginning and end of each trial to
+                   discard to avoid edge artifact.
+   cfg.keep_phase  'yes' to keep phase info.  Will be returned in phase
+                   field (default 'no').
+   cfg.keep_amp    'yes' to keep amplitude info.  Will be returned in trial
+                   field (default 'yes').
+   cfg.keep_power  'yes' to keep the power information. Will be returned
+                   in power field (default 'no')
+   cfg.downsample  indicates if downsample should be applied after wavelet
+                   transformation. 
+                     'average' - returns the mean of consecutive time points
+                                 (only works for power and amplitude)
+                     'filter' - returns one of every n time points
+                     'no' (default) - no downsample applied
+   cfg.downsample_freq  sampling frequency of output wavelet transform
+                   required to be integer division of D.fsample
+                   defaults to closest valid freq to 2*max(cfg.fq)/width</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/signal/bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>	BML_GETFS returns the sampling frequency of a raw object</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/signal/bml_envelope_wavpow.html" class="code" title="function env = bml_envelope_wavpow(cfg, data)">bml_envelope_wavpow</a>	BML_ENVELOPE_WAVPOW calculates the power of the signal by wavelet</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Dtf] = bml_wavtransform(cfg, D)</a>
+0002 <span class="comment">%%</span>
+0003 <span class="comment">% bml_wavtransform</span>
+0004 <span class="comment">%   Performs a wavelet transform on timeseries in D.trial. Spectral</span>
+0005 <span class="comment">%   decomposition is performed trial-wise, and only the amplitude is</span>
+0006 <span class="comment">%   returned unless the keep_phase flag is 'yes'. If keep_amp is set to</span>
+0007 <span class="comment">%   'no', amplitude (trial field) is discarded from the output. Dtf is</span>
+0008 <span class="comment">%   returned with the same fields as the input D, but the trial field now</span>
+0009 <span class="comment">%   contains wavelet amplitudes [time x freq x channel].</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%   Use as</span>
+0012 <span class="comment">%     [Dtf] = bml_wavtransform(cfg, D)</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Inputs:</span>
+0015 <span class="comment">%   D               fieldptrip object containing timeseries to transform.</span>
+0016 <span class="comment">%   cfg.fq            vector of frequencies at which to evaluate the wavelet.</span>
+0017 <span class="comment">%   cfg.width       vector of wavelet c-parameter for corresponding frequencies in fq</span>
+0018 <span class="comment">%                   (if length(width)~=length(fq) then width(1) is used for all fq);</span>
+0019 <span class="comment">%                   note: std in frequency of a given wavelet=fq/width</span>
+0020 <span class="comment">%                   (default = 7)</span>
+0021 <span class="comment">%   cfg.padding     time in seconds at the beginning and end of each trial to</span>
+0022 <span class="comment">%                   discard to avoid edge artifact.</span>
+0023 <span class="comment">%   cfg.keep_phase  'yes' to keep phase info.  Will be returned in phase</span>
+0024 <span class="comment">%                   field (default 'no').</span>
+0025 <span class="comment">%   cfg.keep_amp    'yes' to keep amplitude info.  Will be returned in trial</span>
+0026 <span class="comment">%                   field (default 'yes').</span>
+0027 <span class="comment">%   cfg.keep_power  'yes' to keep the power information. Will be returned</span>
+0028 <span class="comment">%                   in power field (default 'no')</span>
+0029 <span class="comment">%   cfg.downsample  indicates if downsample should be applied after wavelet</span>
+0030 <span class="comment">%                   transformation.</span>
+0031 <span class="comment">%                     'average' - returns the mean of consecutive time points</span>
+0032 <span class="comment">%                                 (only works for power and amplitude)</span>
+0033 <span class="comment">%                     'filter' - returns one of every n time points</span>
+0034 <span class="comment">%                     'no' (default) - no downsample applied</span>
+0035 <span class="comment">%   cfg.downsample_freq  sampling frequency of output wavelet transform</span>
+0036 <span class="comment">%                   required to be integer division of D.fsample</span>
+0037 <span class="comment">%                   defaults to closest valid freq to 2*max(cfg.fq)/width</span>
+0038 
+0039 <span class="keyword">if</span> ~exist(<span class="string">'D'</span>,<span class="string">'var'</span>)
+0040     error(<span class="string">'bml_wavtransform: cfg variable must contain fieldtrip data object.\n'</span>);
+0041 <span class="keyword">end</span>
+0042 
+0043 <span class="keyword">if</span> isfield(cfg, <span class="string">'fq'</span>)
+0044     fq = cfg.fq;
+0045 <span class="keyword">else</span>
+0046     error(<span class="string">'bml_wavtransform: cfg variable must contain a vector of frequencies.\n'</span>);
+0047 <span class="keyword">end</span>
+0048 
+0049 <span class="keyword">if</span> isfield(cfg, <span class="string">'padding'</span>)
+0050     padding = cfg.padding;
+0051 <span class="keyword">else</span>
+0052     padding = 0;
+0053 <span class="keyword">end</span>
+0054 
+0055 <span class="keyword">if</span> isfield(cfg, <span class="string">'keep_phase'</span>)
+0056     <span class="keyword">if</span> strcmp(cfg.keep_phase,<span class="string">'yes'</span>) || istrue(cfg.keep_phase)
+0057         keep_phase = true;
+0058     <span class="keyword">else</span>
+0059         keep_phase = false;
+0060     <span class="keyword">end</span>
+0061 <span class="keyword">else</span>
+0062     keep_phase = false;
+0063 <span class="keyword">end</span>
+0064 <span class="keyword">if</span> isfield(cfg, <span class="string">'keep_amp'</span>)
+0065     <span class="keyword">if</span> strcmp(cfg.keep_amp,<span class="string">'yes'</span>) || istrue(cfg.keep_amp)
+0066         keep_amp = true;
+0067     <span class="keyword">else</span>
+0068         keep_amp = false;
+0069     <span class="keyword">end</span>
+0070 <span class="keyword">else</span>
+0071     keep_amp = true;
+0072 <span class="keyword">end</span>
+0073 keep_power = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'keep_power'</span>,0);
+0074 
+0075 <span class="keyword">if</span> isfield(cfg, <span class="string">'width'</span>)
+0076     width = cfg.width;
+0077 <span class="keyword">else</span>
+0078     width = 7;
+0079 <span class="keyword">end</span>
+0080 <span class="keyword">if</span> ~isfield(D, <span class="string">'fsample'</span>)
+0081   D.fsample = <a href="../../bml/signal/bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>(D); 
+0082 <span class="keyword">end</span>
+0083 
+0084 <span class="comment">%dealing with downsample frequency</span>
+0085 [max_fq, max_fq_i] = max(fq);
+0086 <span class="keyword">if</span> length(width)==1
+0087   max_fq_width = width;
+0088 <span class="keyword">elseif</span> length(width) == length(fq)
+0089   max_fq_width = width(max_fq_i);
+0090 <span class="keyword">else</span>
+0091   error(<span class="string">'length of width should be 1 or equal to length of fq'</span>);
+0092 <span class="keyword">end</span>
+0093 downsample_freq = 2.*max_fq/max_fq_width; <span class="comment">%default downsample freq</span>
+0094 downsample_freq = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'downsample_freq'</span>,downsample_freq);
+0095 downsample_factor = round(D.fsample/downsample_freq);
+0096 downsample_freq = D.fsample/downsample_factor;
+0097 
+0098 ds = <a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>(cfg,<span class="string">'downsample'</span>,<span class="string">'no'</span>);
+0099 <span class="keyword">if</span> ismember(ds,{<span class="string">'average'</span>}) &amp;&amp; keep_phase
+0100   error(<span class="string">'cannot keep phases and downsample with the average method'</span>);
+0101 <span class="keyword">end</span>
+0102 
+0103 <span class="comment">%iterating through trials</span>
+0104 Dtf = D;
+0105 npad = round(D.fsample*padding);
+0106 Dtf.freq = fq;
+0107 <span class="comment">%Dtf.dimord = 'time_freq_channel';</span>
+0108 Dtf.dimord = <span class="string">'channel_time_freq'</span>;
+0109 Dtf.trial = {};
+0110 <span class="keyword">for</span> tr = 1:length(D.trial)
+0111     fprintf(<span class="string">'bml_wavtransform: trial %d\n'</span>, tr);
+0112     <span class="comment">%     % pre-allocate trial</span>
+0113     <span class="comment">%     Dtf.trial{tr} = zeros([size(D.trial{tr},2), ...</span>
+0114     <span class="comment">%         length(fq), ...</span>
+0115     <span class="comment">%         size(D.trial{tr},1)]);</span>
+0116     wavdata = fast_wavtransform(fq,D.trial{tr},D.fsample,width); 
+0117     <span class="comment">%default dimorder 'time_freq_channel'</span>
+0118     <span class="comment">%wanted dimorder 'channel_time_freq'</span>
+0119     wavdata = permute(wavdata, [3,1,2]);
+0120     
+0121     <span class="keyword">if</span> keep_amp
+0122         Dtf.trial{tr} = abs(wavdata(:,(npad+1):(end-npad),:));
+0123     <span class="keyword">end</span>
+0124     <span class="keyword">if</span> keep_phase
+0125         Dtf.phase{tr} = angle(wavdata(:,(npad+1):(end-npad),:));
+0126     <span class="keyword">end</span>
+0127     <span class="keyword">if</span> keep_power
+0128         Dtf.power{tr} = abs(wavdata(:,(npad+1):(end-npad),:)).^2;
+0129     <span class="keyword">end</span>
+0130     Dtf.time{tr} = Dtf.time{tr}((npad+1):(end-npad));
+0131     
+0132     <span class="comment">%dealing with downsample</span>
+0133     <span class="keyword">if</span> ismember(ds, {<span class="string">'average'</span>,<span class="string">'filter'</span>})
+0134       <span class="comment">%calculating time label of new time samples</span>
+0135       s1 = length(Dtf.time{tr});
+0136       m = s1 - mod(s1,downsample_factor);
+0137       Dtf.time{tr} = mean(reshape(round(Dtf.time{tr}(1:m),9,<span class="string">'signif'</span>),downsample_factor,[]),1);
+0138       
+0139       <span class="comment">%dealing with downsampling using the average method</span>
+0140       <span class="keyword">if</span> strcmp(ds, <span class="string">'average'</span>)
+0141         <span class="keyword">if</span> keep_amp         
+0142           s = size(Dtf.trial{tr});
+0143           <span class="keyword">if</span> length(s) == 2; s = [s,1]; <span class="keyword">end</span>
+0144           Dtf.trial{tr} = squeeze(mean(reshape(Dtf.trial{tr}(:,1:m,:),s(1),downsample_factor,m./downsample_factor,s(3)),2));
+0145         <span class="keyword">end</span>
+0146         <span class="keyword">if</span> keep_power        
+0147           s = size(Dtf.power{tr});
+0148           <span class="keyword">if</span> length(s) == 2; s = [s,1]; <span class="keyword">end</span>
+0149           Dtf.power{tr} = squeeze(mean(reshape(Dtf.power{tr}(:,1:m,:),s(1),downsample_factor,m./downsample_factor,s(3)),2));
+0150         <span class="keyword">end</span>
+0151       <span class="keyword">elseif</span> strcmp(ds, <span class="string">'filter'</span>)
+0152         stop(<span class="string">'method downsample filter not implemented'</span>)
+0153       <span class="keyword">elseif</span> ~strcmp(ds, <span class="string">'no'</span>)
+0154         stop(<span class="string">'unknown downsample method'</span>)
+0155       <span class="keyword">end</span>
+0156     <span class="keyword">end</span>
+0157 <span class="keyword">end</span>
+0158 
+0159 <span class="keyword">if</span> ismember(ds, {<span class="string">'average'</span>,<span class="string">'filter'</span>})
+0160   fprintf(<span class="string">'downsample to %f using the %s method \n'</span>,round(downsample_freq,1),ds);
+0161   Dtf.fsample = downsample_freq;
+0162 <span class="keyword">end</span>
+0163</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

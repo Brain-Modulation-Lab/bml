@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_get_canonical_bands</title>
+  <meta name="keywords" content="bml_get_canonical_bands">
+  <meta name="description" content="returns table with canonical bands">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">timefreq</a> &gt; bml_get_canonical_bands.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\timefreq&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_get_canonical_bands
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>returns table with canonical bands</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function bands = bml_get_canonical_bands(flim) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> returns table with canonical bands</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_singleplotTFR.html" class="code" title="function bml_singleplotTFR(cfg, data)">bml_singleplotTFR</a>	BML_SINGLEPLOTTFR is a thin wrapper over ft_singleplotTFR</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bands = bml_get_canonical_bands(flim)</a>
+0002 
+0003 <span class="comment">% returns table with canonical bands</span>
+0004 
+0005 
+0006 name =   {<span class="string">'delta'</span>,   <span class="string">'theta'</span>,  <span class="string">'alpha'</span>,   <span class="string">'beta'</span>,<span class="string">'low gamma'</span>,<span class="string">'high gamma'</span>}';
+0007 symbol = {<span class="string">'\delta'</span>, <span class="string">'\theta'</span>, <span class="string">'\alpha'</span>,  <span class="string">'\beta'</span>, <span class="string">'\gamma_L'</span>,<span class="string">'\gamma_H'</span>}';
+0008 fstarts = [     1,         4,        8,       12,         30,          60]';
+0009 fends =   [     4,         8,       12,       30,         60,         250]';
+0010 color = {<span class="string">'#EDF8FB'</span>,<span class="string">'#BFD3E6'</span>,<span class="string">'#9EBCDA'</span>,<span class="string">'#8C96C6'</span>,  <span class="string">'#8856A7'</span>,   <span class="string">'#810F7C'</span>}'; <span class="comment">%ColorBrewer BuPu_6</span>
+0011 
+0012 <span class="keyword">if</span> exist(<span class="string">'flim'</span>,<span class="string">'var'</span>)
+0013   fstarts = max(fstarts,flim(1));
+0014     fstarts = min(fstarts,flim(2));
+0015   fends = max(fends,flim(1));
+0016     fends = min(fends,flim(2));
+0017 <span class="keyword">end</span>
+0018 
+0019 bands = table(name,fstarts,fends,color,symbol);
+0020 clear name fstarts fends color symbol; 
+0021 
+0022</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -71,12 +71,18 @@ This function is called by:
 0020   <span class="keyword">end</span>
 0021 <span class="keyword">end</span>
 0022 
-0023 <span class="keyword">if</span> ~ismember(<span class="string">'delimiter'</span>,varargin)
-0024   varargin = [varargin, {<span class="string">'delimiter'</span>,<span class="string">'\t'</span>}];
-0025 <span class="keyword">end</span>
-0026 
-0027 writetable(annot,filename,varargin{:});
-0028</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0023 [~,~,ext] = fileparts(filename);
+0024 <span class="keyword">if</span> strcmp(ext,<span class="string">'.tsv'</span>)
+0025     annot.id=[];
+0026     annot.ends=[];
+0027 <span class="keyword">end</span>
+0028 
+0029 <span class="keyword">if</span> ~ismember(<span class="string">'delimiter'</span>,varargin)
+0030   varargin = [varargin, {<span class="string">'delimiter'</span>,<span class="string">'\t'</span>}];
+0031 <span class="keyword">end</span>
+0032 
+0033 writetable(annot,filename,varargin{:},<span class="string">'FileType'</span>,<span class="string">'text'</span>);
+0034</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

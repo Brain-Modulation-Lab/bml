@@ -58,10 +58,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>	BML_ANNOT_INTERSECT returns the intersection of two annotation tables</li><li><a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/annot/bml_raw2annot.html" class="code" title="function annot = bml_raw2annot(cfg, raw)">bml_raw2annot</a>	BML_RAW2ANNOT creates an annotation table from a raw</li><li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>	BML_GETFS returns the sampling frequency of a raw object</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/annot/bml_annot_calculate.html" class="code" title="function annot = bml_annot_calculate(cfg, raw, varargin)">bml_annot_calculate</a>	BML_ANNOT_CALCULATE calculate scalar values from specific annotations in</li><li><a href="../../bml/annot/bml_annot_match.html" class="code" title="function annot = bml_annot_match(cfg, data, template)">bml_annot_match</a>	BML_ANNOT_MATCH matches a raw data object to a template</li></ul>
+<li><a href="../../bml/annot/bml_annot_calculate.html" class="code" title="function annot = bml_annot_calculate(cfg, raw, varargin)">bml_annot_calculate</a>	BML_ANNOT_CALCULATE calculate scalar values from specific annotations in</li><li><a href="../../bml/annot/bml_annot_calculate2.html" class="code" title="function annot = bml_annot_calculate2(cfg, raw, varargin)">bml_annot_calculate2</a>	BML_ANNOT_CALCULATE2 calculates scalar values from 2 specific annotations in raw</li><li><a href="../../bml/annot/bml_annot_match.html" class="code" title="function annot = bml_annot_match(cfg, data, template)">bml_annot_match</a>	BML_ANNOT_MATCH matches a raw data object to a template</li></ul>
 <!-- crossreference -->
 
 
@@ -219,8 +219,9 @@ This function is called by:
 0150 
 0151 <span class="keyword">end</span>
 0152 
-0153 redefined = ft_datatype_raw(redefined);
-0154</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0153 redefined.fsample = <a href="bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>(redefined);
+0154 redefined = ft_datatype_raw(redefined);
+0155</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

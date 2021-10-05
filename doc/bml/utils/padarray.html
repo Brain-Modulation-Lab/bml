@@ -1,0 +1,388 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of padarray</title>
+  <meta name="keywords" content="padarray">
+  <meta name="description" content="PADARRAY Pad an array.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">utils</a> &gt; padarray.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\utils&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>padarray
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>PADARRAY Pad an array.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function b = padarray(varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">PADARRAY Pad an array.
+   B = PADARRAY(A,PADSIZE) pads array A with PADSIZE(k) number of zeros
+   along the k-th dimension of A.  PADSIZE should be a vector of
+   positive integers.
+
+   B = PADARRAY(A,PADSIZE,PADVAL) pads array A with PADVAL (a scalar)
+   instead of with zeros.
+
+   B = PADARRAY(A,PADSIZE,PADVAL,DIRECTION) pads A in the direction
+   specified by the string DIRECTION.  DIRECTION can be one of the
+   following strings.  
+
+       String values for DIRECTION
+       'pre'         Pads before the first array element along each
+                     dimension .
+       'post'        Pads after the last array element along each
+                     dimension. 
+       'both'        Pads before the first array element and after the
+                     last array element along each dimension.
+
+   By default, DIRECTION is 'both'.
+
+   B = PADARRAY(A,PADSIZE,METHOD,DIRECTION) pads array A using the
+   specified METHOD.  METHOD can be one of these strings:
+
+       String values for METHOD
+       'circular'    Pads with circular repetion of elements.
+       'replicate'   Repeats border elements of A.
+       'symmetric'   Pads array with mirror reflections of itself. 
+ 
+   Class Support
+   -------------
+   When padding with a constant value, A can be numeric or logical.
+   When padding using the 'circular', 'replicate', or 'symmetric'
+   methods, A can be of any class.  B is of the same class as A.
+
+   Example
+   -------
+   Add three elements of padding to the beginning of a vector.  The
+   padding elements contain mirror copies of the array.
+
+       b = padarray([1 2 3 4],3,'symmetric','pre')
+
+   Add three elements of padding to the end of the first dimension of
+   the array and two elements of padding to the end of the second
+   dimension.  Use the value of the last array element as the padding
+   value.
+
+       B = padarray([1 2; 3 4],[3 2],'replicate','post')
+
+   Add three elements of padding to each dimension of a
+   three-dimensional array.  Each pad element contains the value 0.
+
+       A = [1 2; 3 4];
+       B = [5 6; 7 8];
+       C = cat(3,A,B)
+       D = padarray(C,[3 3],0,'both')
+
+   See also CIRCSHIFT, IMFILTER.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="checkstrs.html" class="code" title="function out = checkstrs(in, valid_strings, function_name,variable_name, argument_position)">checkstrs</a>	CHECKSTRS Check validity of option string.</li><li><a href="mkconstarray.html" class="code" title="function out = mkconstarray(class, value, size)">mkconstarray</a>	MKCONSTARRAY creates a constant array of a specified numeric class.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>	BML_PAD returns a padded version of the raw (crops if necessary)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function b = ConstantPad(a, padSize, padVal, direction)</a></li><li><a href="#_sub2" class="code">function b = CircularPad(a, padSize, direction)</a></li><li><a href="#_sub3" class="code">function b = SymmetricPad(a, padSize, direction)</a></li><li><a href="#_sub4" class="code">function b = ReplicatePad(a, padSize, direction)</a></li><li><a href="#_sub5" class="code">function [a, method, padSize, padVal, direction] = ParseInputs(varargin)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function b = padarray(varargin)</a>
+0002 <span class="comment">%PADARRAY Pad an array.</span>
+0003 <span class="comment">%   B = PADARRAY(A,PADSIZE) pads array A with PADSIZE(k) number of zeros</span>
+0004 <span class="comment">%   along the k-th dimension of A.  PADSIZE should be a vector of</span>
+0005 <span class="comment">%   positive integers.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%   B = PADARRAY(A,PADSIZE,PADVAL) pads array A with PADVAL (a scalar)</span>
+0008 <span class="comment">%   instead of with zeros.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%   B = PADARRAY(A,PADSIZE,PADVAL,DIRECTION) pads A in the direction</span>
+0011 <span class="comment">%   specified by the string DIRECTION.  DIRECTION can be one of the</span>
+0012 <span class="comment">%   following strings.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%       String values for DIRECTION</span>
+0015 <span class="comment">%       'pre'         Pads before the first array element along each</span>
+0016 <span class="comment">%                     dimension .</span>
+0017 <span class="comment">%       'post'        Pads after the last array element along each</span>
+0018 <span class="comment">%                     dimension.</span>
+0019 <span class="comment">%       'both'        Pads before the first array element and after the</span>
+0020 <span class="comment">%                     last array element along each dimension.</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%   By default, DIRECTION is 'both'.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%   B = PADARRAY(A,PADSIZE,METHOD,DIRECTION) pads array A using the</span>
+0025 <span class="comment">%   specified METHOD.  METHOD can be one of these strings:</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%       String values for METHOD</span>
+0028 <span class="comment">%       'circular'    Pads with circular repetion of elements.</span>
+0029 <span class="comment">%       'replicate'   Repeats border elements of A.</span>
+0030 <span class="comment">%       'symmetric'   Pads array with mirror reflections of itself.</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">%   Class Support</span>
+0033 <span class="comment">%   -------------</span>
+0034 <span class="comment">%   When padding with a constant value, A can be numeric or logical.</span>
+0035 <span class="comment">%   When padding using the 'circular', 'replicate', or 'symmetric'</span>
+0036 <span class="comment">%   methods, A can be of any class.  B is of the same class as A.</span>
+0037 <span class="comment">%</span>
+0038 <span class="comment">%   Example</span>
+0039 <span class="comment">%   -------</span>
+0040 <span class="comment">%   Add three elements of padding to the beginning of a vector.  The</span>
+0041 <span class="comment">%   padding elements contain mirror copies of the array.</span>
+0042 <span class="comment">%</span>
+0043 <span class="comment">%       b = padarray([1 2 3 4],3,'symmetric','pre')</span>
+0044 <span class="comment">%</span>
+0045 <span class="comment">%   Add three elements of padding to the end of the first dimension of</span>
+0046 <span class="comment">%   the array and two elements of padding to the end of the second</span>
+0047 <span class="comment">%   dimension.  Use the value of the last array element as the padding</span>
+0048 <span class="comment">%   value.</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">%       B = padarray([1 2; 3 4],[3 2],'replicate','post')</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">%   Add three elements of padding to each dimension of a</span>
+0053 <span class="comment">%   three-dimensional array.  Each pad element contains the value 0.</span>
+0054 <span class="comment">%</span>
+0055 <span class="comment">%       A = [1 2; 3 4];</span>
+0056 <span class="comment">%       B = [5 6; 7 8];</span>
+0057 <span class="comment">%       C = cat(3,A,B)</span>
+0058 <span class="comment">%       D = padarray(C,[3 3],0,'both')</span>
+0059 <span class="comment">%</span>
+0060 <span class="comment">%   See also CIRCSHIFT, IMFILTER.</span>
+0061 
+0062 <span class="comment">%   Copyright 1993-2003 The MathWorks, Inc.</span>
+0063 <span class="comment">%   $Revision: 1.11.4.3 $  $Date: 2003/08/23 05:53:08 $</span>
+0064 
+0065 [a, method, padSize, padVal, direction] = <a href="#_sub5" class="code" title="subfunction [a, method, padSize, padVal, direction] = ParseInputs(varargin)">ParseInputs</a>(varargin{:});
+0066 
+0067 <span class="keyword">if</span> isempty(a),<span class="comment">% treat empty matrix similar for any method</span>
+0068 
+0069    <span class="keyword">if</span> strcmp(direction,<span class="string">'both'</span>)
+0070       sizeB = size(a) + 2*padSize;
+0071    <span class="keyword">else</span>
+0072       sizeB = size(a) + padSize;
+0073    <span class="keyword">end</span>
+0074 
+0075    b = <a href="mkconstarray.html" class="code" title="function out = mkconstarray(class, value, size)">mkconstarray</a>(class(a), padVal, sizeB);
+0076    
+0077 <span class="keyword">else</span>
+0078   <span class="keyword">switch</span> method
+0079     <span class="keyword">case</span> <span class="string">'constant'</span>
+0080         b = <a href="#_sub1" class="code" title="subfunction b = ConstantPad(a, padSize, padVal, direction)">ConstantPad</a>(a, padSize, padVal, direction);
+0081         
+0082     <span class="keyword">case</span> <span class="string">'circular'</span>
+0083         b = <a href="#_sub2" class="code" title="subfunction b = CircularPad(a, padSize, direction)">CircularPad</a>(a, padSize, direction);
+0084   
+0085     <span class="keyword">case</span> <span class="string">'symmetric'</span>
+0086         b = <a href="#_sub3" class="code" title="subfunction b = SymmetricPad(a, padSize, direction)">SymmetricPad</a>(a, padSize, direction);
+0087         
+0088     <span class="keyword">case</span> <span class="string">'replicate'</span>
+0089         b = <a href="#_sub4" class="code" title="subfunction b = ReplicatePad(a, padSize, direction)">ReplicatePad</a>(a, padSize, direction);
+0090   <span class="keyword">end</span>      
+0091 <span class="keyword">end</span>
+0092 
+0093 <span class="keyword">if</span> (islogical(a))
+0094     b = logical(b);
+0095 <span class="keyword">end</span>
+0096 
+0097 <span class="comment">%%%</span>
+0098 <span class="comment">%%% ConstantPad</span>
+0099 <span class="comment">%%%</span>
+0100 <a name="_sub1" href="#_subfunctions" class="code">function b = ConstantPad(a, padSize, padVal, direction)</a>
+0101 
+0102 numDims = numel(padSize);
+0103 
+0104 <span class="comment">% Form index vectors to subsasgn input array into output array.</span>
+0105 <span class="comment">% Also compute the size of the output array.</span>
+0106 idx   = cell(1,numDims);
+0107 sizeB = zeros(1,numDims);
+0108 <span class="keyword">for</span> k = 1:numDims
+0109     M = size(a,k);
+0110     <span class="keyword">switch</span> direction
+0111         <span class="keyword">case</span> <span class="string">'pre'</span>
+0112             idx{k}   = (1:M) + padSize(k);
+0113             sizeB(k) = M + padSize(k);
+0114             
+0115         <span class="keyword">case</span> <span class="string">'post'</span>
+0116             idx{k}   = 1:M;
+0117             sizeB(k) = M + padSize(k);
+0118             
+0119         <span class="keyword">case</span> <span class="string">'both'</span>
+0120             idx{k}   = (1:M) + padSize(k);
+0121             sizeB(k) = M + 2*padSize(k);
+0122     <span class="keyword">end</span>
+0123 <span class="keyword">end</span>
+0124 
+0125 <span class="comment">% Initialize output array with the padding value.  Make sure the</span>
+0126 <span class="comment">% output array is the same type as the input.</span>
+0127 b         = <a href="mkconstarray.html" class="code" title="function out = mkconstarray(class, value, size)">mkconstarray</a>(class(a), padVal, sizeB);
+0128 b(idx{:}) = a;
+0129 
+0130 
+0131 <span class="comment">%%%</span>
+0132 <span class="comment">%%% CircularPad</span>
+0133 <span class="comment">%%%</span>
+0134 <a name="_sub2" href="#_subfunctions" class="code">function b = CircularPad(a, padSize, direction)</a>
+0135 
+0136 numDims = numel(padSize);
+0137 
+0138 <span class="comment">% Form index vectors to subsasgn input array into output array.</span>
+0139 <span class="comment">% Also compute the size of the output array.</span>
+0140 idx   = cell(1,numDims);
+0141 <span class="keyword">for</span> k = 1:numDims
+0142   M = size(a,k);
+0143   dimNums = 1:M;
+0144   p = padSize(k);
+0145     
+0146   <span class="keyword">switch</span> direction
+0147     <span class="keyword">case</span> <span class="string">'pre'</span>
+0148        idx{k}   = dimNums(mod(-p:M-1, M) + 1);
+0149     
+0150     <span class="keyword">case</span> <span class="string">'post'</span>
+0151       idx{k}   = dimNums(mod(0:M+p-1, M) + 1);
+0152     
+0153     <span class="keyword">case</span> <span class="string">'both'</span>
+0154       idx{k}   = dimNums(mod(-p:M+p-1, M) + 1);
+0155   
+0156   <span class="keyword">end</span>
+0157 <span class="keyword">end</span>
+0158 b = a(idx{:});
+0159 
+0160 <span class="comment">%%%</span>
+0161 <span class="comment">%%% SymmetricPad</span>
+0162 <span class="comment">%%%</span>
+0163 <a name="_sub3" href="#_subfunctions" class="code">function b = SymmetricPad(a, padSize, direction)</a>
+0164 
+0165 numDims = numel(padSize);
+0166 
+0167 <span class="comment">% Form index vectors to subsasgn input array into output array.</span>
+0168 <span class="comment">% Also compute the size of the output array.</span>
+0169 idx   = cell(1,numDims);
+0170 <span class="keyword">for</span> k = 1:numDims
+0171   M = size(a,k);
+0172   dimNums = [1:M M:-1:1];
+0173   p = padSize(k);
+0174     
+0175   <span class="keyword">switch</span> direction
+0176     <span class="keyword">case</span> <span class="string">'pre'</span>
+0177       idx{k}   = dimNums(mod(-p:M-1, 2*M) + 1);
+0178             
+0179     <span class="keyword">case</span> <span class="string">'post'</span>
+0180       idx{k}   = dimNums(mod(0:M+p-1, 2*M) + 1);
+0181             
+0182     <span class="keyword">case</span> <span class="string">'both'</span>
+0183       idx{k}   = dimNums(mod(-p:M+p-1, 2*M) + 1);
+0184   <span class="keyword">end</span>
+0185 <span class="keyword">end</span>
+0186 b = a(idx{:});
+0187 
+0188 <span class="comment">%%%</span>
+0189 <span class="comment">%%% ReplicatePad</span>
+0190 <span class="comment">%%%</span>
+0191 <a name="_sub4" href="#_subfunctions" class="code">function b = ReplicatePad(a, padSize, direction)</a>
+0192 
+0193 numDims = numel(padSize);
+0194 
+0195 <span class="comment">% Form index vectors to subsasgn input array into output array.</span>
+0196 <span class="comment">% Also compute the size of the output array.</span>
+0197 idx   = cell(1,numDims);
+0198 <span class="keyword">for</span> k = 1:numDims
+0199   M = size(a,k);
+0200   p = padSize(k);
+0201   onesVector = ones(1,p);
+0202     
+0203   <span class="keyword">switch</span> direction
+0204     <span class="keyword">case</span> <span class="string">'pre'</span>
+0205       idx{k}   = [onesVector 1:M];
+0206             
+0207     <span class="keyword">case</span> <span class="string">'post'</span>
+0208       idx{k}   = [1:M M*onesVector];
+0209             
+0210     <span class="keyword">case</span> <span class="string">'both'</span>
+0211       idx{k}   = [onesVector 1:M M*onesVector];
+0212   <span class="keyword">end</span>
+0213 <span class="keyword">end</span>
+0214  b = a(idx{:});
+0215 
+0216 <span class="comment">%%%</span>
+0217 <span class="comment">%%% ParseInputs</span>
+0218 <span class="comment">%%%</span>
+0219 <a name="_sub5" href="#_subfunctions" class="code">function [a, method, padSize, padVal, direction] = ParseInputs(varargin)</a>
+0220 
+0221 <span class="comment">% default values</span>
+0222 a         = [];
+0223 method    = <span class="string">'constant'</span>;
+0224 padSize   = [];
+0225 padVal    = 0;
+0226 direction = <span class="string">'both'</span>;
+0227 
+0228 <span class="comment">% checknargin(2,4,nargin,mfilename);</span>
+0229 
+0230 a = varargin{1};
+0231 
+0232 padSize = varargin{2};
+0233 <span class="comment">% checkinput(padSize, {'double'}, {'real' 'vector' 'nonnan' 'nonnegative' ...</span>
+0234 <span class="comment">%                    'integer'}, mfilename, 'PADSIZE', 2);</span>
+0235 
+0236 <span class="comment">% Preprocess the padding size</span>
+0237 <span class="keyword">if</span> (numel(padSize) &lt; ndims(a))
+0238     padSize           = padSize(:);
+0239     padSize(ndims(a)) = 0;
+0240 <span class="keyword">end</span>
+0241 
+0242 <span class="keyword">if</span> nargin &gt; 2
+0243 
+0244     firstStringToProcess = 3;
+0245     
+0246     <span class="keyword">if</span> ~ischar(varargin{3})
+0247         <span class="comment">% Third input must be pad value.</span>
+0248         padVal = varargin{3};
+0249 <span class="comment">%        checkinput(padVal, {'numeric' 'logical'}, {'scalar'}, ...</span>
+0250 <span class="comment">%                   mfilename, 'PADVAL', 3);</span>
+0251         
+0252         firstStringToProcess = 4;
+0253         
+0254     <span class="keyword">end</span>
+0255     
+0256     <span class="keyword">for</span> k = firstStringToProcess:nargin
+0257         validStrings = {<span class="string">'circular'</span> <span class="string">'replicate'</span> <span class="string">'symmetric'</span> <span class="string">'pre'</span> <span class="keyword">...</span>
+0258                         <span class="string">'post'</span> <span class="string">'both'</span>};
+0259         string = <a href="checkstrs.html" class="code" title="function out = checkstrs(in, valid_strings, function_name,variable_name, argument_position)">checkstrs</a>(varargin{k}, validStrings, mfilename, <span class="keyword">...</span>
+0260                            <span class="string">'METHOD or DIRECTION'</span>, k);
+0261         <span class="keyword">switch</span> string
+0262          <span class="keyword">case</span> {<span class="string">'circular'</span> <span class="string">'replicate'</span> <span class="string">'symmetric'</span>}
+0263           method = string;
+0264           
+0265          <span class="keyword">case</span> {<span class="string">'pre'</span> <span class="string">'post'</span> <span class="string">'both'</span>}
+0266           direction = string;
+0267           
+0268          <span class="keyword">otherwise</span>
+0269           error(<span class="string">'Images:padarray:unexpectedError'</span>, <span class="string">'%s'</span>, <span class="keyword">...</span>
+0270                 <span class="string">'Unexpected logic error.'</span>)
+0271         <span class="keyword">end</span>
+0272     <span class="keyword">end</span>
+0273 <span class="keyword">end</span>
+0274     
+0275 <span class="comment">% Check the input array type</span>
+0276 <span class="keyword">if</span> strcmp(method,<span class="string">'constant'</span>) &amp;&amp; ~(isnumeric(a) || islogical(a))
+0277     id = sprintf(<span class="string">'Images:%s:badTypeForConstantPadding'</span>, mfilename);
+0278     msg1 = sprintf(<span class="string">'Function %s expected A (argument 1)'</span>,mfilename);
+0279     msg2 = <span class="string">'to be numeric or logical for constant padding.'</span>;
+0280     error(id,<span class="string">'%s\n%s'</span>,msg1,msg2);
+0281 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -3,7 +3,7 @@
 % last run 2018.09.25
 % update bml/README.md for doc to point to the correct commit. 
 
-GIT_PATH = 'E:\MATLAB';
+GIT_PATH = 'C:\MATLAB_external_libs';
 
 cd(GIT_PATH)
 %rmdir('bml/doc') 

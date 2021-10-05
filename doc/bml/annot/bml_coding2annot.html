@@ -723,27 +723,39 @@ This function is called by:
 0650 <span class="keyword">end</span>
 0651 
 0652 <a name="_sub4" href="#_subfunctions" class="code">function default = default_nan3(input)</a>
-0653   default = padarray(input,[isempty(input),max([0,3-size(input,2)])],nan,<span class="string">'post'</span>);
-0654 <span class="keyword">end</span>
-0655 
-0656 <a name="_sub5" href="#_subfunctions" class="code">function ise = isectopic(t,syl_onset,syl_offset)</a>
-0657   <span class="keyword">for</span> j=1:length(t)
-0658     <span class="keyword">if</span> ~isnan(t(j))
-0659       ise = true;
-0660       <span class="keyword">for</span> k=1:length(syl_onset)
-0661        <span class="keyword">if</span> ~isnan(syl_onset(k)) &amp;&amp; ~isnan(syl_offset(k)) &amp;&amp; t(j) &gt;= syl_onset(k) &amp;&amp; t(j) &lt;= syl_offset(k)
-0662          ise = false;
-0663        <span class="keyword">end</span>
-0664       <span class="keyword">end</span>
-0665       <span class="keyword">if</span> ise
-0666         <span class="keyword">return</span>
-0667       <span class="keyword">end</span>
-0668     <span class="keyword">end</span>
-0669   <span class="keyword">end</span>
-0670   ise = false;
-0671 <span class="keyword">end</span>
-0672 
-0673</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0653     <span class="comment">%defualt_nan3 ensures array has at least three columns, filling up with</span>
+0654     <span class="comment">%nans where required</span>
+0655     
+0656     <span class="comment">%Function definition using padarray of Image Processing Toolbox</span>
+0657     <span class="comment">%default = padarray(input,[isempty(input),max([0,3-size(input,2)])],nan,'post');</span>
+0658   
+0659     <span class="keyword">if</span> isempty(input)
+0660         default = nan(1,3);
+0661     <span class="keyword">else</span>
+0662         padcoln = max([0,3-size(input,2)]);
+0663         default = [input nan(size(input,1),padcoln)];
+0664     <span class="keyword">end</span>
+0665   
+0666 <span class="keyword">end</span>
+0667 
+0668 <a name="_sub5" href="#_subfunctions" class="code">function ise = isectopic(t,syl_onset,syl_offset)</a>
+0669   <span class="keyword">for</span> j=1:length(t)
+0670     <span class="keyword">if</span> ~isnan(t(j))
+0671       ise = true;
+0672       <span class="keyword">for</span> k=1:length(syl_onset)
+0673        <span class="keyword">if</span> ~isnan(syl_onset(k)) &amp;&amp; ~isnan(syl_offset(k)) &amp;&amp; t(j) &gt;= syl_onset(k) &amp;&amp; t(j) &lt;= syl_offset(k)
+0674          ise = false;
+0675        <span class="keyword">end</span>
+0676       <span class="keyword">end</span>
+0677       <span class="keyword">if</span> ise
+0678         <span class="keyword">return</span>
+0679       <span class="keyword">end</span>
+0680     <span class="keyword">end</span>
+0681   <span class="keyword">end</span>
+0682   ise = false;
+0683 <span class="keyword">end</span>
+0684 
+0685</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -31,7 +31,8 @@
 
  Use as
    slave_delta_t = bml_timealign(cfg, master, slave)
-   [slave_delta_t, max_corr] = bml_timealign(cfg, master, slave)
+   [slave_delta_t, min_cost] = bml_timealign(cfg, master, slave)
+   [slave_delta_t, min_cost, warpfactor] = bml_timealign(cfg, master, slave)
 
  cfg is a configuration structure with fields:
  cfg.scan - double: time window in which to scan for a maximal correlation
@@ -39,7 +40,14 @@
             if a length 2 vector is given it should be [-a, b], where 'a'
             and 'b' are positive numbers in seconds. 
  cfg.scan_step - double: time step for initial scan in seconds
+ cfg.censor_mismatch - double: time mismatch at which point gets censored
+ cfg.cliptime - double: time mismatch at which cost gets clipped. Defaults 1s
  cfg.timewarp - logical: should time warping be allowed. Defaults to false
+ cfg.restrict_master_by - str: column name from master used to group
+     events. Synchroniztion is restricted to these groups. If slave events
+     span more than one group, the least represented group events from
+     master are censored for the alignment. Useful when one wav file
+     spans more than one trellis file. 
 
  master - annot table 
  slave - annot table
@@ -47,7 +55,7 @@
  returns
  slave_delta_t - double: time in seconds by which to shift the slave to 
            align it to master
- max_corr - double:</pre></div>
+ min_cost - double: minimal (optimized) value of the cost function.</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
@@ -70,100 +78,126 @@ This function is called by:
 0004   <span class="comment">%</span>
 0005   <span class="comment">% Use as</span>
 0006   <span class="comment">%   slave_delta_t = bml_timealign(cfg, master, slave)</span>
-0007   <span class="comment">%   [slave_delta_t, max_corr] = bml_timealign(cfg, master, slave)</span>
-0008   <span class="comment">%</span>
-0009   <span class="comment">% cfg is a configuration structure with fields:</span>
-0010   <span class="comment">% cfg.scan - double: time window in which to scan for a maximal correlation</span>
-0011   <span class="comment">%            if a scalar is given the time window is [-scan, scan]</span>
-0012   <span class="comment">%            if a length 2 vector is given it should be [-a, b], where 'a'</span>
-0013   <span class="comment">%            and 'b' are positive numbers in seconds.</span>
-0014   <span class="comment">% cfg.scan_step - double: time step for initial scan in seconds</span>
-0015   <span class="comment">% cfg.timewarp - logical: should time warping be allowed. Defaults to false</span>
-0016   <span class="comment">%</span>
-0017   <span class="comment">% master - annot table</span>
-0018   <span class="comment">% slave - annot table</span>
-0019   <span class="comment">%</span>
-0020   <span class="comment">% returns</span>
-0021   <span class="comment">% slave_delta_t - double: time in seconds by which to shift the slave to</span>
-0022   <span class="comment">%           align it to master</span>
-0023   <span class="comment">% max_corr - double:</span>
-0024 
-0025   scan      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'scan'</span>, 100);
-0026   scan_step = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'scan_step'</span>, 0.1);
-0027   timewarp  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'timewarp'</span>, false);
-0028   
-0029   master    = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(master);
-0030   slave     = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(slave);
-0031   slave_starts_mean = mean(slave.starts);
-0032   slave_starts_minus_mean = slave.starts-slave_starts_mean;
-0033   
-0034   <span class="comment">%cost function with timewarp</span>
-0035   <span class="comment">%cost=costfun([slave_delta_t, warpfactor])</span>
-0036   <a name="_sub1" href="#_subfunctions" class="code">function cost=costfun(x0)</a>
-0037     y=master.starts;
-0038     x=slave_starts_minus_mean .* x0(2) + slave_starts_mean + x0(1);
-0039     cost=0;
-0040     <span class="keyword">for</span> i=1:length(x)
-0041      cost = cost + min(abs(x(i)-y))^2;
-0042     <span class="keyword">end</span>
-0043     cost = sqrt(cost);
-0044   <span class="keyword">end</span>
-0045 
-0046   <span class="comment">%cost function without timewarp (timewarp = 1)</span>
-0047   <span class="comment">%cost=costfun(slave_delta_t)</span>
-0048   <a name="_sub2" href="#_subfunctions" class="code">function cost=costfun1(x0)</a>
-0049     y=master.starts;
-0050     x=slave.starts + x0(1);
-0051     cost=0;
-0052     <span class="keyword">for</span> i=1:length(x)
-0053      cost = cost + min(abs(x(i)-y))^2;
-0054     <span class="keyword">end</span>
-0055     cost = sqrt(cost);
-0056   <span class="keyword">end</span>
-0057 
-0058   <span class="comment">%initial brute force scan</span>
-0059   initial_scan = linspace(-scan,scan,floor(2*scan/scan_step)+1);
-0060   warpfactor = 1;
-0061   slave_delta_t=0;
-0062   min_cost=<a href="#_sub2" class="code" title="subfunction cost=costfun1(x0)">costfun1</a>(slave_delta_t);
-0063   <span class="keyword">for</span> j=1:length(initial_scan)
-0064     i_cost = <a href="#_sub2" class="code" title="subfunction cost=costfun1(x0)">costfun1</a>(initial_scan(j));
-0065     <span class="keyword">if</span> i_cost &lt; min_cost
-0066       min_cost = i_cost;
-0067       slave_delta_t=initial_scan(j);
-0068     <span class="keyword">end</span>
-0069   <span class="keyword">end</span>
-0070 
-0071   <span class="comment">%censoring unpaired slave events</span>
-0072   slave_master_dt = zeros(height(slave),1);
-0073   <span class="keyword">for</span> i_slave=1:height(slave)
-0074     slave_master_dt(i_slave) = min(abs(slave.starts(i_slave) + slave_delta_t - master.starts));
-0075   <span class="keyword">end</span>
-0076   censored_slave = slave_master_dt &gt; scan_step;
-0077   <span class="keyword">if</span> sum(censored_slave)&gt;0
-0078     warning(&quot;<span class="comment">%i slave events censored in synchronization&quot;,sum(censored_slave));</span>
-0079     slave = slave(~censored_slave,:);
-0080     slave_starts_mean = mean(slave.starts);
-0081     slave_starts_minus_mean = slave.starts-slave_starts_mean;
-0082   <span class="keyword">end</span>
-0083   
-0084   <span class="comment">%optimizing</span>
-0085   <span class="keyword">if</span> timewarp
-0086     fitted=fminsearch(@<a href="#_sub1" class="code" title="subfunction cost=costfun(x0)">costfun</a>,[slave_delta_t, warpfactor]);
-0087     slave_delta_t=fitted(1);
-0088     warpfactor = fitted(2);
-0089   <span class="keyword">else</span>
-0090     fitted=fminsearch(@<a href="#_sub2" class="code" title="subfunction cost=costfun1(x0)">costfun1</a>,slave_delta_t);
-0091     slave_delta_t=fitted(1);
-0092   <span class="keyword">end</span>
-0093   min_cost = <a href="#_sub1" class="code" title="subfunction cost=costfun(x0)">costfun</a>([slave_delta_t,warpfactor]);
-0094   
-0095 <span class="keyword">end</span>
-0096   
-0097 
-0098     
-0099     
-0100</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0007   <span class="comment">%   [slave_delta_t, min_cost] = bml_timealign(cfg, master, slave)</span>
+0008   <span class="comment">%   [slave_delta_t, min_cost, warpfactor] = bml_timealign(cfg, master, slave)</span>
+0009   <span class="comment">%</span>
+0010   <span class="comment">% cfg is a configuration structure with fields:</span>
+0011   <span class="comment">% cfg.scan - double: time window in which to scan for a maximal correlation</span>
+0012   <span class="comment">%            if a scalar is given the time window is [-scan, scan]</span>
+0013   <span class="comment">%            if a length 2 vector is given it should be [-a, b], where 'a'</span>
+0014   <span class="comment">%            and 'b' are positive numbers in seconds.</span>
+0015   <span class="comment">% cfg.scan_step - double: time step for initial scan in seconds</span>
+0016   <span class="comment">% cfg.censor_mismatch - double: time mismatch at which point gets censored</span>
+0017   <span class="comment">% cfg.cliptime - double: time mismatch at which cost gets clipped. Defaults 1s</span>
+0018   <span class="comment">% cfg.timewarp - logical: should time warping be allowed. Defaults to false</span>
+0019   <span class="comment">% cfg.restrict_master_by - str: column name from master used to group</span>
+0020   <span class="comment">%     events. Synchroniztion is restricted to these groups. If slave events</span>
+0021   <span class="comment">%     span more than one group, the least represented group events from</span>
+0022   <span class="comment">%     master are censored for the alignment. Useful when one wav file</span>
+0023   <span class="comment">%     spans more than one trellis file.</span>
+0024   <span class="comment">%</span>
+0025   <span class="comment">% master - annot table</span>
+0026   <span class="comment">% slave - annot table</span>
+0027   <span class="comment">%</span>
+0028   <span class="comment">% returns</span>
+0029   <span class="comment">% slave_delta_t - double: time in seconds by which to shift the slave to</span>
+0030   <span class="comment">%           align it to master</span>
+0031   <span class="comment">% min_cost - double: minimal (optimized) value of the cost function.</span>
+0032 
+0033   scan      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'scan'</span>, 100);
+0034   scan_step = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'scan_step'</span>, 0.1);
+0035   censor_mismatch = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'censor_mismatch'</span>, scan_step);
+0036   timewarp  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'timewarp'</span>, false);
+0037   cliptime  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg, <span class="string">'cliptime'</span>, 1);
+0038   restrict_master_by = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'restrict_master_by'</span>,[]);
+0039   master    = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(master);
+0040   slave     = <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(slave);
+0041   slave_starts_mean = mean(slave.starts);
+0042   slave_starts_minus_mean = slave.starts-slave_starts_mean;
+0043   
+0044   <span class="comment">%cost function with timewarp</span>
+0045   <span class="comment">%cost=costfun([slave_delta_t, warpfactor])</span>
+0046   <a name="_sub1" href="#_subfunctions" class="code">function cost=costfun(x0)</a>
+0047     y=master.starts;
+0048     x=slave_starts_minus_mean .* x0(2) + slave_starts_mean + x0(1);
+0049     cost=0;
+0050     <span class="keyword">for</span> i=1:length(x)
+0051      <span class="comment">%cost = cost + min(abs(x(i)-y))^2;</span>
+0052      cost = cost + min(min(abs(x(i)-y)),cliptime)^2;
+0053     <span class="keyword">end</span>
+0054     cost = sqrt(cost);
+0055   <span class="keyword">end</span>
+0056 
+0057   <span class="comment">%cost function without timewarp (timewarp = 1)</span>
+0058   <span class="comment">%cost=costfun(slave_delta_t)</span>
+0059   <a name="_sub2" href="#_subfunctions" class="code">function cost=costfun1(x0)</a>
+0060     y=master.starts;
+0061     x=slave.starts + x0(1);
+0062     cost=0;
+0063     <span class="keyword">for</span> i=1:length(x)
+0064      <span class="comment">%cost = cost + min(abs(x(i)-y))^2;</span>
+0065      cost = cost + min(min(abs(x(i)-y)),cliptime)^2;
+0066     <span class="keyword">end</span>
+0067     cost = sqrt(cost);
+0068   <span class="keyword">end</span>
+0069 
+0070   <span class="comment">%restrict by option</span>
+0071   <span class="keyword">if</span> ~isempty(restrict_master_by)
+0072     <span class="keyword">if</span>(ismember(restrict_master_by,master.Properties.VariableNames))
+0073       master.restrict_by = master{:,restrict_master_by};  
+0074     <span class="keyword">else</span>
+0075       warning(<span class="string">'restrict_master_by value doesn''t match any column of master'</span>);
+0076       master.restrict_by(:)=1;
+0077     <span class="keyword">end</span>
+0078   <span class="keyword">else</span>
+0079     master.restrict_by(:)=1;
+0080   <span class="keyword">end</span>
+0081 
+0082   <span class="comment">%initial brute force scan</span>
+0083   initial_scan = linspace(-scan,scan,floor(2*scan/scan_step)+1);
+0084   warpfactor = 1;
+0085   slave_delta_t=0;
+0086   min_cost=<a href="#_sub2" class="code" title="subfunction cost=costfun1(x0)">costfun1</a>(slave_delta_t);
+0087   <span class="keyword">for</span> j=1:length(initial_scan)
+0088     i_cost = <a href="#_sub2" class="code" title="subfunction cost=costfun1(x0)">costfun1</a>(initial_scan(j));
+0089     <span class="keyword">if</span> i_cost &lt; min_cost
+0090       min_cost = i_cost;
+0091       slave_delta_t=initial_scan(j);
+0092     <span class="keyword">end</span>
+0093   <span class="keyword">end</span>
+0094 
+0095   <span class="comment">%censoring unpaired slave events</span>
+0096   slave_master_dt = zeros(height(slave),1);
+0097   slave_master_restrict_by = nan(height(slave),1);
+0098   <span class="keyword">for</span> i_slave=1:height(slave)
+0099     [slave_master_dt(i_slave),idx_min] = min(abs(slave.starts(i_slave) + slave_delta_t - master.starts));
+0100     slave_master_restrict_by(i_slave) = master.restrict_by(idx_min);
+0101   <span class="keyword">end</span>
+0102   censored_slave = (slave_master_dt &gt; censor_mismatch) | (slave_master_restrict_by~=mode(slave_master_restrict_by));
+0103   <span class="keyword">if</span> sum(censored_slave)&gt;0
+0104     warning(&quot;<span class="comment">%i slave events censored in synchronization&quot;,sum(censored_slave));</span>
+0105     slave = slave(~censored_slave,:);
+0106     slave_starts_mean = mean(slave.starts);
+0107     slave_starts_minus_mean = slave.starts-slave_starts_mean;
+0108   <span class="keyword">end</span>
+0109   
+0110   <span class="comment">%optimizing</span>
+0111   <span class="keyword">if</span> timewarp
+0112     fitted=fminsearch(@<a href="#_sub1" class="code" title="subfunction cost=costfun(x0)">costfun</a>,[slave_delta_t, warpfactor]);
+0113     slave_delta_t=fitted(1);
+0114     warpfactor = fitted(2);
+0115   <span class="keyword">else</span>
+0116     fitted=fminsearch(@<a href="#_sub2" class="code" title="subfunction cost=costfun1(x0)">costfun1</a>,slave_delta_t);
+0117     slave_delta_t=fitted(1);
+0118   <span class="keyword">end</span>
+0119   min_cost = <a href="#_sub1" class="code" title="subfunction cost=costfun(x0)">costfun</a>([slave_delta_t,warpfactor]);
+0120   
+0121 <span class="keyword">end</span>
+0122   
+0123 
+0124     
+0125     
+0126</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

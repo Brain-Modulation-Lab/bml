@@ -156,44 +156,45 @@ This function is called by:
 0093 
 0094 <span class="comment">%interpolating subset of slave trials to master times</span>
 0095 cfg=[]; cfg.time=sub_master_time; cfg.method=<span class="string">'pchip'</span>;
-0096 cfg.feedback=<span class="string">'no'</span>;
-0097 cfg.trackcallinfo = false;
-0098 cfg.showcallinfo = <span class="string">'no'</span>;
-0099 sub_conformed=ft_resampledata(cfg,<a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(sub_slave,starts,ends));
-0100 
-0101 <span class="comment">%adding empty slave trials if necessary</span>
-0102 conformed=[];
-0103 conformed.label = slave.label;
-0104 conformed.trial = cell(1,master_N);
-0105 conformed.time = cell(1,master_N);
-0106 <span class="keyword">for</span> i=1:master_N
-0107   <span class="keyword">if</span> sub_ms_map(i)&gt;0
-0108       conformed.time{i}=sub_conformed.time{sub_ms_map(i)};
-0109     conformed.trial{i}=sub_conformed.trial{sub_ms_map(i)};
-0110   <span class="keyword">else</span>
-0111     conformed.time{i}=master.time{i};
-0112     conformed.trial{i}=zeros(nChans,length(conformed.time{i}));
-0113   <span class="keyword">end</span>
-0114 <span class="keyword">end</span>
-0115 
-0116 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(slave))
-0117   conformed.hdr=slave.hdr;
-0118 <span class="keyword">else</span>
-0119   conformed.hdr=[];
-0120 <span class="keyword">end</span>
-0121 
-0122 <span class="comment">%creating header</span>
-0123 conformed.hdr.nChans = length(conformed.label);
-0124 conformed.hdr.Fs=round(1/mean(diff(conformed.time{1})));
-0125 conformed.hdr.label=conformed.label;
-0126 
-0127 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(master))
-0128   conformed.fsample = master.fsample;
-0129   conformed.hdr.Fs = master.fsample;
-0130 <span class="keyword">elseif</span> ismember(<span class="string">'fsample'</span>,fields(conformed))
-0131   conformed = rmfield(conformed,<span class="string">'fsample'</span>);
-0132 <span class="keyword">end</span>
-0133</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0096 cfg.extrapval=nan;
+0097 cfg.feedback=<span class="string">'no'</span>;
+0098 cfg.trackcallinfo = false;
+0099 cfg.showcallinfo = <span class="string">'no'</span>;
+0100 sub_conformed=ft_resampledata(cfg,<a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(sub_slave,starts,ends));
+0101 
+0102 <span class="comment">%adding empty slave trials if necessary</span>
+0103 conformed=[];
+0104 conformed.label = slave.label;
+0105 conformed.trial = cell(1,master_N);
+0106 conformed.time = cell(1,master_N);
+0107 <span class="keyword">for</span> i=1:master_N
+0108   <span class="keyword">if</span> sub_ms_map(i)&gt;0
+0109       conformed.time{i}=sub_conformed.time{sub_ms_map(i)};
+0110     conformed.trial{i}=sub_conformed.trial{sub_ms_map(i)};
+0111   <span class="keyword">else</span>
+0112     conformed.time{i}=master.time{i};
+0113     conformed.trial{i}=zeros(nChans,length(conformed.time{i}));
+0114   <span class="keyword">end</span>
+0115 <span class="keyword">end</span>
+0116 
+0117 <span class="keyword">if</span> ismember(<span class="string">'hdr'</span>,fields(slave))
+0118   conformed.hdr=slave.hdr;
+0119 <span class="keyword">else</span>
+0120   conformed.hdr=[];
+0121 <span class="keyword">end</span>
+0122 
+0123 <span class="comment">%creating header</span>
+0124 conformed.hdr.nChans = length(conformed.label);
+0125 conformed.hdr.Fs=round(1/mean(diff(conformed.time{1})));
+0126 conformed.hdr.label=conformed.label;
+0127 
+0128 <span class="keyword">if</span> ismember(<span class="string">'fsample'</span>,fields(master))
+0129   conformed.fsample = master.fsample;
+0130   conformed.hdr.Fs = master.fsample;
+0131 <span class="keyword">elseif</span> ismember(<span class="string">'fsample'</span>,fields(conformed))
+0132   conformed = rmfield(conformed,<span class="string">'fsample'</span>);
+0133 <span class="keyword">end</span>
+0134</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

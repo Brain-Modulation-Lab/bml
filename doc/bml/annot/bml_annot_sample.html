@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_sample</title>
+  <meta name="keywords" content="bml_annot_sample">
+  <meta name="description" content="BML_ANNOT_SAMPLE returns a random sample of rows">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_sample.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_sample
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_SAMPLE returns a random sample of rows</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function sample = bml_annot_sample(cfg, annot) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_SAMPLE returns a random sample of rows
+
+ Use as
+   sample = bml_annot_sample(annot);
+   sample = bml_annot_sample(cfg, annot);
+   sample = bml_annot_sample(cfg.n, annot);
+
+ The first argument cfg is a configuration structure, which can contain
+ the following field:
+ cfg.n - integer: number of rows to select (defaults to 1)
+ cfg.frac - float: fraction of rows to return 
+ cfg.description - string: description of the output annot table
+ cfg.groupby - cellstr indicating name of column of annot by which to group
+             the rows before sampling. If missing no grouping is
+             done.
+ cfg.warn - bool: should warning be issued when not enough rows?
+
+ Returns a annotation table with a random subset of rows</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function sample = bml_annot_sample(cfg, annot)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_SAMPLE returns a random sample of rows</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   sample = bml_annot_sample(annot);</span>
+0007 <span class="comment">%   sample = bml_annot_sample(cfg, annot);</span>
+0008 <span class="comment">%   sample = bml_annot_sample(cfg.n, annot);</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% The first argument cfg is a configuration structure, which can contain</span>
+0011 <span class="comment">% the following field:</span>
+0012 <span class="comment">% cfg.n - integer: number of rows to select (defaults to 1)</span>
+0013 <span class="comment">% cfg.frac - float: fraction of rows to return</span>
+0014 <span class="comment">% cfg.description - string: description of the output annot table</span>
+0015 <span class="comment">% cfg.groupby - cellstr indicating name of column of annot by which to group</span>
+0016 <span class="comment">%             the rows before sampling. If missing no grouping is</span>
+0017 <span class="comment">%             done.</span>
+0018 <span class="comment">% cfg.warn - bool: should warning be issued when not enough rows?</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Returns a annotation table with a random subset of rows</span>
+0021 
+0022 <span class="keyword">if</span> nargin == 1
+0023   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(cfg,[],inputname(1));
+0024   cfg = [];
+0025 <span class="keyword">elseif</span> nargin == 2
+0026   annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,[],inputname(2));
+0027 <span class="keyword">else</span>
+0028   error(<span class="string">'incorrect number of arguments in call to bml_annot_consolidate'</span>);
+0029 <span class="keyword">end</span>
+0030 
+0031 <span class="keyword">if</span> ~isstruct(cfg)
+0032     cfg = struct(<span class="string">'n'</span>,cfg);
+0033 <span class="keyword">end</span>
+0034 
+0035 frac = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'frac'</span>,[]);
+0036 n = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'n'</span>,1);
+0037 groupby = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby'</span>,[]);
+0038 warn = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
+0039 
+0040 <span class="keyword">if</span> isempty(annot)
+0041   sample = annot;
+0042   <span class="keyword">return</span>
+0043 <span class="keyword">end</span>
+0044 
+0045 
+0046 <span class="comment">%ToDo: allow grouping by several variables</span>
+0047 <span class="keyword">if</span> isempty(groupby)
+0048   annot.groupby_=ones(height(annot),1);
+0049   groupby = {<span class="string">'groupby_'</span>};
+0050   groups={1};
+0051 <span class="keyword">else</span>
+0052     <span class="keyword">if</span> sum(strcmp(annot.Properties.VariableNames, groupby))~=1
+0053     error(<span class="string">'groupby should match one (and only one) column of annot'</span>);
+0054   <span class="keyword">end</span>
+0055   groups = unique(annot{:,groupby});
+0056 <span class="keyword">end</span>
+0057 
+0058 sample = table();
+0059 <span class="keyword">for</span> g=1:numel(groups)
+0060   <span class="keyword">if</span> iscellstr(groups(g))
+0061     annot_g = annot(strcmp(annot{:,groupby},groups(g)),:);
+0062     g_name = groups{g};
+0063   <span class="keyword">else</span>
+0064     annot_g = annot(annot{:,groupby}==groups{g},:);    
+0065     g_name = num2str(groups{g});
+0066   <span class="keyword">end</span>
+0067   
+0068   ngt = height(annot_g);
+0069   <span class="keyword">if</span> ~isempty(frac)
+0070     ng = round(frac*ngt);
+0071   <span class="keyword">else</span>
+0072     ng = n;
+0073   <span class="keyword">end</span>
+0074   
+0075   <span class="keyword">if</span> ng&gt;ngt
+0076     ng = ngt;
+0077     <span class="keyword">if</span> warn
+0078         warning(<span class="string">'group %s has only %i rows'</span>,g_name, ngt);
+0079     <span class="keyword">end</span>
+0080   <span class="keyword">end</span>
+0081   
+0082   sample_g = annot_g(randsample(height(annot_g),ng),:);
+0083   sample = [sample; sample_g];
+0084 <span class="keyword">end</span>
+0085</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

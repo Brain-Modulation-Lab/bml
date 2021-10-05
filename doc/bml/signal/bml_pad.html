@@ -47,7 +47,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>	BML_CROP returns a time-cropped raw [INTERNAL]</li><li><a href="bml_crop_idx.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx(cfg, starts, ends, samples)">bml_crop_idx</a>	BML_CROP_IDX calculates sample indices for a time window and file coordinates</li><li><a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>	BML_IDX2TIME calculates samples midpoint times from a index vector and file coordinates</li><li><a href="../../bml/sync/bml_raw2coord.html" class="code" title="function coord = bml_raw2coord(raw,trial_idx)">bml_raw2coord</a>	BML_RAW2COORD returns the time coordinated of the raw</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/padarray.html" class="code" title="function b = padarray(varargin)">padarray</a>	PADARRAY Pad an array.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 <li><a href="../../bml/io/bml_load_continuous.html" class="code" title="function [raw, file_raw_map] = bml_load_continuous(cfg)">bml_load_continuous</a>	BML_LOAD_CONTINUOUS loads continuous raw from one or more files</li><li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li></ul>
@@ -105,10 +105,10 @@ This function is called by:
 0047   postsamples = max([e-nSamples, 0]);
 0048 
 0049   <span class="keyword">if</span> presamples&gt;0 
-0050     padded.trial{1} = padarray(padded.trial{1},[0 presamples],padval,<span class="string">'pre'</span>);
+0050     padded.trial{1} = <a href="../../bml/utils/padarray.html" class="code" title="function b = padarray(varargin)">padarray</a>(padded.trial{1},[0 presamples],padval,<span class="string">'pre'</span>);
 0051   <span class="keyword">end</span>
 0052   <span class="keyword">if</span> postsamples &gt; 0
-0053     padded.trial{1} = padarray(padded.trial{1},[0 postsamples],padval,<span class="string">'post'</span>);
+0053     padded.trial{1} = <a href="../../bml/utils/padarray.html" class="code" title="function b = padarray(varargin)">padarray</a>(padded.trial{1},[0 postsamples],padval,<span class="string">'post'</span>);
 0054   <span class="keyword">end</span>
 0055   padded.time{1} = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(tc,s:e);
 0056 
@@ -124,10 +124,10 @@ This function is called by:
 0066     postsamples = max([e-nSamples, 0]);
 0067 
 0068     <span class="keyword">if</span> presamples&gt;0 
-0069       padded.trial{i} = padarray(padded.trial{i},[0 presamples],padval,<span class="string">'pre'</span>);
+0069       padded.trial{i} = <a href="../../bml/utils/padarray.html" class="code" title="function b = padarray(varargin)">padarray</a>(padded.trial{i},[0 presamples],padval,<span class="string">'pre'</span>);
 0070     <span class="keyword">end</span>
 0071     <span class="keyword">if</span> postsamples &gt; 0
-0072       padded.trial{i} = padarray(padded.trial{i},[0 postsamples],padval,<span class="string">'post'</span>);
+0072       padded.trial{i} = <a href="../../bml/utils/padarray.html" class="code" title="function b = padarray(varargin)">padarray</a>(padded.trial{i},[0 postsamples],padval,<span class="string">'post'</span>);
 0073     <span class="keyword">end</span>
 0074     padded.time{i} = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(tc,s:e);
 0075 
@@ -137,6 +137,6 @@ This function is called by:
 0079 <span class="keyword">end</span>
 0080     
 0081</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

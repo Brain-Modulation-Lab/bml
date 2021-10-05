@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_FDR</title>
+  <meta name="keywords" content="bml_FDR">
+  <meta name="description" content="Computes the False Discovery Rate according to Benjamini and Hochberg (1995).">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">stat</a> &gt; bml_FDR.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\stat&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_FDR
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Computes the False Discovery Rate according to Benjamini and Hochberg (1995).</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [ ind, thres ] = bml_FDR( p_list, alpha, corrected ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Computes the False Discovery Rate according to Benjamini and Hochberg (1995). 
+ 
+ Inputs: 
+ p_list - list of p values
+ alpha - the desired alpha threshold. Default: 0.05
+ corrected - set to true if correction for dependencies is to be applied, according to Benjamini
+ and Yekutieli (2001) (this is probably not the common case). 
+
+ outputs:
+ ind - the indexes of significant p-values within p_list
+ thres - the p-value which served as the actual threshold in this test. 
+ 
+ Written by Edden Gerber, lab of Leon Y. Deouell, 2012
+ Please send bug reports and requsts to edden.gerber@gmail.com</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ ind, thres ] = bml_FDR( p_list, alpha, corrected )</a>
+0002 <span class="comment">% Computes the False Discovery Rate according to Benjamini and Hochberg (1995).</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">% p_list - list of p values</span>
+0006 <span class="comment">% alpha - the desired alpha threshold. Default: 0.05</span>
+0007 <span class="comment">% corrected - set to true if correction for dependencies is to be applied, according to Benjamini</span>
+0008 <span class="comment">% and Yekutieli (2001) (this is probably not the common case).</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% outputs:</span>
+0011 <span class="comment">% ind - the indexes of significant p-values within p_list</span>
+0012 <span class="comment">% thres - the p-value which served as the actual threshold in this test.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Written by Edden Gerber, lab of Leon Y. Deouell, 2012</span>
+0015 <span class="comment">% Please send bug reports and requsts to edden.gerber@gmail.com</span>
+0016 <span class="comment">%</span>
+0017 n_vals = length(p_list);
+0018 num_tests = n_vals; <span class="comment">% there was some reason that in some cases you may want to set this to</span>
+0019 <span class="comment">% a lower value, but I don't remember what it was.</span>
+0020 
+0021 <span class="keyword">if</span> nargin &lt; 2
+0022     alpha = 0.05;
+0023 <span class="keyword">end</span>
+0024 
+0025 <span class="keyword">if</span> nargin &lt; 3
+0026     corrected = false;
+0027 <span class="keyword">end</span>
+0028 
+0029 p_sorted = sort(p_list,<span class="string">'descend'</span>);
+0030 
+0031 <span class="keyword">if</span> corrected
+0032     comp = (num_tests:-1:1)/num_tests * alpha / sum((1:num_tests)/num_tests);
+0033 <span class="keyword">else</span>
+0034     comp = (num_tests:-1:1)/num_tests * alpha;
+0035 <span class="keyword">end</span>
+0036 
+0037 
+0038 comp = comp((end-n_vals+1):end);
+0039 
+0040 i = find(p_sorted &lt;= comp,1,<span class="string">'first'</span>);
+0041 
+0042 <span class="keyword">if</span> isempty(i)
+0043     thres = 0;
+0044 <span class="keyword">else</span>
+0045     thres = p_sorted(i);
+0046 <span class="keyword">end</span>
+0047 
+0048 ind = find(p_list&lt;=thres);
+0049 
+0050 <span class="keyword">end</span>
+0051</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

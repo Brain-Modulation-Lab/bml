@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_read_tsv</title>
+  <meta name="keywords" content="bml_annot_read_tsv">
+  <meta name="description" content="BML_ANNOT_READ_TSV reads tab delimited vector BIDS annotation table">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_read_tsv.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_read_tsv
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_READ_TSV reads tab delimited vector BIDS annotation table</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function annot = bml_annot_read_tsv(filename,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_READ_TSV reads tab delimited vector BIDS annotation table
+
+ Use as
+   annot = bml_annot_read_tsv('annot/my_annot_table.tsv')
+
+ filename - char or string indicating file to load
+ varargin - further arguments for readtable
+
+ returns an annotation table</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_rename.html" class="code" title="function renamed = bml_annot_rename(annot,varargin)">bml_annot_rename</a>	BML_ANNOT_RENAME changes the names of columns</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_read_tsv(filename,varargin)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_READ_TSV reads tab delimited vector BIDS annotation table</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%   annot = bml_annot_read_tsv('annot/my_annot_table.tsv')</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% filename - char or string indicating file to load</span>
+0009 <span class="comment">% varargin - further arguments for readtable</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% returns an annotation table</span>
+0012 
+0013 <span class="keyword">if</span> ~ismember(<span class="string">'delimiter'</span>,varargin)
+0014   varargin = [varargin, {<span class="string">'delimiter'</span>,<span class="string">'\t'</span>}];
+0015 <span class="keyword">end</span>
+0016 <span class="keyword">if</span> ~ismember(<span class="string">'FileType'</span>,varargin)
+0017   varargin = [varargin, {<span class="string">'FileType'</span>,<span class="string">'text'</span>}];
+0018 <span class="keyword">end</span>
+0019 <span class="keyword">if</span> ~ismember(<span class="string">'TreatAsEmpty'</span>,varargin)
+0020   varargin = [varargin, {<span class="string">'TreatAsEmpty'</span>,{<span class="string">'n/a'</span>}}];
+0021 <span class="keyword">end</span>
+0022 
+0023 annot = readtable(filename,varargin{:});
+0024 [~,name,~]=fileparts(filename);
+0025 is_onset = ismember(<span class="string">'onset'</span>,annot.Properties.VariableNames);
+0026 is_duration = ismember(<span class="string">'duration'</span>,annot.Properties.VariableNames);
+0027 <span class="keyword">if</span> is_onset &amp;&amp; is_duration
+0028     annot = <a href="bml_annot_rename.html" class="code" title="function renamed = bml_annot_rename(annot,varargin)">bml_annot_rename</a>(annot,<span class="string">'onset'</span>,<span class="string">'starts'</span>);
+0029     annot.ends = annot.starts + annot.duration;
+0030     annot.id = (1:height(annot))';
+0031     annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,name);
+0032 <span class="keyword">end</span>
+0033 
+0034</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -48,7 +48,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+<li><a href="bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>	BML_GETFS returns the sampling frequency of a raw object</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 <li><a href="../../bml/sync/bml_sync_analog.html" class="code" title="function sync_roi = bml_sync_analog(cfg)">bml_sync_analog</a>	BML_SYNC_ANALOG time-aligns files based on a common analog sync channel</li><li><a href="../../bml/sync/bml_timealign.html" class="code" title="function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, slave)">bml_timealign</a>	BML_TIMEALIGN aligns slave to master and returns the slave's delta t</li></ul>
@@ -84,14 +84,14 @@ This function is called by:
 0025 <span class="keyword">end</span>
 0026 
 0027 <span class="keyword">if</span> ~ismember(<span class="string">'fsample'</span>,fields(data))
-0028     data.fsample = round(1/mean(diff(data.time{1})),9,<span class="string">'significant'</span>);
+0028     data.fsample = <a href="bml_getFs.html" class="code" title="function Fs = bml_getFs(cfg, raw)">bml_getFs</a>(data);
 0029 <span class="keyword">end</span>
 0030 
 0031 freq      = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'freq'</span>,DEFAULT_TARGET_FSAMPLE);
 0032 bin_size    = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'bin_size'</span>,round(data.fsample/freq));
 0033     
 0034 <span class="keyword">if</span> abs(data.fsample/freq - bin_size) &gt; 0.1
-0035   warning(char(strcat(<span class="string">'Specified envelope freq '</span>,num2str(freq),<span class="string">' not possible. Using '</span>,num2str(data.fsample/bin_size))));
+0035   warning(char(strcat(<span class="string">'Specified envelope freq '</span>,num2str(freq),<span class="string">' not possible. Using freq = '</span>,num2str(data.fsample/bin_size), <span class="string">' Hz'</span>)));
 0036 <span class="keyword">end</span>
 0037 
 0038 env=struct();
@@ -129,6 +129,6 @@ This function is called by:
 0070 <span class="keyword">end</span>
 0071 
 0072</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

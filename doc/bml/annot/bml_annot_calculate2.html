@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_annot_calculate2</title>
+  <meta name="keywords" content="bml_annot_calculate2">
+  <meta name="description" content="BML_ANNOT_CALCULATE2 calculates scalar values from 2 specific annotations in raw">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">annot</a> &gt; bml_annot_calculate2.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\annot&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_annot_calculate2
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_ANNOT_CALCULATE2 calculates scalar values from 2 specific annotations in raw</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function annot = bml_annot_calculate2(cfg, raw, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_ANNOT_CALCULATE2 calculates scalar values from 2 specific annotations in raw
+
+ Use as
+    annot = bml_annot_calculate2(cfg, raw, 'feature_1_name', feature_1_fun,
+                                           'feature_2_name', feature_2_fun,...)
+
+ raw - FT_DATAYPE_RAW in global time coordinates to be used for calculation
+ feature_1_name - string with column name for new feature
+ feature_1_fun - function handle to calculate feature 1
+ feature_2_name - string with column name for new feature
+ feature_2_fun - function handle to calculate feature 2
+ cfg - configuraton structure
+ cfg.epoch - table with epochs on which to calculate the feature. Required columns are
+           for cross-channel only: id, starts, ends, duration, channel1, channel2 OR 
+           for cross-epoch&amp;channel: id1, starts1, ends1, duration1, channel1, id2, starts2, ends2, duration2, channel2. 
+ cfg.warn - logical indicating if warnings should be issued. Defaults to true
+ cfg.minduration - minimal duration in seconds of epoch on which to calculate the
+          feature. Defaults to 0.001.
+ cfg.timetol - float. Tolerance in seconds for determining unique epochs. 
+          Defaults to 0.001.
+
+ returns the epoch table with new features calculated from raw</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="bml_annot_rename.html" class="code" title="function renamed = bml_annot_rename(annot,varargin)">bml_annot_rename</a>	BML_ANNOT_RENAME changes the names of columns</li><li><a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>	BML_ANNOT_TABLE transforms a table into an annotations table [internal]</li><li><a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>	BML_REDEFINETRIAL creates new epoching from a raw object (not necessarily continuous)</li><li><a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>	BML_GETIDX gets the first indices of the elements in the collection (or domain)</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function annot = bml_annot_calculate2(cfg, raw, varargin)</a>
+0002 
+0003 <span class="comment">% BML_ANNOT_CALCULATE2 calculates scalar values from 2 specific annotations in raw</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Use as</span>
+0006 <span class="comment">%    annot = bml_annot_calculate2(cfg, raw, 'feature_1_name', feature_1_fun,</span>
+0007 <span class="comment">%                                           'feature_2_name', feature_2_fun,...)</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% raw - FT_DATAYPE_RAW in global time coordinates to be used for calculation</span>
+0010 <span class="comment">% feature_1_name - string with column name for new feature</span>
+0011 <span class="comment">% feature_1_fun - function handle to calculate feature 1</span>
+0012 <span class="comment">% feature_2_name - string with column name for new feature</span>
+0013 <span class="comment">% feature_2_fun - function handle to calculate feature 2</span>
+0014 <span class="comment">% cfg - configuraton structure</span>
+0015 <span class="comment">% cfg.epoch - table with epochs on which to calculate the feature. Required columns are</span>
+0016 <span class="comment">%           for cross-channel only: id, starts, ends, duration, channel1, channel2 OR</span>
+0017 <span class="comment">%           for cross-epoch&amp;channel: id1, starts1, ends1, duration1, channel1, id2, starts2, ends2, duration2, channel2.</span>
+0018 <span class="comment">% cfg.warn - logical indicating if warnings should be issued. Defaults to true</span>
+0019 <span class="comment">% cfg.minduration - minimal duration in seconds of epoch on which to calculate the</span>
+0020 <span class="comment">%          feature. Defaults to 0.001.</span>
+0021 <span class="comment">% cfg.timetol - float. Tolerance in seconds for determining unique epochs.</span>
+0022 <span class="comment">%          Defaults to 0.001.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% returns the epoch table with new features calculated from raw</span>
+0025 
+0026 warn        = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'warn'</span>,true);
+0027 minduration = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'minduration'</span>,0.001);
+0028 epoch_orig  = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'epoch'</span>,[]);
+0029 annot_pair_id_present = ismember(<span class="string">'annot_pair_id'</span>,epoch_orig.Properties.VariableNames);
+0030 timetol     = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,0.001);
+0031 <span class="keyword">if</span> ~annot_pair_id_present
+0032   epoch_orig.annot_pair_id = (1:height(epoch_orig))';
+0033 <span class="keyword">end</span>
+0034 epoch = epoch_orig;
+0035 
+0036 assert(~isempty(epoch),<span class="string">'epoch table required'</span>);
+0037 
+0038 <span class="keyword">if</span> all(ismember({<span class="string">'id1'</span>,<span class="string">'starts1'</span>,<span class="string">'ends1'</span>,<span class="string">'duration1'</span>,<span class="string">'channel1'</span>,<span class="string">'id2'</span>,<span class="string">'starts2'</span>,<span class="string">'ends2'</span>,<span class="string">'duration2'</span>,<span class="string">'channel2'</span>},<span class="keyword">...</span>
+0039     epoch.Properties.VariableNames))
+0040   fprintf(<span class="string">'Binary calculation across channels and epochs.\n'</span>);
+0041 <span class="keyword">elseif</span> all(ismember({<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>,<span class="string">'channel1'</span>,<span class="string">'channel2'</span>},epoch.Properties.VariableNames))
+0042   fprintf(<span class="string">'Binary calculation across channels, same epochs.\n'</span>);
+0043   epoch2 = epoch(:,{<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'duration'</span>});
+0044   epoch2.Properties.VariableNames = {<span class="string">'id2'</span>,<span class="string">'starts2'</span>,<span class="string">'ends2'</span>,<span class="string">'duration2'</span>};
+0045   epoch = <a href="bml_annot_rename.html" class="code" title="function renamed = bml_annot_rename(annot,varargin)">bml_annot_rename</a>(epoch,<span class="string">'id'</span>,<span class="string">'id1'</span>,<span class="string">'starts'</span>,<span class="string">'starts1'</span>,<span class="string">'ends'</span>,<span class="string">'ends1'</span>,<span class="string">'duration'</span>,<span class="string">'duration1'</span>);
+0046   epoch = [epoch, epoch2];
+0047 <span class="keyword">else</span>
+0048   error(<span class="string">'required columns of epoch missing'</span>);
+0049 <span class="keyword">end</span>
+0050 
+0051 assert(all(ismember({<span class="string">'id1'</span>,<span class="string">'starts1'</span>,<span class="string">'ends1'</span>,<span class="string">'channel1'</span>},epoch.Properties.VariableNames)),<span class="keyword">...</span>
+0052   <span class="string">'One or more of the required variables id1, starts1, ends1, channel1 is missing from epoch table'</span>);
+0053 assert(all(ismember({<span class="string">'id2'</span>,<span class="string">'starts2'</span>,<span class="string">'ends2'</span>,<span class="string">'channel2'</span>},epoch.Properties.VariableNames)),<span class="keyword">...</span>
+0054   <span class="string">'One or more of the required variables id2, starts2, ends2, channel2 is missing from epoch table'</span>);
+0055 
+0056 <span class="comment">%removing rows with nans</span>
+0057 rowhasnan = isnan(epoch.starts1) | isnan(epoch.ends1) | isnan(epoch.starts2) | isnan(epoch.ends2);
+0058 <span class="keyword">if</span> sum(rowhasnan) &gt; 0
+0059   warning(<span class="string">'removing %i rows with nans'</span>,sum(rowhasnan));
+0060   epoch = epoch(~rowhasnan,:);
+0061 <span class="keyword">end</span>
+0062 
+0063 <span class="comment">%mapping epochs to unqiue epochs</span>
+0064 fprintf(<span class="string">'Obtaining unique epochs...\n'</span>);
+0065 ueid_db1 = epoch(:,{<span class="string">'id1'</span>,<span class="string">'starts1'</span>,<span class="string">'ends1'</span>,<span class="string">'channel1'</span>});
+0066 ueid_db1.Properties.VariableNames = {<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'channel'</span>};
+0067 ueid_db1.operand(:) = 1;
+0068 ueid_db2 = epoch(:,{<span class="string">'id2'</span>,<span class="string">'starts2'</span>,<span class="string">'ends2'</span>,<span class="string">'channel2'</span>});
+0069 ueid_db2.Properties.VariableNames = {<span class="string">'id'</span>,<span class="string">'starts'</span>,<span class="string">'ends'</span>,<span class="string">'channel'</span>};
+0070 ueid_db2.operand(:) = 2;
+0071 ueid_db = [ueid_db1; ueid_db2];
+0072 
+0073 [C, ~, IC] = uniquetol(table2array(ueid_db(:,{<span class="string">'starts'</span>,<span class="string">'ends'</span>})),timetol,<span class="keyword">...</span>
+0074           <span class="string">'ByRows'</span>,1,<span class="string">'DataScale'</span>,1,<span class="string">'OutputAllIndices'</span>,true);
+0075 
+0076 <span class="comment">%creating raw with unique trials</span>
+0077 C = array2table(C(~any(isnan(C),2),:),<span class="string">'VariableNames'</span>,{<span class="string">'starts'</span>,<span class="string">'ends'</span>});
+0078 C.id = (1:height(C))';
+0079 C = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(C);
+0080 cfg1=[];
+0081 cfg1.epoch = C;
+0082 cfg1.warn = warn;
+0083 [ue_raw, ue_db] = <a href="../../bml/signal/bml_redefinetrial.html" class="code" title="function [redefined, redefined_epoch] = bml_redefinetrial(cfg, raw)">bml_redefinetrial</a>(cfg1,raw);
+0084 
+0085 <span class="comment">% mapping index in ue_raw to original epoch table</span>
+0086 ueid_db.ueid(:) = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(IC,ue_db.epoch_id,ue_db.id,NaN); <span class="comment">%index match ue_raw</span>
+0087 ueid_db1.ueid(:) = ueid_db.ueid(ueid_db.operand == 1);
+0088 ueid_db2.ueid(:) = ueid_db.ueid(ueid_db.operand == 2);    
+0089 epoch.ueid1(:) = ueid_db1.ueid;
+0090 epoch.ueid2(:) = ueid_db2.ueid;
+0091 
+0092 epoch = epoch(:,{<span class="string">'annot_pair_id'</span>,<span class="string">'ueid1'</span>,<span class="string">'duration1'</span>,<span class="string">'channel1'</span>,<span class="string">'ueid2'</span>,<span class="string">'duration2'</span>,<span class="string">'channel2'</span>});
+0093 epoch = epoch(~(ismissing(epoch.ueid1)|ismissing(epoch.ueid2)),:); 
+0094 
+0095 <span class="keyword">if</span> nargin &lt; 4
+0096   error(<span class="string">'at least one feature name and function required'</span>)
+0097 <span class="keyword">elseif</span> mod(nargin,2)~=0 
+0098   error(<span class="string">'uneven number of arguments. Pairs of feature names and functions required'</span>)
+0099 <span class="keyword">else</span>
+0100   nfeatures = (nargin - 2)/2;
+0101 <span class="keyword">end</span>
+0102  
+0103 <span class="keyword">for</span> i=1:nfeatures
+0104   feature_name = cellstr(varargin{(i-1)*2+1});
+0105   feature_fun = varargin{(i-1)*2+2};
+0106 <span class="comment">%     textprogressbar(sprintf('Calculating feature %s - ',feature_name{1}));</span>
+0107 <span class="comment">%  n_progress = floor(height(epoch)/100);</span>
+0108   feature = nan(height(epoch),numel(feature_name));
+0109   <span class="keyword">for</span> t=1:height(epoch)
+0110 <span class="comment">%     if mod(t,n_progress) == 0</span>
+0111 <span class="comment">%       textprogressbar(round(100 .* t ./ height(epoch)))</span>
+0112 <span class="comment">%     end</span>
+0113     <span class="keyword">if</span> (epoch.duration1(t) &gt; minduration) &amp;&amp; (epoch.duration2(t) &gt; minduration)
+0114       trial1 = ue_raw.trial{epoch.ueid1(t)};
+0115       vec1   = trial1(<a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(epoch.channel1(t),ue_raw.label),:);
+0116       trial2 = ue_raw.trial{epoch.ueid2(t)};
+0117       vec2   = trial2(<a href="../../bml/utils/bml_getidx.html" class="code" title="function idx = bml_getidx(element,collection)">bml_getidx</a>(epoch.channel2(t),ue_raw.label),:);
+0118       <span class="keyword">try</span>
+0119         feature(t,:)=feature_fun(vec1,vec2);
+0120       <span class="keyword">catch</span> 
+0121         warning(&quot;<span class="comment">%s failed on trial %i \n&quot;,feature_name{1},t)</span>
+0122       <span class="keyword">end</span>
+0123     <span class="keyword">end</span>
+0124   <span class="keyword">end</span>
+0125  
+0126   <span class="keyword">for</span> j=1:numel(feature_name)
+0127     epoch.(feature_name{j}) = feature(:,j);
+0128   <span class="keyword">end</span>
+0129 <span class="comment">%     textprogressbar('done')</span>
+0130 <span class="keyword">end</span>
+0131 
+0132 annot = outerjoin(epoch_orig,epoch(:,[1,7:end]),<span class="string">'Type'</span>,<span class="string">'left'</span>,<span class="string">'Keys'</span>,<span class="string">'annot_pair_id'</span>,<span class="string">'MergeKeys'</span>,true);
+0133 
+0134 <span class="keyword">if</span> ~annot_pair_id_present
+0135   annot.annot_pair_id = [];
+0136 <span class="keyword">end</span>
+0137 
+0138 
+0139</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

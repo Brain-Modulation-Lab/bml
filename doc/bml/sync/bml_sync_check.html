@@ -126,19 +126,20 @@ This function is called by:
 0069       t1=master.time{1}(1);
 0070       t2=master.time{1}(end);
 0071       cfg=[]; cfg.time=master.time; cfg.method=<span class="string">'pchip'</span>;
-0072       cfg.feedback=ft_feedback;
-0073       slave_crop=ft_resampledata(cfg,<a href="../../bml/signal/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave,t1,t2));
-0074       slave_crop.fsample = master.fsample;
-0075       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_slave_'</span>,slave_roi.name(slave_i)),slave_crop);
-0076     <span class="keyword">end</span>
-0077 
-0078   <span class="keyword">end</span>
-0079 <span class="keyword">end</span>
-0080 
+0072       cfg.extrapval = nan;
+0073       cfg.feedback=ft_feedback;
+0074       slave_crop=ft_resampledata(cfg,<a href="../../bml/signal/bml_crop.html" class="code" title="function cropped = bml_crop(raw, starts, ends)">bml_crop</a>(slave,t1,t2));
+0075       slave_crop.fsample = master.fsample;
+0076       <a href="../../bml/utils/bml_praat.html" class="code" title="function bml_praat(varargin)">bml_praat</a>(strcat(<span class="string">'c'</span>,num2str(chunk_id),<span class="string">'_slave_'</span>,slave_roi.name(slave_i)),slave_crop);
+0077     <span class="keyword">end</span>
+0078 
+0079   <span class="keyword">end</span>
+0080 <span class="keyword">end</span>
 0081 
 0082 
 0083 
-0084</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0084 
+0085</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

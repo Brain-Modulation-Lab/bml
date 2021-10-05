@@ -72,9 +72,17 @@ This function is called by:
 0023 
 0024 conformed = annot(:,template_vars);
 0025 
-0026 
-0027 
-0028</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0026 <span class="comment">%verifying format</span>
+0027 <span class="keyword">for</span> i=1:width(conformed)
+0028     <span class="keyword">if</span> iscellstr(template{:,i}) &amp;&amp; ~iscellstr(conformed{:,i})
+0029         <span class="keyword">if</span> isvector(conformed{:,i}) || ismatrix(conformed{:,i})
+0030             conformed.(i) = cellstr(num2str(conformed.(i)));
+0031         <span class="keyword">end</span>
+0032     <span class="keyword">end</span>
+0033 <span class="keyword">end</span>
+0034 
+0035 
+0036</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

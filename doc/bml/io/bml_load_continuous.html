@@ -160,258 +160,271 @@ This function is called by:
 0073 
 0074 <span class="keyword">if</span> isempty(roi)
 0075   raw=[];
-0076   <span class="keyword">return</span>  
-0077 <span class="keyword">end</span>
-0078 roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
-0079 
-0080 <span class="keyword">if</span> islogical(discontinuous)
-0081   <span class="keyword">if</span> discontinuous
-0082     discontinuous = {<span class="string">'allow'</span>};
-0083   <span class="keyword">else</span>
-0084     discontinuous = {<span class="string">'no'</span>};
-0085   <span class="keyword">end</span>
-0086 <span class="keyword">end</span>
-0087 
-0088 <span class="comment">%consolidating chunks of same file when possible</span>
-0089 cfg1=[];
-0090 cfg1.roi=roi;
-0091 cfg1.timetol=timetol_cons;
-0092 roi = <a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(cfg1);
-0093 
-0094 <span class="comment">%removing zero length rois</span>
-0095 roi = roi(roi.duration &gt; 0,:);
-0096 
-0097 <span class="keyword">if</span> ~isempty(folder)
-0098   <span class="comment">%ToDo: combine cfg.folder with roi.folder in a smart way</span>
-0099   roi.folder = repmat({folder},height(roi),1);
-0100 <span class="keyword">end</span>
-0101 
-0102 <span class="comment">%using roi parameters if none specified in call</span>
-0103 <span class="keyword">if</span> isempty(chantype) &amp;&amp; ismember(<span class="string">'chantype'</span>,roi.Properties.VariableNames)
-0104   chantype  = cellstr(unique(roi.chantype));
-0105 <span class="keyword">end</span>
-0106 <span class="keyword">if</span> isempty(filetype) &amp;&amp; ismember(<span class="string">'filetype'</span>,roi.Properties.VariableNames)
-0107   filetype  = cellstr(unique(roi.filetype));
-0108 <span class="keyword">end</span>
-0109 <span class="keyword">if</span> isempty(Fs) &amp;&amp; ismember(<span class="string">'Fs'</span>,roi.Properties.VariableNames)
-0110   Fs        = unique(roi.Fs);
-0111 <span class="keyword">end</span>
-0112 assert(length(filetype)==1,<span class="string">'unique filetype required: %s'</span>,strjoin(filetype));
-0113 assert(length(chantype)==1,<span class="string">'unique chantype required: %s'</span>,strjoin(chantype));
-0114 assert(length(Fs)==1,<span class="string">'unique Fs required: %s'</span>,strjoin(string(num2str(Fs))));
-0115 
-0116 <span class="comment">%dealing with skip factors</span>
-0117 skipFactor=1;
-0118 chantype_split=strsplit(chantype{1},<span class="string">':'</span>);
-0119 <span class="keyword">if</span> numel(chantype_split) == 2
-0120   skipFactor=str2double(chantype_split{2});
-0121 <span class="keyword">elseif</span> numel(chantype_split) &gt; 2
-0122   ft_error(<span class="string">'Use '':'' to specify skipfactor, e.g. analog:10'</span>)
-0123 <span class="keyword">end</span>
-0124 
-0125 <span class="comment">%selecting electrodes</span>
-0126 <span class="keyword">if</span> ~isempty(electrode)
-0127   assert(ismember(<span class="string">'channel'</span>,electrode.Properties.VariableNames),&quot;<span class="string">'channel'</span> variable required in cfg.electrode&quot;);
-0128   assert(ismember(<span class="string">'electrode'</span>,electrode.Properties.VariableNames),&quot;<span class="string">'electrode'</span> variable required in cfg.electrode&quot;);
-0129   <span class="comment">%checking electrodes for time, filetype and chantype</span>
-0130   cfg1=[];
-0131   cfg1.keep=<span class="string">'x'</span>;
-0132   cfg1.warn=false;
-0133   electrode = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(cfg1,electrode,<span class="keyword">...</span>
-0134                   <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(table(min(roi.starts),max(roi.ends))));
-0135   assert(height(electrode)&gt;0,&quot;no electrode <span class="keyword">for</span> roi time&quot;);
-0136   <span class="keyword">if</span> ismember(<span class="string">'filetype'</span>,electrode.Properties.VariableNames)
-0137     electrode = electrode(strcmp(electrode.filetype,filetype),:);
-0138     assert(height(electrode)&gt;0,&quot;incorrect filetype <span class="keyword">for</span> cfg.electrode&quot;);
-0139   <span class="keyword">end</span>
-0140   <span class="keyword">if</span> ismember(<span class="string">'chantype'</span>,electrode.Properties.VariableNames)
-0141     electrode = electrode(<span class="keyword">...</span><span class="comment">  </span>
-0142       contains(electrode.chantype,{chantype{1}},<span class="string">'IgnoreCase'</span>,true)|<span class="keyword">...</span>
-0143       strcmp(electrode.chantype,<span class="string">'all'</span>)|<span class="keyword">...</span>
-0144       strcmp(electrode.chantype,<span class="string">'any'</span>)|<span class="keyword">...</span>
-0145       strcmp(electrode.chantype,<span class="string">'NA'</span>)|<span class="keyword">...</span>
-0146       strcmp(electrode.chantype,<span class="string">''</span>),:);
-0147     assert(height(electrode)&gt;0,&quot;incorrect chantype <span class="keyword">for</span> cfg.electrode&quot;);
-0148   <span class="keyword">else</span>
-0149     fprintf(&quot;electrode table has no chantype variable.\n&quot;)
-0150   <span class="keyword">end</span>
-0151   
-0152   assert(numel(electrode.channel)==numel(unique(electrode.channel)),<span class="keyword">...</span>
-0153       &quot;repeated electrode entries <span class="keyword">for</span> time/filetype/chantype&quot;);
-0154 
-0155   <span class="keyword">if</span> isempty(channel)
-0156       channel = electrode.channel;
-0157   <span class="keyword">end</span>
-0158 <span class="keyword">end</span>
-0159 
-0160 <span class="comment">%optimizing channel selection for trellis files</span>
-0161 <span class="keyword">if</span> ~isempty(channel) &amp;&amp; contains(filetype,&quot;trellis&quot;)
-0162   chantype = {[<span class="string">'^('</span>,strjoin(channel,<span class="string">'|'</span>),<span class="string">')$'</span>]};
-0163   <span class="keyword">if</span> skipFactor &gt; 1
-0164     chantype{1} = [chantype{1},<span class="string">':'</span>,num2str(skipFactor)];
-0165   <span class="keyword">end</span>
-0166   channel=[];
-0167 <span class="keyword">end</span>
-0168 
-0169 <span class="comment">%% LOAD FIRST FILE</span>
-0170 
-0171 <span class="comment">%saving mapping between raw and files</span>
-0172 file_raw_map=roi(1,file_raw_map_vars);
-0173 [s,e]=<a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(1,:));
-0174 file_raw_map.s1=s;
-0175 file_raw_map.s2=e;
-0176 file_raw_map.t1=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),s);
-0177 file_raw_map.t2=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),e);
-0178 file_raw_map.raw1=1;
-0179 file_raw_map.raw2=floor((e-s+1)/skipFactor);
-0180 file_raw_map.skipFactor = skipFactor;
-0181 
-0182 <span class="comment">%loading first raw</span>
-0183 cfg=[]; 
-0184 cfg.chantype=chantype;
-0185 cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
-0186 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
-0187 cfg.feedback=ft_feedback;
-0188 cfg.trackcallinfo=false;
-0189 hdr = ft_read_header(cfg.dataset,<span class="string">'chantype'</span>,cfg.chantype);
-0190 
-0191 <span class="comment">%checking nomimal sampling frequencies</span>
-0192 assert(hdr.Fs*skipFactor==roi.Fs(1),<span class="keyword">...</span>
-0193   <span class="string">'File %s chantype %s has Fs %f, not %f as defined in cfg.roi'</span>,<span class="keyword">...</span>
-0194   roi.name{1},strjoin(cfg.chantype),hdr.Fs,roi.Fs(1));
-0195 
-0196 <span class="keyword">if</span> ~dryrun
-0197   raw = ft_preprocessing(cfg);
+0076   file_raw_map=[];
+0077   <span class="keyword">return</span>  
+0078 <span class="keyword">end</span>
+0079 roi = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(roi);
+0080 
+0081 <span class="keyword">if</span> islogical(discontinuous)
+0082   <span class="keyword">if</span> discontinuous
+0083     discontinuous = {<span class="string">'allow'</span>};
+0084   <span class="keyword">else</span>
+0085     discontinuous = {<span class="string">'no'</span>};
+0086   <span class="keyword">end</span>
+0087 <span class="keyword">end</span>
+0088 
+0089 <span class="comment">%consolidating chunks of same file when possible</span>
+0090 cfg1=[];
+0091 cfg1.roi=roi;
+0092 cfg1.timetol=timetol_cons;
+0093 roi = <a href="../../bml/sync/bml_sync_consolidate.html" class="code" title="function consolidated = bml_sync_consolidate(cfg)">bml_sync_consolidate</a>(cfg1);
+0094 
+0095 <span class="comment">%removing zero length rois</span>
+0096 roi = roi(roi.duration &gt; 0,:);
+0097 
+0098 <span class="keyword">if</span> ~isempty(folder)
+0099   <span class="comment">%ToDo: combine cfg.folder with roi.folder in a smart way</span>
+0100   roi.folder = repmat({folder},height(roi),1);
+0101 <span class="keyword">end</span>
+0102 
+0103 <span class="comment">%using roi parameters if none specified in call</span>
+0104 <span class="keyword">if</span> isempty(chantype) &amp;&amp; ismember(<span class="string">'chantype'</span>,roi.Properties.VariableNames)
+0105   chantype  = cellstr(unique(roi.chantype));
+0106 <span class="keyword">end</span>
+0107 <span class="keyword">if</span> isempty(filetype) &amp;&amp; ismember(<span class="string">'filetype'</span>,roi.Properties.VariableNames)
+0108   filetype  = cellstr(unique(roi.filetype));
+0109 <span class="keyword">end</span>
+0110 <span class="keyword">if</span> isempty(Fs) &amp;&amp; ismember(<span class="string">'Fs'</span>,roi.Properties.VariableNames)
+0111   Fs        = unique(roi.Fs);
+0112 <span class="keyword">end</span>
+0113 assert(length(filetype)==1,<span class="string">'unique filetype required: %s'</span>,strjoin(filetype));
+0114 assert(length(chantype)==1,<span class="string">'unique chantype required: %s'</span>,strjoin(chantype));
+0115 assert(length(Fs)==1,<span class="string">'unique Fs required: %s'</span>,strjoin(string(num2str(Fs))));
+0116 
+0117 <span class="comment">%dealing with skip factors</span>
+0118 skipFactor=1;
+0119 chantype_split=strsplit(chantype{1},<span class="string">':'</span>);
+0120 <span class="keyword">if</span> numel(chantype_split) == 2
+0121   skipFactor=str2double(chantype_split{2});
+0122 <span class="keyword">elseif</span> numel(chantype_split) &gt; 2
+0123   ft_error(<span class="string">'Use '':'' to specify skipfactor, e.g. analog:10'</span>)
+0124 <span class="keyword">end</span>
+0125 
+0126 <span class="comment">%selecting electrodes</span>
+0127 <span class="keyword">if</span> ~isempty(electrode)
+0128   assert(ismember(<span class="string">'channel'</span>,electrode.Properties.VariableNames),&quot;<span class="string">'channel'</span> variable required in cfg.electrode&quot;);
+0129   assert(ismember(<span class="string">'electrode'</span>,electrode.Properties.VariableNames),&quot;<span class="string">'electrode'</span> variable required in cfg.electrode&quot;);
+0130   <span class="comment">%checking electrodes for time, filetype and chantype</span>
+0131   cfg1=[];
+0132   cfg1.keep=<span class="string">'x'</span>;
+0133   cfg1.warn=false;
+0134   electrode = <a href="../../bml/annot/bml_annot_intersect.html" class="code" title="function annot = bml_annot_intersect(cfg, x, y)">bml_annot_intersect</a>(cfg1,electrode,<span class="keyword">...</span>
+0135                   <a href="../../bml/annot/bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(table(min(roi.starts),max(roi.ends))));
+0136   assert(height(electrode)&gt;0,&quot;no electrode <span class="keyword">for</span> roi time&quot;);
+0137   <span class="keyword">if</span> ismember(<span class="string">'filetype'</span>,electrode.Properties.VariableNames)
+0138     electrode = electrode(strcmp(electrode.filetype,filetype),:);
+0139     assert(height(electrode)&gt;0,&quot;incorrect filetype <span class="keyword">for</span> cfg.electrode&quot;);
+0140   <span class="keyword">end</span>
+0141   <span class="keyword">if</span> ismember(<span class="string">'chantype'</span>,electrode.Properties.VariableNames)
+0142     electrode = electrode(<span class="keyword">...</span><span class="comment">  </span>
+0143       contains(electrode.chantype,{chantype{1}},<span class="string">'IgnoreCase'</span>,true)|<span class="keyword">...</span>
+0144       strcmp(electrode.chantype,<span class="string">'all'</span>)|<span class="keyword">...</span>
+0145       strcmp(electrode.chantype,<span class="string">'any'</span>)|<span class="keyword">...</span>
+0146       strcmp(electrode.chantype,<span class="string">'NA'</span>)|<span class="keyword">...</span>
+0147       strcmp(electrode.chantype,<span class="string">''</span>),:);
+0148     assert(height(electrode)&gt;0,&quot;incorrect chantype <span class="keyword">for</span> cfg.electrode&quot;);
+0149   <span class="keyword">else</span>
+0150     fprintf(&quot;electrode table has no chantype variable.\n&quot;)
+0151   <span class="keyword">end</span>
+0152   
+0153   assert(numel(electrode.channel)==numel(unique(electrode.channel)),<span class="keyword">...</span>
+0154       &quot;repeated electrode entries <span class="keyword">for</span> time/filetype/chantype&quot;);
+0155 
+0156   <span class="keyword">if</span> isempty(channel)
+0157       channel = electrode.channel;
+0158   <span class="keyword">end</span>
+0159 <span class="keyword">end</span>
+0160 
+0161 <span class="comment">%optimizing channel selection for trellis files</span>
+0162 <span class="keyword">if</span> ~isempty(channel) &amp;&amp; contains(filetype,&quot;trellis&quot;) &amp;&amp; ~contains(filetype,&quot;.nf6&quot;)
+0163   chantype = {[<span class="string">'^('</span>,strjoin(channel,<span class="string">'|'</span>),<span class="string">')$'</span>]};
+0164   <span class="keyword">if</span> skipFactor &gt; 1
+0165     chantype{1} = [chantype{1},<span class="string">':'</span>,num2str(skipFactor)];
+0166   <span class="keyword">end</span>
+0167   channel=[];
+0168 <span class="keyword">end</span>
+0169 
+0170 <span class="comment">%% LOAD FIRST FILE</span>
+0171 
+0172 <span class="comment">%saving mapping between raw and files</span>
+0173 file_raw_map=roi(1,file_raw_map_vars);
+0174 [s,e]=<a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(1,:));
+0175 file_raw_map.s1=s;
+0176 file_raw_map.s2=e;
+0177 file_raw_map.t1=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),s);
+0178 file_raw_map.t2=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),e);
+0179 file_raw_map.raw1=1;
+0180 file_raw_map.raw2=floor((e-s+1)/skipFactor);
+0181 file_raw_map.skipFactor = skipFactor;
+0182 
+0183 <span class="comment">%loading first raw</span>
+0184 cfg=[]; 
+0185 cfg.chantype=chantype;
+0186 cfg.channel = channel;
+0187 cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
+0188 cfg.dataset=fullfile(roi.folder{1},roi.name{1});
+0189 cfg.feedback=ft_feedback;
+0190 cfg.trackcallinfo=false;
+0191 <span class="keyword">if</span> isempty(cfg.chantype) || strcmp(cfg.chantype,{<span class="string">'all'</span>})
+0192     hdr = ft_read_header(cfg.dataset,<span class="string">'chantype'</span>,[]);
+0193     cfg.chantype = [];
+0194     <span class="comment">%checking nomimal sampling frequencies</span>
+0195     assert(hdr.Fs*skipFactor==roi.Fs(1),<span class="keyword">...</span>
+0196         <span class="string">'File %s has Fs %f, not %f as defined in cfg.roi'</span>,<span class="keyword">...</span>
+0197         roi.name{1},hdr.Fs,roi.Fs(1));
 0198 <span class="keyword">else</span>
-0199   raw = hdr;
-0200   assert(raw.nSamples&gt;=floor(e/skipFactor),<span class="string">'index overflow s2=%i but nSample=%i'</span>,floor(e/skipFactor),raw.nSamples);
-0201 <span class="keyword">end</span>
-0202 
-0203 <span class="comment">%selecting channels</span>
-0204 <span class="keyword">if</span> ~isempty(channel)
-0205   channel_selected=ft_channelselection(channel,raw.label);
-0206   <span class="keyword">if</span> numel(channel_selected)==0
-0207     error(<span class="string">'%s not present in raw %s \nAvailable channels are: %s'</span>,strjoin(channel),cfg.dataset,strjoin(raw.label));
-0208   <span class="keyword">elseif</span> ~dryrun
-0209     cfg=[]; 
-0210     cfg.channel=channel; 
-0211     cfg.feedback=ft_feedback;
-0212     cfg.trackcallinfo=false;
-0213     raw = ft_selectdata(cfg,raw);
-0214   <span class="keyword">end</span>
-0215 <span class="keyword">end</span>
-0216 
-0217 <span class="comment">% time = raw.time{1}+bml_idx2time(roi(1,:),s);</span>
-0218 time = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),ceil(s/skipFactor):floor(e/skipFactor),skipFactor);
-0219 raw.time{1} = time;
-0220 <span class="keyword">if</span> abs(time(end)-<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),floor(e/skipFactor),skipFactor)) &gt; timetol
-0221   error(<span class="string">'timetol violated'</span>)
-0222 <span class="keyword">end</span>
-0223 
-0224 <span class="comment">%% LOAD OTHER FILES (if present)</span>
-0225 <span class="keyword">for</span> i=2:height(roi)
-0226   
-0227   <span class="comment">%saving mapping between raw and files</span>
-0228   row=roi(i,file_raw_map_vars);
-0229   [s,e]=<a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(i,:));
-0230   row.s1=s;
-0231   row.s2=e;
-0232   row.t1=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),s);
-0233   row.t2=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),e);
-0234   row.raw1=max(file_raw_map.raw2)+1;
-0235   row.raw2=floor((e-s)/skipFactor)+row.raw1;
-0236   row.skipFactor = skipFactor;
+0199     hdr = ft_read_header(cfg.dataset,<span class="string">'chantype'</span>,cfg.chantype);
+0200     <span class="comment">%checking nomimal sampling frequencies</span>
+0201     assert(hdr.Fs*skipFactor==roi.Fs(1),<span class="keyword">...</span>
+0202         <span class="string">'File %s chantype %s has Fs %f, not %f as defined in cfg.roi'</span>,<span class="keyword">...</span>
+0203         roi.name{1},strjoin(cfg.chantype),hdr.Fs,roi.Fs(1));
+0204 <span class="keyword">end</span>
+0205 
+0206 
+0207 <span class="keyword">if</span> ~dryrun
+0208   raw = ft_preprocessing(cfg);
+0209 <span class="keyword">else</span>
+0210   raw = hdr;
+0211   assert(raw.nSamples&gt;=floor(e/skipFactor),<span class="string">'index overflow s2=%i but nSample=%i'</span>,floor(e/skipFactor),raw.nSamples);
+0212 <span class="keyword">end</span>
+0213 
+0214 <span class="comment">%selecting channels</span>
+0215 <span class="keyword">if</span> ~isempty(channel)
+0216   channel_selected=ft_channelselection(channel,raw.label);
+0217   <span class="keyword">if</span> numel(channel_selected)==0
+0218     error(<span class="string">'%s not present in raw %s \nAvailable channels are: %s'</span>,strjoin(channel),cfg.dataset,strjoin(raw.label));
+0219   <span class="keyword">elseif</span> ~dryrun
+0220     cfg=[]; 
+0221     cfg.channel=channel; 
+0222     cfg.feedback=ft_feedback;
+0223     cfg.trackcallinfo=false;
+0224     raw = ft_selectdata(cfg,raw);
+0225   <span class="keyword">end</span>
+0226 <span class="keyword">end</span>
+0227 
+0228 <span class="comment">% time = raw.time{1}+bml_idx2time(roi(1,:),s);</span>
+0229 time = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),ceil(s/skipFactor):floor(e/skipFactor),skipFactor);
+0230 raw.time{1} = time;
+0231 <span class="keyword">if</span> abs(time(end)-<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(1,:),floor(e/skipFactor),skipFactor)) &gt; timetol
+0232   error(<span class="string">'timetol violated'</span>)
+0233 <span class="keyword">end</span>
+0234 
+0235 <span class="comment">%% LOAD OTHER FILES (if present)</span>
+0236 <span class="keyword">for</span> i=2:height(roi)
 0237   
-0238   <span class="comment">%loading next raw</span>
-0239   cfg=[]; 
-0240   cfg.chantype=chantype;
-0241   cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
-0242   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
-0243   cfg.feedback=ft_feedback;
-0244   cfg.trackcallinfo=false;
-0245   <span class="keyword">if</span> ~dryrun
-0246     next_raw = ft_preprocessing(cfg);
-0247   <span class="keyword">else</span>
-0248     next_raw = ft_read_header(cfg.dataset,<span class="string">'chantype'</span>,cfg.chantype);
-0249     assert(next_raw.nSamples&gt;=floor(e/skipFactor),<span class="string">'index overflow s2=%i but nSample=%i'</span>,floor(e/skipFactor),next_raw.nSamples);
-0250   <span class="keyword">end</span>
-0251   
-0252   <span class="keyword">if</span> ~isempty(channel)
-0253     <span class="keyword">if</span> isstring(channel); channel = {char(channel)}; <span class="keyword">end</span>
-0254     <span class="keyword">if</span> ~dryrun
-0255       cfg=[]; cfg.channel=channel; cfg.feedback=ft_feedback;
-0256       cfg.trackcallinfo=false;
-0257       next_raw = ft_selectdata(cfg,next_raw);
-0258     <span class="keyword">end</span>
-0259   <span class="keyword">end</span>
-0260     
-0261   <span class="comment">%next_time = next_raw.time{1}+bml_idx2time(roi(i,:),s);</span>
-0262   next_time = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),ceil(s/skipFactor):floor(e/skipFactor),skipFactor);
-0263   next_raw.time{1} = next_time;
-0264   assert(abs(next_time(end)-<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),floor(e/skipFactor),skipFactor)) &lt; timetol, <span class="string">'timetol violated'</span>);
-0265  
-0266   <span class="comment">%verifying contiguity</span>
-0267   delta_t = next_time(1) - time(end) - skipFactor/Fs;
-0268   <span class="keyword">if</span> abs(delta_t) &gt; timetol <span class="comment">%non contiguous files</span>
-0269     <span class="keyword">if</span> ~ismember(discontinuous,{<span class="string">'allow'</span>,<span class="string">'warn'</span>})
-0270       roi
-0271       error(&quot;To concateneting discontinuous rois use cfg.discontinuous=<span class="string">'allow'</span>&quot;);
-0272     <span class="keyword">end</span>  
-0273     
-0274     delta_s = delta_t*Fs/skipFactor;
-0275     delta_s_int = round(delta_s);
-0276     assert(delta_s&gt;0,&quot;rois overlap by <span class="comment">%f &gt; tolerance = %f correct or increase tolerance&quot;,delta_t,timetol);</span>
-0277 
-0278     <span class="keyword">if</span> abs(delta_s_int - delta_s) &lt; timetol*Fs/skipFactor
-0279       <span class="keyword">if</span> ismember(discontinuous,{<span class="string">'warn'</span>})
-0280         warning(&quot;concatenating discontinous files <span class="comment">%i samples added&quot;,delta_s_int);</span>
-0281       <span class="keyword">end</span>
-0282       <span class="keyword">if</span> ~dryrun             
-0283         <span class="comment">%zero padding the end of the previous raw</span>
-0284         starts = raw.time{1}(1) - 0.5*skipFactor/Fs;
-0285         ends = next_time(1) + 0.5*skipFactor/Fs;
-0286         [raw, ~, post] = <a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>(raw,starts,ends,padval);
-0287         
-0288         <span class="comment">%correcting raw mapping due to zero padding</span>
-0289         <span class="comment">%the starts of next file in raw coordinates is delayed by post</span>
-0290         row.raw1=max(file_raw_map.raw2)+1+post;
-0291         row.raw2=floor((e-s)/skipFactor)+row.raw1;
-0292       <span class="keyword">else</span>
-0293         time = [time,time(end)+(1:delta_s_int)*skipFactor/Fs];
-0294       <span class="keyword">end</span>
-0295     <span class="keyword">else</span>
-0296         roi
-0297       error(&quot;can't concatenate discontinuous files with sample snap error of <span class="comment">%f seconds within timetol of %f seconds&quot;,...</span>
-0298         abs(delta_s_int - delta_s)*skipFactor/Fs, timetol);
-0299     <span class="keyword">end</span> 
-0300   <span class="keyword">end</span>
-0301     
-0302   <span class="keyword">if</span> ~dryrun
-0303     cfg1=[]; 
-0304     cfg1.timetol = timetol; 
-0305     cfg1.timeref = <span class="string">'common'</span>;
-0306     cfg1.match_labels = match_labels;
-0307     raw = <a href="../../bml/signal/bml_hstack.html" class="code" title="function [data] = bml_hstack(cfg, varargin)">bml_hstack</a>(cfg1, raw, next_raw);
-0308     time = raw.time{1};
-0309   <span class="keyword">else</span>
-0310     time = [time next_time];
+0238   <span class="comment">%saving mapping between raw and files</span>
+0239   row=roi(i,file_raw_map_vars);
+0240   [s,e]=<a href="../../bml/signal/bml_crop_idx_valid.html" class="code" title="function [starts_idx,ends_idx] = bml_crop_idx_valid(cfg, varargin)">bml_crop_idx_valid</a>(roi(i,:));
+0241   row.s1=s;
+0242   row.s2=e;
+0243   row.t1=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),s);
+0244   row.t2=<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),e);
+0245   row.raw1=max(file_raw_map.raw2)+1;
+0246   row.raw2=floor((e-s)/skipFactor)+row.raw1;
+0247   row.skipFactor = skipFactor;
+0248   
+0249   <span class="comment">%loading next raw</span>
+0250   cfg=[]; 
+0251   cfg.chantype=chantype;
+0252   cfg.trl = [ceil(s/skipFactor), floor(e/skipFactor), 0];
+0253   cfg.dataset=fullfile(roi.folder{i},roi.name{i});
+0254   cfg.feedback=ft_feedback;
+0255   cfg.trackcallinfo=false;
+0256   <span class="keyword">if</span> ~dryrun
+0257     next_raw = ft_preprocessing(cfg);
+0258   <span class="keyword">else</span>
+0259     next_raw = ft_read_header(cfg.dataset,<span class="string">'chantype'</span>,cfg.chantype);
+0260     assert(next_raw.nSamples&gt;=floor(e/skipFactor),<span class="string">'index overflow s2=%i but nSample=%i'</span>,floor(e/skipFactor),next_raw.nSamples);
+0261   <span class="keyword">end</span>
+0262   
+0263   <span class="keyword">if</span> ~isempty(channel)
+0264     <span class="keyword">if</span> isstring(channel); channel = {char(channel)}; <span class="keyword">end</span>
+0265     <span class="keyword">if</span> ~dryrun
+0266       cfg=[]; cfg.channel=channel; cfg.feedback=ft_feedback;
+0267       cfg.trackcallinfo=false;
+0268       next_raw = ft_selectdata(cfg,next_raw);
+0269     <span class="keyword">end</span>
+0270   <span class="keyword">end</span>
+0271     
+0272   <span class="comment">%next_time = next_raw.time{1}+bml_idx2time(roi(i,:),s);</span>
+0273   next_time = <a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),ceil(s/skipFactor):floor(e/skipFactor),skipFactor);
+0274   next_raw.time{1} = next_time;
+0275   assert(abs(next_time(end)-<a href="../../bml/sync/bml_idx2time.html" class="code" title="function time=bml_idx2time(cfg, idx, skipFactor)">bml_idx2time</a>(roi(i,:),floor(e/skipFactor),skipFactor)) &lt; timetol, <span class="string">'timetol violated'</span>);
+0276  
+0277   <span class="comment">%verifying contiguity</span>
+0278   delta_t = next_time(1) - time(end) - skipFactor/Fs;
+0279   <span class="keyword">if</span> abs(delta_t) &gt; timetol <span class="comment">%non contiguous files</span>
+0280     <span class="keyword">if</span> ~ismember(discontinuous,{<span class="string">'allow'</span>,<span class="string">'warn'</span>})
+0281       roi
+0282       error(&quot;To concateneting discontinuous rois use cfg.discontinuous=<span class="string">'allow'</span>&quot;);
+0283     <span class="keyword">end</span>  
+0284     
+0285     delta_s = delta_t*Fs/skipFactor;
+0286     delta_s_int = round(delta_s);
+0287     assert(abs(delta_t)&lt;timetol,&quot;rois overlap by <span class="comment">%f &gt; tolerance = %f correct or increase tolerance&quot;,delta_t,timetol);</span>
+0288 
+0289     <span class="keyword">if</span> abs(delta_s_int - delta_s) &lt; timetol*Fs/skipFactor
+0290       <span class="keyword">if</span> ismember(discontinuous,{<span class="string">'warn'</span>})
+0291         warning(&quot;concatenating discontinous files <span class="comment">%i samples added&quot;,delta_s_int);</span>
+0292       <span class="keyword">end</span>
+0293       <span class="keyword">if</span> ~dryrun             
+0294         <span class="comment">%zero padding the end of the previous raw</span>
+0295         starts = raw.time{1}(1) - 0.5*skipFactor/Fs;
+0296         ends = next_time(1) + 0.5*skipFactor/Fs;
+0297         [raw, ~, post] = <a href="../../bml/signal/bml_pad.html" class="code" title="function [padded, presamples, postsamples] = bml_pad(raw, starts, ends, padval)">bml_pad</a>(raw,starts,ends,padval);
+0298         
+0299         <span class="comment">%correcting raw mapping due to zero padding</span>
+0300         <span class="comment">%the starts of next file in raw coordinates is delayed by post</span>
+0301         row.raw1=max(file_raw_map.raw2)+1+post;
+0302         row.raw2=floor((e-s)/skipFactor)+row.raw1;
+0303       <span class="keyword">else</span>
+0304         time = [time,time(end)+(1:delta_s_int)*skipFactor/Fs];
+0305       <span class="keyword">end</span>
+0306     <span class="keyword">else</span>
+0307         roi
+0308       error(&quot;can't concatenate discontinuous files with sample snap error of <span class="comment">%f seconds within timetol of %f seconds&quot;,...</span>
+0309         abs(delta_s_int - delta_s)*skipFactor/Fs, timetol);
+0310     <span class="keyword">end</span> 
 0311   <span class="keyword">end</span>
-0312   
-0313   file_raw_map = [file_raw_map;row];
-0314 <span class="keyword">end</span>
-0315 
-0316 <span class="keyword">if</span> dryrun
-0317   raw = [];
-0318 <span class="keyword">elseif</span> ~isempty(electrode)
-0319   <span class="comment">%changing labels from channels to electrodes</span>
-0320     raw.label = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(raw.label,electrode.channel,electrode.electrode);
-0321 <span class="keyword">end</span>
-0322 
-0323 file_raw_map = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(file_raw_map);
-0324 
-0325 
+0312     
+0313   <span class="keyword">if</span> ~dryrun
+0314     cfg1=[]; 
+0315     cfg1.timetol = timetol; 
+0316     cfg1.timeref = <span class="string">'common'</span>;
+0317     cfg1.match_labels = match_labels;
+0318     raw = <a href="../../bml/signal/bml_hstack.html" class="code" title="function [data] = bml_hstack(cfg, varargin)">bml_hstack</a>(cfg1, raw, next_raw);
+0319     time = raw.time{1};
+0320   <span class="keyword">else</span>
+0321     time = [time next_time];
+0322   <span class="keyword">end</span>
+0323   
+0324   file_raw_map = [file_raw_map;row];
+0325 <span class="keyword">end</span>
 0326 
-0327</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0327 <span class="keyword">if</span> dryrun
+0328   raw = [];
+0329 <span class="keyword">elseif</span> ~isempty(electrode)
+0330   <span class="comment">%changing labels from channels to electrodes</span>
+0331   new_label = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(raw.label,electrode.channel,electrode.electrode,<span class="string">'NA'</span>);
+0332   new_label(strcmp(new_label,<span class="string">'NA'</span>)) = raw.label(strcmp(new_label,<span class="string">'NA'</span>));
+0333   raw.label = new_label; 
+0334 <span class="keyword">end</span>
+0335 
+0336 file_raw_map = <a href="../../bml/annot/bml_roi_table.html" class="code" title="function roi=bml_roi_table(x, description, x_var_name)">bml_roi_table</a>(file_raw_map);
+0337 
+0338 
+0339 
+0340</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -65,7 +65,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../../matlabicon.gif)">
-<li><a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data)">bml_apply</a>	BML_APPLY applies a function to the data of each trial</li><li><a href="../../bml/utils/bml_comavgref_matrix.html" class="code" title="function U=bml_comavgref_matrix(n,alpha)">bml_comavgref_matrix</a>	BML_COMAVGREF_MATRIX creates a common average referencing matrix</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_locavgref_matrix.html" class="code" title="function U=bml_locavgref_matrix(n,alpha)">bml_locavgref_matrix</a>	BML_LOCAVGREF_MATRIX creates a local average referencing matrix</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li><li><a href="../../bml/utils/bml_varavgref_matrix.html" class="code" title="function U=bml_varavgref_matrix(COV)">bml_varavgref_matrix</a>	BML_VARAVGREF_MATRIX creates a variable average referencing matrix</li></ul>
+<li><a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data, varargin)">bml_apply</a>	BML_APPLY applies a function to the data of each trial</li><li><a href="../../bml/utils/bml_comavgref_matrix.html" class="code" title="function U=bml_comavgref_matrix(n,alpha)">bml_comavgref_matrix</a>	BML_COMAVGREF_MATRIX creates a common average referencing matrix</li><li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_getopt_single.html" class="code" title="function val = bml_getopt_single(varargin)">bml_getopt_single</a>	BML_GETOPT_SINGLE gets a single value from a configuration structure [internal]</li><li><a href="../../bml/utils/bml_locavgref_matrix.html" class="code" title="function U=bml_locavgref_matrix(n,alpha)">bml_locavgref_matrix</a>	BML_LOCAVGREF_MATRIX creates a local average referencing matrix</li><li><a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>	BML_MAP maps elements based on given domain and codomain</li><li><a href="../../bml/utils/bml_varavgref_matrix.html" class="code" title="function U=bml_varavgref_matrix(COV)">bml_varavgref_matrix</a>	BML_VARAVGREF_MATRIX creates a variable average referencing matrix</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../../matlabicon.gif)">
 </ul>
@@ -122,185 +122,205 @@ This function is called by:
 0046 <span class="comment">%checking for NaNs in data</span>
 0047 raw_has_nan = any(cellfun(@(x) any(any(isnan(x),1),2),raw.trial));
 0048 
-0049 <span class="comment">%inferring groups from labels</span>
-0050 <span class="keyword">if</span> isempty(group)
-0051   sl=split(label,<span class="string">'_'</span>);
-0052   sl=sl(:,1);
-0053   usl=unique(sl);
-0054   group = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(sl,usl,1:length(usl));
-0055 <span class="keyword">end</span>
-0056 
-0057 <span class="comment">%assigning orphan raw labels to null group</span>
-0058 in=ismember(raw.label,label);
-0059 <span class="keyword">if</span> ~all(in)
-0060   label = [label;raw.label(~in)];
-0061   group = [group; zeros(sum(~in),1)];
-0062 <span class="keyword">end</span>
-0063 
-0064 <span class="comment">%re-ordering group to match raw.label</span>
-0065 assert(length(group)==length(label),<span class="string">'cfg.label and cfg.group should be of same length'</span>);
-0066 group = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(raw.label,label,group);
-0067 label = raw.label;
-0068 
-0069 <span class="comment">%creating null group</span>
-0070 group(ismissing(group))=0;
-0071 group(group&lt;=0)=0;
-0072 g0 = sum(group&lt;=0);
-0073 
-0074 <span class="comment">%keeping original order</span>
-0075 [g,g_idx]=sort(group);
-0076 ug = unique(g);
-0077 [N,~] = histc(g,ug);
-0078 
-0079 <span class="keyword">if</span> ~raw_has_nan &amp;&amp; ismember(method,{<span class="string">'CAR'</span>,<span class="string">'LAR'</span>,<span class="string">'VAR'</span>})
-0080   <span class="comment">%creating blocks</span>
-0081   <span class="keyword">if</span> ismember(method,{<span class="string">'CAR'</span>})
-0082     U_blocks=cellfun(@<a href="../../bml/utils/bml_comavgref_matrix.html" class="code" title="function U=bml_comavgref_matrix(n,alpha)">bml_comavgref_matrix</a>,num2cell(N),<span class="string">'UniformOutput'</span>,false);
-0083   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>})
-0084     U_blocks=cellfun(@<a href="../../bml/utils/bml_locavgref_matrix.html" class="code" title="function U=bml_locavgref_matrix(n,alpha)">bml_locavgref_matrix</a>,num2cell(N),<span class="string">'UniformOutput'</span>,false);
-0085   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>})
-0086     warning(<span class="string">'Using experimental method VAR, susceptible to high amplitude artifacts'</span>)
-0087 
-0088     <span class="comment">%calculating variance-covariance matrix</span>
-0089     cfg1=[];
-0090     cfg1.covariance = <span class="string">'yes'</span>;
-0091     cfg1.vartrllength = 2;
-0092     tl_raw=ft_timelockanalysis(cfg1,raw);
-0093 
-0094     <span class="comment">%grouping matrix into blocks</span>
-0095     COVs = cell(length(ug),1);
-0096     <span class="keyword">for</span> i=1:length(ug)
-0097       COVs{i,1}=tl_raw.cov(g_idx(g==ug(i)),g_idx(g==ug(i)));
-0098     <span class="keyword">end</span>
-0099 
-0100     <span class="comment">%creating blocks</span>
-0101     U_blocks=cellfun(@<a href="../../bml/utils/bml_varavgref_matrix.html" class="code" title="function U=bml_varavgref_matrix(COV)">bml_varavgref_matrix</a>,COVs,<span class="string">'UniformOutput'</span>,false);
-0102 
-0103   <span class="keyword">else</span>
-0104     error(<span class="string">'unknown method'</span>)
-0105   <span class="keyword">end</span>
-0106 
-0107   <span class="comment">%replacing block by identity for null group</span>
-0108   <span class="keyword">if</span> g0 &gt; 0
-0109     U_blocks{1} = eye(N(1));
+0049 assert(size(label,1)&gt;=size(label,2),&quot;label cell array should be Nx1, not 1xN&quot;)
+0050 
+0051 <span class="comment">%inferring groups from labels</span>
+0052 <span class="keyword">if</span> isempty(group)
+0053   sl=split(label,<span class="string">'_'</span>);
+0054   sl=sl(:,1);
+0055   usl=unique(sl);
+0056   group = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(sl,usl,1:length(usl));
+0057 <span class="keyword">end</span>
+0058 
+0059 <span class="comment">%assigning orphan raw labels to null group</span>
+0060 in=ismember(raw.label,label);
+0061 <span class="keyword">if</span> ~all(in)
+0062   label = [label;raw.label(~in)];
+0063   group = [group; zeros(sum(~in),1)];
+0064 <span class="keyword">end</span>
+0065 
+0066 <span class="comment">%re-ordering group to match raw.label</span>
+0067 assert(length(group)==length(label),<span class="string">'cfg.label and cfg.group should be of same length'</span>);
+0068 group = <a href="../../bml/utils/bml_map.html" class="code" title="function mapped = bml_map(element,domain,codomain,non_domain)">bml_map</a>(raw.label,label,group);
+0069 label = raw.label;
+0070 
+0071 <span class="comment">%creating null group</span>
+0072 group(ismissing(group))=0;
+0073 group(group&lt;=0)=0;
+0074 g0 = sum(group&lt;=0);
+0075 
+0076 <span class="comment">%keeping original order</span>
+0077 [g,g_idx]=sort(group);
+0078 ug = unique(g);
+0079 [N,~] = histc(g,ug);
+0080 
+0081 <span class="keyword">if</span> ~raw_has_nan &amp;&amp; ismember(method,{<span class="string">'CAR'</span>,<span class="string">'LAR'</span>,<span class="string">'VAR'</span>})
+0082   
+0083   <span class="comment">%% matrix multiplication based methods</span>
+0084     
+0085   <span class="comment">%creating blocks</span>
+0086   <span class="keyword">if</span> ismember(method,{<span class="string">'CAR'</span>})
+0087     U_blocks=cellfun(@<a href="../../bml/utils/bml_comavgref_matrix.html" class="code" title="function U=bml_comavgref_matrix(n,alpha)">bml_comavgref_matrix</a>,num2cell(N),<span class="string">'UniformOutput'</span>,false);
+0088   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>})
+0089     U_blocks=cellfun(@<a href="../../bml/utils/bml_locavgref_matrix.html" class="code" title="function U=bml_locavgref_matrix(n,alpha)">bml_locavgref_matrix</a>,num2cell(N),<span class="string">'UniformOutput'</span>,false);
+0090   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>})
+0091     warning(<span class="string">'Using experimental method VAR, susceptible to high amplitude artifacts'</span>)
+0092 
+0093     <span class="comment">%calculating variance-covariance matrix</span>
+0094     cfg1=[];
+0095     cfg1.covariance = <span class="string">'yes'</span>;
+0096     cfg1.vartrllength = 2;
+0097     tl_raw=ft_timelockanalysis(cfg1,raw);
+0098 
+0099     <span class="comment">%grouping matrix into blocks</span>
+0100     COVs = cell(length(ug),1);
+0101     <span class="keyword">for</span> i=1:length(ug)
+0102       COVs{i,1}=tl_raw.cov(g_idx(g==ug(i)),g_idx(g==ug(i)));
+0103     <span class="keyword">end</span>
+0104 
+0105     <span class="comment">%creating blocks</span>
+0106     U_blocks=cellfun(@<a href="../../bml/utils/bml_varavgref_matrix.html" class="code" title="function U=bml_varavgref_matrix(COV)">bml_varavgref_matrix</a>,COVs,<span class="string">'UniformOutput'</span>,false);
+0107 
+0108   <span class="keyword">else</span>
+0109     error(<span class="string">'unknown method'</span>)
 0110   <span class="keyword">end</span>
 0111 
-0112   <span class="comment">%joining blocks</span>
-0113   U = blkdiag(U_blocks{:});
-0114   U(g_idx,g_idx) = U;
-0115   <span class="comment">%image(U,'CDataMapping','scaled')</span>
+0112   <span class="comment">%replacing block by identity for null group</span>
+0113   <span class="keyword">if</span> g0 &gt; 0
+0114     U_blocks{1} = eye(N(1));
+0115   <span class="keyword">end</span>
 0116 
-0117   <span class="comment">%applying unmixing matrix to data</span>
-0118   ref = <a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data)">bml_apply</a>(@(x) U*x, raw);
-0119 
-0120 <span class="keyword">else</span>
-0121   <span class="comment">%removing null group</span>
-0122   ug = ug(ug&gt;0);
-0123   
-0124   <span class="keyword">if</span> ismember(method,{<span class="string">'CAR'</span>,<span class="string">'common'</span>}) <span class="comment">%common average referencing</span>
-0125     ref = raw;
-0126     <span class="keyword">for</span> t=1:numel(raw.trial)
-0127       <span class="keyword">for</span> g=1:numel(ug)
-0128         <span class="comment">%calculating groups common average</span>
-0129         commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
-0130         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
-0131       <span class="keyword">end</span>
-0132     <span class="keyword">end</span>
-0133     
-0134   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CARCF'</span>}) <span class="comment">%common average referencing with cross fading</span>
-0135     cfp = linspace(0,1,ceil(crossfading_width/2)); <span class="comment">%crossfading pattern</span>
-0136     cfp = [cfp, fliplr(cfp(2:end))]; 
-0137     cfp = cfp ./ sum(cfp);
-0138     cfr = ones(size(cfp)); <span class="comment">%crossfading region</span>
-0139     cfr = cfr ./ sum(cfr);
-0140     
-0141     ref = raw;
-0142     <span class="keyword">for</span> t=1:numel(raw.trial)
-0143       <span class="comment">%get nan mask</span>
-0144       cf_weights = isnan(raw.trial{t});
-0145       
-0146       <span class="comment">%implementing justification of crossfading by extending nan mask</span>
-0147       cf_weights = convn(cf_weights, cfr, <span class="string">'same'</span>);
-0148       cf_weights = cf_weights &gt; 0;
-0149 
-0150       <span class="comment">%calculating crossfading weights</span>
-0151       cf_weights = 1 - convn(cf_weights, cfp, <span class="string">'same'</span>);
-0152       
-0153       <span class="keyword">for</span> g=1:numel(ug)
-0154         <span class="comment">%calculating groups common average</span>
-0155         tr = raw.trial{t}(group==ug(g),:);
-0156         tr(isnan(tr)) = 0;
-0157         tw = cf_weights(group==ug(g),:);
-0158         commavg = sum(tr .* tw,1) ./ sum(tw,1);
-0159         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
-0160       <span class="keyword">end</span>
-0161     <span class="keyword">end</span>
-0162     
-0163   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CMR'</span>})
-0164     ref = raw;
-0165     <span class="keyword">for</span> t=1:numel(raw.trial)
-0166       <span class="keyword">for</span> g=1:numel(ug)
-0167         <span class="comment">%calculating groups common median</span>
-0168         commmed = nanmedian(raw.trial{t}(group==ug(g),:),1);
-0169         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
-0170       <span class="keyword">end</span>
-0171     <span class="keyword">end</span>   
-0172     
-0173   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CTAR'</span>})
-0174     ref = raw;
-0175     <span class="keyword">for</span> t=1:numel(raw.trial)
-0176       <span class="keyword">for</span> g=1:numel(ug)
-0177         <span class="comment">%calculating groups common trimmed average</span>
-0178         commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
-0179         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
-0180       <span class="keyword">end</span>
-0181     <span class="keyword">end</span>   
-0182     
-0183   <span class="keyword">elseif</span> ismember(method,{<span class="string">'bipolar'</span>})
-0184     <span class="comment">%loading label again from cfg</span>
-0185     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
-0186     refchan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan'</span>,[]); 
-0187     
-0188     <span class="comment">%defining reference for each channel to be re-referenced</span>
-0189     <span class="keyword">if</span> isempty(refchan)
-0190       error(<span class="string">'reference channel(s) required for bipolar referencing'</span>)
-0191     <span class="keyword">elseif</span> numel(refchan)==1
-0192       reftable = table(label);
-0193       reftable.reference(:) = refchan;
-0194     <span class="keyword">elseif</span> numel(refchan) == numel(label)
-0195       reftable = table(label);
-0196       reftable.reference = refchan;
-0197     <span class="keyword">else</span>
-0198       error(<span class="string">'refchan should have one element, or same number of elements as label'</span>);
-0199     <span class="keyword">end</span>
-0200     
-0201     ref = raw;
-0202     <span class="keyword">for</span> t=1:numel(raw.trial)
-0203       <span class="keyword">for</span> j=1:height(reftable)
-0204         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
-0205           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
-0206           raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
-0207       <span class="keyword">end</span>
-0208     <span class="keyword">end</span>  
-0209     
-0210     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
-0211       <span class="comment">%removing reference channels</span>
-0212       cfg1=[];
-0213       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-0214       ref = ft_selectdata(cfg1, ref);
-0215     <span class="keyword">end</span>
-0216     
-0217   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>,<span class="string">'local'</span>})
-0218     error(<span class="string">'local average referencing not implemented for data with NaNs'</span>)
-0219   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>,<span class="string">'variable'</span>})
-0220     error(<span class="string">'variable average referencing not implemented for data with NaNs'</span>)
-0221   <span class="keyword">else</span>
-0222     error(<span class="string">'unknown method'</span>)
-0223   <span class="keyword">end</span>
-0224 <span class="keyword">end</span>
-0225 
-0226 
-0227</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0117   <span class="comment">%joining blocks</span>
+0118   U = blkdiag(U_blocks{:});
+0119   U(g_idx,g_idx) = U;
+0120   <span class="comment">%image(U,'CDataMapping','scaled')</span>
+0121 
+0122   <span class="comment">%applying unmixing matrix to data</span>
+0123   ref = <a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data, varargin)">bml_apply</a>(@(x) U*x, raw);
+0124 
+0125 <span class="keyword">else</span>
+0126   
+0127   <span class="comment">%% explicit substraction based methods</span>
+0128     
+0129   <span class="comment">%removing null group</span>
+0130   ug = ug(ug&gt;0);
+0131   
+0132   <span class="comment">%% Common Average Reference</span>
+0133   <span class="keyword">if</span> ismember(method,{<span class="string">'CAR'</span>,<span class="string">'common'</span>}) <span class="comment">%common average referencing</span>
+0134     ref = raw;
+0135     <span class="keyword">for</span> t=1:numel(raw.trial)
+0136       <span class="keyword">for</span> g=1:numel(ug)
+0137         <span class="comment">%calculating groups common average</span>
+0138         commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
+0139         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
+0140       <span class="keyword">end</span>
+0141     <span class="keyword">end</span>
+0142     
+0143   <span class="comment">%% Common Trimmed Average Reference</span>
+0144   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CTAR'</span>})
+0145     ref = raw;
+0146     <span class="keyword">for</span> t=1:numel(raw.trial)
+0147       <span class="keyword">for</span> g=1:numel(ug)
+0148         <span class="comment">%calculating groups common trimmed average</span>
+0149         commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
+0150         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
+0151       <span class="keyword">end</span>
+0152     <span class="keyword">end</span>  
+0153     
+0154   <span class="comment">%% Common Average Reference with Cross-Fading</span>
+0155   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CARCF'</span>}) <span class="comment">%common average referencing with cross fading</span>
+0156     cfp = linspace(0,1,ceil(crossfading_width/2)); <span class="comment">%crossfading pattern</span>
+0157     cfp = [cfp, fliplr(cfp(2:end))]; 
+0158     cfp = cfp ./ sum(cfp);
+0159     cfr = ones(size(cfp)); <span class="comment">%crossfading region</span>
+0160     cfr = cfr ./ sum(cfr);
+0161     
+0162     ref = raw;
+0163     <span class="keyword">for</span> t=1:numel(raw.trial)
+0164       <span class="comment">%get nan mask</span>
+0165       cf_weights = isnan(raw.trial{t});
+0166       
+0167       <span class="comment">%implementing justification of crossfading by extending nan mask</span>
+0168       cf_weights = convn(cf_weights, cfr, <span class="string">'same'</span>);
+0169       cf_weights = cf_weights &gt; 0;
+0170 
+0171       <span class="comment">%calculating crossfading weights</span>
+0172       cf_weights = 1 - convn(cf_weights, cfp, <span class="string">'same'</span>);
+0173       
+0174       <span class="keyword">for</span> g=1:numel(ug)
+0175         <span class="comment">%calculating groups common average</span>
+0176         tr = raw.trial{t}(group==ug(g),:);
+0177         tr(isnan(tr)) = 0;
+0178         tw = cf_weights(group==ug(g),:);
+0179         commavg = sum(tr .* tw,1) ./ sum(tw,1);
+0180         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
+0181       <span class="keyword">end</span>
+0182     <span class="keyword">end</span> 
+0183     
+0184  
+0185     
+0186      <span class="comment">%% Common Median Reference</span>
+0187   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CMR'</span>})
+0188     ref = raw;
+0189     <span class="keyword">for</span> t=1:numel(raw.trial)
+0190       <span class="keyword">for</span> g=1:numel(ug)
+0191         <span class="comment">%calculating groups common median</span>
+0192         commmed = nanmedian(raw.trial{t}(group==ug(g),:),1);
+0193         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
+0194       <span class="keyword">end</span>
+0195     <span class="keyword">end</span>  
+0196     
+0197   <span class="comment">%% Bipolar Reference</span>
+0198   <span class="keyword">elseif</span> ismember(method,{<span class="string">'bipolar'</span>})
+0199     <span class="comment">%loading label again from cfg</span>
+0200     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
+0201     refchan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan'</span>,[]); 
+0202     
+0203     <span class="comment">%defining reference for each channel to be re-referenced</span>
+0204     <span class="keyword">if</span> isempty(refchan)
+0205       error(<span class="string">'reference channel(s) required for bipolar referencing'</span>)
+0206     <span class="keyword">elseif</span> numel(refchan)==1
+0207       reftable = table(label);
+0208       reftable.reference(:) = refchan;
+0209     <span class="keyword">elseif</span> numel(refchan) == numel(label)
+0210       reftable = table(label);
+0211       reftable.reference = refchan;
+0212     <span class="keyword">else</span>
+0213       error(<span class="string">'refchan should have one element, or same number of elements as label'</span>);
+0214     <span class="keyword">end</span>
+0215     
+0216     ref = raw;
+0217     
+0218     <span class="keyword">for</span> t=1:numel(raw.trial)
+0219       <span class="keyword">for</span> j=1:height(reftable)
+0220         ridx=find(ismember(raw.label,reftable.reference(j)));
+0221         <span class="keyword">if</span> isempty(ridx)
+0222             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
+0223         <span class="keyword">end</span> 
+0224         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
+0225           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
+0226           raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
+0227       <span class="keyword">end</span>
+0228     <span class="keyword">end</span>  
+0229     
+0230     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
+0231       <span class="comment">%removing reference channels</span>
+0232       cfg1=[];
+0233       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+0234       ref = ft_selectdata(cfg1, ref);
+0235     <span class="keyword">end</span>
+0236     
+0237   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>,<span class="string">'local'</span>})
+0238     error(<span class="string">'local average referencing not implemented for data with NaNs'</span>)
+0239   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>,<span class="string">'variable'</span>})
+0240     error(<span class="string">'variable average referencing not implemented for data with NaNs'</span>)
+0241   <span class="keyword">else</span>
+0242     error(<span class="string">'unknown method'</span>)
+0243   <span class="keyword">end</span>
+0244 <span class="keyword">end</span>
+0245 
+0246 
+0247</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

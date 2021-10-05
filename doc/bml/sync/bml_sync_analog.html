@@ -34,7 +34,7 @@
 
  cfg - configuration structure (required fields)
    cfg.roi - roi table with vars 'id','starts','ends','folder','name',
-            'nSamples','filetype'. Contains a coarse alignment of the
+            'nSamples','filetype','Fs'. Contains a coarse alignment of the
             files, normally inferred from the OS 'Date-Modified' metadata.
             'starts' and 'ends' should be given in seconds from midnight.
    cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'
@@ -153,7 +153,7 @@ This function is called by:
 0007 <span class="comment">%</span>
 0008 <span class="comment">% cfg - configuration structure (required fields)</span>
 0009 <span class="comment">%   cfg.roi - roi table with vars 'id','starts','ends','folder','name',</span>
-0010 <span class="comment">%            'nSamples','filetype'. Contains a coarse alignment of the</span>
+0010 <span class="comment">%            'nSamples','filetype','Fs'. Contains a coarse alignment of the</span>
 0011 <span class="comment">%            files, normally inferred from the OS 'Date-Modified' metadata.</span>
 0012 <span class="comment">%            'starts' and 'ends' should be given in seconds from midnight.</span>
 0013 <span class="comment">%   cfg.sync_channels - table with vars 'filetype', 'channel', 'chantype'</span>
@@ -536,6 +536,6 @@ This function is called by:
 0390 
 0391 
 0392</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

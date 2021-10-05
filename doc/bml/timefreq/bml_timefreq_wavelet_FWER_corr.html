@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bml_timefreq_wavelet_FWER_corr</title>
+  <meta name="keywords" content="bml_timefreq_wavelet_FWER_corr">
+  <meta name="description" content="BML_TIMEFRQ_WAVELET_FWER_CORR estimates number of independent comparisons in a time frequency analysis">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">timefreq</a> &gt; bml_timefreq_wavelet_FWER_corr.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for bml\timefreq&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>bml_timefreq_wavelet_FWER_corr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>BML_TIMEFRQ_WAVELET_FWER_CORR estimates number of independent comparisons in a time frequency analysis</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [alpha, n_comp] = bml_timefreq_wavelet_FWER_corr(cfg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BML_TIMEFRQ_WAVELET_FWER_CORR estimates number of independent comparisons in a time frequency analysis
+
+ Parameters
+   cfg.foi - vector with frequencies of interest
+   cfg.toi - vector with times of interest
+   cfg.width - width of wavlet (fixed for all freqs). Defaults to 7.
+   cfg.fwer - family wise error rate. Defaults to 0.05
+
+ Returns
+   alpha - significance threshold for uncorrected pvalues
+   n_comp - Estimated number of independent components</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>	BML_GETOPT gets the value from a configuration structure [internal]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [alpha, n_comp] = bml_timefreq_wavelet_FWER_corr(cfg)</a>
+0002 <span class="comment">% BML_TIMEFRQ_WAVELET_FWER_CORR estimates number of independent comparisons in a time frequency analysis</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Parameters</span>
+0005 <span class="comment">%   cfg.foi - vector with frequencies of interest</span>
+0006 <span class="comment">%   cfg.toi - vector with times of interest</span>
+0007 <span class="comment">%   cfg.width - width of wavlet (fixed for all freqs). Defaults to 7.</span>
+0008 <span class="comment">%   cfg.fwer - family wise error rate. Defaults to 0.05</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Returns</span>
+0011 <span class="comment">%   alpha - significance threshold for uncorrected pvalues</span>
+0012 <span class="comment">%   n_comp - Estimated number of independent components</span>
+0013 
+0014 method = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'method'</span>,<span class="string">'wavelet'</span>);
+0015 <span class="keyword">if</span> ~strcmp(method, <span class="string">'wavelet'</span>)
+0016   error(<span class="string">'only method = wavelet supported'</span>);
+0017 <span class="keyword">end</span>
+0018 
+0019 foi = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'foi'</span>,[]);
+0020 toi = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'toi'</span>,[]);
+0021 w   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'width'</span>,7);
+0022 fwer = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'fwer'</span>,0.05);
+0023 
+0024 dt=0.01;
+0025 df=0.1;
+0026 tbuff = 3 ./ min(foi);
+0027 tv = min(toi)-tbuff + dt .* (0:ceil((range(toi) + 1.2.* tbuff) ./ dt));
+0028 fv = df .* (1:ceil(max(foi).*2/df));
+0029 
+0030 
+0031 <span class="comment">%heuristic brute force approach</span>
+0032 count_v=[];
+0033 tfm = zeros(length(fv),length(tv));
+0034 <span class="keyword">for</span> t0i=1:3
+0035   t0 = toi(t0i);
+0036   fprintf(<span class="string">'time %i '</span>,t0i);
+0037   count = 0;
+0038   <span class="keyword">for</span> f0i=1:length(foi)
+0039     f0 = foi(f0i);
+0040     psf_t = exp( (-2 .* f0.^2 .* pi.^2 .* (tv - t0).^2) ./ w.^2);
+0041     psf_f = exp( -((fv - f0).^2 .* w.^2)/(2 .* f0.^2));
+0042     psf1 =  psf_f' * psf_t;
+0043     psf2 = psf1 - tfm;
+0044     psf2(psf2&lt;0)=0;
+0045     count = count + sum(sum(psf2,2),1)*dt*df;
+0046     tfm = tfm + psf2;
+0047   <span class="keyword">end</span>
+0048   count_v = [count_v, count];
+0049   fprintf(<span class="string">'count = %f \n'</span>, count);
+0050 <span class="keyword">end</span>
+0051 fprintf(<span class="string">'assuming additional %i times increment the count by the same amount'</span>,length(toi)-1);
+0052 n_comp = ceil(count_v(1) + count_v(2) .* (length(toi)-1));
+0053 alpha = fwer/n_comp;</pre></div>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

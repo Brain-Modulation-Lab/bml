@@ -95,7 +95,7 @@ This function is called by:
 0036 
 0037 idx = round((t2*s1-s2*t1+(s2-s1).*round(time,pTT))/(t2-t1));
 0038 
-0039 <span class="keyword">if</span> any(idx&lt;=0); error(<span class="string">'negative index'</span>); <span class="keyword">end</span>
+0039 <span class="comment">%if any(idx&lt;=0); error('negative index'); end</span>
 0040 <span class="keyword">if</span> ~isempty(nSamples)
 0041   <span class="keyword">if</span> any(idx&gt;nSamples); error(<span class="string">'index exceeds number of samples in file'</span>); <span class="keyword">end</span>
 0042 <span class="keyword">end</span>
@@ -103,6 +103,6 @@ This function is called by:
 0044   
 0045   
 0046</pre></div>
-<hr><address>Generated on Tue 12-May-2020 15:55:12 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
