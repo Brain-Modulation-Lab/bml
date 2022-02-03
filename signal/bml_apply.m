@@ -16,7 +16,7 @@ if nargin==2
     data.trial{i} = fun(data.trial{i});
   end
 else
-	for i=1:numel(data.trial)
+  for i=1:numel(data.trial)
     data.trial{i} = fun(data.trial{i},varargin{:});
   end
 end
