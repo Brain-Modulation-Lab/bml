@@ -78,7 +78,7 @@ g0 = sum(group<=0);
 ug = unique(g);
 [N,~] = histc(g,ug);
 
-if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
+if ~raw_has_nan && ismember(method,{'LAR','VAR'})
   
   %% matrix multiplication based methods  
     
