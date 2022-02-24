@@ -7,7 +7,8 @@ function Fs = bml_getFs(cfg, raw)
 %   Fs = bml_getFs(raw)
 %
 % cfg - configuration structure with fields
-% cfg.tolerance
+% cfg.timetol - tolerance in absolute time (s)
+% cfg.reltimetol - tolerance in relative time 
 % raw - ft_datatype_raw object
 %
 % returns a double with the sampling rate
@@ -18,7 +19,7 @@ if ~exist('raw','var')
 end
 
 timetol = bml_getopt(cfg,'timetol',1e-9);
-reltimetol = bml_getopt(cfg,'reltimetol',1e-6);
+reltimetol = bml_getopt(cfg,'reltimetol',1e-4);
 freqsignif = bml_getopt(cfg,'freqsignif',4);
 
 %checking within trial consistency
