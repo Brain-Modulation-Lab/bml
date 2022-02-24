@@ -193,6 +193,47 @@ else
         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
       end
     end  
+
+  %% Laplacian Reference
+  elseif ismember(method,{'laplacian'})
+    %loading label again from cfg
+    label   = bml_getopt(cfg,'label',raw.label);
+    refchan1 = bml_getopt(cfg,'refchan1',[]); 
+    refchan2 = bml_getopt(cfg,'refchan1',[]); 
+    %defining reference for each channel to be re-referenced
+    if isempty(refchan1)
+      error('reference channel(s) required for bipolar referencing')
+    elseif numel(refchan1) == numel(label)
+      reftable = table(label);
+      reftable.reference1 = refchan1;
+      reftable.reference2 = refchan2;
+    else
+      error('refchan should have one element, or same number of elements as label');
+    end
+    
+    ref = raw;
+    
+    for t=1:numel(raw.trial)
+      for j=1:height(reftable)
+        ridx=find(ismember(raw.label,reftable.reference1(j)));
+        if isempty(ridx)
+            error('refchan %s not available to rereference channel %s',reftable.reference{j},reftable.label{j});
+        end 
+        ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
+          raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - ...
+          (raw.trial{t}(ismember(raw.label,reftable.reference1(j)),:)+raw.trial{t}(ismember(raw.label,reftable.reference2(j)),:)/2);
+      end
+    end  
+    
+    if ~bml_getopt(cfg,'refkeep',0)
+      %removing reference channels
+      cfg1=[];
+      cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+      ref = ft_selectdata(cfg1, ref);
+    end
+
+    
+    
     
   %% Bipolar Reference 
   elseif ismember(method,{'bipolar'})
@@ -233,90 +274,6 @@ else
       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
       ref = ft_selectdata(cfg1, ref);
     end
-    
-    
-  elseif ismember(method,('Average_Electrodes'))
-         %loading label again from cfg
-    label   = bml_getopt(cfg,'label',raw.label);
-    refchan1 = bml_getopt(cfg,'refchan1',[]); 
-    refchan2 = bml_getopt(cfg,'refchan2',[]); 
-    
-    %defining reference for each channel to be re-referenced
-    if isempty(refchan1)
-      error('reference channels required for average monopolar referencing')
-    %elseif numel(refchan)~=2
-     % error('Two reference channels required for average monopolar referencing')
-    else
-      reftable = table(label);
-      reftable.reference1 = refchan1;
-      reftable.reference2 = refchan2
-    end
-    
-    ref = raw;
-    
-    for t=1:numel(raw.trial)
-      for j=1:height(reftable)
-        ridx=find(ismember(raw.label,reftable.reference1(j)));
-        if isempty(ridx)
-            error('refchan %s not available to rereference channel %s',reftable.reference{j},reftable.label{j});
-        end 
-        ridx=find(ismember(raw.label,reftable.reference2(j)));
-        if isempty(ridx)
-            error('refchan %s not available to rereference channel %s',reftable.reference{j},reftable.label{j});
-        end 
-        ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
-          raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - ...
-          mean(raw.trial{t}(ismember(raw.label,reftable.reference1(j)),:),raw.trial{t}(ismember(raw.label,reftable.reference2(j)),:));
-      end
-    end  
-    
-    if ~bml_getopt(cfg,'refkeep',0)
-      %removing reference channels
-      cfg1=[];
-      cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-      ref = ft_selectdata(cfg1, ref);
-    end
- 
-   elseif ismember(method,('Common_White_Average_Electrodes'))
-         %loading label again from cfg
-    label   = bml_getopt(cfg,'label',raw.label);
-    reference = bml_getopt(cfg,'refchan',[]); 
-
-    %defining reference for each channel to be re-referenced
-    if isempty(reference)
-      error('reference channels required for average monopolar referencing')
-    else
-      reftable = table(label);
-    end
-    
-    ref = raw;
-    
-    for t=1:numel(raw.trial)
-     channeltrial=cell(1,height(reference))
-     for k=1:height(reference)
-        channeltrial{1,k}=raw.trial{t}(ismember(raw.label,reference.channel(k)),:)
-     end
-     dim = ndims(channeltrial{1});          %# Get the number of dimensions for your arrays
-     channelmatrix = cat(dim+1,channeltrial{:});        %# Convert to a (dim+1)-dimensional matrix
-     averageref = mean(channelmatrix,dim+1)
- 
-    
-     for j=1:height(reftable)
-        ridx=find(ismember(raw.label,reftable.label(j)));
-        ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
-          raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - averageref
-      end
-    end  
-    
-    if ~bml_getopt(cfg,'refkeep',0)
-      %removing reference channels
-      cfg1=[];
-      cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-      ref = ft_selectdata(cfg1, ref);
-    end
-
-    
-    
     
   elseif ismember(method,{'LAR','local'})
     error('local average referencing not implemented for data with NaNs')

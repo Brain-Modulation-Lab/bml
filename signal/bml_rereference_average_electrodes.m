@@ -122,8 +122,6 @@ if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
   %applying unmixing matrix to data
   ref = bml_apply(@(x) U*x, raw);
 
-else
-  
   %% explicit substraction based methods
     
   %removing null group 
@@ -133,12 +131,13 @@ else
   if ismember(method,{'CAR','common'}) %common average referencing
     ref = raw;
     for t=1:numel(raw.trial)
-      for g=1:numel(ug)
-        %calculating groups common average
-        commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
-        ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
+        commavg = nanmean(raw.trial{t}(:,:),1);
+        for g=1:numel(ug)
+        %calculating common average
+        ref.trial{t}(g,:) = raw.trial{t}(g,:) - commavg;
       end
-    end
+    end  
+    
     
   %% Common Trimmed Average Reference 
   elseif ismember(method,{'CTAR'})
