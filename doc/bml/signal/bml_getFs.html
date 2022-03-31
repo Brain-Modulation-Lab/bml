@@ -34,7 +34,8 @@
    Fs = bml_getFs(raw)
 
  cfg - configuration structure with fields
- cfg.tolerance
+ cfg.timetol - tolerance in absolute time (s)
+ cfg.reltimetol - tolerance in relative time 
  raw - ft_datatype_raw object
 
  returns a double with the sampling rate</pre></div>
@@ -61,54 +62,54 @@ This function is called by:
 0007 <span class="comment">%   Fs = bml_getFs(raw)</span>
 0008 <span class="comment">%</span>
 0009 <span class="comment">% cfg - configuration structure with fields</span>
-0010 <span class="comment">% cfg.tolerance</span>
-0011 <span class="comment">% raw - ft_datatype_raw object</span>
-0012 <span class="comment">%</span>
-0013 <span class="comment">% returns a double with the sampling rate</span>
-0014 
-0015 <span class="keyword">if</span> ~exist(<span class="string">'raw'</span>,<span class="string">'var'</span>)  
-0016   raw=cfg;
-0017   cfg=[];
-0018 <span class="keyword">end</span>
-0019 
-0020 timetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-9);
-0021 reltimetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'reltimetol'</span>,1e-6);
-0022 freqsignif = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'freqsignif'</span>,4);
-0023 
-0024 <span class="comment">%checking within trial consistency</span>
-0025 timetol_offenders = [];
-0026 reltimetol_offenders = [];
-0027 median_dt = nan(1,length(raw.time));
-0028 <span class="keyword">for</span> t=1:length(raw.time)
-0029   dts = diff(raw.time{t});
-0030   median_dt(t)=median(dts);
-0031   <span class="keyword">if</span> range(dts) &gt; timetol
-0032     timetol_offenders = [timetol_offenders, t];
-0033   <span class="keyword">end</span>
-0034     <span class="keyword">if</span> range(dts)/median_dt(t) &gt; reltimetol
-0035     reltimetol_offenders = [reltimetol_offenders, t];
-0036   <span class="keyword">end</span>
-0037 <span class="keyword">end</span>
-0038 
-0039 <span class="keyword">if</span> ~isempty(timetol_offenders)
-0040   warning(&quot;trials <span class="comment">%s don't comply with timetol of %f&quot;,toString(timetol_offenders),timetol)</span>
-0041 <span class="keyword">end</span>
-0042 <span class="keyword">if</span> ~isempty(reltimetol_offenders)
-0043   warning(&quot;trials <span class="comment">%s don't comply with reltimetol of %f&quot;,toString(reltimetol_offenders),reltimetol)</span>
-0044 <span class="keyword">end</span>
-0045 
-0046 mean_median_dt = mean(median_dt);
-0047 
-0048 <span class="comment">%checking across trials consistency</span>
-0049 <span class="keyword">if</span> range(median_dt) &gt; timetol
-0050   warning(&quot;timetol violated across trials&quot;)
-0051 <span class="keyword">end</span>
-0052 <span class="keyword">if</span> range(median_dt)/mean_median_dt &gt; reltimetol
-0053   warning(&quot;reltimetol violated across trials&quot;)
-0054 <span class="keyword">end</span>
-0055 
-0056 Fs = round(1/mean_median_dt,freqsignif,<span class="string">'signif'</span>);
-0057 
+0010 <span class="comment">% cfg.timetol - tolerance in absolute time (s)</span>
+0011 <span class="comment">% cfg.reltimetol - tolerance in relative time</span>
+0012 <span class="comment">% raw - ft_datatype_raw object</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% returns a double with the sampling rate</span>
+0015 
+0016 <span class="keyword">if</span> ~exist(<span class="string">'raw'</span>,<span class="string">'var'</span>)  
+0017   raw=cfg;
+0018   cfg=[];
+0019 <span class="keyword">end</span>
+0020 
+0021 timetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'timetol'</span>,1e-9);
+0022 reltimetol = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'reltimetol'</span>,1e-4);
+0023 freqsignif = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'freqsignif'</span>,4);
+0024 
+0025 <span class="comment">%checking within trial consistency</span>
+0026 timetol_offenders = [];
+0027 reltimetol_offenders = [];
+0028 median_dt = nan(1,length(raw.time));
+0029 <span class="keyword">for</span> t=1:length(raw.time)
+0030   dts = diff(raw.time{t});
+0031   median_dt(t)=median(dts);
+0032   <span class="keyword">if</span> range(dts) &gt; timetol
+0033     timetol_offenders = [timetol_offenders, t];
+0034   <span class="keyword">end</span>
+0035     <span class="keyword">if</span> range(dts)/median_dt(t) &gt; reltimetol
+0036     reltimetol_offenders = [reltimetol_offenders, t];
+0037   <span class="keyword">end</span>
+0038 <span class="keyword">end</span>
+0039 
+0040 <span class="keyword">if</span> ~isempty(timetol_offenders)
+0041   warning(&quot;trials <span class="comment">%s don't comply with timetol of %f&quot;,toString(timetol_offenders),timetol)</span>
+0042 <span class="keyword">end</span>
+0043 <span class="keyword">if</span> ~isempty(reltimetol_offenders)
+0044   warning(&quot;trials <span class="comment">%s don't comply with reltimetol of %f&quot;,toString(reltimetol_offenders),reltimetol)</span>
+0045 <span class="keyword">end</span>
+0046 
+0047 mean_median_dt = mean(median_dt);
+0048 
+0049 <span class="comment">%checking across trials consistency</span>
+0050 <span class="keyword">if</span> range(median_dt) &gt; timetol
+0051   warning(&quot;timetol violated across trials&quot;)
+0052 <span class="keyword">end</span>
+0053 <span class="keyword">if</span> range(median_dt)/mean_median_dt &gt; reltimetol
+0054   warning(&quot;reltimetol violated across trials&quot;)
+0055 <span class="keyword">end</span>
+0056 
+0057 Fs = round(1/mean_median_dt,freqsignif,<span class="string">'signif'</span>);
 0058 
 0059 
 0060 
@@ -117,7 +118,8 @@ This function is called by:
 0063 
 0064 
 0065 
-0066</pre></div>
-<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0066 
+0067</pre></div>
+<hr><address>Generated on Thu 31-Mar-2022 14:53:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

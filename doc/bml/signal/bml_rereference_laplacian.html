@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of bml_reference_average_electrodes</title>
-  <meta name="keywords" content="bml_reference_average_electrodes">
+  <title>Description of bml_rereference_laplacian</title>
+  <meta name="keywords" content="bml_rereference_laplacian">
   <meta name="description" content="BML_REREFERENCE applies re-referencing scheme to raw">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
@@ -12,12 +12,12 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_reference_average_electrodes.m</div>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">signal</a> &gt; bml_rereference_laplacian.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
 <td align="right"><a href="index.html">Index for bml\signal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
-<h1>bml_reference_average_electrodes
+<h1>bml_rereference_laplacian
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
@@ -154,7 +154,7 @@ This function is called by:
 0078 ug = unique(g);
 0079 [N,~] = histc(g,ug);
 0080 
-0081 <span class="keyword">if</span> ~raw_has_nan &amp;&amp; ismember(method,{<span class="string">'LAR'</span>,<span class="string">'VAR'</span>})
+0081 <span class="keyword">if</span> ~raw_has_nan &amp;&amp; ismember(method,{<span class="string">'CAR'</span>,<span class="string">'LAR'</span>,<span class="string">'VAR'</span>})
 0082   
 0083   <span class="comment">%% matrix multiplication based methods</span>
 0084     
@@ -198,8 +198,8 @@ This function is called by:
 0122   <span class="comment">%applying unmixing matrix to data</span>
 0123   ref = <a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data, varargin)">bml_apply</a>(@(x) U*x, raw);
 0124 
-0125 
-0126 <span class="keyword">else</span>  
+0125 <span class="keyword">else</span>
+0126   
 0127   <span class="comment">%% explicit substraction based methods</span>
 0128     
 0129   <span class="comment">%removing null group</span>
@@ -211,7 +211,7 @@ This function is called by:
 0135     <span class="keyword">for</span> t=1:numel(raw.trial)
 0136       <span class="keyword">for</span> g=1:numel(ug)
 0137         <span class="comment">%calculating groups common average</span>
-0138         commavg = nanmean(raw.trial{t}(g,:),1);
+0138         commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
 0139         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
 0140       <span class="keyword">end</span>
 0141     <span class="keyword">end</span>
@@ -269,102 +269,99 @@ This function is called by:
 0193         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
 0194       <span class="keyword">end</span>
 0195     <span class="keyword">end</span>  
-0196     
-0197   <span class="comment">%% Bipolar Reference</span>
-0198   <span class="keyword">elseif</span> ismember(method,{<span class="string">'bipolar'</span>})
+0196 
+0197   <span class="comment">%% Laplacian Reference</span>
+0198   <span class="keyword">elseif</span> ismember(method,{<span class="string">'laplacian'</span>})
 0199     <span class="comment">%loading label again from cfg</span>
 0200     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
-0201     refchan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan'</span>,[]); 
-0202     
+0201     refchan1 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan1'</span>,[]); 
+0202     refchan2 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan1'</span>,[]); 
 0203     <span class="comment">%defining reference for each channel to be re-referenced</span>
-0204     <span class="keyword">if</span> isempty(refchan)
+0204     <span class="keyword">if</span> isempty(refchan1)
 0205       error(<span class="string">'reference channel(s) required for bipolar referencing'</span>)
-0206     <span class="keyword">elseif</span> numel(refchan)==1
+0206     <span class="keyword">elseif</span> numel(refchan1) == numel(label)
 0207       reftable = table(label);
-0208       reftable.reference(:) = refchan;
-0209     <span class="keyword">elseif</span> numel(refchan) == numel(label)
-0210       reftable = table(label);
-0211       reftable.reference = refchan;
-0212     <span class="keyword">else</span>
-0213       error(<span class="string">'refchan should have one element, or same number of elements as label'</span>);
-0214     <span class="keyword">end</span>
+0208       reftable.reference1 = refchan1;
+0209       reftable.reference2 = refchan2;
+0210     <span class="keyword">else</span>
+0211       error(<span class="string">'refchan should have one element, or same number of elements as label'</span>);
+0212     <span class="keyword">end</span>
+0213     
+0214     ref = raw;
 0215     
-0216     ref = raw;
-0217     
-0218     <span class="keyword">for</span> t=1:numel(raw.trial)
-0219       <span class="keyword">for</span> j=1:height(reftable)
-0220         ridx=find(ismember(raw.label,reftable.reference(j)));
-0221         <span class="keyword">if</span> isempty(ridx)
-0222             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
-0223         <span class="keyword">end</span> 
-0224         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
-0225           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
-0226           raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
-0227       <span class="keyword">end</span>
-0228     <span class="keyword">end</span>  
-0229     
-0230     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
-0231       <span class="comment">%removing reference channels</span>
-0232       cfg1=[];
-0233       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-0234       ref = ft_selectdata(cfg1, ref);
-0235     <span class="keyword">end</span>
+0216     <span class="keyword">for</span> t=1:numel(raw.trial)
+0217       <span class="keyword">for</span> j=1:height(reftable)
+0218         ridx=find(ismember(raw.label,reftable.reference1(j)));
+0219         <span class="keyword">if</span> isempty(ridx)
+0220             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
+0221         <span class="keyword">end</span> 
+0222         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
+0223           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
+0224           (raw.trial{t}(ismember(raw.label,reftable.reference1(j)),:)+raw.trial{t}(ismember(raw.label,reftable.reference2(j)),:)/2);
+0225       <span class="keyword">end</span>
+0226     <span class="keyword">end</span>  
+0227     
+0228     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
+0229       <span class="comment">%removing reference channels</span>
+0230       cfg1=[];
+0231       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+0232       ref = ft_selectdata(cfg1, ref);
+0233     <span class="keyword">end</span>
+0234 
+0235     
 0236     
 0237     
-0238   <span class="keyword">elseif</span> ismember(method,(<span class="string">'Average_Electrodes'</span>))
-0239          <span class="comment">%loading label again from cfg</span>
-0240     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
-0241     refchan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan'</span>,[]); 
-0242 
+0238   <span class="comment">%% Bipolar Reference</span>
+0239   <span class="keyword">elseif</span> ismember(method,{<span class="string">'bipolar'</span>})
+0240     <span class="comment">%loading label again from cfg</span>
+0241     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
+0242     refchan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan'</span>,[]); 
 0243     
 0244     <span class="comment">%defining reference for each channel to be re-referenced</span>
 0245     <span class="keyword">if</span> isempty(refchan)
-0246       error(<span class="string">'reference channels required for average monopolar referencing'</span>)
-0247     <span class="keyword">elseif</span> numel(refchan)~=2
-0248       error(<span class="string">'Two reference channels required for average monopolar referencing'</span>)
-0249     <span class="keyword">else</span>
-0250       reftable = table(label);
-0251       <span class="comment">%refchan.reference1 = table(refchan.Reference1);</span>
-0252       <span class="comment">%reftable.reference2 = table(refchan.Reference2)</span>
-0253     <span class="keyword">end</span>
-0254     
-0255     ref = raw;
+0246       error(<span class="string">'reference channel(s) required for bipolar referencing'</span>)
+0247     <span class="keyword">elseif</span> numel(refchan)==1
+0248       reftable = table(label);
+0249       reftable.reference(:) = refchan;
+0250     <span class="keyword">elseif</span> numel(refchan) == numel(label)
+0251       reftable = table(label);
+0252       reftable.reference = refchan;
+0253     <span class="keyword">else</span>
+0254       error(<span class="string">'refchan should have one element, or same number of elements as label'</span>);
+0255     <span class="keyword">end</span>
 0256     
-0257     <span class="keyword">for</span> t=1:numel(raw.trial)
-0258       <span class="keyword">for</span> j=1:height(reftable)
-0259         ridx=find(ismember(raw.label,refchan(1)));
-0260         <span class="keyword">if</span> isempty(ridx)
-0261             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,refchan.Reference1,reftable.label{j});
-0262         <span class="keyword">end</span> 
-0263         ridx=find(ismember(raw.label,refchan(2)));
-0264         <span class="keyword">if</span> isempty(ridx)
-0265             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,refchan.Reference2,reftable.label{j});
-0266         <span class="keyword">end</span> 
-0267         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
-0268           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
-0269           (raw.trial{t}(ismember(raw.label,refchan(1)),:)+raw.trial{t}(ismember(raw.label,refchan(2)),:))/2;
-0270       <span class="keyword">end</span>
-0271     <span class="keyword">end</span>  
-0272     
-0273     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
-0274       <span class="comment">%removing reference channels</span>
-0275       cfg1=[];
-0276       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-0277       ref = ft_selectdata(cfg1, ref);
-0278     <span class="keyword">end</span>
-0279  
-0280       
-0281   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>,<span class="string">'local'</span>})
-0282     error(<span class="string">'local average referencing not implemented for data with NaNs'</span>)
-0283   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>,<span class="string">'variable'</span>})
-0284     error(<span class="string">'variable average referencing not implemented for data with NaNs'</span>)
-0285   <span class="keyword">else</span>
-0286     error(<span class="string">'unknown method'</span>)
-0287   <span class="keyword">end</span>
-0288 <span class="keyword">end</span>
-0289 
-0290 
-0291</pre></div>
+0257     ref = raw;
+0258     
+0259     <span class="keyword">for</span> t=1:numel(raw.trial)
+0260       <span class="keyword">for</span> j=1:height(reftable)
+0261         ridx=find(ismember(raw.label,reftable.reference(j)));
+0262         <span class="keyword">if</span> isempty(ridx)
+0263             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
+0264         <span class="keyword">end</span> 
+0265         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
+0266           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
+0267           raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
+0268       <span class="keyword">end</span>
+0269     <span class="keyword">end</span>  
+0270     
+0271     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
+0272       <span class="comment">%removing reference channels</span>
+0273       cfg1=[];
+0274       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+0275       ref = ft_selectdata(cfg1, ref);
+0276     <span class="keyword">end</span>
+0277     
+0278   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>,<span class="string">'local'</span>})
+0279     error(<span class="string">'local average referencing not implemented for data with NaNs'</span>)
+0280   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>,<span class="string">'variable'</span>})
+0281     error(<span class="string">'variable average referencing not implemented for data with NaNs'</span>)
+0282   <span class="keyword">else</span>
+0283     error(<span class="string">'unknown method'</span>)
+0284   <span class="keyword">end</span>
+0285 <span class="keyword">end</span>
+0286 
+0287 
+0288</pre></div>
 <hr><address>Generated on Thu 31-Mar-2022 14:53:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

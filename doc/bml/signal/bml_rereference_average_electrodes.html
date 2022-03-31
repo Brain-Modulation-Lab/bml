@@ -198,173 +198,172 @@ This function is called by:
 0122   <span class="comment">%applying unmixing matrix to data</span>
 0123   ref = <a href="bml_apply.html" class="code" title="function raw = bml_apply(fun, data, varargin)">bml_apply</a>(@(x) U*x, raw);
 0124 
-0125 <span class="keyword">else</span>
-0126   
-0127   <span class="comment">%% explicit substraction based methods</span>
-0128     
-0129   <span class="comment">%removing null group</span>
-0130   ug = ug(ug&gt;0);
-0131   
-0132   <span class="comment">%% Common Average Reference</span>
-0133   <span class="keyword">if</span> ismember(method,{<span class="string">'CAR'</span>,<span class="string">'common'</span>}) <span class="comment">%common average referencing</span>
-0134     ref = raw;
-0135     <span class="keyword">for</span> t=1:numel(raw.trial)
-0136       <span class="keyword">for</span> g=1:numel(ug)
-0137         <span class="comment">%calculating groups common average</span>
-0138         commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
-0139         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
-0140       <span class="keyword">end</span>
-0141     <span class="keyword">end</span>
-0142     
-0143   <span class="comment">%% Common Trimmed Average Reference</span>
-0144   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CTAR'</span>})
-0145     ref = raw;
-0146     <span class="keyword">for</span> t=1:numel(raw.trial)
-0147       <span class="keyword">for</span> g=1:numel(ug)
-0148         <span class="comment">%calculating groups common trimmed average</span>
-0149         commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
-0150         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
-0151       <span class="keyword">end</span>
-0152     <span class="keyword">end</span>  
-0153     
-0154   <span class="comment">%% Common Average Reference with Cross-Fading</span>
-0155   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CARCF'</span>}) <span class="comment">%common average referencing with cross fading</span>
-0156     cfp = linspace(0,1,ceil(crossfading_width/2)); <span class="comment">%crossfading pattern</span>
-0157     cfp = [cfp, fliplr(cfp(2:end))]; 
-0158     cfp = cfp ./ sum(cfp);
-0159     cfr = ones(size(cfp)); <span class="comment">%crossfading region</span>
-0160     cfr = cfr ./ sum(cfr);
-0161     
-0162     ref = raw;
-0163     <span class="keyword">for</span> t=1:numel(raw.trial)
-0164       <span class="comment">%get nan mask</span>
-0165       cf_weights = isnan(raw.trial{t});
-0166       
-0167       <span class="comment">%implementing justification of crossfading by extending nan mask</span>
-0168       cf_weights = convn(cf_weights, cfr, <span class="string">'same'</span>);
-0169       cf_weights = cf_weights &gt; 0;
-0170 
-0171       <span class="comment">%calculating crossfading weights</span>
-0172       cf_weights = 1 - convn(cf_weights, cfp, <span class="string">'same'</span>);
-0173       
-0174       <span class="keyword">for</span> g=1:numel(ug)
-0175         <span class="comment">%calculating groups common average</span>
-0176         tr = raw.trial{t}(group==ug(g),:);
-0177         tr(isnan(tr)) = 0;
-0178         tw = cf_weights(group==ug(g),:);
-0179         commavg = sum(tr .* tw,1) ./ sum(tw,1);
-0180         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
-0181       <span class="keyword">end</span>
-0182     <span class="keyword">end</span> 
-0183     
-0184  
-0185     
-0186      <span class="comment">%% Common Median Reference</span>
-0187   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CMR'</span>})
-0188     ref = raw;
-0189     <span class="keyword">for</span> t=1:numel(raw.trial)
-0190       <span class="keyword">for</span> g=1:numel(ug)
-0191         <span class="comment">%calculating groups common median</span>
-0192         commmed = nanmedian(raw.trial{t}(group==ug(g),:),1);
-0193         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
-0194       <span class="keyword">end</span>
-0195     <span class="keyword">end</span>  
-0196     
-0197   <span class="comment">%% Bipolar Reference</span>
-0198   <span class="keyword">elseif</span> ismember(method,{<span class="string">'bipolar'</span>})
-0199     <span class="comment">%loading label again from cfg</span>
-0200     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
-0201     refchan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan'</span>,[]); 
-0202     
-0203     <span class="comment">%defining reference for each channel to be re-referenced</span>
-0204     <span class="keyword">if</span> isempty(refchan)
-0205       error(<span class="string">'reference channel(s) required for bipolar referencing'</span>)
-0206     <span class="keyword">elseif</span> numel(refchan)==1
-0207       reftable = table(label);
-0208       reftable.reference(:) = refchan;
-0209     <span class="keyword">elseif</span> numel(refchan) == numel(label)
-0210       reftable = table(label);
-0211       reftable.reference = refchan;
-0212     <span class="keyword">else</span>
-0213       error(<span class="string">'refchan should have one element, or same number of elements as label'</span>);
-0214     <span class="keyword">end</span>
-0215     
-0216     ref = raw;
-0217     
-0218     <span class="keyword">for</span> t=1:numel(raw.trial)
-0219       <span class="keyword">for</span> j=1:height(reftable)
-0220         ridx=find(ismember(raw.label,reftable.reference(j)));
-0221         <span class="keyword">if</span> isempty(ridx)
-0222             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
-0223         <span class="keyword">end</span> 
-0224         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
-0225           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
-0226           raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
-0227       <span class="keyword">end</span>
-0228     <span class="keyword">end</span>  
-0229     
-0230     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
-0231       <span class="comment">%removing reference channels</span>
-0232       cfg1=[];
-0233       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-0234       ref = ft_selectdata(cfg1, ref);
-0235     <span class="keyword">end</span>
+0125   <span class="comment">%% explicit substraction based methods</span>
+0126     
+0127   <span class="comment">%removing null group</span>
+0128   ug = ug(ug&gt;0);
+0129   
+0130   <span class="comment">%% Common Average Reference</span>
+0131   <span class="keyword">if</span> ismember(method,{<span class="string">'CAR'</span>,<span class="string">'common'</span>}) <span class="comment">%common average referencing</span>
+0132     ref = raw;
+0133     <span class="keyword">for</span> t=1:numel(raw.trial)
+0134         commavg = nanmean(raw.trial{t}(:,:),1);
+0135         <span class="keyword">for</span> g=1:numel(ug)
+0136         <span class="comment">%calculating common average</span>
+0137         ref.trial{t}(g,:) = raw.trial{t}(g,:) - commavg;
+0138       <span class="keyword">end</span>
+0139     <span class="keyword">end</span>  
+0140     
+0141     
+0142   <span class="comment">%% Common Trimmed Average Reference</span>
+0143   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CTAR'</span>})
+0144     ref = raw;
+0145     <span class="keyword">for</span> t=1:numel(raw.trial)
+0146       <span class="keyword">for</span> g=1:numel(ug)
+0147         <span class="comment">%calculating groups common trimmed average</span>
+0148         commtrimmean = trimmean(raw.trial{t}(group==ug(g),:),percent,1);
+0149         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commtrimmean;
+0150       <span class="keyword">end</span>
+0151     <span class="keyword">end</span>  
+0152     
+0153   <span class="comment">%% Common Average Reference with Cross-Fading</span>
+0154   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CARCF'</span>}) <span class="comment">%common average referencing with cross fading</span>
+0155     cfp = linspace(0,1,ceil(crossfading_width/2)); <span class="comment">%crossfading pattern</span>
+0156     cfp = [cfp, fliplr(cfp(2:end))]; 
+0157     cfp = cfp ./ sum(cfp);
+0158     cfr = ones(size(cfp)); <span class="comment">%crossfading region</span>
+0159     cfr = cfr ./ sum(cfr);
+0160     
+0161     ref = raw;
+0162     <span class="keyword">for</span> t=1:numel(raw.trial)
+0163       <span class="comment">%get nan mask</span>
+0164       cf_weights = isnan(raw.trial{t});
+0165       
+0166       <span class="comment">%implementing justification of crossfading by extending nan mask</span>
+0167       cf_weights = convn(cf_weights, cfr, <span class="string">'same'</span>);
+0168       cf_weights = cf_weights &gt; 0;
+0169 
+0170       <span class="comment">%calculating crossfading weights</span>
+0171       cf_weights = 1 - convn(cf_weights, cfp, <span class="string">'same'</span>);
+0172       
+0173       <span class="keyword">for</span> g=1:numel(ug)
+0174         <span class="comment">%calculating groups common average</span>
+0175         tr = raw.trial{t}(group==ug(g),:);
+0176         tr(isnan(tr)) = 0;
+0177         tw = cf_weights(group==ug(g),:);
+0178         commavg = sum(tr .* tw,1) ./ sum(tw,1);
+0179         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
+0180       <span class="keyword">end</span>
+0181     <span class="keyword">end</span> 
+0182     
+0183  
+0184     
+0185      <span class="comment">%% Common Median Reference</span>
+0186   <span class="keyword">elseif</span> ismember(method,{<span class="string">'CMR'</span>})
+0187     ref = raw;
+0188     <span class="keyword">for</span> t=1:numel(raw.trial)
+0189       <span class="keyword">for</span> g=1:numel(ug)
+0190         <span class="comment">%calculating groups common median</span>
+0191         commmed = nanmedian(raw.trial{t}(group==ug(g),:),1);
+0192         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commmed;
+0193       <span class="keyword">end</span>
+0194     <span class="keyword">end</span>  
+0195     
+0196   <span class="comment">%% Bipolar Reference</span>
+0197   <span class="keyword">elseif</span> ismember(method,{<span class="string">'bipolar'</span>})
+0198     <span class="comment">%loading label again from cfg</span>
+0199     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
+0200     refchan = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan'</span>,[]); 
+0201     
+0202     <span class="comment">%defining reference for each channel to be re-referenced</span>
+0203     <span class="keyword">if</span> isempty(refchan)
+0204       error(<span class="string">'reference channel(s) required for bipolar referencing'</span>)
+0205     <span class="keyword">elseif</span> numel(refchan)==1
+0206       reftable = table(label);
+0207       reftable.reference(:) = refchan;
+0208     <span class="keyword">elseif</span> numel(refchan) == numel(label)
+0209       reftable = table(label);
+0210       reftable.reference = refchan;
+0211     <span class="keyword">else</span>
+0212       error(<span class="string">'refchan should have one element, or same number of elements as label'</span>);
+0213     <span class="keyword">end</span>
+0214     
+0215     ref = raw;
+0216     
+0217     <span class="keyword">for</span> t=1:numel(raw.trial)
+0218       <span class="keyword">for</span> j=1:height(reftable)
+0219         ridx=find(ismember(raw.label,reftable.reference(j)));
+0220         <span class="keyword">if</span> isempty(ridx)
+0221             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
+0222         <span class="keyword">end</span> 
+0223         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
+0224           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
+0225           raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
+0226       <span class="keyword">end</span>
+0227     <span class="keyword">end</span>  
+0228     
+0229     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
+0230       <span class="comment">%removing reference channels</span>
+0231       cfg1=[];
+0232       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+0233       ref = ft_selectdata(cfg1, ref);
+0234     <span class="keyword">end</span>
+0235     
 0236     
-0237     
-0238   <span class="keyword">elseif</span> ismember(method,(<span class="string">'Average_Electrodes'</span>))
-0239          <span class="comment">%loading label again from cfg</span>
-0240     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
-0241     refchan1 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan1'</span>,[]); 
-0242     refchan2 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan2'</span>,[]); 
-0243     
-0244     <span class="comment">%defining reference for each channel to be re-referenced</span>
-0245     <span class="keyword">if</span> isempty(refchan)
-0246       error(<span class="string">'reference channels required for average monopolar referencing'</span>)
-0247     <span class="keyword">elseif</span> numel(refchan)~=2
-0248       error(<span class="string">'Two reference channels required for average monopolar referencing'</span>)
-0249     <span class="keyword">else</span>
-0250       reftable = table(label);
-0251       reftable.reference1 = refchan1;
-0252       reftable.reference2 = refchan2
-0253     <span class="keyword">end</span>
-0254     
-0255     ref = raw;
-0256     
-0257     <span class="keyword">for</span> t=1:numel(raw.trial)
-0258       <span class="keyword">for</span> j=1:height(reftable)
-0259         ridx=find(ismember(raw.label,reftable.reference1(j)));
-0260         <span class="keyword">if</span> isempty(ridx)
-0261             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
-0262         <span class="keyword">end</span> 
-0263         ridx=find(ismember(raw.label,reftable.reference2(j)));
-0264         <span class="keyword">if</span> isempty(ridx)
-0265             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
-0266         <span class="keyword">end</span> 
-0267         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
-0268           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
-0269           mean(raw.trial{t}(ismember(raw.label,reftable.reference1(j)),:),raw.trial{t}(ismember(raw.label,reftable.reference2(j)),:));
-0270       <span class="keyword">end</span>
-0271     <span class="keyword">end</span>  
-0272     
-0273     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
-0274       <span class="comment">%removing reference channels</span>
-0275       cfg1=[];
-0276       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-0277       ref = ft_selectdata(cfg1, ref);
-0278     <span class="keyword">end</span>
-0279  
-0280       
-0281   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>,<span class="string">'local'</span>})
-0282     error(<span class="string">'local average referencing not implemented for data with NaNs'</span>)
-0283   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>,<span class="string">'variable'</span>})
-0284     error(<span class="string">'variable average referencing not implemented for data with NaNs'</span>)
-0285   <span class="keyword">else</span>
-0286     error(<span class="string">'unknown method'</span>)
-0287   <span class="keyword">end</span>
-0288 <span class="keyword">end</span>
+0237   <span class="keyword">elseif</span> ismember(method,(<span class="string">'Average_Electrodes'</span>))
+0238          <span class="comment">%loading label again from cfg</span>
+0239     label   = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'label'</span>,raw.label);
+0240     refchan1 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan1'</span>,[]); 
+0241     refchan2 = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refchan2'</span>,[]); 
+0242     
+0243     <span class="comment">%defining reference for each channel to be re-referenced</span>
+0244     <span class="keyword">if</span> isempty(refchan)
+0245       error(<span class="string">'reference channels required for average monopolar referencing'</span>)
+0246     <span class="keyword">elseif</span> numel(refchan)~=2
+0247       error(<span class="string">'Two reference channels required for average monopolar referencing'</span>)
+0248     <span class="keyword">else</span>
+0249       reftable = table(label);
+0250       reftable.reference1 = refchan1;
+0251       reftable.reference2 = refchan2
+0252     <span class="keyword">end</span>
+0253     
+0254     ref = raw;
+0255     
+0256     <span class="keyword">for</span> t=1:numel(raw.trial)
+0257       <span class="keyword">for</span> j=1:height(reftable)
+0258         ridx=find(ismember(raw.label,reftable.reference1(j)));
+0259         <span class="keyword">if</span> isempty(ridx)
+0260             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
+0261         <span class="keyword">end</span> 
+0262         ridx=find(ismember(raw.label,reftable.reference2(j)));
+0263         <span class="keyword">if</span> isempty(ridx)
+0264             error(<span class="string">'refchan %s not available to rereference channel %s'</span>,reftable.reference{j},reftable.label{j});
+0265         <span class="keyword">end</span> 
+0266         ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = <span class="keyword">...</span>
+0267           raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - <span class="keyword">...</span>
+0268           mean(raw.trial{t}(ismember(raw.label,reftable.reference1(j)),:),raw.trial{t}(ismember(raw.label,reftable.reference2(j)),:));
+0269       <span class="keyword">end</span>
+0270     <span class="keyword">end</span>  
+0271     
+0272     <span class="keyword">if</span> ~<a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'refkeep'</span>,0)
+0273       <span class="comment">%removing reference channels</span>
+0274       cfg1=[];
+0275       cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+0276       ref = ft_selectdata(cfg1, ref);
+0277     <span class="keyword">end</span>
+0278  
+0279       
+0280   <span class="keyword">elseif</span> ismember(method,{<span class="string">'LAR'</span>,<span class="string">'local'</span>})
+0281     error(<span class="string">'local average referencing not implemented for data with NaNs'</span>)
+0282   <span class="keyword">elseif</span> ismember(method,{<span class="string">'VAR'</span>,<span class="string">'variable'</span>})
+0283     error(<span class="string">'variable average referencing not implemented for data with NaNs'</span>)
+0284   <span class="keyword">else</span>
+0285     error(<span class="string">'unknown method'</span>)
+0286   <span class="keyword">end</span>
+0287 <span class="keyword">end</span>
+0288 
 0289 
-0290 
-0291</pre></div>
-<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0290</pre></div>
+<hr><address>Generated on Thu 31-Mar-2022 14:53:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

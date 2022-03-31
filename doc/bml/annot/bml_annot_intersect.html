@@ -143,220 +143,228 @@ This function is called by:
 0062 groupby_x = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby_x'</span>,groupby);
 0063 groupby_y = <a href="../../bml/utils/bml_getopt.html" class="code" title="function val = bml_getopt(opt, key, default, emptymeaningful)">bml_getopt</a>(cfg,<span class="string">'groupby_y'</span>,groupby);
 0064 
-0065 
-0066 <span class="keyword">if</span> isempty(x.Properties.Description); x.Properties.Description = <span class="string">'x'</span>; <span class="keyword">end</span>
-0067 <span class="keyword">if</span> isempty(y.Properties.Description); y.Properties.Description = <span class="string">'y'</span>; <span class="keyword">end</span>
-0068 
-0069 <span class="keyword">if</span> strcmp(x.Properties.Description,y.Properties.Description)
-0070   x.Properties.Description = [x.Properties.Description <span class="string">'_x'</span>];
-0071   y.Properties.Description = [y.Properties.Description <span class="string">'_y'</span>];
+0065 <span class="keyword">if</span> isempty(x)
+0066     annot = x;
+0067     <span class="keyword">return</span>
+0068 <span class="keyword">end</span>
+0069 <span class="keyword">if</span> isempty(y)
+0070     annot = y;
+0071     <span class="keyword">return</span>
 0072 <span class="keyword">end</span>
 0073 
-0074 xidn=[x.Properties.Description <span class="string">'_id'</span>];
-0075 yidn=[y.Properties.Description <span class="string">'_id'</span>];
+0074 <span class="keyword">if</span> isempty(x.Properties.Description); x.Properties.Description = <span class="string">'x'</span>; <span class="keyword">end</span>
+0075 <span class="keyword">if</span> isempty(y.Properties.Description); y.Properties.Description = <span class="string">'y'</span>; <span class="keyword">end</span>
 0076 
-0077 <span class="comment">%ToDo: allow grouping by several variables</span>
-0078 <span class="keyword">if</span> isempty(groupby_x) &amp;&amp; isempty(groupby_y)
-0079   x.groupby_=ones(height(x),1);
-0080   y.groupby_=ones(height(y),1);
-0081   groupby_x = {<span class="string">'groupby_'</span>};
-0082   groupby_y = {<span class="string">'groupby_'</span>};
-0083   groups={1};
-0084 <span class="keyword">elseif</span> ~isempty(groupby_x) &amp;&amp; ~isempty(groupby_y)
-0085     <span class="keyword">if</span> sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
-0086     error(<span class="string">'groupby_x should match one (and only one) column of x'</span>);
-0087   <span class="keyword">end</span>
-0088     <span class="keyword">if</span> sum(strcmp(y.Properties.VariableNames, groupby_y))~=1
-0089     error(<span class="string">'groupby_y should match one (and only one) column of y'</span>);
-0090   <span class="keyword">end</span>
-0091   groups_x = unique(x{:,groupby_x});
-0092   groups_y = unique(y{:,groupby_y});
-0093   groups = intersect(groups_x,groups_y);
-0094   <span class="keyword">if</span> isempty(groups)
-0095     annot = [];
-0096     <span class="keyword">return</span>
-0097   <span class="keyword">end</span>
-0098 
-0099 <span class="keyword">else</span>
-0100   error(<span class="string">'groupby_x and groupby_y should be both given or none at all'</span>)
-0101 <span class="keyword">end</span>
-0102 
-0103 annot = table();
-0104 <span class="keyword">for</span> g=1:numel(groups)
-0105   <span class="keyword">if</span> iscellstr(groups(g))
-0106     x_g = x(strcmp(x{:,groupby_x},groups(g)),:);
-0107     y_g = y(strcmp(y{:,groupby_y},groups(g)),:);
-0108   <span class="keyword">else</span>
-0109     x_g = x(x{:,groupby_x}==groups{g},:);   
-0110     y_g = y(y{:,groupby_y}==groups{g},:);   
-0111   <span class="keyword">end</span>
-0112 
-0113   <span class="comment">%optimizing for special cases</span>
-0114   <span class="keyword">if</span> isempty(y_g); <span class="keyword">continue</span>; <span class="keyword">end</span>
-0115     <span class="keyword">if</span> height(y_g)==1
-0116     ovlp_y = false;
-0117     x_g = x_g(x_g.ends &gt; y_g.starts(1) &amp; x_g.starts &lt; y_g.ends(1),:);
-0118   <span class="keyword">else</span>
-0119     ovlp_y = ~isempty(<a href="bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>(y_g));
-0120     <span class="keyword">if</span> ovlp_y
-0121       error(<span class="string">'''y'' has overlaps for group %s'</span>,string(groups(g)))
-0122     <span class="keyword">end</span> 
-0123   <span class="keyword">end</span>
-0124     <span class="keyword">if</span> isempty(x_g); <span class="keyword">continue</span>; <span class="keyword">end</span>
-0125   ovlp_x = ~isempty(<a href="bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>(x_g));
-0126   
-0127   i=1; j=1;
-0128   annot_g = cell2table(cell(0,5)); 
-0129   annot_g.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,xidn,yidn,groupby_x{1}};
-0130   <span class="keyword">if</span> ovlp_x
-0131     <span class="keyword">while</span> i&lt;=height(x_g) &amp;&amp; j&lt;=height(y_g)
-0132       <span class="keyword">if</span> x_g.starts(i) &lt; y_g.ends(j) &amp;&amp; x_g.ends(i) &gt; y_g.starts(j)
-0133         annot_g = [annot_g;{<span class="keyword">...</span>
-0134           max(x_g.starts(i),y_g.starts(j)),<span class="keyword">...</span>
-0135           min(x_g.ends(i),y_g.ends(j)),<span class="keyword">...</span>
-0136           x_g.id(i),<span class="keyword">...</span>
-0137           y_g.id(j),<span class="keyword">...</span>
-0138           groups{g}}];
-0139         <span class="keyword">if</span> x_g.ends(i) &lt; y_g.ends(j) || j &gt;= height(y_g)
-0140           i = i + 1;
-0141           j=1;
-0142         <span class="keyword">else</span>
-0143           j = j + 1;
-0144         <span class="keyword">end</span>
-0145       <span class="keyword">elseif</span> x_g.ends(i) &lt;= y_g.starts(j) || j &gt;= height(y_g)
-0146         i=i+1;
-0147         j=1;
-0148       <span class="keyword">elseif</span> x_g.starts(i) &gt;= y_g.ends(j)
-0149         j=j+1;
-0150       <span class="keyword">else</span>
-0151         error(<span class="string">'Unsupported input annotations tables'</span>);
-0152       <span class="keyword">end</span>
-0153     <span class="keyword">end</span>
-0154   <span class="keyword">else</span> <span class="comment">%no overlaps in x</span>
-0155     <span class="keyword">while</span> i&lt;=height(x_g) &amp;&amp; j&lt;=height(y_g)
-0156       <span class="keyword">if</span> x_g.starts(i) &lt; y_g.ends(j) &amp;&amp; x_g.ends(i) &gt; y_g.starts(j)
-0157         annot_g = [annot_g;{<span class="keyword">...</span>
-0158           max(x_g.starts(i),y_g.starts(j)),<span class="keyword">...</span>
-0159           min(x_g.ends(i),y_g.ends(j)),<span class="keyword">...</span>
-0160           x_g.id(i),<span class="keyword">...</span>
-0161           y_g.id(j),<span class="keyword">...</span>
-0162           groups{g}}];
-0163         <span class="keyword">if</span> x_g.ends(i) &lt; y_g.ends(j)
-0164           i = i + 1;
-0165         <span class="keyword">else</span>
-0166           j = j + 1;
-0167         <span class="keyword">end</span>
-0168       <span class="keyword">elseif</span> x_g.ends(i) &lt;= y_g.starts(j)
-0169         i=i+1;
-0170       <span class="keyword">elseif</span> x_g.starts(i) &gt;= y_g.ends(j)
-0171         j=j+1;
-0172       <span class="keyword">else</span>
-0173         error(<span class="string">'Unsupported input annotations tables'</span>);
-0174       <span class="keyword">end</span>
-0175     <span class="keyword">end</span>
-0176   <span class="keyword">end</span>
-0177   annot = [annot; annot_g];
-0178 <span class="keyword">end</span>
-0179 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,description);
-0180 <span class="keyword">if</span> isempty(annot); <span class="keyword">return</span>; <span class="keyword">end</span>
-0181 
-0182 x.starts=[]; x.ends=[]; <span class="comment">% x.Properties.VariableNames{1}=xidn;</span>
-0183 y.starts=[]; y.ends=[]; <span class="comment">% y.Properties.VariableNames{1}=yidn;</span>
-0184 <span class="keyword">if</span> ~isempty(groupby_x); x.(groupby_x{1})=[]; <span class="keyword">end</span>
-0185 <span class="keyword">if</span> ~isempty(groupby_y); y.(groupby_y{1})=[]; <span class="keyword">end</span>
-0186 
-0187 <span class="keyword">switch</span> keep
-0188   <span class="keyword">case</span> {<span class="string">'both'</span>,<span class="string">'keepboth'</span>,<span class="string">'keep both'</span>,<span class="string">'keep_both'</span>}
-0189     keep=<span class="string">'both'</span>;
-0190     common_vars=intersect(x.Properties.VariableNames,y.Properties.VariableNames);
-0191     common_vars_x=ismember(x.Properties.VariableNames,common_vars);
-0192     common_vars_y=ismember(y.Properties.VariableNames,common_vars);
-0193     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars);
-0194     unique_vars_y=setdiff(y.Properties.VariableNames,common_vars);
-0195   <span class="keyword">case</span> {<span class="string">'none'</span>,<span class="string">'keepnone'</span>,<span class="string">'keep none'</span>,<span class="string">'keep_none'</span>}
-0196     keep=<span class="string">'none'</span>;
-0197     common_vars_x=[];
-0198     common_vars_y=[];
-0199     unique_vars_x=[];
-0200     unique_vars_y=[];
-0201   <span class="keyword">case</span> {<span class="string">'x'</span>,<span class="string">'keepx'</span>,<span class="string">'keep x'</span>,<span class="string">'keep_x'</span>}
-0202     keep=<span class="string">'x'</span>;
-0203     common_vars_x={<span class="string">'id'</span>,<span class="string">'duration'</span>};
-0204     common_vars_y=[];
-0205     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars_x);
-0206     unique_vars_y=[];
-0207   <span class="keyword">case</span> {<span class="string">'y'</span>,<span class="string">'keepy'</span>,<span class="string">'keep y'</span>,<span class="string">'keep_y'</span>}
-0208     keep=<span class="string">'y'</span>;
-0209     common_vars_x=[];
-0210     common_vars_y={<span class="string">'id'</span>,<span class="string">'duration'</span>};
-0211     unique_vars_x=[];
-0212     unique_vars_y=setdiff(y.Properties.VariableNames,common_vars_y);
-0213   <span class="keyword">otherwise</span>
-0214     error(&quot;unknown value <span class="keyword">for</span> keep <span class="comment">%s. Allowed values are 'both', 'none', 'x' or 'y'&quot;,keep);</span>
-0215 <span class="keyword">end</span>
-0216 
-0217 new_names_common_vars_x = strcat([x.Properties.Description <span class="string">'_'</span>],x.Properties.VariableNames(common_vars_x));
-0218 <span class="keyword">if</span> ~isempty(new_names_common_vars_x)
-0219   new_names_common_vars_x_repeated = ismember(new_names_common_vars_x,unique_vars_x);
-0220   <span class="keyword">if</span> any(new_names_common_vars_x_repeated)
-0221     rm_vars = new_names_common_vars_x(new_names_common_vars_x_repeated);
-0222     <span class="keyword">for</span> i=1:length(rm_vars)
-0223       <span class="keyword">if</span> warn
-0224         warning(<span class="string">'Overwriting variable %s of table %s'</span>,rm_vars{i},x.Properties.Description);
-0225       <span class="keyword">end</span>
-0226       <span class="comment">%common_vars_x(bml_getidx(rm_vars(i),x.Properties.VariableNames))=[];</span>
-0227       x.(rm_vars{i})=[];
-0228     <span class="keyword">end</span>
-0229   <span class="keyword">end</span>
-0230 <span class="keyword">end</span>
-0231 
-0232 new_names_common_vars_y = strcat([y.Properties.Description <span class="string">'_'</span>],y.Properties.VariableNames(common_vars_y));
-0233 <span class="keyword">if</span> ~isempty(new_names_common_vars_y)
-0234   new_names_common_vars_y_repeated = ismember(new_names_common_vars_y,unique_vars_y);
-0235   <span class="keyword">if</span> any(new_names_common_vars_y_repeated)
-0236     rm_vars = new_names_common_vars_y(new_names_common_vars_y_repeated);
-0237     <span class="keyword">for</span> i=1:length(rm_vars)
-0238       <span class="keyword">if</span> warn
-0239         warning(<span class="string">'Overwriting variable %s of table %s'</span>,rm_vars{i},y.Properties.Description);
-0240       <span class="keyword">end</span>
-0241       <span class="comment">%common_vars_y(bml_getidx(rm_vars(i),y.Properties.VariableNames))=[];</span>
-0242       y.(rm_vars{i})=[];
-0243     <span class="keyword">end</span>
-0244   <span class="keyword">end</span>
-0245 <span class="keyword">end</span>
-0246 
-0247 x.Properties.VariableNames(common_vars_x) = new_names_common_vars_x;
-0248 y.Properties.VariableNames(common_vars_y) = new_names_common_vars_y;
-0249 
-0250 <span class="keyword">if</span> ismember(yidn,x.Properties.VariableNames)
-0251   <span class="keyword">if</span> warn
-0252     warning(<span class="string">'Overwriting variable %s from table %s'</span>,yidn,x.Properties.Description);
-0253   <span class="keyword">end</span>
-0254   x.(yidn)=[];
-0255 <span class="keyword">end</span>
-0256 <span class="keyword">if</span> ismember(xidn,y.Properties.VariableNames)
-0257   <span class="keyword">if</span> warn
-0258     warning(<span class="string">'Overwriting variable %s from table %s'</span>,xidn,y.Properties.Description);
-0259   <span class="keyword">end</span>
-0260   y.(xidn)=[];
-0261 <span class="keyword">end</span>
-0262 
-0263 <span class="keyword">if</span> ismember(keep,{<span class="string">'x'</span>,<span class="string">'both'</span>})
-0264   annot=join(annot,x,<span class="string">'Keys'</span>,xidn);
-0265 <span class="keyword">end</span>
-0266 <span class="keyword">if</span> ismember(keep,{<span class="string">'y'</span>,<span class="string">'both'</span>})
-0267   annot=join(annot,y,<span class="string">'Keys'</span>,yidn);
-0268 <span class="keyword">end</span>
-0269 
-0270 <span class="keyword">if</span> any(strcmp(<span class="string">'groupby_'</span>,annot.Properties.VariableNames))
-0271   annot.groupby_ = [];
-0272 <span class="keyword">end</span>
-0273 
-0274 
-0275 
-0276 
+0077 <span class="keyword">if</span> strcmp(x.Properties.Description,y.Properties.Description)
+0078   x.Properties.Description = [x.Properties.Description <span class="string">'_x'</span>];
+0079   y.Properties.Description = [y.Properties.Description <span class="string">'_y'</span>];
+0080 <span class="keyword">end</span>
+0081 
+0082 xidn=[x.Properties.Description <span class="string">'_id'</span>];
+0083 yidn=[y.Properties.Description <span class="string">'_id'</span>];
+0084 
+0085 <span class="comment">%ToDo: allow grouping by several variables</span>
+0086 <span class="keyword">if</span> isempty(groupby_x) &amp;&amp; isempty(groupby_y)
+0087   x.groupby_=ones(height(x),1);
+0088   y.groupby_=ones(height(y),1);
+0089   groupby_x = {<span class="string">'groupby_'</span>};
+0090   groupby_y = {<span class="string">'groupby_'</span>};
+0091   groups={1};
+0092 <span class="keyword">elseif</span> ~isempty(groupby_x) &amp;&amp; ~isempty(groupby_y)
+0093     <span class="keyword">if</span> sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
+0094     error(<span class="string">'groupby_x should match one (and only one) column of x'</span>);
+0095   <span class="keyword">end</span>
+0096     <span class="keyword">if</span> sum(strcmp(y.Properties.VariableNames, groupby_y))~=1
+0097     error(<span class="string">'groupby_y should match one (and only one) column of y'</span>);
+0098   <span class="keyword">end</span>
+0099   groups_x = unique(x{:,groupby_x});
+0100   groups_y = unique(y{:,groupby_y});
+0101   groups = intersect(groups_x,groups_y);
+0102   <span class="keyword">if</span> isempty(groups)
+0103     annot = [];
+0104     <span class="keyword">return</span>
+0105   <span class="keyword">end</span>
+0106 
+0107 <span class="keyword">else</span>
+0108   error(<span class="string">'groupby_x and groupby_y should be both given or none at all'</span>)
+0109 <span class="keyword">end</span>
+0110 
+0111 annot = table();
+0112 <span class="keyword">for</span> g=1:numel(groups)
+0113   <span class="keyword">if</span> iscellstr(groups(g))
+0114     x_g = x(strcmp(x{:,groupby_x},groups(g)),:);
+0115     y_g = y(strcmp(y{:,groupby_y},groups(g)),:);
+0116   <span class="keyword">else</span>
+0117     x_g = x(x{:,groupby_x}==groups{g},:);   
+0118     y_g = y(y{:,groupby_y}==groups{g},:);   
+0119   <span class="keyword">end</span>
+0120 
+0121   <span class="comment">%optimizing for special cases</span>
+0122   <span class="keyword">if</span> isempty(y_g); <span class="keyword">continue</span>; <span class="keyword">end</span>
+0123     <span class="keyword">if</span> height(y_g)==1
+0124     ovlp_y = false;
+0125     x_g = x_g(x_g.ends &gt; y_g.starts(1) &amp; x_g.starts &lt; y_g.ends(1),:);
+0126   <span class="keyword">else</span>
+0127     ovlp_y = ~isempty(<a href="bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>(y_g));
+0128     <span class="keyword">if</span> ovlp_y
+0129       error(<span class="string">'''y'' has overlaps for group %s'</span>,string(groups(g)))
+0130     <span class="keyword">end</span> 
+0131   <span class="keyword">end</span>
+0132     <span class="keyword">if</span> isempty(x_g); <span class="keyword">continue</span>; <span class="keyword">end</span>
+0133   ovlp_x = ~isempty(<a href="bml_annot_overlap.html" class="code" title="function overlap=bml_annot_overlap(cfg, annot)">bml_annot_overlap</a>(x_g));
+0134   
+0135   i=1; j=1;
+0136   annot_g = cell2table(cell(0,5)); 
+0137   annot_g.Properties.VariableNames = {<span class="string">'starts'</span>,<span class="string">'ends'</span>,xidn,yidn,groupby_x{1}};
+0138   <span class="keyword">if</span> ovlp_x
+0139     <span class="keyword">while</span> i&lt;=height(x_g) &amp;&amp; j&lt;=height(y_g)
+0140       <span class="keyword">if</span> x_g.starts(i) &lt; y_g.ends(j) &amp;&amp; x_g.ends(i) &gt; y_g.starts(j)
+0141         annot_g = [annot_g;{<span class="keyword">...</span>
+0142           max(x_g.starts(i),y_g.starts(j)),<span class="keyword">...</span>
+0143           min(x_g.ends(i),y_g.ends(j)),<span class="keyword">...</span>
+0144           x_g.id(i),<span class="keyword">...</span>
+0145           y_g.id(j),<span class="keyword">...</span>
+0146           groups{g}}];
+0147         <span class="keyword">if</span> x_g.ends(i) &lt; y_g.ends(j) || j &gt;= height(y_g)
+0148           i = i + 1;
+0149           j=1;
+0150         <span class="keyword">else</span>
+0151           j = j + 1;
+0152         <span class="keyword">end</span>
+0153       <span class="keyword">elseif</span> x_g.ends(i) &lt;= y_g.starts(j) || j &gt;= height(y_g)
+0154         i=i+1;
+0155         j=1;
+0156       <span class="keyword">elseif</span> x_g.starts(i) &gt;= y_g.ends(j)
+0157         j=j+1;
+0158       <span class="keyword">else</span>
+0159         error(<span class="string">'Unsupported input annotations tables'</span>);
+0160       <span class="keyword">end</span>
+0161     <span class="keyword">end</span>
+0162   <span class="keyword">else</span> <span class="comment">%no overlaps in x</span>
+0163     <span class="keyword">while</span> i&lt;=height(x_g) &amp;&amp; j&lt;=height(y_g)
+0164       <span class="keyword">if</span> x_g.starts(i) &lt; y_g.ends(j) &amp;&amp; x_g.ends(i) &gt; y_g.starts(j)
+0165         annot_g = [annot_g;{<span class="keyword">...</span>
+0166           max(x_g.starts(i),y_g.starts(j)),<span class="keyword">...</span>
+0167           min(x_g.ends(i),y_g.ends(j)),<span class="keyword">...</span>
+0168           x_g.id(i),<span class="keyword">...</span>
+0169           y_g.id(j),<span class="keyword">...</span>
+0170           groups{g}}];
+0171         <span class="keyword">if</span> x_g.ends(i) &lt; y_g.ends(j)
+0172           i = i + 1;
+0173         <span class="keyword">else</span>
+0174           j = j + 1;
+0175         <span class="keyword">end</span>
+0176       <span class="keyword">elseif</span> x_g.ends(i) &lt;= y_g.starts(j)
+0177         i=i+1;
+0178       <span class="keyword">elseif</span> x_g.starts(i) &gt;= y_g.ends(j)
+0179         j=j+1;
+0180       <span class="keyword">else</span>
+0181         error(<span class="string">'Unsupported input annotations tables'</span>);
+0182       <span class="keyword">end</span>
+0183     <span class="keyword">end</span>
+0184   <span class="keyword">end</span>
+0185   annot = [annot; annot_g];
+0186 <span class="keyword">end</span>
+0187 annot = <a href="bml_annot_table.html" class="code" title="function annot=bml_annot_table(x, description, x_var_name)">bml_annot_table</a>(annot,description);
+0188 <span class="keyword">if</span> isempty(annot); <span class="keyword">return</span>; <span class="keyword">end</span>
+0189 
+0190 x.starts=[]; x.ends=[]; <span class="comment">% x.Properties.VariableNames{1}=xidn;</span>
+0191 y.starts=[]; y.ends=[]; <span class="comment">% y.Properties.VariableNames{1}=yidn;</span>
+0192 <span class="keyword">if</span> ~isempty(groupby_x); x.(groupby_x{1})=[]; <span class="keyword">end</span>
+0193 <span class="keyword">if</span> ~isempty(groupby_y); y.(groupby_y{1})=[]; <span class="keyword">end</span>
+0194 
+0195 <span class="keyword">switch</span> keep
+0196   <span class="keyword">case</span> {<span class="string">'both'</span>,<span class="string">'keepboth'</span>,<span class="string">'keep both'</span>,<span class="string">'keep_both'</span>}
+0197     keep=<span class="string">'both'</span>;
+0198     common_vars=intersect(x.Properties.VariableNames,y.Properties.VariableNames);
+0199     common_vars_x=ismember(x.Properties.VariableNames,common_vars);
+0200     common_vars_y=ismember(y.Properties.VariableNames,common_vars);
+0201     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars);
+0202     unique_vars_y=setdiff(y.Properties.VariableNames,common_vars);
+0203   <span class="keyword">case</span> {<span class="string">'none'</span>,<span class="string">'keepnone'</span>,<span class="string">'keep none'</span>,<span class="string">'keep_none'</span>}
+0204     keep=<span class="string">'none'</span>;
+0205     common_vars_x=[];
+0206     common_vars_y=[];
+0207     unique_vars_x=[];
+0208     unique_vars_y=[];
+0209   <span class="keyword">case</span> {<span class="string">'x'</span>,<span class="string">'keepx'</span>,<span class="string">'keep x'</span>,<span class="string">'keep_x'</span>}
+0210     keep=<span class="string">'x'</span>;
+0211     common_vars_x={<span class="string">'id'</span>,<span class="string">'duration'</span>};
+0212     common_vars_y=[];
+0213     unique_vars_x=setdiff(x.Properties.VariableNames,common_vars_x);
+0214     unique_vars_y=[];
+0215   <span class="keyword">case</span> {<span class="string">'y'</span>,<span class="string">'keepy'</span>,<span class="string">'keep y'</span>,<span class="string">'keep_y'</span>}
+0216     keep=<span class="string">'y'</span>;
+0217     common_vars_x=[];
+0218     common_vars_y={<span class="string">'id'</span>,<span class="string">'duration'</span>};
+0219     unique_vars_x=[];
+0220     unique_vars_y=setdiff(y.Properties.VariableNames,common_vars_y);
+0221   <span class="keyword">otherwise</span>
+0222     error(&quot;unknown value <span class="keyword">for</span> keep <span class="comment">%s. Allowed values are 'both', 'none', 'x' or 'y'&quot;,keep);</span>
+0223 <span class="keyword">end</span>
+0224 
+0225 new_names_common_vars_x = strcat([x.Properties.Description <span class="string">'_'</span>],x.Properties.VariableNames(common_vars_x));
+0226 <span class="keyword">if</span> ~isempty(new_names_common_vars_x)
+0227   new_names_common_vars_x_repeated = ismember(new_names_common_vars_x,unique_vars_x);
+0228   <span class="keyword">if</span> any(new_names_common_vars_x_repeated)
+0229     rm_vars = new_names_common_vars_x(new_names_common_vars_x_repeated);
+0230     <span class="keyword">for</span> i=1:length(rm_vars)
+0231       <span class="keyword">if</span> warn
+0232         warning(<span class="string">'Overwriting variable %s of table %s'</span>,rm_vars{i},x.Properties.Description);
+0233       <span class="keyword">end</span>
+0234       <span class="comment">%common_vars_x(bml_getidx(rm_vars(i),x.Properties.VariableNames))=[];</span>
+0235       x.(rm_vars{i})=[];
+0236     <span class="keyword">end</span>
+0237   <span class="keyword">end</span>
+0238 <span class="keyword">end</span>
+0239 
+0240 new_names_common_vars_y = strcat([y.Properties.Description <span class="string">'_'</span>],y.Properties.VariableNames(common_vars_y));
+0241 <span class="keyword">if</span> ~isempty(new_names_common_vars_y)
+0242   new_names_common_vars_y_repeated = ismember(new_names_common_vars_y,unique_vars_y);
+0243   <span class="keyword">if</span> any(new_names_common_vars_y_repeated)
+0244     rm_vars = new_names_common_vars_y(new_names_common_vars_y_repeated);
+0245     <span class="keyword">for</span> i=1:length(rm_vars)
+0246       <span class="keyword">if</span> warn
+0247         warning(<span class="string">'Overwriting variable %s of table %s'</span>,rm_vars{i},y.Properties.Description);
+0248       <span class="keyword">end</span>
+0249       <span class="comment">%common_vars_y(bml_getidx(rm_vars(i),y.Properties.VariableNames))=[];</span>
+0250       y.(rm_vars{i})=[];
+0251     <span class="keyword">end</span>
+0252   <span class="keyword">end</span>
+0253 <span class="keyword">end</span>
+0254 
+0255 x.Properties.VariableNames(common_vars_x) = new_names_common_vars_x;
+0256 y.Properties.VariableNames(common_vars_y) = new_names_common_vars_y;
+0257 
+0258 <span class="keyword">if</span> ismember(yidn,x.Properties.VariableNames)
+0259   <span class="keyword">if</span> warn
+0260     warning(<span class="string">'Overwriting variable %s from table %s'</span>,yidn,x.Properties.Description);
+0261   <span class="keyword">end</span>
+0262   x.(yidn)=[];
+0263 <span class="keyword">end</span>
+0264 <span class="keyword">if</span> ismember(xidn,y.Properties.VariableNames)
+0265   <span class="keyword">if</span> warn
+0266     warning(<span class="string">'Overwriting variable %s from table %s'</span>,xidn,y.Properties.Description);
+0267   <span class="keyword">end</span>
+0268   y.(xidn)=[];
+0269 <span class="keyword">end</span>
+0270 
+0271 <span class="keyword">if</span> ismember(keep,{<span class="string">'x'</span>,<span class="string">'both'</span>})
+0272   annot=join(annot,x,<span class="string">'Keys'</span>,xidn);
+0273 <span class="keyword">end</span>
+0274 <span class="keyword">if</span> ismember(keep,{<span class="string">'y'</span>,<span class="string">'both'</span>})
+0275   annot=join(annot,y,<span class="string">'Keys'</span>,yidn);
+0276 <span class="keyword">end</span>
 0277 
-0278</pre></div>
-<hr><address>Generated on Tue 05-Oct-2021 13:19:33 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+0278 <span class="keyword">if</span> any(strcmp(<span class="string">'groupby_'</span>,annot.Properties.VariableNames))
+0279   annot.groupby_ = [];
+0280 <span class="keyword">end</span>
+0281 
+0282 
+0283 
+0284 
+0285 
+0286</pre></div>
+<hr><address>Generated on Thu 31-Mar-2022 14:53:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

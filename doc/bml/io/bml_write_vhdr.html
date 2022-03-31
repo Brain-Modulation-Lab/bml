@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of bml_write_edf</title>
-  <meta name="keywords" content="bml_write_edf">
-  <meta name="description" content="BML_WRITE_EDF saves a ft_datatype_raw to EDF file(s) and a sync annot">
+  <title>Description of bml_write_vhdr</title>
+  <meta name="keywords" content="bml_write_vhdr">
+  <meta name="description" content="BML_WRITE_VHDR saves a ft_datatype_raw to BrainVision file(s) and a sync annot">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -12,30 +12,31 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">io</a> &gt; bml_write_edf.m</div>
+<div><a href="../../index.html">Home</a> &gt;  <a href="../index.html">bml</a> &gt; <a href="index.html">io</a> &gt; bml_write_vhdr.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
 <td align="right"><a href="index.html">Index for bml\io&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
 
-<h1>bml_write_edf
+<h1>bml_write_vhdr
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>BML_WRITE_EDF saves a ft_datatype_raw to EDF file(s) and a sync annot</strong></div>
+<div class="box"><strong>BML_WRITE_VHDR saves a ft_datatype_raw to BrainVision file(s) and a sync annot</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="box"><strong>function bml_write_edf(filename, raw) </strong></div>
+<div class="box"><strong>function bml_write_vhdr(filename, raw) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> BML_WRITE_EDF saves a ft_datatype_raw to EDF file(s) and a sync annot
+<div class="fragment"><pre class="comment"> BML_WRITE_VHDR saves a ft_datatype_raw to BrainVision file(s) and a sync annot
  table
- %%% CHECK THE OUTPUT OF THIS FUNCTION, ft seems to cut long files
+
  Use as
-   bml_write_edf(filename, raw)
+   bml_write_vhdr(filename, raw)
 
  filename - string, file basename without extension (trial number will be
    appended). The name identifier of the trial (e.g. run, as in BIDs)
-   should be placed at the very end, after an undersocre.
+   should be placed at the very end, after an underscore. NOTE: filename
+   must include folder path.
  raw - ft_datatype_raw</pre></div>
 
 <!-- crossreference -->
@@ -51,24 +52,24 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bml_write_edf(filename, raw)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bml_write_vhdr(filename, raw)</a>
 0002 
-0003 <span class="comment">% BML_WRITE_EDF saves a ft_datatype_raw to EDF file(s) and a sync annot</span>
+0003 <span class="comment">% BML_WRITE_VHDR saves a ft_datatype_raw to BrainVision file(s) and a sync annot</span>
 0004 <span class="comment">% table</span>
-0005 <span class="comment">% %%% CHECK THE OUTPUT OF THIS FUNCTION, ft seems to cut long files</span>
+0005 <span class="comment">%</span>
 0006 <span class="comment">% Use as</span>
-0007 <span class="comment">%   bml_write_edf(filename, raw)</span>
+0007 <span class="comment">%   bml_write_vhdr(filename, raw)</span>
 0008 <span class="comment">%</span>
 0009 <span class="comment">% filename - string, file basename without extension (trial number will be</span>
 0010 <span class="comment">%   appended). The name identifier of the trial (e.g. run, as in BIDs)</span>
-0011 <span class="comment">%   should be placed at the very end, after an undersocre.</span>
-0012 <span class="comment">% raw - ft_datatype_raw</span>
-0013 
-0014 assert(isstruct(raw),&quot;invalid raw&quot;);
-0015 assert(all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(raw))),&quot;invalid raw&quot;);
-0016 
-0017 nTrial = length(raw.trial);
-0018 format_string = strcat(filename,<span class="string">'%0'</span>,num2str(ceil(log10(nTrial))),<span class="string">'i.edf'</span>);
+0011 <span class="comment">%   should be placed at the very end, after an underscore. NOTE: filename</span>
+0012 <span class="comment">%   must include folder path.</span>
+0013 <span class="comment">% raw - ft_datatype_raw</span>
+0014 
+0015 assert(isstruct(raw),&quot;invalid raw&quot;);
+0016 assert(all(ismember({<span class="string">'trial'</span>,<span class="string">'time'</span>,<span class="string">'label'</span>},fieldnames(raw))),&quot;invalid raw&quot;);
+0017 
+0018 nTrial = length(raw.trial);
 0019 
 0020 <span class="comment">%creating header</span>
 0021 hdr=[];
@@ -96,9 +97,9 @@ This function is called by:
 0043 nTrials = [];
 0044 
 0045 <span class="keyword">for</span> i=1:nTrial
-0046   basename = [name_file, num2str(i)];
-0047   <span class="comment">%calling fieldtrip's EDF writing function</span>
-0048   ft_write_data([filename,  num2str(i), <span class="string">'.edf'</span>],raw.trial{i},<span class="string">'header'</span>,hdr)
+0046   basename = [name_file, num2str(i,<span class="string">'%02.f'</span>), <span class="string">'_ieeg.vhdr'</span>];
+0047   <span class="comment">%calling fieldtrip's data writing function</span>
+0048   ft_write_data([filename,  num2str(i,<span class="string">'%02.f'</span>), <span class="string">'_ieeg.vhdr'</span>],raw.trial{i},<span class="string">'header'</span>,hdr)
 0049   <span class="comment">% get time</span>
 0050   time = raw.time{i};
 0051   label = raw.label;
@@ -113,25 +114,19 @@ This function is called by:
 0060   name = [name ; basename];
 0061   nSamples = [nSamples ; length(time)];
 0062   Fs = [Fs ; raw.fsample];
-0063   filetype = [filetype ; <span class="string">'.edf'</span>];
+0063   filetype = [filetype ; <span class="string">'brainvision'</span>];
 0064   nChans = [nChans; length(label)];
 0065   nTrials = [nTrials ; 1];
 0066  
 0067 <span class="keyword">end</span>
 0068 
-0069 <span class="comment">% %%%%%%%%%%%%%%%%%</span>
-0070 <span class="comment">% fix bugs</span>
-0071 folder = cellstr(folder);
-0072 name = cellstr(name);
-0073 filetype = cellstr(filetype);
-0074 <span class="comment">% %%%%%%%%%%%%%%%%%</span>
-0075 <span class="comment">% write sync table to save the time information</span>
-0076 annot = table(starts, ends, duration, s1, t1, s2, t2, folder, name, nSamples, Fs, filetype, nChans, nTrials);
-0077 <span class="comment">% find general task name</span>
-0078 last_pos = find(name_file == <span class="string">'_'</span>, 1, <span class="string">'last'</span>)-1;
-0079 name_table = name_file(1:last_pos);
-0080 <a href="../../bml/annot/bml_annot_write_tsv.html" class="code" title="function bml_annot_write_tsv(annot,filename,varargin)">bml_annot_write_tsv</a>(annot, fullfile(path_file, [name_table, <span class="string">'.tsv'</span>]));
-0081 <span class="keyword">end</span></pre></div>
+0069 <span class="comment">% write sync table to save the time information</span>
+0070 annot = table(starts, ends, duration, s1, t1, s2, t2, folder, name, nSamples, Fs, filetype, nChans, nTrials);
+0071 <span class="comment">% find general task name</span>
+0072 last_pos = find(name_file == <span class="string">'_'</span>, 1, <span class="string">'last'</span>)-1;
+0073 name_table = name_file(1:last_pos);
+0074 <a href="../../bml/annot/bml_annot_write_tsv.html" class="code" title="function bml_annot_write_tsv(annot,filename,varargin)">bml_annot_write_tsv</a>(annot, fullfile(path_file, [name_table, <span class="string">'.tsv'</span>]));
+0075 <span class="keyword">end</span></pre></div>
 <hr><address>Generated on Thu 31-Mar-2022 14:53:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
