@@ -66,6 +66,12 @@ for i=1:nTrial
  
 end
 
+% %%%%%%%%%%%%%%%%%
+% fix bugs
+folder = cellstr(folder);
+name = cellstr(name);
+filetype = cellstr(filetype);
+% %%%%%%%%%%%%%%%%%
 % write sync table to save the time information
 annot = table(starts, ends, duration, s1, t1, s2, t2, folder, name, nSamples, Fs, filetype, nChans, nTrials);
 % find general task name

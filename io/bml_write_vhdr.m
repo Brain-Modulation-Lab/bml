@@ -1,14 +1,15 @@
 function bml_write_vhdr(filename, raw)
 
-% BML_WRITE_EDF saves a ft_datatype_raw to BrainVision file(s) and a sync annot
+% BML_WRITE_VHDR saves a ft_datatype_raw to BrainVision file(s) and a sync annot
 % table
 %
 % Use as
-%   bml_write_edf(filename, raw)
+%   bml_write_vhdr(filename, raw)
 %
 % filename - string, file basename without extension (trial number will be
 %   appended). The name identifier of the trial (e.g. run, as in BIDs)
-%   should be placed at the very end, after an undersocre.
+%   should be placed at the very end, after an underscore. NOTE: filename
+%   must include folder path.
 % raw - ft_datatype_raw
 
 assert(isstruct(raw),"invalid raw");
@@ -43,7 +44,7 @@ nTrials = [];
 
 for i=1:nTrial
   basename = [name_file, num2str(i,'%02.f'), '_ieeg.vhdr'];
-  %calling fieldtrip's EDF writing function 
+  %calling fieldtrip's data writing function 
   ft_write_data([filename,  num2str(i,'%02.f'), '_ieeg.vhdr'],raw.trial{i},'header',hdr)
   % get time
   time = raw.time{i};
