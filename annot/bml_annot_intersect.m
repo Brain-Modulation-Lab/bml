@@ -62,6 +62,14 @@ groupby   = bml_getopt(cfg,'groupby',[]);
 groupby_x = bml_getopt(cfg,'groupby_x',groupby);
 groupby_y = bml_getopt(cfg,'groupby_y',groupby);
 
+if isempty(x)
+    annot = x;
+    return
+end
+if isempty(y)
+    annot = y;
+    return
+end
 
 if isempty(x.Properties.Description); x.Properties.Description = 'x'; end
 if isempty(y.Properties.Description); y.Properties.Description = 'y'; end
