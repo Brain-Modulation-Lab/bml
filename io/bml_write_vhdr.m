@@ -17,12 +17,15 @@ assert(all(ismember({'trial','time','label'},fieldnames(raw))),"invalid raw");
 
 nTrial = length(raw.trial);
 
-%creating header
-hdr=[];
-hdr.nChans = length(raw.label);
-hdr.Fs=round(1/mean(diff(raw.time{1})));
-hdr.label=raw.label;
-
+if isstruct(raw.hdr)
+    hdr = raw.hdr;
+else
+    %creating header
+    hdr=[];
+    hdr.nChans = length(raw.label);
+    hdr.Fs=round(1/mean(diff(raw.time{1})));
+    hdr.label=raw.label;
+end
 % get fileparts
 [path_file,name_file,~] = fileparts(filename);
 
