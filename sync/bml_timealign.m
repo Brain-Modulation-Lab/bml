@@ -31,6 +31,10 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   %            slave_delta_t > cfg.penalty_tau. Defaults to 2. 
   % cfg.ft_feedback - string: default to 'no'. Defines verbosity of fieldtrip
   %            functions 
+  % cfg.simulate_aliasing - bool, indicates if alising should be simulated
+  %             on the slave when downsampling. Useful if one if the signals was not
+  %             low-pass filtered at aquisition time (e.g. natus DC
+  %             channels). Defaults to true. 
   %
   % master - FT_DATATYPE_RAW continuous with single channel and trial
   % slave - FT_DATATYPE_RAW continuous with single channel and trial
@@ -59,6 +63,7 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   lpf_freq          = bml_getopt(cfg,'lpf_freq', 4000);
   penalty_tau       = bml_getopt(cfg,'penalty_tau');
   penalty_n         = bml_getopt(cfg,'penalty_n', 2); 
+  simulate_aliasing = bml_getopt(cfg,'simulate_aliasing', 1); 
   ft_feedback       = bml_getopt(cfg,'ft_feedback','no');
   ft_feedback       = ft_feedback{1};
 
@@ -78,6 +83,7 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   if prod(max_scan_range) > 0 % if files do not overlap
     slave_delta_t=nan;
     max_corr=nan;
+    warning('files do not overlap');
     return
   end
   if isempty(scan)
@@ -110,10 +116,14 @@ function [slave_delta_t, max_corr, master, slave] = bml_timealign(cfg, master, s
   cfg.showcallinfo='no';
   master = ft_resampledata(cfg, master);
   cfg=[]; cfg.feedback=ft_feedback;
-  cfg.time=master.time; cfg.method='linear';
   cfg.trackcallinfo=false;
   cfg.showcallinfo='no';
-  slave = ft_resampledata(cfg, slave);
+  if simulate_aliasing
+	cfg.time=master.time; cfg.method='linear';
+    slave = ft_resampledata(cfg, slave);  
+  else
+    error('Low pass filter to avoid aliasing not implemented'); 
+  end
 
   %checking slave resampling
   if abs(slave.fsample/master.fsample-1) < freqreltol

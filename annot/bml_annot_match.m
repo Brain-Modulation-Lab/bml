@@ -75,7 +75,16 @@ if template.fsample ~= Fs
 end
 
 %normalizing template
-template_std = std(template.trial{1});
+if any(ismissing(template.trial{1}))    
+    warning('Template contains nans. Masking wiht zeros.');
+    cfg=[];
+    cfg.value=0;
+    cfg.remask_nan=1;
+    cfg.complete_trial =0;
+    template=bml_mask(cfg,template);
+end
+
+template_std = std(template.trial{1},'omitnan');
 if template_std > eps
   template.trial{1} = (template.trial{1} - mean(template.trial{1})) ./ template_std;
 else
@@ -160,7 +169,7 @@ for s=1:numel(data.trial)
         if overlap <= allow_overlap
           annot = [annot; cell2table({max_ti,max_tf,max_r})];
           n_annots_per_scan = n_annots_per_scan + 1;
-          r(floor(max_idx-n1/2):ceil(max_idx+n1/2))=0;
+          r(max(floor(max_idx-n1/2),1):min(ceil(max_idx+n1/2),length(r)))=0;
           search_match = n_annots_per_scan < max_annot_per_scan;
         else
           r(floor(max_idx-n1/4):ceil(max_idx+n1/4))=0;

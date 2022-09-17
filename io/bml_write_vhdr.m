@@ -70,6 +70,12 @@ for i=1:nTrial
 end
 
 % write sync table to save the time information
+% To remove code crashing with single row table:
+if (length(starts) == 1)
+    folder = cellstr(folder);
+    name = cellstr(name);
+    filetype = cellstr(filetype);
+end
 annot = table(starts, ends, duration, s1, t1, s2, t2, folder, name, nSamples, Fs, filetype, nChans, nTrials);
 % find general task name
 last_pos = find(name_file == '_', 1, 'last')-1;
