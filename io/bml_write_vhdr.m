@@ -66,7 +66,6 @@ for i=1:nTrial
   filetype = [filetype ; 'brainvision'];
   nChans = [nChans; length(label)];
   nTrials = [nTrials ; 1];
- 
 end
 
 % write sync table to save the time information

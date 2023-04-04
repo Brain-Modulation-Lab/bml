@@ -55,7 +55,7 @@ else
   end
   cfg=[];
   cfg.channel = template_channel;
-	cfg.ft_feedback = 'no';
+  cfg.ft_feedback = 'no';
   cfg.showcallinfo = 'no';
   cfg.trackcallinfo = false;
   template = ft_selectdata(cfg, template);
@@ -65,8 +65,8 @@ if numel(template.trial) > 1
 end
 
 % verifying sampling rate of template 
-template.fsample = round(1/mean(diff(template.time{1})));
-Fs = round(1/mean(diff(data.time{1})));
+template.fsample = bml_getFs(template);% round(1/mean(diff(template.time{1})));
+Fs = bml_getFs(data);%round(1/mean(diff(data.time{1})));
 if template.fsample ~= Fs
   cfg=[];
   cfg.resamplefs = Fs;
@@ -131,12 +131,26 @@ for s=1:numel(data.trial)
     %doing the cross correlation
     %calculating Pearson's correlation coefficient for cross correlation
     [r, lags] = xcorr(data_s.trial{1}(l,:),template.trial{1}(1,:));
+    %figure; plot(data_s.trial{1}(l,:));
+    %figure; plot(template.trial{1}(1,:));
     d2u = xcorr((data_s.trial{1}(l,:)).^2,ones(1,n1));
     du  = xcorr(data_s.trial{1}(l,:),ones(1,n1));
     sqdenom = n1*d2u - du.^2;
     sqdenom(sqdenom < eps) = eps;
     r = r ./ realsqrt(sqdenom);
-    
+    mad_r = mad(r,1);
+
+    %cropping only valid portions of xcorr
+    n_s = length(data_s.trial{1}(l,:));
+    if n_s >= n1
+        r = r(n_s:(2*n_s-n1));
+        lags = lags(n_s:(2*n_s-n1));
+    else
+        warning("template shorter than matching signal")
+        r = r(n1:(2*n1-n_s));
+        lags = lags(n1:(2*n1-n_s));
+    end
+        
     %detecting matches
     loop_count = 0;
     n_annots_per_scan = 0;
@@ -167,7 +181,7 @@ for s=1:numel(data.trial)
         end
         
         if overlap <= allow_overlap
-          annot = [annot; cell2table({max_ti,max_tf,max_r})];
+          annot = [annot; cell2table({max_ti,max_tf,max_r,mad_r})];
           n_annots_per_scan = n_annots_per_scan + 1;
           r(max(floor(max_idx-n1/2),1):min(ceil(max_idx+n1/2),length(r)))=0;
           search_match = n_annots_per_scan < max_annot_per_scan;
@@ -182,7 +196,7 @@ for s=1:numel(data.trial)
 end
 
 if ~isempty(annot)
-  annot.Properties.VariableNames = {'starts','ends','max_cor'};
+  annot.Properties.VariableNames = {'starts','ends','max_cor','mad_cor'};
   annot = bml_annot_table(annot);
 end
 

@@ -1,4 +1,4 @@
-function [ref,U] = bml_rereference(cfg,raw)
+function [ref,U] = bml_rereference_PLB20230125(cfg,raw)
 
 % BML_REREFERENCE applies re-referencing scheme to raw
 %
@@ -19,7 +19,6 @@ function [ref,U] = bml_rereference(cfg,raw)
 %   'LAR', local average referencing
 %   'VAR', variable average referencing
 %   'bipolar', bipolar referencing
-%   'Average_Electrodes', for white matter referenceing scheme
 % cfg.percent - numeric, indicates percentage of labels in group used in
 %   trimmed mean. Defaults to 50. 
 % cfg.crossfading_width - scalar. Width in samples of the crossfading
@@ -79,7 +78,7 @@ g0 = sum(group<=0);
 ug = unique(g);
 [N,~] = histc(g,ug);
 
-if ~raw_has_nan && ismember(method,{'LAR','VAR'})
+if ~raw_has_nan && ismember(method,{'CAR','LAR','VAR'})
   
   %% matrix multiplication based methods  
     
@@ -123,8 +122,8 @@ if ~raw_has_nan && ismember(method,{'LAR','VAR'})
   %applying unmixing matrix to data
   ref = bml_apply(@(x) U*x, raw);
 
-
-else  
+else
+  
   %% explicit substraction based methods
     
   %removing null group 
@@ -136,7 +135,7 @@ else
     for t=1:numel(raw.trial)
       for g=1:numel(ug)
         %calculating groups common average
-        commavg = nanmean(raw.trial{t}(g,:),1);
+        commavg = nanmean(raw.trial{t}(group==ug(g),:),1);
         ref.trial{t}(group==ug(g),:) = raw.trial{t}(group==ug(g),:) - commavg;
       end
     end
@@ -235,50 +234,6 @@ else
       ref = ft_selectdata(cfg1, ref);
     end
     
-    
-  elseif ismember(method,('Average_Electrodes'))
-         %loading label again from cfg
-    label   = bml_getopt(cfg,'label',raw.label);
-    refchan = bml_getopt(cfg,'refchan',[]); 
-
-    
-    %defining reference for each channel to be re-referenced
-    if isempty(refchan)
-      error('reference channels required for average monopolar referencing')
-    elseif numel(refchan)~=2
-      error('Two reference channels required for average monopolar referencing')
-    else
-      reftable = table(label);
-      %refchan.reference1 = table(refchan.Reference1);
-      %reftable.reference2 = table(refchan.Reference2)
-    end
-    
-    ref = raw;
-    
-    for t=1:numel(raw.trial)
-      for j=1:height(reftable)
-        ridx=find(ismember(raw.label,refchan(1)));
-        if isempty(ridx)
-            error('refchan %s not available to rereference channel %s',refchan.Reference1,reftable.label{j});
-        end 
-        ridx=find(ismember(raw.label,refchan(2)));
-        if isempty(ridx)
-            error('refchan %s not available to rereference channel %s',refchan.Reference2,reftable.label{j});
-        end 
-        ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
-          raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - ...
-          (raw.trial{t}(ismember(raw.label,refchan(1)),:)+raw.trial{t}(ismember(raw.label,refchan(2)),:))/2;
-      end
-    end  
-    
-    if ~bml_getopt(cfg,'refkeep',0)
-      %removing reference channels
-      cfg1=[];
-      cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-      ref = ft_selectdata(cfg1, ref);
-    end
- 
-      
   elseif ismember(method,{'LAR','local'})
     error('local average referencing not implemented for data with NaNs')
   elseif ismember(method,{'VAR','variable'})

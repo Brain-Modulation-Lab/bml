@@ -31,7 +31,7 @@ toilimbands      = [min(data.time) max(data.time)];
 cfg.ylim         = bml_getopt(cfg,'ylim','maxmin');
 cfg.colorbar     = bml_getopt(cfg,'colorbar','yes');
 
-cfg.baselinetype = 'db'; 
+cfg.baselinetype = 'db'; % 'db' 
 cfg.showlabels   = 'no';	
 cfg.showscale    = 'no';
 cfg.box          = 'no';

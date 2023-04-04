@@ -14,3 +14,19 @@ isits = isits/fs;
 isits = movmean(isits,[ISIFILTER, ISIFILTER]);
 end
 
+
+% helper function isi
+function I = isi(D)
+spike_samples = find(D~=0);
+if length(spike_samples) < 2
+    disp('ISI aborting: Not enough spikes in D.');
+else
+    I = zeros(length(spike_samples)-1,1);
+    for i = 1:length(spike_samples)-1
+        I(i) = spike_samples(i+1)-spike_samples(i);
+    end
+end
+end
+
+
+
