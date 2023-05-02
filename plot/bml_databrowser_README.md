@@ -1,4 +1,4 @@
-GUI for Viewing High-Channel-Count Data with MATLAB FieldTrip Objects
+GUI for Viewing High-Channel Count Data with MATLAB FieldTrip Objects
 =====================================================================
 
 This graphical user interface (GUI) provides an intuitive way to visualize MATLAB FieldTrip objects with high-channel-count data. It is designed for neuroscience students and researchers who want to explore and analyze data from neurophysiological experiments.
