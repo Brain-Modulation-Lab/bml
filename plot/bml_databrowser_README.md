@@ -25,9 +25,9 @@ The GUI is built in MATLAB 2021a. I have not tested in other versions of MATLAB.
 Installation
 ------------
 
-The only required dependencies are: FieldTrip and [PlotBig](https://www.mathworks.com/matlabcentral/fileexchange/40790-plot-big). 
+The only required dependencies are: [FieldTrip](https://www.fieldtriptoolbox.org/) and [PlotBig](https://www.mathworks.com/matlabcentral/fileexchange/40790-plot-big). 
 
-To ensure that these are installed, try `which ft_selectdata` and `which LinePlotReducer` in the MATLAB command line. These should return paths to the files. If they are not found, download these packages and add them to your path
+To ensure that these are installed, try `which ft_selectdata` (a FieldTrip function) and `which LinePlotReducer` (a Plot Big function) in the MATLAB command line. These should return paths to the files. If they are not found, download these packages and add them to your path
 
 
 How to use
