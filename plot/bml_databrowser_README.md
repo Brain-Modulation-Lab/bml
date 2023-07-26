@@ -14,7 +14,12 @@ The GUI includes the following features:
 
 -   Easy data loading: The GUI allows users to load FieldTrip objects in your workspace just by typing them into the box. 
 -   Data visualization: 50-channel simulataneous visualization with <1s update times. 
--   Channel selection: The GUI allows users to select which channels to visualize and, in the case of trialed data, visualize many trials from one channel. 
+-   Channel selection: The GUI allows users to select which channels to visualize and, in the case of trialed data, visualize many trials from one channel.
+
+Feature requests: 
+
+- y-axis scale bars for each individual channel, useful for comparing scales across channels
+
 
 
 System requirements
