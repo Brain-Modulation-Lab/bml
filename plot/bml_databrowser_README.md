@@ -51,6 +51,8 @@ Please see the video below for basic functionality. Keep an eye on the keystroke
 - For BML, you can also load artifact files to visualize your artifact rejections in the raw recording. 
 ![Alt Text](./load-artifact.gif)
 
+(Screen recordings taken with https://gifcap.dev/, key strokes recorded with https://github.com/keycastr/keycastr/tree/main)
+
 Support
 -------
 
