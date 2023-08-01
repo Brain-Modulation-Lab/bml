@@ -16,9 +16,11 @@ The GUI includes the following features:
 -   Data visualization: 50-channel simulataneous visualization with <1s update times. 
 -   Channel selection: The GUI allows users to select which channels to visualize and, in the case of trialed data, visualize many trials from one channel.
 
-Feature requests: 
+Feature requests and known bugs:
 
-- y-axis scale bars for each individual channel, useful for comparing scales across channels
+- Bug: Time axis doesn't update when clicking new trial (eg, DM1002 lombard run 3).
+- Bug: In trialed data view, small-time scale axes don't properly show (if the current view is < 2 seconds, there aren't enough time ticks).
+- Feature: y-axis scale bars for each individual channel, useful for comparing scales across channels
 
 
 
