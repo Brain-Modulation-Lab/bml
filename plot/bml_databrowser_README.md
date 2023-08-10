@@ -20,7 +20,23 @@ Feature requests and known bugs:
 
 - Bug: Time axis doesn't update when clicking new trial (eg, DM1002 lombard run 3).
 - Bug: In trialed data view, small-time scale axes don't properly show (if the current view is < 2 seconds, there aren't enough time ticks).
-- Feature: y-axis scale bars for each individual channel, useful for comparing scales across channels
+- Feature: y-axis scale bars for each individual channel, useful for comparing scales across channels. [LB 2023 08 09] This could be implemented with a checkbox "scale uniformly" which can apply the same scale factor to each of the channels. 
+- Feature: channel selection by group.
+  
+This can be done with Levenstein edit distance to construct a distance matrix and hierarchical clustering. Below is some code that might get started with that. 
+D = []; 
+for i = 1:height(t.channel)
+    D = [D editDistance(t.channel(i), t.channel)]; 
+end
+
+L = linkage(D);
+dendrogram(L);
+T = cluster(L,"maxclust",5)
+
+
+alternatively, this could be achieved with ft_selectdata(). There could be achieved with fieldtrip's channelselection() algorithm, which comes for free. https://github.com/fieldtrip/fieldtrip/blob/master/utilities/ft_channelselection.m
+there could be a text box just above the channel selection tab. When the user finishes typing, the channels could filter according to their selection. they can then multiselect the channels they want. Filter [ ecog* ] or [ -ecog* ]. 
+
 
 
 
