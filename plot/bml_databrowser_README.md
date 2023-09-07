@@ -14,7 +14,30 @@ The GUI includes the following features:
 
 -   Easy data loading: The GUI allows users to load FieldTrip objects in your workspace just by typing them into the box. 
 -   Data visualization: 50-channel simulataneous visualization with <1s update times. 
--   Channel selection: The GUI allows users to select which channels to visualize and, in the case of trialed data, visualize many trials from one channel. 
+-   Channel selection: The GUI allows users to select which channels to visualize and, in the case of trialed data, visualize many trials from one channel.
+
+Feature requests and known bugs:
+
+- Bug: Time axis doesn't update when clicking new trial (eg, DM1002 lombard run 3).
+- Bug: In trialed data view, small-time scale axes don't properly show (if the current view is < 2 seconds, there aren't enough time ticks).
+- Feature: y-axis scale bars for each individual channel, useful for comparing scales across channels. [LB 2023 08 09] This could be implemented with a checkbox "scale uniformly" which can apply the same scale factor to each of the channels. 
+- Feature: channel selection by group.
+  
+This can be done with Levenstein edit distance to construct a distance matrix and hierarchical clustering. Below is some code that might get started with that. 
+D = []; 
+for i = 1:height(t.channel)
+    D = [D editDistance(t.channel(i), t.channel)]; 
+end
+
+L = linkage(D);
+dendrogram(L);
+T = cluster(L,"maxclust",5)
+
+
+alternatively, this could be achieved with ft_selectdata(). There could be achieved with fieldtrip's channelselection() algorithm, which comes for free. https://github.com/fieldtrip/fieldtrip/blob/master/utilities/ft_channelselection.m
+there could be a text box just above the channel selection tab. When the user finishes typing, the channels could filter according to their selection. they can then multiselect the channels they want. Filter [ ecog* ] or [ -ecog* ]. 
+
+
 
 
 System requirements
@@ -25,9 +48,9 @@ The GUI is built in MATLAB 2021a. I have not tested in other versions of MATLAB.
 Installation
 ------------
 
-The only required dependencies are: FieldTrip and [PlotBig](https://www.mathworks.com/matlabcentral/fileexchange/40790-plot-big). 
+The only required dependencies are: [FieldTrip](https://www.fieldtriptoolbox.org/) and [PlotBig](https://www.mathworks.com/matlabcentral/fileexchange/40790-plot-big). 
 
-To ensure that these are installed, try `which ft_selectdata` and `which LinePlotReducer` in the MATLAB command line. These should return paths to the files. If they are not found, download these packages and add them to your path
+To ensure that these are installed, try `which ft_selectdata` (a FieldTrip function) and `which LinePlotReducer` (a Plot Big function) in the MATLAB command line. These should return paths to the files. If they are not found, download these packages and add them to your path
 
 
 How to use
@@ -43,6 +66,8 @@ Please see the video below for basic functionality. Keep an eye on the keystroke
 ![Alt Text](./load-annot.gif)
 - For BML, you can also load artifact files to visualize your artifact rejections in the raw recording. 
 ![Alt Text](./load-artifact.gif)
+
+(Screen recordings taken with https://gifcap.dev/, key strokes recorded with https://github.com/keycastr/keycastr/tree/main)
 
 Support
 -------
