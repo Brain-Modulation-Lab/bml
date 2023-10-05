@@ -26,6 +26,9 @@ function textgrids_all = bml_annot2praattextgrid(cfg, annot)
 %     tier.Label - cell array of phoneme/word labels
 % tg.tmin
 % tg.tmax
+%
+% 
+% Latane Bullock 20230815 latanebullock@gmail.com
 
 
 col_name  = bml_getopt(cfg,'col_name'); % col_name = col_name{1}; 
