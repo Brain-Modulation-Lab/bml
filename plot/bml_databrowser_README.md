@@ -18,6 +18,7 @@ The GUI includes the following features:
 
 Feature requests and known bugs:
 
+- Unfavorable: after plotting an annotation .tsv, any actions that reset the plot also erase the annot. [LB 2023 10 05]
 - Bug: Time axis doesn't update when clicking new trial (eg, DM1002 lombard run 3).
 - Bug: In trialed data view, small-time scale axes don't properly show (if the current view is < 2 seconds, there aren't enough time ticks).
 - Feature: y-axis scale bars for each individual channel, useful for comparing scales across channels. [LB 2023 08 09] This could be implemented with a checkbox "scale uniformly" which can apply the same scale factor to each of the channels. 
