@@ -90,23 +90,19 @@ for i=1:height(roi)
     all_warpfactor(i) = warpfactor;
 
     if diagnostic_plot
-        tbar = mean(i_slave_events.starts);
-        i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
-        figure; tiledlayout(1, 2); nexttile();
-        plot(master_events.starts,ones(1,height(master_events)),'bo');
-        hold on;
-        plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),'r*');
+      tbar = mean(i_slave_events.starts);
+      i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
+      figure; tiledlayout(1, 2); nexttile();
+      plot(master_events.starts,ones(1,height(master_events)),'bo');
+      hold on;
+      plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),'r*');
 
-        % [LB 20231102] Plot histogram of events to get a sense of how well
-        % the syncronization worked
-        idxs_tmp = master_events.starts > min(i_slave_events_starts) & ...
-            master_events.starts < max(i_slave_events_starts);
-        master_events_tmp = master_events.starts(idxs_tmp);
-        diffs = abs(i_slave_events_starts - repmat(master_events_tmp', [height(i_slave_events_starts), 1]));
-        diffs = min(diffs, [], 2);
-        nexttile(); histogram(log10(diffs));
-        xlabel('master minus slave log10 diff [s]');
-        ylabel('# events');
+      master_events_tmp = master_events.starts(
+      diffs = abs(i_slave_events_starts - repmat(master_events.starts', [height(i_slave_events_starts), 1]));
+       diffs = min(diffs, [], 2);
+       nexttile(); histogram(log10(diffs));
+       xlabel('master minus slave log10 diff [s]'); 
+       ylabel('# events')
     end
 
     all_meanerror(i) = min_cost/height(i_slave_events);
