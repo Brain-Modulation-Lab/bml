@@ -33,7 +33,7 @@ facetvar     = bml_getopt_single(cfg,'facet');
 annot = bml_annot_table(annot);
 
 if isempty(varargin)
-  varargin={'LineWidth',0.5};
+  varargin={'LineWidth',2};
 end
 
 if isempty(facetvar)
