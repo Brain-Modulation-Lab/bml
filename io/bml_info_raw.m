@@ -11,6 +11,7 @@ function info = bml_info_raw(cfg)
 % the following field:
 % cfg.path - string: path to the folder containing the files. Defauts to '.'
 % cfg.has_channel - cell of strings: channels required 
+% cfg.pattern - string: pattern to match to file names
 %
 % Returns a matlab 'table' with the folloing variables:
 %   starts - double: time in seconds 
