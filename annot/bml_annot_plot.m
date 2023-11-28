@@ -26,20 +26,21 @@ if istable(cfg)
   cfg=[];
 end
 
-yvar      = bml_getopt_single(cfg,'y','id');
-facetvar  = bml_getopt_single(cfg,'facet');
+yvar         = bml_getopt_single(cfg,'y','id');
+yvar_offset  = bml_getopt_single(cfg,'y_offset', 0); % added Latane Bullock 2023 05 31
+facetvar     = bml_getopt_single(cfg,'facet');
 
 annot = bml_annot_table(annot);
 
 if isempty(varargin)
-  varargin={'LineWidth',0.5};
+  varargin={'LineWidth',2};
 end
 
 if isempty(facetvar)
   for i=1:height(annot)
     hold on;
     annot_yvar = annot.(yvar);
-    plot([annot.starts(i),annot.ends(i)],[annot_yvar(i),annot_yvar(i)],varargin{:})
+    plot([annot.starts(i),annot.ends(i)],[annot_yvar(i)+yvar_offset,annot_yvar(i)+yvar_offset],varargin{:})
     ylabel(yvar);
     xlabel('Time (s)');
   end

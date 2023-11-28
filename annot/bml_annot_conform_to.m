@@ -26,7 +26,9 @@ conformed = annot(:,template_vars);
 %verifying format 
 for i=1:width(conformed)
     if iscellstr(template{:,i}) && ~iscellstr(conformed{:,i})
-        if isvector(conformed{:,i}) || ismatrix(conformed{:,i})
+        if isdatetime(conformed{:,i}) % added Latane Bullock 20231019
+            conformed.(i) = cellstr(datestr(conformed.(i)));
+        elseif  isvector(conformed{:,i}) || ismatrix(conformed{:,i})
             conformed.(i) = cellstr(num2str(conformed.(i)));
         end
     end
