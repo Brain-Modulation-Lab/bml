@@ -59,7 +59,7 @@ for i=1:height(roi)
     i_slave_events.type = repmat({'audio'},[height(i_slave_events),1]);
     audio1 = smooth(audio1,min_ipi*audio.fsample);
     i_slave_events.value = (audio1(ceil(locs .* audio.fsample)) > 0) .* 1.0;
-    i_slave_events.sample = (locs.*audio.fsample)';
+    i_slave_events.sample = round(locs.*audio.fsample)';
     i_slave_events.filename(:) = roi.name(i);
 
     events = bml_annot_rowbind(events,i_slave_events);
