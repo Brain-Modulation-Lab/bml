@@ -36,6 +36,7 @@ function sync = bml_sync_transfer_neuroomega_chantype(cfg)
 % 'micro_lfp'  | 'CLFP_01___Central'
 % 'macro_lfp'  | 'CMacro_LFP_01___Central
 % 'emg'        | 'CEMG_1___01'
+% 'events'     | (will use micro time)
 % ----------------------------------------
 %
 %
@@ -48,6 +49,9 @@ roi               = bml_getopt(cfg,'roi');
 
 assert(~isempty(chantype),'chantype required');
 assert(~isempty(roi),'roi required');
+assert(all(ismember({'chantype'},roi.Properties.VariableNames)));
+
+roi.chantype = strrep(roi.chantype,'events','micro');
 
 hdr1 = ft_read_header(fullfile(roi.folder{1},roi.name{1}),'chantype','chaninfo');
 if isempty(time_channel)

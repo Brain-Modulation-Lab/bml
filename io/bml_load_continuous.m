@@ -284,7 +284,7 @@ for i=2:height(roi)
     
     delta_s = delta_t*Fs/skipFactor;
     delta_s_int = round(delta_s);
-    assert(abs(delta_t)<timetol,"rois overlap by %f > tolerance = %f correct or increase tolerance",delta_t,timetol); 
+    assert(delta_t > -timetol,"rois overlap by %f > tolerance = %f correct or increase tolerance",delta_t,timetol); 
 
     if abs(delta_s_int - delta_s) < timetol*Fs/skipFactor
       if ismember(discontinuous,{'warn'})

@@ -3,7 +3,7 @@ function [sync_roi, hF] = bml_sync_event(cfg, master_events, slave_events)
 % bml_sync_event synchronizes files according to events
 %
 % Use as 
-%    sync_roi = bml_sync_event(cfg, master_events, slave_events)
+%    [sync_roi, hF] = bml_sync_event(cfg, master_events, slave_events)
 %
 %   slave_events - events annotation table with sample column
 %
@@ -11,20 +11,24 @@ function [sync_roi, hF] = bml_sync_event(cfg, master_events, slave_events)
 %   cfg.master_events - events to align to in annot table in master time
 %   cfg.timewarp - logical: Should slave time be warped? defaults to true.
 %   cfg.diagnostic_plot - logical
+%   cfg.plot_title - str
 %   cfg.timetol - numeric, time tolerance in seconds. Defaults to 1e-6
 %   cfg.min_events - integer. Minimum number of events required to attemp
 %             alingment, defaults to 10. 
 %   cfg.strict - logical. Issue errors if timetol is violated instead of errors. 
 %             Defaults to false. 
 %
-% returns a roi table
+% returns 
+%   sync_roi - roi table
+%   hF - figure handle
 
-timewarp          = bml_getopt(cfg,'timewarp',false);
+%timewarp          = bml_getopt(cfg,'timewarp',false);
 diagnostic_plot   = bml_getopt(cfg,'diagnostic_plot',false);
+plot_title        = bml_getopt_single(cfg,'plot_title',"events diagnostic plot");
 timetol           = bml_getopt(cfg,'timetol',1e-3);
 sim_threshold     = bml_getopt(cfg,'sim_threshold',0.9);
-min_events        = bml_getopt(cfg,'min_events',10);
-strict            = bml_getopt(cfg,'strict',false);
+% min_events        = bml_getopt(cfg,'min_events',10);
+% strict            = bml_getopt(cfg,'strict',false);
 
 assert(all(ismember({'starts','value'},slave_events.Properties.VariableNames)));
 assert(all(ismember({'starts','value'},master_events.Properties.VariableNames)));
@@ -101,6 +105,7 @@ for i=1:height(cons_chunks)
         plot(master_events.starts(idxs_master_events),slave_events.starts(idxs_slave_events) - master_events.starts(idxs_master_events))
         hold on;
         plot(master_events.starts(idxs_master_events(cons_chunk_idxs)),slave_events.starts(idxs_slave_events(cons_chunk_idxs)) - master_events.starts(idxs_master_events(cons_chunk_idxs)),'r')
+        title(plot_title,sprintf("[chunk %d of %d]",i,height(cons_chunks)));
         
         nexttile();
         i_slave_events_starts = (slave_events.starts(idxs_slave_events(cons_chunk_idxs))) .* cons_chunks.warpfactor(i) + cons_chunks.delta_t(i);
