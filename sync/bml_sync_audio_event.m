@@ -1,4 +1,4 @@
-function sync_roi = bml_sync_audio_event(cfg)
+function [sync_roi, hF] = bml_sync_audio_event(cfg)
 
 % bml_sync_audio_event synchronizes zoom audio files according to
 % events
@@ -56,6 +56,9 @@ assert(~isempty(master_events),'master_events required');
 all_slave_dt = zeros(height(roi),1);
 all_warpfactor = ones(height(roi),1);
 all_meanerror = zeros(height(roi),1);
+
+hF = gobjects(height(roi),1); % Latane Bullock 2023 12 12, return handles to diagnostic plots
+
 for i=1:height(roi)
   
   %getting events
@@ -92,7 +95,7 @@ for i=1:height(roi)
     if diagnostic_plot
         tbar = mean(i_slave_events.starts);
         i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
-        figure; tiledlayout(1, 2); nexttile();
+        hF(i) = figure; tiledlayout(1, 2); nexttile();
         plot(master_events.starts,ones(1,height(master_events)),'bo');
         hold on;
         plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),'r*');
@@ -105,6 +108,7 @@ for i=1:height(roi)
         diffs = abs(i_slave_events_starts - repmat(master_events_tmp', [height(i_slave_events_starts), 1]));
         diffs = min(diffs, [], 2);
         nexttile(); histogram(log10(diffs));
+        sgtitle(roi.name{i}, 'Interpreter', 'none');
         xlabel('master minus slave log10 diff [s]');
         ylabel('# events');
     end

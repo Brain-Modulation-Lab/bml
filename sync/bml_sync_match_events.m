@@ -1,4 +1,4 @@
-function [idxs_x1, idxs_x2, mean_sim] = bml_sync_match_events(cfg, events1, events2)
+function [idxs_x1, idxs_x2, mean_sim, sim] = bml_sync_match_events(cfg, events1, events2)
     % BML_SYNC_MATCH_EVENTS
     %
     % Input:
@@ -6,17 +6,20 @@ function [idxs_x1, idxs_x2, mean_sim] = bml_sync_match_events(cfg, events1, even
     %   events2: events table with required columns starts and value 
     %   cfg.timetol: intended time tolerance in seconds for similarity metric.
     %                Defaults to 0.001
+    %   cfg.simtol: similarity tolerance. Defaults to 0
     %   cfg.weight_time: float - weight of event duration similarity
     %                Defaults to 1/3
     %   cfg.weight_value_pre: float - weight of matching pre transition values
     %                Defaults to 1/3
     %   cfg.weight_value_post: float - weight of matching post transition values
     %                Defaults to 1/3
+    %   cfg.diagnostic_plot: bool
     %   
     % Output:
     %   idxs_x1: Vector of indices from x1
     %   idxs_x2: Vector of indices from x2
     %   mean_sim: mean similarity
+    %   sim: similarity vector
 
     % Latane Bullock 2023 11 08 
     % Alan Bush 2023 12 05 - generalizer to similarity functions
@@ -28,43 +31,35 @@ function [idxs_x1, idxs_x2, mean_sim] = bml_sync_match_events(cfg, events1, even
     % contain indices from x1 and x2 respecively which maximizes sum(x1[idxs_x1]==x2[idxs_x2]).  
 
     timetol = bml_getopt(cfg,'timetol',0.001);
-    simtol = bml_getopt(cfg,'simtol',0.001);
-    wdt = bml_getopt(cfg,'weight_time',1/3);
-    wv1 = bml_getopt(cfg,'weight_value_pre',1/3);
-    wv2 = bml_getopt(cfg,'weight_value_post',1/3);
-
-%     %defining trigger feature matrix with columns
-%     % 1) pre-inter-trigger interval,
-%     % 2) post-inter-trigger interval,
-%     % 3) pre value, 
-%     % 4) post value
-%     events1_delta_starts = diff(events1.starts);
-%     x1 = [events1_delta_starts(1:(end-1)),...
-%           events1_delta_starts(2:end),....
-%           events1.value(1:(end-2)),...
-%           events1.value(2:(end-1))];
-% 
-%     events2_delta_starts = diff(events2.starts);
-%     x2 = [events2_delta_starts(1:(end-1)),...
-%           events2_delta_starts(2:end),....
-%           events2.value(1:(end-2)),...
-%           events2.value(2:(end-1))];
-% 
-%     similarity_fun = @(x1,x2) 1/(1+((x1(1)-x2(1))/timetol)^2) + ...
-%                               1/(1+((x1(2)-x2(2))/timetol)^2) + ...
-%                               (x1(3)==x2(3)) + ....
-%                               (x1(4)==x2(4));
+    simtol = bml_getopt(cfg,'simtol',0);
+    wdt1 = bml_getopt(cfg,'weight_time_pre',1/4);
+    wdt2 = bml_getopt(cfg,'weight_time_post',1/4);
+    wv1 = bml_getopt(cfg,'weight_value_pre',1/4);
+    wv2 = bml_getopt(cfg,'weight_value_post',1/4);
+    diagnostic_plot = bml_getopt(cfg,'diagnostic_plot',0);
 
     %defining trigger feature matrix with columns
-    % 1) inter-trigger interval,
-    % 2) pre value, 
-    % 3) post value
-    x1 = [diff(events1.starts),events1.value(1:(end-1)),events1.value(2:(end))];
-    x2 = [diff(events2.starts),events2.value(1:(end-1)),events2.value(2:(end))];
+    % 1) pre-inter-trigger interval,
+    % 2) post-inter-trigger interval,
+    % 3) pre value, 
+    % 4) post value
 
-    %similarity_fun = @(x1,x2) wdt*(1/(1+((x1(1)-x2(1))/timetol)^2)) + wv1*(x1(2)==x2(2)) + wv2*(x1(3)==x2(3));
-    similarity_fun = @(x1,x2) wdt.*(1./(1+((x1(:,1)-x2(:,1))./timetol).^2)) + wv1.*(x1(:,2)==x2(:,2)) + wv2.*(x1(:,3)==x2(:,3));
+    events1_delta_starts = diff(events1.starts);
+    x1 = [events1_delta_starts(1:(end-1)),...
+          events1_delta_starts(2:end),....
+          events1.value(1:(end-2)),...
+          events1.value(2:(end-1))];
 
+    events2_delta_starts = diff(events2.starts);
+    x2 = [events2_delta_starts(1:(end-1)),...
+          events2_delta_starts(2:end),....
+          events2.value(1:(end-2)),...
+          events2.value(2:(end-1))];
+
+    similarity_fun = @(x1,x2) wdt1 .* (1./(1+((x1(:,1)-x2(:,1))./timetol).^2)) + ...
+                              wdt2 .* (1./(1+((x1(:,2)-x2(:,2))./timetol).^2)) + ...
+                              wv1 .* (x1(:,3)==x2(:,3)) + ...
+                              wv2 .* (x1(:,4)==x2(:,4));
 
     n = size(x1,1);
     m = size(x2,1);
@@ -102,19 +97,22 @@ function [idxs_x1, idxs_x2, mean_sim] = bml_sync_match_events(cfg, events1, even
     end
     
     % idxs_x1 and idxs_x2 will contain the indices maximizing the sum
-
-    mean_sim = mean(similarity_fun(x1(idxs_x1,:),x2(idxs_x2,:)),1);
-    fprintf("mean similarity of matched events is %f\n", mean_sim)
+    sim = similarity_fun(x1(idxs_x1,:),x2(idxs_x2,:));
+    mean_sim = mean(sim,1);
     
-%     if nargout>2
-%         sum_sim = 0;
-%         n_sim = length(idxs_x1);
-%         for i=1:n_sim
-%             sum_sim = sum_sim + similarity_fun(x1(idxs_x1(i),:),x2(idxs_x2(i),:));
-%         end
-%         mean_sim = sum_sim/n_sim;
-%         fprintf("mean similarity of matched events is %f\n", mean_sim)
-%     end
+    if diagnostic_plot
+        figure
+        subplot(4,1,2:4)
+        imagesc(dp)
+        hold on
+        plot(idxs_x2,idxs_x1)
+        subplot(4,1,1)
+        plot(idxs_x2,sim)
+    
+        fprintf("mean similarity of matched events is %f\n", mean_sim)
+    end
 
-
+    idxs_x1 = idxs_x1 + 1;
+    idxs_x2 = idxs_x2 + 1;
+    
 end

@@ -51,6 +51,9 @@ assert(~isempty(master_events),'master_events required');
 all_slave_dt = zeros(height(roi),1);
 all_warpfactor = ones(height(roi),1);
 all_meanerror = zeros(height(roi),1);
+
+hF = gobjects(height(roi),1); % Latane Bullock 2023 12 12, return handles to diagnostic plots
+
 for i=1:height(roi)
   
   %getting events
@@ -76,13 +79,33 @@ for i=1:height(roi)
     all_slave_dt(i) = slave_dt;
     all_warpfactor(i) = warpfactor;
 
+%     if diagnostic_plot
+%       tbar = mean(i_slave_events.starts);
+%       i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
+%       figure;
+%       plot(i_master_events.starts,ones(1,height(i_master_events)),'bo');
+%       hold on;
+%       plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),'r*');
+%     end
     if diagnostic_plot
-      tbar = mean(i_slave_events.starts);
-      i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
-      figure;
-      plot(i_master_events.starts,ones(1,height(i_master_events)),'bo');
-      hold on;
-      plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),'r*');
+        tbar = mean(i_slave_events.starts);
+        i_slave_events_starts = (i_slave_events.starts - tbar) .* warpfactor + tbar + slave_dt;
+        hF(i) = figure; tiledlayout(1, 2); nexttile();
+        plot(master_events.starts,ones(1,height(master_events)),'bo');
+        hold on;
+        plot(i_slave_events_starts,ones(1,length(i_slave_events_starts)),'r*');
+
+        % [LB 20231102] Plot histogram of events to get a sense of how well
+        % the syncronization worked
+        idxs_tmp = master_events.starts > min(i_slave_events_starts) & ...
+            master_events.starts < max(i_slave_events_starts);
+        master_events_tmp = master_events.starts(idxs_tmp);
+        diffs = abs(i_slave_events_starts - repmat(master_events_tmp', [height(i_slave_events_starts), 1]));
+        diffs = min(diffs, [], 2);
+        nexttile(); histogram(log10(diffs));
+        sgtitle(roi.name{i}, 'Interpreter', 'none');
+        xlabel('master minus slave log10 diff [s]');
+        ylabel('# events');
     end
 
     all_meanerror(i) = min_cost/height(i_slave_events);
