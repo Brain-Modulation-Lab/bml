@@ -13,10 +13,10 @@ function [h_points] = bml_plot3d_points(cfg, points)
 % cfg.electrodes - an electrode table specifying the location of electrodes
 % to plot. Electrodes should have columns 'x', 'y', 'z' to plot. 
 
-snap_elecs_to_surf = bml_getopt(cfg,'snap_elecs_to_surf',false);
-fig_title = bml_getopt(cfg,'title','');
-cam_view = bml_getopt(cfg,'view',[-96 15]);
-surface_facealpha = bml_getopt(cfg,'surface_facealpha',1);
+% snap_elecs_to_surf = bml_getopt(cfg,'snap_elecs_to_surf',false);
+% fig_title = bml_getopt(cfg,'title','');
+% cam_view = bml_getopt(cfg,'view',[-96 15]);
+% surface_facealpha = bml_getopt(cfg,'surface_facealpha',1);
 radius = bml_getopt(cfg,'radius', 1);
 h_ax = bml_getopt(cfg,'h_ax', []);
 
@@ -26,11 +26,12 @@ COLORS = [];
 COLORS.electrode = [66, 164, 245]./255; 
 COLORS.electrode_highlight = 'r'; 
 COLORS.surface = [.9 .9 .9];
+COLORS.selected = []; 
 
 [sphere_x,sphere_y,sphere_z] = sphere(50);
 
 if ~ismember('color', points.Properties.VariableNames)
-    points.color = repmat([1 0 0], [height(points), 1]); 
+    points.color = repmat(COLORS.electrode, [height(points), 1]); 
 end
 
 
@@ -43,21 +44,46 @@ else
 end
 hold on
 
-h_points = gobjects(1, height(points)); 
-for ip = 1:height(points)
-    h_points(ip)=surf(radius.*sphere_x + points.x(ip), ...
-                      radius.*sphere_y + points.y(ip), ...
-                      radius.*sphere_z + points.z(ip), ...
-                'FaceColor', points.color(ip, :), ...
-                'EdgeColor','none', 'DisplayName', 'temporary_name');
+if size(points.color, 2)==1 % if user has passed color data values
+    h_points = gobjects(1, height(points));
+    for ip = 1:height(points) % this version enables plotting with color bar
+        x = radius.*sphere_x + points.x(ip);
+        y = radius.*sphere_y + points.y(ip);
+        z = radius.*sphere_z + points.z(ip);
+        c = ones(size(z))*points.color(ip);
+        h_points(ip)=surf(x, y, z, c, ...
+            'EdgeColor','none', 'DisplayName', points.name{ip});
+    end
+else % if user has passed specific colors
+    h_points = gobjects(1, height(points));
+    for ip = 1:height(points) % this version ignores colorbar, just indicates face color
+        x = radius.*sphere_x + points.x(ip);
+        y = radius.*sphere_y + points.y(ip);
+        z = radius.*sphere_z + points.z(ip);
+        h_points(ip)=surf(x, y, z, [], 'facecolor', points.color(ip, :), ...
+            'EdgeColor','none', 'DisplayName', points.name{ip});
+    end
 end
 
+h_points_orig = copyobj(h_points, h_ax);
+set(h_points_orig, 'Visible', 'off');
+
+h_annotation = annotation('textbox', [0.1, 0.1, 0.1, 0.1], 'String', "Selected:", 'Interpreter', 'none'); 
+set(h_points, 'ButtonDownFcn', @(src, event) set_selected_object(src, event, h_points, h_points_orig,  h_annotation, COLORS.electrode_highlight)  );
+%     text(mean(mean(src.XData)), mean(mean(src.YData)), mean(mean(src.ZData)), src.DisplayName, 'Interpreter', 'none'));
 % now plot electrodes
 % scatter3(points.x, points.y, points.z,12,'filled','MarkerEdgeColor','k');
 
+set(h_ax.Parent, 'Pointer', 'crosshair')
+
 end
 
+function set_selected_object(src, event, h_points, h_points_orig,  h_annotation, select_color)
 
+for ip = 1:numel(h_points); set(h_points(ip), 'facecolor', h_points_orig(ip).FaceColor); end
+set(src, 'facecolor', select_color);
+set(h_annotation, 'String', "Selected: " + src.DisplayName);
+end
 
 
 
@@ -84,11 +110,11 @@ end
 
 
 
-% This function will move the light after each rotation
-function move_light_source(src, evt, hL)
-disp('updating camlight')  ;  
-camlight(hL, 'headlight');
-end
+% % This function will move the light after each rotation
+% function move_light_source(src, evt, hL)
+% disp('updating camlight')  ;  
+% camlight(hL, 'headlight');
+% end
 
 
 

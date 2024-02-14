@@ -23,7 +23,7 @@ end
 
 conformed = annot(:,template_vars);
 
-%verifying format 
+% verifying format 
 for i=1:width(conformed)
     if iscellstr(template{:,i}) && ~iscellstr(conformed{:,i})
         if isdatetime(conformed{:,i}) % added Latane Bullock 20231019
