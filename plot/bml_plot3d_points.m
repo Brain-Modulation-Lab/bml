@@ -34,6 +34,10 @@ if ~ismember('color', points.Properties.VariableNames)
     points.color = repmat(COLORS.electrode, [height(points), 1]); 
 end
 
+if ~ismember('radius', points.Properties.VariableNames)
+    points.radius = repmat(radius, [height(points), 1]); 
+end
+
 
 %% Plot spheres in 3D space
 if isempty(h_ax)
@@ -47,9 +51,9 @@ hold on
 if size(points.color, 2)==1 % if user has passed color data values
     h_points = gobjects(1, height(points));
     for ip = 1:height(points) % this version enables plotting with color bar
-        x = radius.*sphere_x + points.x(ip);
-        y = radius.*sphere_y + points.y(ip);
-        z = radius.*sphere_z + points.z(ip);
+        x = points.radius(ip) .* sphere_x + points.x(ip);
+        y = points.radius(ip) .* sphere_y + points.y(ip);
+        z = points.radius(ip) .* sphere_z + points.z(ip);
         c = ones(size(z))*points.color(ip);
         h_points(ip)=surf(x, y, z, c, ...
             'EdgeColor','none', 'DisplayName', points.name{ip});
@@ -57,9 +61,9 @@ if size(points.color, 2)==1 % if user has passed color data values
 else % if user has passed specific colors
     h_points = gobjects(1, height(points));
     for ip = 1:height(points) % this version ignores colorbar, just indicates face color
-        x = radius.*sphere_x + points.x(ip);
-        y = radius.*sphere_y + points.y(ip);
-        z = radius.*sphere_z + points.z(ip);
+        x = points.radius(ip).*sphere_x + points.x(ip);
+        y = points.radius(ip).*sphere_y + points.y(ip);
+        z = points.radius(ip).*sphere_z + points.z(ip);
         h_points(ip)=surf(x, y, z, [], 'facecolor', points.color(ip, :), ...
             'EdgeColor','none', 'DisplayName', points.name{ip});
     end
