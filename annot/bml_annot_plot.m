@@ -69,4 +69,7 @@ else
   end
 end
 
+hA = findall(gcf, 'type', 'axes'); 
+linkaxes(hA);
+
 
