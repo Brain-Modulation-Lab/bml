@@ -58,10 +58,10 @@ if isempty(groupby_x) && isempty(groupby_y)
   groupby_y = {'groupby_'};
   groups_x={1};
 elseif ~isempty(groupby_x) && ~isempty(groupby_y)
-	if sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
+  if sum(strcmp(x.Properties.VariableNames, groupby_x))~=1
     error('groupby_x should match one (and only one) column of x');
   end
-	if sum(strcmp(y.Properties.VariableNames, groupby_y))~=1
+  if sum(strcmp(y.Properties.VariableNames, groupby_y))~=1
     error('groupby_y should match one (and only one) column of y');
   end
   groups_x = unique(x{:,groupby_x});
@@ -105,6 +105,9 @@ for g=1:numel(groups_x)
         annot_g = [annot_g;{x_start,y_start,x_id,groups_x(g)}];
         x_g.starts(i)=y_end; 
         j=j+1;
+        if j>height(y_g) 
+            annot_g = [annot_g;{y_end,x_end,x_id,groups_x(g)}];         
+        end
       elseif x_start < y_start && y_start < x_end && x_end <= y_end
         %     xxxxxxxxxxxx
         %         yyyyyyyyyyyy
@@ -124,13 +127,14 @@ for g=1:numel(groups_x)
         %       xxxxxxxxxxx
         % yyyy   
         j=j+1;
-        if j>height(y_g)
-        	annot_g = [annot_g;{x_start,x_end,x_id,groups_x(g)}];         
+        if j>height(y_g) 
+            annot_g = [annot_g;{x_start,x_end,x_id,groups_x(g)}];         
         end
       else
           error('Should never get here. Is there any annotation with negative duration?');
       end
     end
+
     if ~isempty(annot_g)
       annot_g.Properties.VariableNames = {'starts','ends','id',groupby_x{1}}; 
     end
