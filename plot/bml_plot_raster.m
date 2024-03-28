@@ -24,6 +24,9 @@ panels = bml_getopt(cfg,'panels',[]);
 colbar = bml_getopt(cfg,'colorbar',false);
 trial_name = bml_getopt_single(cfg,'trial_name','trial');
 
+hax = gca() ;
+set(hax, 'TickLabelInterpreter', 'none'); 
+
 T = numel(raw.trial);
 if isempty(panels)
   panels = ceil(sqrt(T));
@@ -35,4 +38,13 @@ for t=1:T
   image(raw.trial{t},'CDataMapping','scaled');
   title([trial_name,' ',num2str(t)]);
   if colbar; colorbar(); end
+
+  nchans = size(raw.trial{t}, 1); 
+  if nchans < 10
+      yticks(1:10); yticklabels(raw.label(1:10));
+  else
+      yticks(1:round(nchans/10):nchans); 
+      yticklabels(raw.label(1:round(nchans/10):nchans));
+  end
+
 end

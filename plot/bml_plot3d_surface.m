@@ -16,7 +16,7 @@ function [hFigure, hSurface] = bml_plot3d_surface(cfg, vertices, faces)
 snap_elecs_to_surf = bml_getopt(cfg,'snap_elecs_to_surf',false);
 fig_title = bml_getopt(cfg,'title','');
 cam_view = bml_getopt(cfg,'view',[-96 15]);
-electrode = bml_getopt(cfg,'electrodes',table());
+electrodes = bml_getopt(cfg,'electrodes',table());
 surface_facealpha = bml_getopt(cfg,'surface_facealpha', 1);
 surface_facecolor =  bml_getopt(cfg,'surface_facecolor', []);
 h_ax = bml_getopt(cfg,'h_ax', []);
@@ -62,29 +62,29 @@ if length(hL)>1
 end
 
 %% Plot electrodes if electrodes table present
-if ~isempty(electrode)
+if ~isempty(electrodes)
 
 if snap_elecs_to_surf 
     % Snap coordinates to closest vertex on the pial surface
     cols = {'name', 'x', 'y', 'z'};
-    coords = electrode(:, cols(2:end));
+    coords = electrodes(:, cols(2:end));
     [~, idxs] = min(pdist2(coords{:, :}, vertices), [], 2);
     coords = vertices(idxs, :);
 
-    electrode.x = coords(:, 1);
-    electrode.y = coords(:, 2);
-    electrode.z = coords(:, 3);
+    electrodes.x = coords(:, 1);
+    electrodes.y = coords(:, 2);
+    electrodes.z = coords(:, 3);
 %     tit = "cohort_coverage_good_white_bad_black_closest-vertex.png";
 % % else
-%     electrode.native_x = electrode.native_x; 
+%     electrodes.native_x = electrodes.native_x; 
 end
 
 % now plot electrodes
 cfg = []; 
 cfg.radius = 1; 
 cfg.h_ax = h_ax; 
-bml_plot3d_points(cfg, electrode); 
-% scatter3(electrode.x, electrode.y, electrode.z, 12, 'filled','MarkerEdgeColor','k');
+bml_plot3d_points(cfg, electrodes); 
+% scatter3(electrodes.x, electrodes.y, electrodes.z, 12, 'filled','MarkerEdgeColor','k');
 
 
 title(fig_title); 
@@ -95,21 +95,21 @@ end
 
 % 
 % % highlight a single electrodee
-% subset = electrode;
+% subset = electrodes;
 % hE = gobjects([1 height(subset)]); 
 % for ielec = 1:height(subset)
 %     hE(ielec) = scatter3(subset.native_x(ielec), subset.native_y(ielec), subset.native_z(ielec), ... 
-%         20,'filled','MarkerFaceColor', COLORS.electrode, 'MarkerEdgeColor','k', ...
+%         20,'filled','MarkerFaceColor', COLORS.electrodes, 'MarkerEdgeColor','k', ...
 %         'DisplayName', subset.name{ielec}, 'ButtonDownFcn', @(src,event) elec_select_callback(src, event, COLORS)); 
 % end
 
-% scatter3(electrode.x, electrode.y, electrode.z,12,'filled','MarkerEdgeColor','k'); 
+% scatter3(electrodes.x, electrodes.y, electrodes.z,12,'filled','MarkerEdgeColor','k'); 
 
 % iptaddcallback(hE,);
 
 
 % % Highlight some electrodes 
-% idxs_highlight = ismember(electrode.name, ELECS_HIGHLIGHT); 
+% idxs_highlight = ismember(electrodes.name, ELECS_HIGHLIGHT); 
 % set(hE(idxs_highlight), 'MarkerFaceColor', COLORS.electrode_highlight); 
 
 

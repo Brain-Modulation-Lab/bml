@@ -1,0 +1,27 @@
+# DOCKER GUIDE
+
+
+# The docker contains three containers:
+# 	1. talking-intervals-cont: container for timing features extraction
+#	2. pitch-analysis-cont: container for pitch features extraction
+# 	3. disvoice_cont: container for articulatory features extraction
+
+
+
+# for each analysis (container) these are the relevant steps to do:
+#	1. Close any active/running/deactive container:
+#		docker rm -f <container_name>
+#	2. Run the container:
+#		docker run --rm --name talking-intervals-cont -d -p 0.0.0.0:8080:8080 sosawelford/tell-talking-intervals
+#		docker run --read-only --tmpfs /tmp --rm --name pitch-analysis-cont -d -p 8080:8080 sosawelford/tell-pitch-analysis
+#		docker run --read-only --tmpfs /tmp --rm --name disvoice_cont -it -d -p 8080:8080 sosawelford/tell-articulation-phonological
+#	3. Run python script:
+#		
+#		python pitch_request.py --input /Volumes/Nexus/DBS/DBS3001/Preprocessed\ Data/Sync/analyses/20240108-tell-speechfeature/					wav-files --output /Volumes/Nexus/DBS/DBS3001/Preprocessed\ Data/Sync/analyses/20240108-tell-speechfeature/output
+
+#		python talking_intervals_request.py --input /Volumes/Nexus/DBS/DBS3001/Preprocessed\ Data/Sync/analyses/20240108-tell-speechfeature/wav-files --output /Volumes/Nexus/DBS/DBS3001/Preprocessed\ Data/Sync/analyses/20240108-tell-speechfeature/output
+
+#		python disvoice_request.py --input /Volumes/Nexus/DBS/DBS3001/Preprocessed\ Data/Sync/analyses/20240108-tell-speechfeature/test-wav --output /Volumes/Nexus/DBS/DBS3001/Preprocessed\ Data/Sync/analyses/20240108-tell-speechfeature/output
+
+
+

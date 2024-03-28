@@ -12,7 +12,7 @@ function info = bml_info_file(cfg)
 % cfg.regexp - string: regular expression to filter files
 % cfg.filetype - string: variable added to info table
 %
-% Returns a matlab 'table' with the folloing variables:
+% Returns a matlab 'table' with the following variables:
 %   name - cell array of char: filename
 %   folder - cell array of char: path
 %   date - cell array of char: data of file modification 

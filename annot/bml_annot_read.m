@@ -22,13 +22,25 @@ end
 
 annot = readtable(filename,varargin{:});
 [~,name,ext]=fileparts(filename);
-if strcmp(ext,'.tsv')
-    try
-        annot.ends = annot.starts + annot.duration;
-    catch
-        annot.ends = annot.onset + annot.duration;
-    end
+
+[~,name,~]=fileparts(filename);
+is_onset = ismember('onset',annot.Properties.VariableNames);
+is_duration = ismember('duration',annot.Properties.VariableNames);
+if is_onset && is_duration
+    annot = bml_annot_rename(annot,'onset','starts');
+    annot.ends = annot.starts + annot.duration;
     annot.id = (1:height(annot))';
+    annot = bml_annot_table(annot,name);
 end
+
+% if strcmp(ext,'.tsv')
+%     try
+%         annot.ends = annot.starts + annot.duration;
+%     catch
+%         annot.ends = annot.onset + annot.duration;
+%     end
+%     annot.id = (1:height(annot))';
+% end
+
 annot = bml_annot_table(annot,name);
 

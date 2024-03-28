@@ -10,13 +10,12 @@ function [h_points] = bml_plot3d_points(cfg, points)
 %
 % The first argument cfg is a configuration structure, which can contain
 % the following field:
-% cfg.electrodes - an electrode table specifying the location of electrodes
+% points - a table (usually with a set of electrodes) specifying the location of electrodes
 % to plot. Electrodes should have columns 'x', 'y', 'z' to plot. 
+% 
+% points can optionally have a column 'color' where each row is an
+% [R G B] color value row vector. 
 
-% snap_elecs_to_surf = bml_getopt(cfg,'snap_elecs_to_surf',false);
-% fig_title = bml_getopt(cfg,'title','');
-% cam_view = bml_getopt(cfg,'view',[-96 15]);
-% surface_facealpha = bml_getopt(cfg,'surface_facealpha',1);
 radius = bml_getopt(cfg,'radius', 1);
 h_ax = bml_getopt(cfg,'h_ax', []);
 
