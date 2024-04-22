@@ -18,6 +18,8 @@ function [h_points] = bml_plot3d_points(cfg, points)
 
 radius = bml_getopt(cfg,'radius', 1);
 h_ax = bml_getopt(cfg,'h_ax', []);
+is_interactive = bml_getopt(cfg,'is_interactive', 0);
+
 
 
 %% set default colors 
@@ -71,13 +73,11 @@ end
 h_points_orig = copyobj(h_points, h_ax);
 set(h_points_orig, 'Visible', 'off');
 
+if is_interactive
 h_annotation = annotation('textbox', [0.1, 0.1, 0.1, 0.1], 'String', "Selected:", 'Interpreter', 'none'); 
 set(h_points, 'ButtonDownFcn', @(src, event) set_selected_object(src, event, h_points, h_points_orig,  h_annotation, COLORS.electrode_highlight)  );
-%     text(mean(mean(src.XData)), mean(mean(src.YData)), mean(mean(src.ZData)), src.DisplayName, 'Interpreter', 'none'));
-% now plot electrodes
-% scatter3(points.x, points.y, points.z,12,'filled','MarkerEdgeColor','k');
-
 set(h_ax.Parent, 'Pointer', 'crosshair')
+end
 
 end
 

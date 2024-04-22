@@ -1,0 +1,6 @@
+[submodule "plot/dependencies/matlab-plot-big"]
+	path = plot/dependencies/matlab-plot-big
+	url = https://github.com/tuckermcclure/matlab-plot-big.git
+[submodule "plot/dependencies/cbrewer2"]
+	path = plot/dependencies/cbrewer2
+	url = https://github.com/scottclowe/cbrewer2.git

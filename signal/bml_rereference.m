@@ -216,22 +216,27 @@ else
     ref = raw;
     
     for t=1:numel(raw.trial)
-      for j=1:height(reftable)
-        ridx=find(ismember(raw.label,reftable.reference(j)));
-        if isempty(ridx)
-            error('refchan %s not available to rereference channel %s',reftable.reference{j},reftable.label{j});
-        end 
-        ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
-          raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - ...
-          raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
-      end
-    end  
-    
-    if ~bml_getopt(cfg,'refkeep',0)
-      %removing reference channels
-      cfg1=[];
-      cfg1.channel = setdiff(ref.label, unique(reftable.reference));
-      ref = ft_selectdata(cfg1, ref);
+        for j=1:height(reftable)
+            ridx=find(ismember(raw.label,reftable.reference(j)));
+            if isempty(ridx)
+                error('refchan %s not available to rereference channel %s',reftable.reference{j},reftable.label{j});
+            end
+            ref.trial{t}(ismember(ref.label,reftable.label(j)),:) = ...
+                raw.trial{t}(ismember(raw.label,reftable.label(j)),:) - ...
+                raw.trial{t}(ismember(raw.label,reftable.reference(j)),:);
+        end
+    end
+
+
+    if bml_getopt(cfg,'refkeep',0)
+        % rename channels PLB 2024 03 28
+        label_new = strcat(reftable.label, '-',reftable.reference);
+        ref.label(ismember(ref.label, reftable.label)) = label_new;
+    else
+        %removing reference channels
+        cfg1=[];
+        cfg1.channel = setdiff(ref.label, unique(reftable.reference));
+        ref = ft_selectdata(cfg1, ref);
     end
     
   elseif ismember(method,{'LAR','local'})

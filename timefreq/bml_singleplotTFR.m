@@ -41,6 +41,7 @@ ft_singleplotTFR(cfg, data);
 
 set(gca,'ytick',[])
 set(gca,'yticklabel',[])
+set(get(gca, 'title'), 'Interpreter', 'none')
 
 polycoeff = polyfit(log10(foi),foi_idx,1);
 

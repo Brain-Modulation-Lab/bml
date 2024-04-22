@@ -48,6 +48,11 @@ reref_scheme{end+1} = struct('method', 'append_CA', 'label', 'macro_L*');
 reref_scheme{end+1} = struct('method', 'append_bipolar', 'label', 'macro_L*', 'refchan', 'macro_Lc');
 reref_scheme{end+1} = struct('method', 'append_bipolar', 'label', 'macro_L*', 'refchan', 'macro_L_CA');
 
+alldata = [raw.trial{:}]; 
+if any(isnan(alldata(:)))
+    warning('At least one trial contains NaNs. Rereferencing may not work as intended')
+end
+
 for ir = 1:length(reref_scheme)
     r = reref_scheme{ir};
     nchan = length(raw.label);

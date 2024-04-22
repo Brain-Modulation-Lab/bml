@@ -24,7 +24,7 @@ panels = bml_getopt(cfg,'panels',[]);
 colbar = bml_getopt(cfg,'colorbar',false);
 trial_name = bml_getopt_single(cfg,'trial_name','trial');
 
-hax = gca() ;
+hax = gca();
 set(hax, 'TickLabelInterpreter', 'none'); 
 
 T = numel(raw.trial);
@@ -40,8 +40,8 @@ for t=1:T
   if colbar; colorbar(); end
 
   nchans = size(raw.trial{t}, 1); 
-  if nchans < 10
-      yticks(1:10); yticklabels(raw.label(1:10));
+  if nchans < 20
+      yticks(1:length(raw.label)); yticklabels(raw.label);
   else
       yticks(1:round(nchans/10):nchans); 
       yticklabels(raw.label(1:round(nchans/10):nchans));
