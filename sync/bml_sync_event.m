@@ -52,9 +52,13 @@ sim_raw.fsample = 1;
 cfg1=[];
 cfg1.threshold = sim_threshold;
 chunks = bml_annot_detect(cfg1, sim_raw);
+if isempty(chunks)
+  error("similarity threshold too stringent");
+end
 chunks.delta_t(:)=nan;
 chunks.warp(:)=nan;
 tbar = mean(master_events.starts(idxs_master_events),'omitnan');
+
 for i=1:height(chunks)
     chunk_idxs = ceil(chunks.starts(i)):floor(chunks.ends(i));
     p = polyfit(master_events.starts(idxs_master_events(chunk_idxs)) - tbar, dtv(chunk_idxs),1);

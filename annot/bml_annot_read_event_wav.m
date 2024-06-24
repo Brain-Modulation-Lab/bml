@@ -40,7 +40,7 @@ for i=1:height(roi)
     min_peak_height = max(abs(audio1))*min_rph;
     MinPeakDistance = min_ipi;
     [pks,locs] = findpeaks(abs(audio1),audio.fsample,...
-    'MinPeakHeight',min_peak_height,'MinPeakDistance',MinPeakDistance);
+    'MinPeakHeight',min_peak_height,'MinPeakDistance',MinPeakDistance,'MinPeakProminence',min_peak_height * 0.5);
     
     if isempty(locs) 
         warning(['no events found in wav file' roi.name{i}])
