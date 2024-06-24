@@ -49,15 +49,22 @@ else
 end
 hold on
 
-if size(points.color, 2)==1 % if user has passed color data values
+if size(points.color, 2)==1 % if user has passed color DATA values
     h_points = gobjects(1, height(points));
     for ip = 1:height(points) % this version enables plotting with color bar
         x = points.radius(ip) .* sphere_x + points.x(ip);
         y = points.radius(ip) .* sphere_y + points.y(ip);
         z = points.radius(ip) .* sphere_z + points.z(ip);
         c = ones(size(z))*points.color(ip);
-        h_points(ip)=surf(x, y, z, c, ...
-            'EdgeColor','none', 'DisplayName', points.name{ip});
+        try
+            h_points(ip)=surf(x, y, z, c, ...
+                'EdgeColor','none', 'FaceColor', 'flat', ...
+                'DisplayName', points.name{ip});
+        catch
+            h_points(ip)=surf(x, y, z, c, ...
+                'EdgeColor','none', 'FaceColor', 'flat');
+        end
+        
     end
 else % if user has passed specific colors
     h_points = gobjects(1, height(points));
@@ -65,8 +72,13 @@ else % if user has passed specific colors
         x = points.radius(ip).*sphere_x + points.x(ip);
         y = points.radius(ip).*sphere_y + points.y(ip);
         z = points.radius(ip).*sphere_z + points.z(ip);
-        h_points(ip)=surf(x, y, z, [], 'facecolor', points.color(ip, :), ...
-            'EdgeColor','none', 'DisplayName', points.name{ip});
+        try
+            h_points(ip)=surf(x, y, z, [], 'facecolor', points.color(ip, :), ...
+                'EdgeColor','none', 'DisplayName', points.name{ip});
+        catch
+            h_points(ip)=surf(x, y, z, [], 'facecolor', points.color(ip, :), ...
+                'EdgeColor','none');
+        end
     end
 end
 
