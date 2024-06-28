@@ -9,6 +9,7 @@ function events = bml_annot_read_event_wav(cfg)
 % Configuration structure options:
 % cfg.roi - annot: table with synchronized nev files
 % cfg.detectflank - 'up', 'down' or 'both' (default)
+% cfg.flip_polarity - bool, 
 %
 % returns an events annotation table 
 
