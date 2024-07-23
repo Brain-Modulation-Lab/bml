@@ -23,7 +23,7 @@ end
 detectflank = bml_getopt_single(cfg,'detectflank','both');
 
 min_ipi     = bml_getopt(cfg,'min_ipi',0.05);
-min_rph     = bml_getopt(cfg,'min_rph',0.5);
+min_rph     = bml_getopt(cfg,'min_rph',0.25);
 flip_polarity = bml_getopt(cfg,'flip_polarity',0);
 
 assert(~isempty(roi),'roi required');
@@ -38,11 +38,15 @@ for i=1:height(roi)
     audio = bml_load_continuous(cfg1);
     audio1 = audio.trial{1}(1,:);
     if flip_polarity; audio1 = audio1 .* -1.0; end
-    min_peak_height = max(abs(audio1))*min_rph;
     MinPeakDistance = min_ipi;
-    [pks,locs] = findpeaks(abs(audio1),audio.fsample,...
+    min_peak_height = max(audio1)*min_rph;
+    [~,locs_max] = findpeaks(audio1,audio.fsample,...
     'MinPeakHeight',min_peak_height,'MinPeakDistance',MinPeakDistance,'MinPeakProminence',min_peak_height * 0.5);
-    
+    min_peak_height = max(-audio1)*min_rph;
+    [~,locs_min] = findpeaks(-audio1,audio.fsample,...
+    'MinPeakHeight',min_peak_height,'MinPeakDistance',MinPeakDistance,'MinPeakProminence',min_peak_height * 0.5);
+    locs = sort([locs_max, locs_min]);
+
     if isempty(locs) 
         warning(['no events found in wav file' roi.name{i}])
         continue
