@@ -209,6 +209,8 @@ else
     elseif numel(refchan) == numel(label)
       reftable = table(label);
       reftable.reference = refchan;
+    elseif istable(refchan) && height(refchan)== numel(label)
+      reftable = refchan;
     else
       error('refchan should have one element, or same number of elements as label');
     end
