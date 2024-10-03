@@ -24,7 +24,8 @@ is_interactive = bml_getopt(cfg,'is_interactive', 0);
 
 %% set default colors 
 COLORS = []; 
-COLORS.electrode = [66, 164, 245]./255; 
+% COLORS.electrode = [66, 164, 245]./255; % blue
+COLORS.electrode = [255 0 0]./255; % blue
 COLORS.electrode_highlight = 'r'; 
 COLORS.surface = [.9 .9 .9];
 COLORS.selected = []; 
