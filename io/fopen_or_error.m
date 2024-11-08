@@ -21,7 +21,6 @@ if fid < 0
   else
     mode_descr = 'reading';
   end  
-  ft_error(sprintf('could not open file %s for %s: %s', ...
-    filename, mode_descr, msg));
+    error('could not open file %s for %s: %s', filename, mode_descr, msg);
 end
 
