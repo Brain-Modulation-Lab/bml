@@ -75,7 +75,7 @@ for i=1:height(roi)
     all_slave_dt(i) = nan;
     all_warpfactor(i) = nan;
   else
-    %creating annot table with events
+    % creating annot table with events
     starts = (roi.starts(i) + locs)';
     ends = starts;
     i_slave_events=bml_annot_table(table(starts,ends));

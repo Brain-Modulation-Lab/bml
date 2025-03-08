@@ -42,6 +42,7 @@ group     = bml_getopt(cfg,'group');
 method    = bml_getopt_single(cfg,'method','CAR');
 percent   = bml_getopt(cfg,'percent',50);
 crossfading_width = bml_getopt(cfg,'crossfading_width',100);
+refkeep   = bml_getopt(cfg,'refkeep',0); 
 
 %checking for NaNs in data
 raw_has_nan = any(cellfun(@(x) any(any(isnan(x),1),2),raw.trial));
@@ -229,17 +230,18 @@ else
         end
     end
 
-
-    if bml_getopt(cfg,'refkeep',0)
-        % rename channels PLB 2024 03 28
-        label_new = strcat(reftable.label, '-',reftable.reference);
-        ref.label(ismember(ref.label, reftable.label)) = label_new;
-    else
-        %removing reference channels
+    if ~refkeep
+        % removing reference channels
         cfg1=[];
         cfg1.channel = setdiff(ref.label, unique(reftable.reference));
         ref = ft_selectdata(cfg1, ref);
     end
+
+%     if method=="bipolar" && rename==1
+%         % rename channels PLB 2024 03 28
+%         label_new = strcat(reftable.label, '-',reftable.reference);
+%         ref.label(ismember(ref.label, reftable.label)) = label_new;
+%     end
     
   elseif ismember(method,{'LAR','local'})
     error('local average referencing not implemented for data with NaNs')

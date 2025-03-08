@@ -6,7 +6,7 @@ function [idxs_x1, idxs_x2, mean_sim, sim] = bml_sync_match_events2(cfg, events1
     %   events2: events table with required columns starts and value 
     %   cfg.timetol: intended time tolerance in seconds for similarity metric.
     %                Defaults to 0.001
-    %   cfg.onsettol: time tolerace for onset mismatch
+    %   cfg.onsettol: time tolerace for onset mismatch. Defaults to 100s
     %   cfg.simtol: similarity tolerance. Defaults to 0
     %   cfg.weight_time_pre: float - weight of event duration similarity
     %                Defaults to 1/4

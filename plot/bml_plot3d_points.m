@@ -1,6 +1,6 @@
 function [h_points] = bml_plot3d_points(cfg, points)
 % Latane Bullock 2023 08 01 latanebullock@gmail.com
-
+% 
 % BML_PLOT3D_points plots 3d points. This script can be used to plot
 % locations of elecrodes on the cortical surface or on subcortical
 % surfaces. 
@@ -24,8 +24,8 @@ is_interactive = bml_getopt(cfg,'is_interactive', 0);
 
 %% set default colors 
 COLORS = []; 
-% COLORS.electrode = [66, 164, 245]./255; % blue
-COLORS.electrode = [255 0 0]./255; % blue
+COLORS.electrode = [66, 164, 245]./255; % blue
+% COLORS.electrode = [255 0 0]./255; % red
 COLORS.electrode_highlight = 'r'; 
 COLORS.surface = [.9 .9 .9];
 COLORS.selected = []; 
