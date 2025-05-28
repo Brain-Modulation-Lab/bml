@@ -58,7 +58,7 @@ if cfg.method=="ft-dpss"
     cfg1.keeptrials = 'yes'; 
     cfg1.pad = 'nextpow2'; 
     cfg1.toi = D.time{1}(1):(1/cfg.fs_out):D.time{1}(end); 
-    cfg1.toi = cfg1.toi(10:(end-10));
+    cfg1.toi = cfg1.toi(10:(end-10)); % clip front and back
     D_epoch_gamma = ft_freqanalysis(cfg1, D); 
     
     nsamples_trialwise_ds = length(D_epoch_gamma.time); % the number of samples in each trial after downsampling
