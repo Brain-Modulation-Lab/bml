@@ -52,7 +52,11 @@ assert(size(label,1)>=size(label,2),"label cell array should be Nx1, not 1xN")
 %inferring groups from labels
 if isempty(group)
   sl=split(label,'_');
-  sl=sl(:,1);
+  if numel(label)==1
+    sl = sl(1);
+  else
+    sl=sl(:,1);
+  end
   usl=unique(sl);
   group = bml_map(sl,usl,1:length(usl));
 end
