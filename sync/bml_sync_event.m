@@ -40,7 +40,7 @@ assert(all(ismember({'starts','value'},master_events.Properties.VariableNames)))
 cfg1=[];
 cfg1.timetol=timetol;
 cfg1.diagnostic_plot = 1; 
-[idxs_master_events, idxs_slave_events, mean_sim, sim]=bml_sync_match_events(cfg1,master_events,slave_events); 
+[idxs_master_events, idxs_slave_events, mean_sim, sim]=bml_sync_match_events2(cfg1,master_events,slave_events); 
 dtv = master_events.starts(idxs_master_events)-slave_events.starts(idxs_slave_events);
 
 sim_raw = [];
