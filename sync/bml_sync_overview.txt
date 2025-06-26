@@ -1,0 +1,41 @@
+mermaid chart code:
+
+
+flowchart TD
+  subgraph SyncFunctions
+    A["bml_sync_analog<br/>Time-aligns files based on analog sync channel"]
+    B["bml_sync_audio_event<br/>Synchronizes audio files using event peaks"]
+    C["bml_sync_event<br/>Generic event-based file synchronization"]
+    D["bml_sync_neuroomega_event<br/>Synchronizes NeuroOmega recordings via events"]
+  end
+
+  subgraph Matching
+    E1["bml_sync_match_events<br/>DP-based matching of two event sequences"]
+    E2["bml_sync_match_events2<br/>Enhanced matching with onset weighting"]
+  end
+
+  subgraph TimeAlign
+    F["bml_timealign_annot<br/>Aligns event annotations, returns ?t & warp"]
+    G["bml_timealign<br/>Correlates continuous signals to find ?t"]
+    H["bml_timewarp_annot<br/>Enforced warp via timealign_annot"]
+    I["bml_timewarp<br/>Aligns & linearly warps signals to maximize correlation"]
+  end
+
+  A --> H
+  A --> G
+  A --> I
+
+  B --> F
+
+  C --> E2
+  C --> E1
+
+  D --> F
+
+  E2 --> E1
+
+  F --> G
+
+  H --> F
+
+  I --> G

@@ -133,7 +133,7 @@ function [idxs_x1, idxs_x2, mean_sim, sim, hF_diagnostic] = bml_sync_match_event
         hold on
         plot(idxs_x2,idxs_x1)
         subplot(4,1,1)
-        plot(idxs_x2,sim)
+        plot(idxs_x2,sim); ylim([0 1.1]);
     
         fprintf("mean similarity of matched events is %f\n", mean_sim)
     end

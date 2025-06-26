@@ -29,6 +29,7 @@ timetol           = bml_getopt(cfg,'timetol',1e-3);
 sim_threshold     = bml_getopt(cfg,'sim_threshold',0.9);
 % min_events        = bml_getopt(cfg,'min_events',10);
 % strict            = bml_getopt(cfg,'strict',false);
+min_chunk_length   = 10; 
 
 assert(all(ismember({'starts','value'},slave_events.Properties.VariableNames)));
 assert(all(ismember({'starts','value'},master_events.Properties.VariableNames)));
@@ -37,10 +38,16 @@ assert(all(ismember({'starts','value'},master_events.Properties.VariableNames)))
 % all_warpfactor = ones(height(roi),1);
 % all_meanerror = zeros(height(roi),1);
 
-cfg1=[];
-cfg1.timetol=timetol;
-cfg1.diagnostic_plot = 1; 
-[idxs_master_events, idxs_slave_events, mean_sim, sim]=bml_sync_match_events2(cfg1,master_events,slave_events); 
+% hF = gobjects(height(cons_chunks),1); % Latane Bullock 2023 12 12, return handles to diagnostic plots
+
+
+% Update PLB 2025 06 26: pass cfg parameters to the sync_match)eve
+[idxs_master_events, idxs_slave_events, mean_sim, sim]=bml_sync_match_events2(cfg,master_events,slave_events); 
+% cfg1=[];
+% cfg1.timetol=timetol;
+% cfg1.diagnostic_plot = 1; 
+% [idxs_master_events, idxs_slave_events, mean_sim, sim]=bml_sync_match_events2(cfg1,master_events,slave_events); 
+
 dtv = master_events.starts(idxs_master_events)-slave_events.starts(idxs_slave_events);
 
 sim_raw = [];
@@ -53,10 +60,20 @@ sim_raw.fsample = 1;
 cfg1=[];
 cfg1.threshold = sim_threshold;
 chunks = bml_annot_detect(cfg1, sim_raw);
+
+if (height(chunks) > 10); 
+    error('# detected chunks exceeds 10. This may indicate poor alignment. Consider changing parameters like sim_threshold.'); 
+end 
+
+% min chunk length: when chunks are less than 10 events, they are likely spurious 
+chunks = chunks(chunks.duration > min_chunk_length, :); 
+
 if isempty(chunks)
-  error("similarity threshold too stringent");
+  warning("similarity threshold too stringent, or there are no matching master events for the slave events. \n Returning empty sync_roi table.");
+  sync_roi = table();
+  return 
 end
-if (height(chunks) > 10); warning('# detected chunks exceeds 10. This may indicate poor alignment.'); end 
+
 chunks.delta_t(:)=nan;
 chunks.warp(:)=nan;
 tbar = mean(master_events.starts(idxs_master_events),'omitnan');
@@ -73,7 +90,6 @@ cfg1=[];
 cfg1.criterion = @(x) (abs(max(x.delta_t)-min(x.delta_t)) < cfg.timetol);
 cons_chunks = bml_annot_consolidate(cfg1,chunks);
 
-hF = gobjects(height(cons_chunks),1); % Latane Bullock 2023 12 12, return handles to diagnostic plots
 
 %doing linear warping
 cons_chunks.delta_t(:)=nan;
