@@ -1,4 +1,4 @@
-function [sync_roi, hF] = bml_sync_event(cfg, master_events, slave_events)
+function [sync_roi, hF] = bml_sync_digital(cfg, master_events, slave_events)
 
 % bml_sync_event synchronizes files according to events
 %
@@ -41,8 +41,8 @@ assert(all(ismember({'starts','value'},master_events.Properties.VariableNames)))
 % hF = gobjects(height(cons_chunks),1); % Latane Bullock 2023 12 12, return handles to diagnostic plots
 
 
-% Update PLB 2025 06 26: pass cfg parameters to the sync_match)eve
-[idxs_master_events, idxs_slave_events, mean_sim, sim]=bml_sync_match_events2(cfg,master_events,slave_events); 
+% Update PLB 2025 06 26: pass cfg parameters to the sync_match_events()
+[idxs_master_events, idxs_slave_events, mean_sim, sim]=bml_sync_match_events(cfg, master_events,slave_events); 
 % cfg1=[];
 % cfg1.timetol=timetol;
 % cfg1.diagnostic_plot = 1; 
