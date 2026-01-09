@@ -93,7 +93,7 @@ end
 
 %interpolating subset of slave trials to master times
 cfg=[]; cfg.time=sub_master_time; cfg.method='pchip';
-cfg.extrapval=nan;
+cfg.extrapval=nan; % PLB 2025 08 14 changed 'nan' to 0, changed back
 cfg.feedback='no';
 cfg.trackcallinfo = false;
 cfg.showcallinfo = 'no';

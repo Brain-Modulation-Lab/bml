@@ -76,6 +76,7 @@ hdr_table.Properties.VariableNames = hdr_vars;
 assert(~isempty(chantype),'cfg.chantype required');
 if isempty(time_channel)
   hdr1 = ft_read_header(fullfile(info.folder{1},info.name{1}),'chantype','chaninfo');
+  assert(ismember(chantype,hdr1.orig.chaninfo.chantype),"selected chantype not present in header");
   time_channel = hdr1.orig.chaninfo(strcmp(hdr1.orig.chaninfo.chantype,chantype),:).channel{1};
 end
 time_begin     = strcat(time_channel,'_TimeBegin');

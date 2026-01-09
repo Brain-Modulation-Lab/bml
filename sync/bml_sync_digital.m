@@ -29,6 +29,8 @@ timetol           = bml_getopt(cfg,'timetol',1e-3);
 sim_threshold     = bml_getopt(cfg,'sim_threshold',0.9);
 % min_events        = bml_getopt(cfg,'min_events',10);
 % strict            = bml_getopt(cfg,'strict',false);
+    hF = gobjects(0,1);
+
 min_chunk_length   = 10; 
 
 assert(all(ismember({'starts','value'},slave_events.Properties.VariableNames)));
@@ -99,6 +101,8 @@ cons_chunks.t1(:)=nan;
 cons_chunks.s2(:)=nan;
 cons_chunks.t2(:)=nan;
 cons_chunks.mean_sim(:)=nan;
+
+
 for i=1:height(cons_chunks)
 
     cons_chunk_idxs = ceil(cons_chunks.starts(i)):floor(cons_chunks.ends(i));
