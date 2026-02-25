@@ -14,7 +14,8 @@ Tall = cell(nRuns,1);
 tMaster = argus_raw.time{iMax};
 
 % prefix check with float tolerance
-if ~all(cellfun(@(x) max(abs(x - tMaster(1:numel(x)))) < opts.timetol, argus_raw.time))
+argus_raw_time = argus_raw.time(~cellfun('isempty', argus_raw.time));
+if ~all(cellfun(@(x) max(abs(x - tMaster(1:numel(x)))) < opts.timetol, argus_raw_time))
   warning('Time Tolerance Violated');
 end
 
@@ -26,8 +27,11 @@ dataVarNames = matlab.lang.makeValidName(rawNames);
 
 for run_i = 1:nRuns
     run      = str2double(regexp(argus_raw.record_fname{1,run_i}, '(\d+)(?=(\.[^./\\]*)?$)', 'tokens', 'once'));  % digits before last ".ext" (or end)
-    data     = argus_raw.trial{1,run_i};       % N_trial x N_time
     time     = argus_raw.time{1,run_i};        % 1 x N_times
+    if isempty(time)
+      continue
+    end
+    data     = argus_raw.trial{1,run_i};       % N_trial x N_time
     timeburst= argus_raw.timeburst{1,run_i};   % N_trial x 1
     stim_amp = argus_raw.stim_amp{1,run_i};    % N_trial x 1   (fix: stim_amp not srim_amp)
 
