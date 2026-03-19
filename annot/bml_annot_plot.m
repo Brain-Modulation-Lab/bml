@@ -36,6 +36,11 @@ if isempty(varargin)
   varargin={'LineWidth',2};
 end
 
+if isnumeric(annot.(facetvar))
+    annot.(facetvar) = string(annot.(facetvar));
+end
+
+
 if isempty(facetvar)
   for i=1:height(annot)
     hold on;
