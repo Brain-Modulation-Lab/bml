@@ -111,6 +111,7 @@ if height(blocks) >= 2
         edges = table();
         edges.starts  = blocks.ends(idx_from);
         edges.ends    = blocks.ends(idx_from);
+        edges.(group_by) = blocks.(group_by)(idx_from);
         edges.from_id = idx_from;
         edges.to_id   = idx_from + 1;
 
