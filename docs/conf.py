@@ -3,7 +3,7 @@ import sys
 
 # -- Project info -----------------------------------------------------------
 project = "BML Toolbox"
-copyright = "2026, Brain Modulation Laboratory, MGH / University of Pittsburgh"
+copyright = "2026, Brain Modulation Laboratory, MGH"
 author = "Brain Modulation Laboratory"
 release = "1.0"
 version = "1.0"
