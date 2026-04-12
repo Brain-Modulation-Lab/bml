@@ -1,0 +1,220 @@
+% =============================================================
+%  BML TOOLBOX REFERENCE GUIDE  v1.0
+%  Brain Modulation Laboratory · MGH / University of Pittsburgh
+%  Generated: April 2026
+% =============================================================
+\documentclass[11pt, a4paper]{report}
+
+\usepackage{fontspec}
+\setmainfont{Georgia}
+\setmonofont[Scale=0.85]{Menlo}
+
+\usepackage[top=2.8cm, bottom=2.8cm, left=3.0cm, right=3.0cm]{geometry}
+\usepackage{microtype}
+\usepackage{parskip}
+\setlength{\parskip}{6pt}
+
+\usepackage[dvipsnames,table]{xcolor}
+\definecolor{bmlblue}{RGB}{0,72,144}
+\definecolor{boxbg}{RGB}{242,246,252}
+\definecolor{codefg}{RGB}{30,30,50}
+\definecolor{codebg}{RGB}{248,248,252}
+\definecolor{rulecolor}{RGB}{180,200,230}
+\definecolor{warnyellow}{RGB}{255,248,220}
+\definecolor{warnborder}{RGB}{204,153,0}
+\definecolor{greenbg}{RGB}{240,252,240}
+\definecolor{greenborder}{RGB}{80,160,80}
+\definecolor{redbg}{RGB}{255,245,245}
+\definecolor{redborder}{RGB}{180,60,60}
+\definecolor{glossbg}{RGB}{250,248,240}
+\definecolor{partcolor}{RGB}{0,72,144}
+\definecolor{annotA}{RGB}{30,100,200}
+\definecolor{annotB}{RGB}{180,40,40}
+\definecolor{annotC}{RGB}{40,140,60}
+\definecolor{annotD}{RGB}{160,80,160}
+
+\usepackage{amsmath, amssymb, mathtools}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds,
+                calc,decorations.pathreplacing,patterns}
+\usepackage{graphicx}
+\usepackage{float}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
+\usepackage{listings}
+\lstdefinestyle{matlab}{
+  language=Matlab,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small\color{codefg},
+  keywordstyle=\color{bmlblue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{Maroon},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=8pt,
+  frame=single, framerule=0.4pt, rulecolor=\color{rulecolor},
+  breaklines=true, captionpos=b, showstringspaces=false, tabsize=2
+}
+
+\usepackage[most]{tcolorbox}
+\newtcolorbox{notebox}{colback=greenbg,colframe=greenborder,
+  fonttitle=\bfseries,title=Note,left=4pt,right=4pt,top=3pt,bottom=3pt}
+\newtcolorbox{warnbox}{colback=warnyellow,colframe=warnborder,
+  fonttitle=\bfseries,title=Warning,left=4pt,right=4pt,top=3pt,bottom=3pt}
+\newtcolorbox{formulabox}[1]{colback=boxbg,colframe=bmlblue!50,
+  fonttitle=\bfseries\color{bmlblue},title=#1,left=4pt,right=4pt,top=3pt,bottom=3pt}
+\newtcolorbox{glossentry}[1]{colback=glossbg,colframe=bmlblue!30,
+  fonttitle=\bfseries\color{bmlblue},title=#1,left=5pt,right=5pt,top=4pt,bottom=4pt,
+  before upper={\setlength{\parskip}{3pt}}}
+
+\usepackage{enumitem}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=bmlblue,urlcolor=bmlblue,
+            pdftitle={BML Toolbox Reference Guide v1.0},
+            pdfauthor={Brain Modulation Laboratory}}
+
+% Chapter styling
+\usepackage{titlesec}
+\titleformat{\part}[display]
+  {\centering\normalfont\Huge\bfseries\color{partcolor}}
+  {\partname\ \thepart}{20pt}{}
+\titleformat{\chapter}[hang]
+  {\normalfont\Large\bfseries\color{bmlblue}}
+  {\thechapter}{12pt}{}[\vspace{-4pt}\rule{\textwidth}{0.4pt}]
+\titlespacing*{\chapter}{0pt}{20pt}{10pt}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{gray}BML Toolbox Reference Guide}
+\fancyhead[R]{\small\color{gray}\leftmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}}
+
+% Reusable TikZ styles
+\tikzset{
+  annot/.style={rectangle,minimum height=0.45cm,inner sep=0pt,
+                draw=#1!70,fill=#1!20,font=\tiny},
+  taxis/.style={->,thick,gray!60},
+  tlabel/.style={font=\tiny,gray},
+  resultbar/.style={rectangle,minimum height=0.45cm,inner sep=0pt,
+                    draw=annotC!80,fill=annotC!25,font=\tiny},
+  removedbar/.style={rectangle,minimum height=0.45cm,inner sep=0pt,
+                     draw=gray!50,fill=gray!10,font=\tiny,text=gray!60},
+}
+
+% Version info
+\newcommand{\bmlversion}{1.0}
+\newcommand{\bmldate}{April 2026}
+
+\begin{document}
+
+% ---- Title page ----
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\color{bmlblue}\rule{\textwidth}{2pt}}\\[0.8em]
+{\fontsize{28}{34}\selectfont\bfseries\color{bmlblue} BML Toolbox}\\[0.4em]
+{\fontsize{18}{22}\selectfont\color{gray} Reference Guide}\\[0.3em]
+{\color{bmlblue}\rule{\textwidth}{2pt}}\\[1.5em]
+{\Large\bfseries Version \bmlversion}\\[0.5em]
+{\large\color{gray}\bmldate}\\[2em]
+
+\begin{tcolorbox}[colback=boxbg,colframe=bmlblue!40,width=12cm]
+\centering\small
+\textbf{Brain Modulation Laboratory}\\
+Massachusetts General Hospital · University of Pittsburgh\\[0.5em]
+\textit{A comprehensive reference for annotation table manipulation\\
+and multi-device clock synchronization in MATLAB.}
+\end{tcolorbox}
+
+\vfill
+\begin{tabular}{ll}
+\toprule
+\textbf{Document} & BML Toolbox Reference Guide\\
+\textbf{Version} & \bmlversion\\
+\textbf{Date} & \bmldate\\
+\textbf{Language} & MATLAB (Python migration in progress)\\
+\textbf{Devices supported} & Ripple/Trellis, Zoom, NeuroOmega, Psychtoolbox\\
+\bottomrule
+\end{tabular}
+\end{titlepage}
+
+% ---- Changelog ----
+\chapter*{Version History}
+\addcontentsline{toc}{chapter}{Version History}
+\begin{center}
+\begin{tabular}{L{1.5cm} L{2.5cm} L{9cm}}
+\toprule
+\textbf{Version} & \textbf{Date} & \textbf{Changes} \\
+\midrule
+1.0 & April 2026 &
+  First unified release. Merged annotation algebra guide (Part~I)
+  with synchronization pipeline guide (Part~II).
+  Added: digital-trigger audio sync, task-event fallback strategy,
+  old vs.\ new DP matching comparison, Python migration roadmap,
+  best practices, complete worked examples, ReadTheDocs site. \\
+\midrule
+0.2 & March 2026 &
+  Sync guide: added Psychtoolbox sync, expanded consolidation section,
+  data flow diagram. \\
+0.1 & January 2026 &
+  Initial sync guide draft covering Zoom analog sync,
+  NeuroOmega event sync, bml\_timealign/bml\_timewarp internals. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ---- Introduction ----
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+\section*{About this guide}
+
+This guide is the complete reference for the \textbf{BML (Brain Modulation Laboratory) MATLAB toolbox}, used for intraoperative and clinical neurophysiology data analysis at MGH and the University of Pittsburgh. It covers:
+
+\begin{description}[leftmargin=2cm,style=nextline]
+  \item[Part~I: Annotation Tables] The universal data structure used throughout BML. Every time-stamped object --- a trial, a spike, a file, an artifact window --- is an annotation table. Part~I covers the schema, all set/interval algebra operations (filter, intersect, union, difference, consolidate, \ldots), I/O, visualization, and a complete worked example.
+  \item[Part~II: Synchronization] How to align recordings from four independent devices (Ripple/Trellis, Zoom audio recorder, NeuroOmega, task laptop) onto a single master clock. Covers analog cross-correlation, digital event matching, the DP algorithm, the fallback strategy, consolidation, and best practices.
+\end{description}
+
+\section*{Design philosophy}
+
+Three principles underlie every BML function:
+
+\begin{enumerate}
+  \item \textbf{Annotation tables are the universal contract.} Every function takes annotation tables as input and returns annotation tables as output. This makes functions composable: the output of \texttt{bml\_annot\_filter} feeds directly into \texttt{bml\_annot\_intersect} without any data transformation.
+  \item \textbf{All times are on the master clock.} After synchronization, every sample index and every event timestamp is expressed in seconds on the Trellis/Ripple hardware clock. You never need to know which device produced a data point.
+  \item \textbf{Non-destructive.} Raw files are never modified. Sync state is stored separately in \texttt{sync\_roi} tables. Any step can be re-run without corrupting the original data.
+\end{enumerate}
+
+\section*{How to use this guide}
+
+\begin{itemize}
+  \item \textbf{New to BML?} Start with Section~\ref{sec:schema} (annotation table schema), then Section~\ref{sec:roi} (the ROI table and coordinate system), then the worked example in Chapter~\ref{sec:example}.
+  \item \textbf{Doing sync?} Jump to Part~II. The sync overview diagram (Section~\ref{sec:dataflow}) shows the full pipeline at a glance.
+  \item \textbf{Looking for a specific function?} Use the reference table in Chapter~\ref{sec:reference} or the table of contents.
+\end{itemize}
+
+\tableofcontents
+\newpage
+
+% ================================================================
+\part{Annotation Tables and Interval Algebra}
+% ================================================================
+
+\input{/tmp/annot_body}
+
+% ================================================================
+\part{The Synchronization Pipeline}
+% ================================================================
+
+\input{/tmp/sync_body}
+
+\end{document}

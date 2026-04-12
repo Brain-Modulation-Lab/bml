@@ -1,0 +1,61 @@
+\contentsline {section}{\numberline {1}Glossary of Key Terms}{3}{section.1}%
+\contentsline {section}{\numberline {2}System Overview and Data Flow}{6}{section.2}%
+\contentsline {subsection}{\numberline {2.1}The synchronization problem}{6}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Complete data flow diagram}{6}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Annotation Tables and the ROI Structure}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Annotation table schema}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}ROI table: the sync state carrier}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Key annotation manipulation functions}{8}{subsection.3.3}%
+\contentsline {section}{\numberline {4}The Coordinate System}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Why two points?}{8}{subsection.4.1}%
+\contentsline {section}{\numberline {5}Building the Initial ROI Table}{9}{section.5}%
+\contentsline {section}{\numberline {6}Synchronizing Audio (Zoom) to Ripple/Trellis}{10}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Approach A: Shared analog channel (\texttt {bml\_sync\_analog})}{10}{subsection.6.1}%
+\contentsline {subsubsection}{\numberline {6.1.1}Inside \texttt {bml\_sync\_analog}: per-chunk pipeline}{10}{subsubsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.2}Approach B: Digital triggers via audio-peak detection (\texttt {bml\_sync\_audio\_event})}{10}{subsection.6.2}%
+\contentsline {section}{\numberline {7}Synchronizing NeuroOmega to Ripple/Trellis}{11}{section.7}%
+\contentsline {section}{\numberline {8}Synchronizing Task Laptop (Psychtoolbox) to Ripple}{12}{section.8}%
+\contentsline {subsection}{\numberline {8.1}The setup}{12}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Step 1: Read the task log file}{12}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Step 2: Get the same events from Ripple}{12}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Step 3: Synchronize with \texttt {bml\_sync\_digital}}{13}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}Step 4: Apply sync to task events}{13}{subsection.8.5}%
+\contentsline {subsection}{\numberline {8.6}Step 4b: Exact-match fallback strategy}{13}{subsection.8.6}%
+\contentsline {section}{\numberline {9}Event Alignment: From Brute-Force to Dynamic Programming}{15}{section.9}%
+\contentsline {subsection}{\numberline {9.1}The problem with simple event matching}{15}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}The old approach (archived, pre-2025)}{15}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}The new approach (current)}{16}{subsection.9.3}%
+\contentsline {subsubsection}{\numberline {9.3.1}Summary of differences}{16}{subsubsection.9.3.1}%
+\contentsline {subsection}{\numberline {9.4}The dynamic programming algorithm (both versions)}{17}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}How \texttt {bml\_sync\_digital} uses the DP output}{17}{subsection.9.5}%
+\contentsline {section}{\numberline {10}Alignment Function Hierarchy}{18}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Call graph}{18}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}The two dimensions}{18}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Decision guide: which function to call?}{19}{subsection.10.3}%
+\contentsline {section}{\numberline {11}Event Alignment Internals: \texttt {bml\_timealign\_annot}}{19}{section.11}%
+\contentsline {section}{\numberline {12}Continuous Signal Alignment}{20}{section.12}%
+\contentsline {subsection}{\numberline {12.1}\texttt {bml\_timealign} --- cross-correlation}{20}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}\texttt {bml\_timewarp} --- linear warp optimization}{20}{subsection.12.2}%
+\contentsline {section}{\numberline {13}Consolidation: What It Is and Why It Matters}{20}{section.13}%
+\contentsline {subsection}{\numberline {13.1}The problem consolidation solves}{20}{subsection.13.1}%
+\contentsline {subsection}{\numberline {13.2}Level 1: per-file consolidation}{21}{subsection.13.2}%
+\contentsline {subsection}{\numberline {13.3}Level 2: contiguous file consolidation}{21}{subsection.13.3}%
+\contentsline {subsection}{\numberline {13.4}What the consolidated table looks like}{21}{subsection.13.4}%
+\contentsline {section}{\numberline {14}Complete End-to-End Example}{22}{section.14}%
+\contentsline {section}{\numberline {15}Common Pitfalls}{23}{section.15}%
+\contentsline {section}{\numberline {16}Diagnostic Plots: How to Enable and Interpret}{24}{section.16}%
+\contentsline {subsection}{\numberline {16.1}\texttt {bml\_sync\_match\_events} --- DP similarity plot}{24}{subsection.16.1}%
+\contentsline {subsection}{\numberline {16.2}\texttt {bml\_sync\_audio\_event} / \texttt {bml\_sync\_neuroomega\_event} --- event alignment plot}{25}{subsection.16.2}%
+\contentsline {subsection}{\numberline {16.3}\texttt {bml\_sync\_digital} --- residual + alignment plot}{25}{subsection.16.3}%
+\contentsline {subsection}{\numberline {16.4}\texttt {bml\_sync\_consolidate} --- pairwise residual heatmap}{26}{subsection.16.4}%
+\contentsline {subsection}{\numberline {16.5}Quick-reference: what to check first}{27}{subsection.16.5}%
+\contentsline {section}{\numberline {17}Best Practices and Lab Conventions}{27}{section.17}%
+\contentsline {subsection}{\numberline {17.1}Choose your sync method by signal quality}{28}{subsection.17.1}%
+\contentsline {subsection}{\numberline {17.2}Always validate sync quality}{28}{subsection.17.2}%
+\contentsline {subsection}{\numberline {17.3}Annotation tables as the lingua franca}{28}{subsection.17.3}%
+\contentsline {subsection}{\numberline {17.4}Save intermediate outputs}{28}{subsection.17.4}%
+\contentsline {subsection}{\numberline {17.5}The fallback-first principle}{29}{subsection.17.5}%
+\contentsline {subsection}{\numberline {17.6}BIDS event file conventions}{29}{subsection.17.6}%
+\contentsline {subsection}{\numberline {17.7}Chunking strategy}{29}{subsection.17.7}%
+\contentsline {subsection}{\numberline {17.8}Toward Python: design principles to carry forward}{29}{subsection.17.8}%
+\contentsline {section}{\numberline {A}Mathematical Reference}{30}{appendix.A}%

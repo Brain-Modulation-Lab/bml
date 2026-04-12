@@ -1,0 +1,47 @@
+\contentsline {section}{\numberline {1}The Annotation Table: Core Data Structure}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Rationale}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}The four mandatory columns}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Creating annotation tables}{3}{subsection.1.3}%
+\contentsline {section}{\numberline {2}The ROI Table and the (s1, t1, s2, t2) Coordinate System}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}What is an ROI table?}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The linear coordinate map}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Why sample midpoints?}{4}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Creating and Loading Annotation Tables}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}From scratch}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}From BIDS TSV files (\texttt {bml\_annot\_read\_tsv})}{5}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}From FieldTrip event structs (\texttt {bml\_event2annot})}{5}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Scanning a folder to build the initial ROI table}{6}{subsection.3.4}%
+\contentsline {section}{\numberline {4}bml\_annot\_extend --- Temporal Dilation and Erosion}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Rationale}{6}{subsection.4.1}%
+\contentsline {section}{\numberline {5}bml\_annot\_filter / filterout --- Selection by Time Window}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Rationale}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Overlap condition}{7}{subsection.5.2}%
+\contentsline {section}{\numberline {6}bml\_annot\_intersect --- Temporal Intersection}{7}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Rationale}{7}{subsection.6.1}%
+\contentsline {section}{\numberline {7}bml\_annot\_union --- Temporal Union}{8}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Rationale}{8}{subsection.7.1}%
+\contentsline {section}{\numberline {8}bml\_annot\_difference --- Set Subtraction}{9}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Rationale}{9}{subsection.8.1}%
+\contentsline {section}{\numberline {9}bml\_annot\_consolidate --- Merging by Criterion}{9}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Rationale}{9}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Algorithm}{10}{subsection.9.2}%
+\contentsline {section}{\numberline {10}bml\_annot\_blocks --- Run-Length Encoding and Transitions}{10}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Rationale}{10}{subsection.10.1}%
+\contentsline {section}{\numberline {11}bml\_annot\_shadow --- Filling the Gaps}{11}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Rationale}{11}{subsection.11.1}%
+\contentsline {section}{\numberline {12}bml\_annot\_coverage --- Measuring How Much is Covered}{12}{section.12}%
+\contentsline {section}{\numberline {13}bml\_annot\_overlap --- Detecting Conflicts}{12}{section.13}%
+\contentsline {section}{\numberline {14}Joining Tables}{13}{section.14}%
+\contentsline {subsection}{\numberline {14.1}bml\_annot\_left\_join --- Key-Based Join}{13}{subsection.14.1}%
+\contentsline {subsection}{\numberline {14.2}bml\_annot\_transfer --- Temporal Overlap Join}{13}{subsection.14.2}%
+\contentsline {section}{\numberline {15}bml\_annot\_calculate --- Feature Extraction over Epochs}{13}{section.15}%
+\contentsline {section}{\numberline {16}bml\_annot\_detect --- Threshold-Based Event Detection}{14}{section.16}%
+\contentsline {section}{\numberline {17}bml\_annot2raw / bml\_raw2annot --- Signal Encoding}{14}{section.17}%
+\contentsline {subsection}{\numberline {17.1}Annotations to binary/count signals (\texttt {bml\_annot2raw})}{14}{subsection.17.1}%
+\contentsline {section}{\numberline {18}bml\_annot\_plot --- Visualization}{15}{section.18}%
+\contentsline {section}{\numberline {19}bml\_annot\_t0 and bml\_annot\_rowbind --- Utilities}{15}{section.19}%
+\contentsline {subsection}{\numberline {19.1}bml\_annot\_t0 --- Change Time Reference}{15}{subsection.19.1}%
+\contentsline {subsection}{\numberline {19.2}bml\_annot\_rowbind --- Vertical Concatenation}{15}{subsection.19.2}%
+\contentsline {section}{\numberline {20}Complete Worked Example: From Raw Events to Clean Trial Features}{16}{section.20}%
+\contentsline {section}{\numberline {21}Annotation Algebra: Complete Reference Table}{17}{section.21}%
+\contentsline {section}{\numberline {A}Interval Algebra: Mathematical Summary}{19}{appendix.A}%
