@@ -1,6 +1,6 @@
 # BML Toolbox
 
-**Brain Modulation Laboratory · MGH / University of Pittsburgh · v1.0**
+**Brain Modulation Laboratory · MGH · v1.0**
 
 The BML toolbox is a MATLAB library for intraoperative and clinical neurophysiology data analysis (ECoG, LFP, MER). It provides a uniform data model based on **annotation tables** and a complete pipeline for synchronizing multi-device recordings to a single master clock.
 
