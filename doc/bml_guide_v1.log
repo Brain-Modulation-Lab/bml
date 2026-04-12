@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.3.8)  12 APR 2026 09:40
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.3.8)  12 APR 2026 11:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1269,7 +1269,7 @@ k detection (\TU/Menlo(0)/m/n/10.95 bml_sync_audio_event\TU/Georgia(0)/m/n/10.9
 
 
 [4]
-Overfull \hbox (5.49104pt too wide) in paragraph at lines 99--99
+Overfull \hbox (5.49104pt too wide) in paragraph at lines 104--104
  [][] [][][]\TU/Menlo(0)/m/n/10.95 bml_sync_audio_event \TU/Georgia(0)/m/n/10.9
 5 / \TU/Menlo(0)/m/n/10.95 bml_sync_neuroomega_event \TU/Georgia(0)/m/n/10.95 —
  event align- 
@@ -1600,30 +1600,62 @@ Overfull \hbox (101.24976pt too wide) in paragraph at lines 1103--1112
  []
 
 
-
-[20]
-
-[21]
-Overfull \hbox (65.96263pt too wide) in paragraph at lines 1212--1213
-[][][][][][][][][][][][][][][][][][][][][] 
+Overfull \hbox (0.58893pt too wide) in paragraph at lines 1121--1122
+\TU/Georgia(0)/m/n/10.95 After synchronization you have \TU/Menlo(0)/m/n/10.95 
+(s1,t1,s2,t2) \TU/Georgia(0)/m/n/10.95 coordinates for the \TU/Georgia(0)/m/it/
+10.95 file you actually synced
  []
 
 
-Overfull \hbox (39.68242pt too wide) in paragraph at lines 1213--1214
-[][][][][][][][][][][] 
+
+[20]
+Overfull \hbox (39.68242pt too wide) in paragraph at lines 1166--1167
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1171--1172
+[]\TU/Menlo(0)/b/n/10.95 bml_sync_transfer_nsx_filetype \TU/Georgia(0)/m/n/10.9
+5 is functionally identical but uses
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1171--1172
+\TU/Menlo(0)/m/n/10.95 round(…,'significant') \TU/Georgia(0)/m/n/10.95 for the 
+real-Fs calculation. Use it when
+ []
+
+
+Underfull \hbox (badness 1616) in paragraph at lines 1171--1172
+\TU/Menlo(0)/m/n/10.95 bml_sync_transfer_trellis_filetype \TU/Georgia(0)/m/n/10
+.95 produces spurious coordinate values with
+ []
+
+
+Overfull \hbox (88.4109pt too wide) in paragraph at lines 1177--1178
+\TU/Georgia(0)/m/n/10.95 A single NeuroOmega \TU/Menlo(0)/m/n/10.95 .mat \TU/Ge
+orgia(0)/m/n/10.95 file stores every channel type with its own internal clock: 
+\TU/Menlo(0)/m/n/10.95 ChannelName_TimeBegin
+ []
+
+
+
+[21]
+Overfull \hbox (3.44597pt too wide) in paragraph at lines 1212--1213
+[]\TU/Georgia(0)/m/n/10.95 Re-syncing each file independently introduces indepe
+ndent estimation errors. Trans-
+ []
+
+
+Overfull \hbox (118.52306pt too wide) in paragraph at lines 1224--1226
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
 
 [22]
-Underfull \hbox (badness 10000) in paragraph at lines 1276--1276
-[]|\TU/Georgia(0)/m/n/10.95 Path has horizontal/vertical
- []
-
-
-Overfull \hbox (12.81366pt too wide) in paragraph at lines 1283--1283
-|[]\TU/Menlo(0)/b/n/12 bml_sync_audio_event \TU/Georgia(0)/b/n/12 / \TU/Menlo(0
-)/b/n/12 bml_sync_neuroomega_event \TU/Georgia(0)/b/n/12 — event alignment
+Overfull \hbox (52.82253pt too wide) in paragraph at lines 1237--1238
+[][][][][][][][][][][][][][][][][][][] 
  []
 
 
@@ -1631,21 +1663,46 @@ Overfull \hbox (12.81366pt too wide) in paragraph at lines 1283--1283
 [23]
 
 [24]
+Overfull \hbox (65.96263pt too wide) in paragraph at lines 1336--1337
+[][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.68242pt too wide) in paragraph at lines 1337--1338
+[][][][][][][][][][][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1400--1400
+[]|\TU/Georgia(0)/m/n/10.95 Path has horizontal/vertical
+ []
+
+
+Overfull \hbox (14.2785pt too wide) in paragraph at lines 1407--1407
+|[]\TU/Menlo(0)/b/n/12 bml_sync_audio_event \TU/Georgia(0)/b/n/12 / \TU/Menlo(0
+)/b/n/12 bml_sync_neuroomega_event \TU/Georgia(0)/b/n/12 — event alignment
+ []
+
+
 
 [25]
-Overfull \hbox (26.54231pt too wide) in paragraph at lines 1492--1493
+
+[26]
+
+[27]
+Overfull \hbox (26.54231pt too wide) in paragraph at lines 1616--1617
 [][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (26.27951pt too wide) in paragraph at lines 1528--1528
+Overfull \hbox (26.27951pt too wide) in paragraph at lines 1652--1652
 []|\TU/Menlo(0)/m/n/10.95 bml_sync_neuroomega_event|  
  []
 
 
 
-[26]
-Overfull \hbox (15.67438pt too wide) in paragraph at lines 1557--1558
+[28]
+Overfull \hbox (15.67438pt too wide) in paragraph at lines 1681--1682
 []\TU/Georgia(0)/m/n/10.95 Use \TU/Menlo(0)/m/n/10.95 bml_annot_table() \TU/Geo
 rgia(0)/m/n/10.95 to create any new table — it enforces \TU/Menlo(0)/m/n/10.95 
 id\TU/Georgia(0)/m/n/10.95 , \TU/Menlo(0)/m/n/10.95 starts\TU/Georgia(0)/m/n/10
@@ -1655,19 +1712,19 @@ id\TU/Georgia(0)/m/n/10.95 , \TU/Menlo(0)/m/n/10.95 starts\TU/Georgia(0)/m/n/10
 
 
 
-[27]
+[29]
 
-[28]
-Overfull \hbox (194.34308pt too wide) detected at line 1651
+[30]
+Overfull \hbox (194.34308pt too wide) detected at line 1775
 []\OT1/cmr/m/n/10.95 ([][]\OML/cmm/m/it/10.95 ; [][]\OT1/cmr/m/n/10.95 ) = []  
 []
  []
 
 
 
-[29])
+[31])
 
-[30] (./bml_guide_v1.aux)
+[32] (./bml_guide_v1.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1677,15 +1734,15 @@ L3 programming layer <2025-01-18>
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `bml_guide_v1.out' has not changed.
-(rerunfilecheck)             Checksum: B31AD07085C8D8FE172C94FA93D0950C;27079.
+(rerunfilecheck)             Checksum: 487D35E0DB5641682A3364A28AE413DF;28641.
  ) 
 Here is how much of TeX's memory you used:
- 36610 strings out of 473832
- 776485 string characters out of 5729482
- 1869090 words of memory out of 5000000
- 59068 multiletter control sequences out of 15000+600000
+ 36677 strings out of 473832
+ 777554 string characters out of 5729482
+ 1800149 words of memory out of 5000000
+ 59135 multiletter control sequences out of 15000+600000
  567529 words of font info for 124 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  102i,13n,107p,1201b,1977s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on bml_guide_v1.pdf (57 pages).
+Output written on bml_guide_v1.pdf (59 pages).

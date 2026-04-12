@@ -68,30 +68,36 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {13.2}Level 1: per-file consolidation}{21}{subsection.13.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {13.3}Level 2: contiguous file consolidation}{21}{subsection.13.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {13.4}What the consolidated table looks like}{21}{subsection.13.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {14}Complete End-to-End Example}{22}{section.14}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {9}{\ignorespaces Complete synchronization script: Trellis + Zoom + NeuroOmega + Psychtoolbox}}{22}{lstlisting.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {15}Common Pitfalls}{23}{section.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {16}Diagnostic Plots: How to Enable and Interpret}{24}{section.16}\protected@file@percent }
-\newlabel{sec:diagnostics}{{16}{24}{Diagnostic Plots: How to Enable and Interpret}{section.16}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {16.1}\texttt  {bml\_sync\_match\_events} --- DP similarity plot}{24}{subsection.16.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Schematic of \texttt  {bml\_sync\_match\_events} diagnostic figure.}}{24}{figure.caption.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {16.2}\texttt  {bml\_sync\_audio\_event} / \texttt  {bml\_sync\_neuroomega\_event} --- event alignment plot}{25}{subsection.16.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Schematic of event-alignment diagnostic. Good output: circles and stars overlap; histogram peak at $\log _{10}|\Delta t| \leq -3$ (i.e.\ $\leq 1$\,ms).}}{25}{figure.caption.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {16.3}\texttt  {bml\_sync\_digital} --- residual + alignment plot}{25}{subsection.16.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Schematic of \texttt  {bml\_sync\_digital} 3-panel diagnostic. Good output: Panel 1 residuals are flat near 0; Panel 2 circles and stars overlap; Panel 3 peak at $\leq -3$.}}{26}{figure.caption.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {16.4}\texttt  {bml\_sync\_consolidate} --- pairwise residual heatmap}{26}{subsection.16.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Schematic consolidation heatmap. Blue = good agreement; red = rogue chunk. Remove the row/column that is uniformly bright and re-run consolidation.}}{27}{figure.caption.4}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {10}{\ignorespaces Removing a rogue chunk and re-consolidating}}{27}{lstlisting.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {16.5}Quick-reference: what to check first}{27}{subsection.16.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {17}Best Practices and Lab Conventions}{27}{section.17}\protected@file@percent }
-\newlabel{sec:bestpractices}{{17}{27}{Best Practices and Lab Conventions}{section.17}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.1}Choose your sync method by signal quality}{28}{subsection.17.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.2}Always validate sync quality}{28}{subsection.17.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.3}Annotation tables as the lingua franca}{28}{subsection.17.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.4}Save intermediate outputs}{28}{subsection.17.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.5}The fallback-first principle}{29}{subsection.17.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.6}BIDS event file conventions}{29}{subsection.17.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.7}Chunking strategy}{29}{subsection.17.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {17.8}Toward Python: design principles to carry forward}{29}{subsection.17.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {A}Mathematical Reference}{30}{appendix.A}\protected@file@percent }
-\gdef \@abspage@last{32}
+\@writefile{toc}{\contentsline {section}{\numberline {14}Sync Transfer Functions}{22}{section.14}\protected@file@percent }
+\newlabel{sec:transfer}{{14}{22}{Sync Transfer Functions}{section.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.1}\texttt  {bml\_sync\_transfer\_trellis\_filetype} --- rescale sample indices}{22}{subsection.14.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.2}\texttt  {bml\_sync\_transfer\_neuroomega\_chantype} --- re-anchor to channel internal clock}{23}{subsection.14.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.3}Why not re-sync each file type separately?}{23}{subsection.14.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.4}Putting it all together}{23}{subsection.14.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {15}Complete End-to-End Example}{24}{section.15}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {9}{\ignorespaces Complete synchronization script: Trellis + Zoom + NeuroOmega + Psychtoolbox}}{24}{lstlisting.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {16}Common Pitfalls}{25}{section.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {17}Diagnostic Plots: How to Enable and Interpret}{26}{section.17}\protected@file@percent }
+\newlabel{sec:diagnostics}{{17}{26}{Diagnostic Plots: How to Enable and Interpret}{section.17}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {17.1}\texttt  {bml\_sync\_match\_events} --- DP similarity plot}{26}{subsection.17.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Schematic of \texttt  {bml\_sync\_match\_events} diagnostic figure.}}{26}{figure.caption.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {17.2}\texttt  {bml\_sync\_audio\_event} / \texttt  {bml\_sync\_neuroomega\_event} --- event alignment plot}{27}{subsection.17.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Schematic of event-alignment diagnostic. Good output: circles and stars overlap; histogram peak at $\log _{10}|\Delta t| \leq -3$ (i.e.\ $\leq 1$\,ms).}}{27}{figure.caption.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {17.3}\texttt  {bml\_sync\_digital} --- residual + alignment plot}{27}{subsection.17.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Schematic of \texttt  {bml\_sync\_digital} 3-panel diagnostic. Good output: Panel 1 residuals are flat near 0; Panel 2 circles and stars overlap; Panel 3 peak at $\leq -3$.}}{28}{figure.caption.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {17.4}\texttt  {bml\_sync\_consolidate} --- pairwise residual heatmap}{28}{subsection.17.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Schematic consolidation heatmap. Blue = good agreement; red = rogue chunk. Remove the row/column that is uniformly bright and re-run consolidation.}}{29}{figure.caption.4}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {10}{\ignorespaces Removing a rogue chunk and re-consolidating}}{29}{lstlisting.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {17.5}Quick-reference: what to check first}{29}{subsection.17.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {18}Best Practices and Lab Conventions}{29}{section.18}\protected@file@percent }
+\newlabel{sec:bestpractices}{{18}{29}{Best Practices and Lab Conventions}{section.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.1}Choose your sync method by signal quality}{30}{subsection.18.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.2}Always validate sync quality}{30}{subsection.18.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.3}Annotation tables as the lingua franca}{30}{subsection.18.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.4}Save intermediate outputs}{30}{subsection.18.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.5}The fallback-first principle}{31}{subsection.18.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.6}BIDS event file conventions}{31}{subsection.18.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.7}Chunking strategy}{31}{subsection.18.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {18.8}Toward Python: design principles to carry forward}{31}{subsection.18.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Mathematical Reference}{32}{appendix.A}\protected@file@percent }
+\gdef \@abspage@last{34}

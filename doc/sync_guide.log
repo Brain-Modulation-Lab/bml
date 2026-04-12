@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.3.8)  12 APR 2026 09:39
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.3.8)  12 APR 2026 11:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1344,29 +1344,53 @@ Overfull \hbox (89.86884pt too wide) in paragraph at lines 1214--1223
  []
 
 
+Overfull \hbox (28.3015pt too wide) in paragraph at lines 1277--1278
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1282--1283
+[]\TU/Menlo(0)/b/n/10.95 bml_sync_transfer_nsx_filetype \TU/Georgia(0)/m/n/10.9
+5 is functionally identical but uses
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1282--1283
+\TU/Menlo(0)/m/n/10.95 round(…,'significant') \TU/Georgia(0)/m/n/10.95 for the 
+real-Fs calculation. Use it when
+ []
+
+
+Underfull \hbox (badness 2818) in paragraph at lines 1282--1283
+\TU/Menlo(0)/m/n/10.95 bml_sync_transfer_trellis_filetype \TU/Georgia(0)/m/n/10
+.95 produces spurious coordinate values with
+ []
+
+
 
 [22]
-Overfull \hbox (36.96558pt too wide) in paragraph at lines 1311--1312
-[]\TU/Georgia(0)/b/n/10.95 Combining analog and event sync ROI. \TU/Menlo(0)/m/
-n/10.95 bml_sync_analog \TU/Georgia(0)/m/n/10.95 adds \TU/Menlo(0)/m/n/10.95 ch
-unk_id \TU/Georgia(0)/m/n/10.95 and \TU/Menlo(0)/m/n/10.95 sync_channel
+Overfull \hbox (17.51207pt too wide) in paragraph at lines 1286--1286
+|[]\TU/Menlo(0)/b/n/12 bml_sync_transfer_neuroomega_chantype \TU/Georgia(0)/b/n
+/12 — re-anchor to channel internal clock| 
+ []
+
+
+Overfull \hbox (77.02998pt too wide) in paragraph at lines 1288--1289
+\TU/Georgia(0)/m/n/10.95 A single NeuroOmega \TU/Menlo(0)/m/n/10.95 .mat \TU/Ge
+orgia(0)/m/n/10.95 file stores every channel type with its own internal clock: 
+\TU/Menlo(0)/m/n/10.95 ChannelName_TimeBegin
+ []
+
+
+Overfull \hbox (107.14214pt too wide) in paragraph at lines 1335--1337
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
 
 [23]
-Overfull \hbox (54.58171pt too wide) in paragraph at lines 1323--1324
-[][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (28.3015pt too wide) in paragraph at lines 1324--1325
-[][][][][][][][][][][] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1387--1387
-[]|\TU/Georgia(0)/m/n/10.95 Path has horizontal/vertical
+Overfull \hbox (41.4416pt too wide) in paragraph at lines 1348--1349
+[][][][][][][][][][][][][][][][][][][] 
  []
 
 
@@ -1374,21 +1398,47 @@ Underfull \hbox (badness 10000) in paragraph at lines 1387--1387
 [24]
 
 [25]
+Overfull \hbox (36.96558pt too wide) in paragraph at lines 1435--1436
+[]\TU/Georgia(0)/b/n/10.95 Combining analog and event sync ROI. \TU/Menlo(0)/m/
+n/10.95 bml_sync_analog \TU/Georgia(0)/m/n/10.95 adds \TU/Menlo(0)/m/n/10.95 ch
+unk_id \TU/Georgia(0)/m/n/10.95 and \TU/Menlo(0)/m/n/10.95 sync_channel
+ []
+
+
+Overfull \hbox (54.58171pt too wide) in paragraph at lines 1447--1448
+[][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (28.3015pt too wide) in paragraph at lines 1448--1449
+[][][][][][][][][][][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1511--1511
+[]|\TU/Georgia(0)/m/n/10.95 Path has horizontal/vertical
+ []
+
+
 
 [26]
-Overfull \hbox (15.16139pt too wide) in paragraph at lines 1603--1604
+
+[27]
+
+[28]
+Overfull \hbox (15.16139pt too wide) in paragraph at lines 1727--1728
 [][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (26.27951pt too wide) in paragraph at lines 1639--1639
+Overfull \hbox (26.27951pt too wide) in paragraph at lines 1763--1763
 []|\TU/Menlo(0)/m/n/10.95 bml_sync_neuroomega_event|  
  []
 
 
 
-[27]
-Overfull \hbox (4.29346pt too wide) in paragraph at lines 1668--1669
+[29]
+Overfull \hbox (4.29346pt too wide) in paragraph at lines 1792--1793
 []\TU/Georgia(0)/m/n/10.95 Use \TU/Menlo(0)/m/n/10.95 bml_annot_table() \TU/Geo
 rgia(0)/m/n/10.95 to create any new table — it enforces \TU/Menlo(0)/m/n/10.95 
 id\TU/Georgia(0)/m/n/10.95 , \TU/Menlo(0)/m/n/10.95 starts\TU/Georgia(0)/m/n/10
@@ -1398,33 +1448,33 @@ id\TU/Georgia(0)/m/n/10.95 , \TU/Menlo(0)/m/n/10.95 starts\TU/Georgia(0)/m/n/10
 
 
 
-[28]
+[30]
 
-[29]
-Overfull \hbox (182.96216pt too wide) detected at line 1762
+[31]
+Overfull \hbox (182.96216pt too wide) detected at line 1886
 []\OT1/cmr/m/n/10.95 ([][]\OML/cmm/m/it/10.95 ; [][]\OT1/cmr/m/n/10.95 ) = []  
 []
  []
 
 
 
-[30]
+[32]
 
-[31] (./sync_guide.aux)
+[33] (./sync_guide.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `sync_guide.out' has not changed.
-(rerunfilecheck)             Checksum: 8909F378D2807E507AD65A176F972E1D;14793.
+(rerunfilecheck)             Checksum: A3265307D51BC96933EC10E1FD123684;16281.
  ) 
 Here is how much of TeX's memory you used:
- 35852 strings out of 473832
- 744253 string characters out of 5729482
- 1836315 words of memory out of 5000000
- 58358 multiletter control sequences out of 15000+600000
+ 35920 strings out of 473832
+ 745327 string characters out of 5729482
+ 1836367 words of memory out of 5000000
+ 58426 multiletter control sequences out of 15000+600000
  567505 words of font info for 121 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  102i,13n,107p,1199b,1853s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on sync_guide.pdf (32 pages).
+Output written on sync_guide.pdf (34 pages).

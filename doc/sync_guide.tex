@@ -1225,6 +1225,130 @@ sync_roi_final = bml_sync_consolidate(cfg_cons);
 \textbf{Interpreting warpfactor:} Zoom at 0.999998 means its clock ran 2\,ppm \emph{fast} (slightly fewer samples per real second than 44100). NeuroOmega at 1.000003 means its clock ran 3\,ppm \emph{slow}. Over a 5-minute session: Zoom off by 0.6\,ms, NeuroOmega off by 0.9\,ms --- easily within 1\,ms tolerance.
 
 % ============================================================================
+\section{Sync Transfer Functions}
+\label{sec:transfer}
+% ============================================================================
+
+After synchronization you have \texttt{(s1,t1,s2,t2)} coordinates for the \emph{file you actually synced} --- e.g.\ the Trellis \texttt{.ns5} file or the NeuroOmega \texttt{analog} channel. But the same session also contains files at different sampling rates (\texttt{.ns2}, \texttt{.ns3}) and other channel types (\texttt{micro}, \texttt{macro}, \texttt{emg}) that were never directly synced.
+
+The three transfer functions \textbf{propagate} the sync coordinates to all those files without re-running sync.
+
+\begin{center}
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, fill=bmlblue!10, minimum width=3.4cm, minimum height=0.65cm, font=\small\ttfamily, align=center},
+  srcbox/.style={draw, rounded corners, fill=bmlblue!30, minimum width=3.4cm, minimum height=0.65cm, font=\small\ttfamily\bfseries, align=center},
+  arr/.style={->, >=stealth, thick},
+  lbl/.style={font=\scriptsize\itshape}
+]
+% Left side: Trellis
+\node[srcbox] (ns5) at (0,0)   {sync\_roi\\.ns5 / 30\,kHz};
+\node[box]    (ns3) at (0,-1.4) {sync\_roi\\.ns3 / 2\,kHz};
+\node[box]    (ns2) at (0,-2.8) {sync\_roi\\.ns2 / 1\,kHz};
+\draw[arr] (ns5) -- node[lbl,right]{transfer\_trellis} (ns3);
+\draw[arr] (ns3) -- node[lbl,right]{transfer\_trellis} (ns2);
+
+% Right side: NeuroOmega
+\node[srcbox] (analog) at (6.5,0)   {sync\_roi\\analog / 2750\,Hz};
+\node[box]    (micro)  at (6.5,-1.4) {sync\_roi\\micro / 44\,kHz};
+\node[box]    (macro)  at (6.5,-2.8) {sync\_roi\\macro / 44\,kHz};
+\node[box]    (emg)    at (6.5,-4.2) {sync\_roi\\emg};
+\draw[arr] (analog) -- node[lbl,right]{transfer\_neuroomega} (micro);
+\draw[arr] (analog) -- ++(2.2,0) |- (macro);
+\draw[arr] (analog) -- ++(2.2,0) |- (emg);
+\end{tikzpicture}
+\end{center}
+
+% ---------------------------------------------------------------------------
+\subsection{\texttt{bml\_sync\_transfer\_trellis\_filetype} --- rescale sample indices}
+
+Trellis writes the same session as multiple NSx files simultaneously. You sync on \texttt{.ns5} (30\,kHz, best waveform quality), then transfer to \texttt{.ns2} (1\,kHz LFP) and \texttt{.ns3} (2\,kHz).
+
+The function reconstructs the absolute file start/end times $t_0$, $t_f$ from the synced coordinates, then maps sample indices by the nominal Fs ratio:
+
+$$s_1^{\text{new}} = \left\lceil \frac{F_s^{\text{new}}}{F_s} \cdot \left(s_1 - \tfrac{1}{2}\right) \right\rceil, \qquad t_1^{\text{new}} = t_0 + \frac{s_1^{\text{new}} - \tfrac{1}{2}}{F_{s,\text{eff}}^{\text{new}}} - \text{delay}$$
+
+The \texttt{delay} parameter corrects for online low-pass filter phase delays (relevant for \texttt{.ns2}).
+
+\begin{lstlisting}[language=Matlab]
+cfg = [];
+cfg.roi           = sync_ns5;
+cfg.filetype      = 'trellis.ns2';
+cfg.sync_filetype = 'trellis.ns5';
+cfg.delay         = 0;          % optional: correct LPF phase delay (s)
+sync_ns2 = bml_sync_transfer_trellis_filetype(cfg);
+\end{lstlisting}
+
+\begin{notebox}
+\textbf{\texttt{bml\_sync\_transfer\_nsx\_filetype}} is functionally identical but uses \texttt{round(\ldots,\,'significant')} for the real-Fs calculation. Use it when \texttt{bml\_sync\_transfer\_trellis\_filetype} produces spurious coordinate values with certain NSx files.
+\end{notebox}
+
+% ---------------------------------------------------------------------------
+\subsection{\texttt{bml\_sync\_transfer\_neuroomega\_chantype} --- re-anchor to channel internal clock}
+
+A single NeuroOmega \texttt{.mat} file stores every channel type with its own internal clock: \texttt{ChannelName\_TimeBegin} and \texttt{ChannelName\_TimeEnd}. Sync is done on \texttt{analog} (2750\,Hz). This function re-anchors the coordinates to \texttt{micro}, \texttt{macro}, \texttt{emg}, etc.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+\toprule
+\textbf{chantype} & \textbf{Example channel} & \textbf{Fs} \\
+\midrule
+\texttt{analog}    & \texttt{CANALOG\_IN\_1}         & 2750\,Hz \\
+\texttt{micro}     & \texttt{CRAW\_01\_\_\_Central}  & 44\,kHz \\
+\texttt{micro\_hp} & \texttt{CSPK\_01\_\_\_Central}  & 44\,kHz \\
+\texttt{micro\_lfp}& \texttt{CLFP\_01\_\_\_Central}  & $\sim$1.4\,kHz \\
+\texttt{macro}     & \texttt{CMacro\_RAW\_01}        & 44\,kHz \\
+\texttt{macro\_lfp}& \texttt{CMacro\_LFP\_01}        & $\sim$1.4\,kHz \\
+\texttt{emg}       & \texttt{CEMG\_1\_\_\_01}        & variable \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}[language=Matlab]
+cfg = [];
+cfg.roi      = sync_ao_analog;   % synced with chantype='analog'
+cfg.chantype = 'micro';
+sync_ao_micro = bml_sync_transfer_neuroomega_chantype(cfg);
+
+cfg.chantype = 'macro';
+sync_ao_macro = bml_sync_transfer_neuroomega_chantype(cfg);
+\end{lstlisting}
+
+% ---------------------------------------------------------------------------
+\subsection{Why not re-sync each file type separately?}
+
+\begin{itemize}
+  \item The \texttt{analog} channel is used for NeuroOmega sync because its lower Fs (2750\,Hz) makes the grid search faster and more robust.
+  \item The \texttt{.ns5} file is used for Trellis sync because it has the highest Fs and the cleanest waveform of the click track.
+  \item Re-syncing each file independently introduces independent estimation errors. Transfer ensures all channel types share the \emph{exact same} sync estimate, maintaining perfect internal consistency.
+\end{itemize}
+
+% ---------------------------------------------------------------------------
+\subsection{Putting it all together}
+
+\begin{lstlisting}[language=Matlab]
+% 1. Sync Trellis ns5
+sync_ns5 = bml_sync_analog(cfg_analog);
+
+% 2. Transfer to other Trellis filetypes
+sync_ns2 = bml_sync_transfer_trellis_filetype(...
+    struct('roi',sync_ns5,'filetype','trellis.ns2','sync_filetype','trellis.ns5'));
+
+% 3. Sync NeuroOmega (analog channel)
+sync_ao_analog = bml_sync_neuroomega_event(cfg_ao);
+
+% 4. Transfer to micro and macro
+sync_ao_micro = bml_sync_transfer_neuroomega_chantype(...
+    struct('roi',sync_ao_analog,'chantype','micro'));
+sync_ao_macro = bml_sync_transfer_neuroomega_chantype(...
+    struct('roi',sync_ao_analog,'chantype','macro'));
+
+% 5. Consolidate everything
+sync_roi_final = bml_sync_consolidate(struct('roi', ...
+    [sync_ns5; sync_ns2; sync_ao_analog; sync_ao_micro; sync_ao_macro]));
+\end{lstlisting}
+
+% ============================================================================
 \section{Complete End-to-End Example}
 % ============================================================================
 

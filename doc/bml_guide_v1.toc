@@ -92,21 +92,26 @@
 \contentsline {subsection}{\numberline {.14.2}Level 1: per-file consolidation}{19}{subsection.Alph0.14.2}%
 \contentsline {subsection}{\numberline {.14.3}Level 2: contiguous file consolidation}{20}{subsection.Alph0.14.3}%
 \contentsline {subsection}{\numberline {.14.4}What the consolidated table looks like}{20}{subsection.Alph0.14.4}%
-\contentsline {section}{\numberline {.15}Complete End-to-End Example}{20}{section.Alph0.15}%
-\contentsline {section}{\numberline {.16}Common Pitfalls}{22}{section.Alph0.16}%
-\contentsline {section}{\numberline {.17}Diagnostic Plots: How to Enable and Interpret}{22}{section.Alph0.17}%
-\contentsline {subsection}{\numberline {.17.1}\texttt {bml\_sync\_match\_events} --- DP similarity plot}{23}{subsection.Alph0.17.1}%
-\contentsline {subsection}{\numberline {.17.2}\texttt {bml\_sync\_audio\_event} / \texttt {bml\_sync\_neuroomega\_event} --- event alignment plot}{23}{subsection.Alph0.17.2}%
-\contentsline {subsection}{\numberline {.17.3}\texttt {bml\_sync\_digital} --- residual + alignment plot}{24}{subsection.Alph0.17.3}%
-\contentsline {subsection}{\numberline {.17.4}\texttt {bml\_sync\_consolidate} --- pairwise residual heatmap}{25}{subsection.Alph0.17.4}%
-\contentsline {subsection}{\numberline {.17.5}Quick-reference: what to check first}{26}{subsection.Alph0.17.5}%
-\contentsline {section}{\numberline {.18}Best Practices and Lab Conventions}{27}{section.Alph0.18}%
-\contentsline {subsection}{\numberline {.18.1}Choose your sync method by signal quality}{27}{subsection.Alph0.18.1}%
-\contentsline {subsection}{\numberline {.18.2}Always validate sync quality}{27}{subsection.Alph0.18.2}%
-\contentsline {subsection}{\numberline {.18.3}Annotation tables as the lingua franca}{27}{subsection.Alph0.18.3}%
-\contentsline {subsection}{\numberline {.18.4}Save intermediate outputs}{27}{subsection.Alph0.18.4}%
-\contentsline {subsection}{\numberline {.18.5}The fallback-first principle}{28}{subsection.Alph0.18.5}%
-\contentsline {subsection}{\numberline {.18.6}BIDS event file conventions}{28}{subsection.Alph0.18.6}%
-\contentsline {subsection}{\numberline {.18.7}Chunking strategy}{28}{subsection.Alph0.18.7}%
-\contentsline {subsection}{\numberline {.18.8}Toward Python: design principles to carry forward}{28}{subsection.Alph0.18.8}%
-\contentsline {section}{\numberline {.1}Mathematical Reference}{29}{section.Alph0.1}%
+\contentsline {section}{\numberline {.15}Sync Transfer Functions}{21}{section.Alph0.15}%
+\contentsline {subsection}{\numberline {.15.1}\texttt {bml\_sync\_transfer\_trellis\_filetype} --- rescale sample indices}{21}{subsection.Alph0.15.1}%
+\contentsline {subsection}{\numberline {.15.2}\texttt {bml\_sync\_transfer\_neuroomega\_chantype} --- re-anchor to channel internal clock}{22}{subsection.Alph0.15.2}%
+\contentsline {subsection}{\numberline {.15.3}Why not re-sync each file type separately?}{22}{subsection.Alph0.15.3}%
+\contentsline {subsection}{\numberline {.15.4}Putting it all together}{22}{subsection.Alph0.15.4}%
+\contentsline {section}{\numberline {.16}Complete End-to-End Example}{23}{section.Alph0.16}%
+\contentsline {section}{\numberline {.17}Common Pitfalls}{24}{section.Alph0.17}%
+\contentsline {section}{\numberline {.18}Diagnostic Plots: How to Enable and Interpret}{25}{section.Alph0.18}%
+\contentsline {subsection}{\numberline {.18.1}\texttt {bml\_sync\_match\_events} --- DP similarity plot}{25}{subsection.Alph0.18.1}%
+\contentsline {subsection}{\numberline {.18.2}\texttt {bml\_sync\_audio\_event} / \texttt {bml\_sync\_neuroomega\_event} --- event alignment plot}{26}{subsection.Alph0.18.2}%
+\contentsline {subsection}{\numberline {.18.3}\texttt {bml\_sync\_digital} --- residual + alignment plot}{26}{subsection.Alph0.18.3}%
+\contentsline {subsection}{\numberline {.18.4}\texttt {bml\_sync\_consolidate} --- pairwise residual heatmap}{27}{subsection.Alph0.18.4}%
+\contentsline {subsection}{\numberline {.18.5}Quick-reference: what to check first}{28}{subsection.Alph0.18.5}%
+\contentsline {section}{\numberline {.19}Best Practices and Lab Conventions}{29}{section.Alph0.19}%
+\contentsline {subsection}{\numberline {.19.1}Choose your sync method by signal quality}{29}{subsection.Alph0.19.1}%
+\contentsline {subsection}{\numberline {.19.2}Always validate sync quality}{29}{subsection.Alph0.19.2}%
+\contentsline {subsection}{\numberline {.19.3}Annotation tables as the lingua franca}{29}{subsection.Alph0.19.3}%
+\contentsline {subsection}{\numberline {.19.4}Save intermediate outputs}{29}{subsection.Alph0.19.4}%
+\contentsline {subsection}{\numberline {.19.5}The fallback-first principle}{30}{subsection.Alph0.19.5}%
+\contentsline {subsection}{\numberline {.19.6}BIDS event file conventions}{30}{subsection.Alph0.19.6}%
+\contentsline {subsection}{\numberline {.19.7}Chunking strategy}{30}{subsection.Alph0.19.7}%
+\contentsline {subsection}{\numberline {.19.8}Toward Python: design principles to carry forward}{30}{subsection.Alph0.19.8}%
+\contentsline {section}{\numberline {.1}Mathematical Reference}{31}{section.Alph0.1}%

@@ -58,6 +58,7 @@ sync/neuroomega
 sync/psychtoolbox
 sync/dp_matching
 sync/consolidation
+sync/transfer
 sync/best_practices
 sync/internals
 sync/diagnostics

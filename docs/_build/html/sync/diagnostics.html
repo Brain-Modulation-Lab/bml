@@ -1,0 +1,720 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Function Reference" href="../api/index.html"><link rel="prev" title="Alignment Function Internals" href="internals.html">
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.12.19 -->
+        <title>Diagnostic Plots - BML Toolbox v1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=acfd86a5" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #004890;
+  --color-brand-content: #004890;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: Menlo, Monaco, Consolas, monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #6baed6;
+  --color-brand-content: #6baed6;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #6baed6;
+  --color-brand-content: #6baed6;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">BML Toolbox v1.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">BML Toolbox v1.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Part I · Annotation Tables</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../annotation/index.html">Annotation Tables</a><input aria-label="Toggle navigation of Annotation Tables" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/schema.html">Annotation Table Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/roi_table.html">The ROI Table and Coordinate System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/creating.html">Creating and Loading Annotation Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/set_operations.html">Set Operations on Time Intervals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/grouping.html">Grouping, Consolidation, and Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/joins_features.html">Joining Tables and Computing Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/encoding_viz.html">Signal Encoding and Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/example.html">Complete Worked Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/reference.html">Function Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/schema.html">Annotation Table Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/roi_table.html">The ROI Table and Coordinate System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/creating.html">Creating and Loading Annotation Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/set_operations.html">Set Operations on Time Intervals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/grouping.html">Grouping, Consolidation, and Measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/joins_features.html">Joining Tables and Computing Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/encoding_viz.html">Signal Encoding and Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/example.html">Complete Worked Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/reference.html">Function Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Part II · Synchronization</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="index.html">Synchronization Pipeline</a><input aria-label="Toggle navigation of Synchronization Pipeline" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html">System Overview and Data Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Synchronizing Zoom Audio to Ripple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="neuroomega.html">NeuroOmega Synchronization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psychtoolbox.html">Task Laptop Synchronization (Psychtoolbox)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dp_matching.html">DP Event Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="consolidation.html">Consolidation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="best_practices.html">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">System Overview and Data Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audio.html">Synchronizing Zoom Audio to Ripple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neuroomega.html">NeuroOmega Synchronization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psychtoolbox.html">Task Laptop Synchronization (Psychtoolbox)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dp_matching.html">DP Event Matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consolidation.html">Consolidation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="best_practices.html">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internals.html">Alignment Function Internals</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Diagnostic Plots</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">Function Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/sync/diagnostics.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="diagnostic-plots">
+<h1>Diagnostic Plots<a class="headerlink" href="#diagnostic-plots" title="Link to this heading">¶</a></h1>
+<p>Every sync function produces a diagnostic figure when <code class="docutils literal notranslate"><span class="pre">cfg.diagnostic_plot</span> <span class="pre">=</span> <span class="pre">true</span></code> (or <code class="docutils literal notranslate"><span class="pre">cfg.plot_diagnostic</span> <span class="pre">=</span> <span class="pre">true</span></code> for consolidation). This page explains what each plot shows, how to read it, and what good vs. bad output looks like.</p>
+<hr class="docutils" />
+<section id="bml-sync-match-events-dp-similarity-plot">
+<h2>1. <code class="docutils literal notranslate"><span class="pre">bml_sync_match_events</span></code> — DP similarity plot<a class="headerlink" href="#bml-sync-match-events-dp-similarity-plot" title="Link to this heading">¶</a></h2>
+<p><strong>How to enable</strong>:</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="p">.</span><span class="n">diagnostic_plot</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">[</span><span class="n">idxs_m</span><span class="p">,</span><span class="w"> </span><span class="n">idxs_s</span><span class="p">,</span><span class="w"> </span><span class="n">mean_sim</span><span class="p">,</span><span class="w"> </span><span class="n">sim</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bml_sync_match_events</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="w"> </span><span class="n">master_events</span><span class="p">,</span><span class="w"> </span><span class="n">slave_events</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>What you see</strong>: a 2-panel figure.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>┌─────────────────────────────────────────┐
+│ Panel 1: Similarity vector              │
+│                                         │
+│  1.0 ┤ ████████████████████████        │
+│  0.5 ┤          ░░░░░░░░               │
+│  0.0 ┤                                 │
+│       └──────────────────────────────  │
+│            event index (matched pairs) │
+├─────────────────────────────────────────┤
+│ Panel 2: DP matrix + backtrack path     │
+│                                         │
+│  master │░░░░░░░░░░░░                  │
+│  index  │    ░░░░░░░░░░░░░░            │
+│         │            ░░░░░░░░░░░░░░░   │
+│          └─────────────────────────    │
+│                  slave index           │
+└─────────────────────────────────────────┘
+</pre></div>
+</div>
+<p><strong>Panel 1 — similarity vector</strong></p>
+<p>Each point is one matched pair. The y-axis is similarity (0–1).</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pattern</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>All points near 1.0</p></td>
+<td><p>Perfect match — event patterns are identical</p></td>
+</tr>
+<tr class="row-odd"><td><p>A cluster of high values, then a drop</p></td>
+<td><p>One contiguous well-matched block; events outside are noise</p></td>
+</tr>
+<tr class="row-even"><td><p>Low values throughout (&lt; 0.5)</p></td>
+<td><p>Poor match — wrong scan range, wrong event type, or no overlap</p></td>
+</tr>
+<tr class="row-odd"><td><p>Alternating high/low</p></td>
+<td><p>Possible duplicate event structure in one recording</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Panel 2 — DP matrix</strong></p>
+<p>The matrix <code class="docutils literal notranslate"><span class="pre">dp[i,j]</span></code> = best total similarity achievable by matching the first <code class="docutils literal notranslate"><span class="pre">i</span></code> master events to the first <code class="docutils literal notranslate"><span class="pre">j</span></code> slave events. The overlaid line is the backtrack path — the actual pairing chosen.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pattern</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Path is a smooth diagonal</p></td>
+<td><p>Clean 1:1 correspondence, events align well</p></td>
+</tr>
+<tr class="row-odd"><td><p>Path has horizontal or vertical runs</p></td>
+<td><p>Events missing on one side — the path skips over them</p></td>
+</tr>
+<tr class="row-even"><td><p>Path jumps diagonally and then stalls</p></td>
+<td><p>One device has extra events not present in the other</p></td>
+</tr>
+<tr class="row-odd"><td><p>Path stays in one corner</p></td>
+<td><p>No real overlap — scan range too narrow, or wrong files</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="bml-sync-audio-event-bml-sync-neuroomega-event-event-alignment-plot">
+<h2>2. <code class="docutils literal notranslate"><span class="pre">bml_sync_audio_event</span></code> / <code class="docutils literal notranslate"><span class="pre">bml_sync_neuroomega_event</span></code> — event alignment plot<a class="headerlink" href="#bml-sync-audio-event-bml-sync-neuroomega-event-event-alignment-plot" title="Link to this heading">¶</a></h2>
+<p><strong>How to enable</strong>:</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="p">.</span><span class="n">diagnostic_plot</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="n">sync_roi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bml_sync_audio_event</span><span class="p">(</span><span class="n">cfg</span><span class="p">);</span><span class="w">       </span><span class="c">% or bml_sync_neuroomega_event</span>
+</pre></div>
+</div>
+<p><strong>What you see</strong>: one 2-panel figure <strong>per file</strong> in <code class="docutils literal notranslate"><span class="pre">cfg.roi</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>┌───────────────────────────────┬──────────────────────────┐
+│ Panel 1: Event timeline       │ Panel 2: Residual         │
+│                               │ histogram                 │
+│  ●  ●  ●  ●  ●  ●  ●  ●  ●  │                           │
+│  master events (blue ●)       │  ██                       │
+│                               │  ████                     │
+│  *  *  *  *  *  *  *  *  *  │  ████████                  │
+│  slave events corrected (★)  │  ██████████               │
+│                               │  ████                     │
+│ ────────────────────────────  │  ██                       │
+│      master time (s)          │  -4  -3  -2  -1   0       │
+│                               │  log10 |Δt| (s)           │
+└───────────────────────────────┴──────────────────────────┘
+</pre></div>
+</div>
+<p><strong>Panel 1 — timeline</strong></p>
+<p>Blue circles = master event times. Red stars = slave event times <strong>after</strong> applying <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> (and <code class="docutils literal notranslate"><span class="pre">warpfactor</span></code> if enabled).</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pattern</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Circles and stars perfectly interleaved</p></td>
+<td><p>Excellent alignment</p></td>
+</tr>
+<tr class="row-odd"><td><p>Stars consistently offset from circles</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">delta_t</span></code> estimate is slightly off — check scan range</p></td>
+</tr>
+<tr class="row-even"><td><p>Stars spread out relative to circles</p></td>
+<td><p>Residual drift — consider enabling <code class="docutils literal notranslate"><span class="pre">timewarp</span> <span class="pre">=</span> <span class="pre">true</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Many extra stars with no nearby circle</p></td>
+<td><p>False peaks detected — increase <code class="docutils literal notranslate"><span class="pre">min_rph</span></code> threshold</p></td>
+</tr>
+<tr class="row-even"><td><p>Many circles with no nearby star</p></td>
+<td><p>Events missed — decrease <code class="docutils literal notranslate"><span class="pre">min_rph</span></code> or check audio quality</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Panel 2 — residual histogram</strong></p>
+<p>X-axis is <span class="math notranslate nohighlight">\(\log_{10}|\Delta t|\)</span> (seconds). Each bar is a matched event pair.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pattern</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Sharp peak at −3 or lower (&lt; 1 ms)</p></td>
+<td><p>Excellent — events agree at sub-millisecond level</p></td>
+</tr>
+<tr class="row-odd"><td><p>Peak at −2 (10 ms)</p></td>
+<td><p>Acceptable for behavior; marginal for neural data</p></td>
+</tr>
+<tr class="row-even"><td><p>Peak at −1 (100 ms) or higher</p></td>
+<td><p>Poor alignment — inspect timeline</p></td>
+</tr>
+<tr class="row-odd"><td><p>Bimodal histogram</p></td>
+<td><p>Two populations: matched and unmatched events mixed together</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="bml-sync-digital-residual-and-alignment-plot">
+<h2>3. <code class="docutils literal notranslate"><span class="pre">bml_sync_digital</span></code> — residual and alignment plot<a class="headerlink" href="#bml-sync-digital-residual-and-alignment-plot" title="Link to this heading">¶</a></h2>
+<p><strong>How to enable</strong>:</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="p">.</span><span class="n">diagnostic_plot</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="n">sync_roi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bml_sync_digital</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="w"> </span><span class="n">master_events</span><span class="p">,</span><span class="w"> </span><span class="n">slave_events</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>What you see</strong>: one 3-panel figure <strong>per contiguous matched chunk</strong>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>┌────────────────────────────────────────────────────────┐
+│ Panel 1: Residual over time                            │
+│                                                        │
+│   0.002 ┤ ·  ·  ·  · ·  ··  ·  (all matched, black)  │
+│   0.000 ┼────────────────── 0                         │
+│  -0.002 ┤   ●●●●●●●●●●●●●●● (chunk events, red)      │
+│          └────────────────────────────────             │
+│               master event time (s)                    │
+├────────────────────────────────────────────────────────┤
+│ Panel 2: Timeline (after correction)                   │
+│                                                        │
+│  ● ● ● ● ● ● ● ● ● ● ● ● master (blue ●)             │
+│  * * * * * * * * * * * * slave corrected (red ★)      │
+│  ──────────────────────────────────────────            │
+│           master time (s)                              │
+├────────────────────────────────────────────────────────┤
+│ Panel 3: Residual histogram                            │
+│                                                        │
+│  ████████████                                          │
+│  ██████████████████                                    │
+│  -4    -3    -2    -1    0                             │
+│  log10 |master − slave| (s)                            │
+└────────────────────────────────────────────────────────┘
+</pre></div>
+</div>
+<p><strong>Panel 1 — residual over time</strong></p>
+<p>Y-axis: <code class="docutils literal notranslate"><span class="pre">slave.starts</span> <span class="pre">-</span> <span class="pre">master.starts</span></code> for each matched pair. Red points = events used for this chunk’s <code class="docutils literal notranslate"><span class="pre">polyfit</span></code>; black = all matched pairs.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pattern</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Flat horizontal band near 0</p></td>
+<td><p>Pure offset, no drift — good</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tilted straight line</p></td>
+<td><p>Linear drift — enable <code class="docutils literal notranslate"><span class="pre">timewarp</span> <span class="pre">=</span> <span class="pre">true</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Curved or scattered</p></td>
+<td><p>Non-linear drift or bad matching — inspect DP plot</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sudden jump</p></td>
+<td><p>Two separate sessions mixed; check <code class="docutils literal notranslate"><span class="pre">cfg.group</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Red points track the line, black scatter around it</p></td>
+<td><p>Normal — chunk is a well-matched contiguous segment</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Panel 2 and 3</strong> — same interpretation as the audio/NeuroOmega plots above.</p>
+</section>
+<hr class="docutils" />
+<section id="bml-sync-consolidate-pairwise-residual-heatmap">
+<h2>4. <code class="docutils literal notranslate"><span class="pre">bml_sync_consolidate</span></code> — pairwise residual heatmap<a class="headerlink" href="#bml-sync-consolidate-pairwise-residual-heatmap" title="Link to this heading">¶</a></h2>
+<p><strong>How to enable</strong>:</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="p">.</span><span class="n">plot_diagnostic</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="n">sync_roi_final</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bml_sync_consolidate</span><span class="p">(</span><span class="n">cfg</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>What you see</strong>: one heatmap <strong>per file</strong> (Level 1) and one per contiguous file group (Level 2). Axes are chunk IDs; color is the pairwise <code class="docutils literal notranslate"><span class="pre">delta_t</span></code> disagreement.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>           chunk ID
+        1    2    3    4
+      ┌────┬────┬────┬────┐
+   1  │  0 │0.0 │0.0 │0.0 │  ← all near zero = consistent
+      ├────┼────┼────┼────┤
+   2  │0.0 │  0 │0.0 │0.0 │
+      ├────┼────┼────┼────┤
+   3  │0.0 │0.0 │  0 │2.5 │  ← chunk 3–4 disagree → rogue chunk
+      ├────┼────┼────┼────┤
+   4  │0.0 │0.0 │2.5 │  0 │
+      └────┴────┴────┴────┘
+  (color = |delta_t difference| in seconds)
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pattern</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>All cells near zero (dark)</p></td>
+<td><p>All chunks agree — consolidation will succeed</p></td>
+</tr>
+<tr class="row-odd"><td><p>One row/column bright</p></td>
+<td><p>That chunk is a rogue — its estimate disagrees with all others</p></td>
+</tr>
+<tr class="row-even"><td><p>Checkerboard pattern</p></td>
+<td><p>Alternating-sign drift; try shorter chunk windows</p></td>
+</tr>
+<tr class="row-odd"><td><p>All cells bright</p></td>
+<td><p>No two chunks agree — sync failed entirely</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>What to do with a rogue chunk</strong>: find the outlier row/column, remove that chunk from <code class="docutils literal notranslate"><span class="pre">cfg.roi</span></code>, and re-run consolidation.</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Identify rogue by inspecting sync_roi before consolidation</span>
+<span class="n">sync_roi</span><span class="p">(</span><span class="n">sync_roi</span><span class="p">.</span><span class="n">meanerror</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.005</span><span class="p">,</span><span class="w"> </span><span class="p">:)</span><span class="w">  </span><span class="c">% &gt; 5 ms residual</span>
+
+<span class="c">% Remove it</span>
+<span class="n">sync_roi_clean</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sync_roi</span><span class="p">(</span><span class="n">sync_roi</span><span class="p">.</span><span class="n">meanerror</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">0.005</span><span class="p">,</span><span class="w"> </span><span class="p">:);</span>
+<span class="n">sync_roi_final</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bml_sync_consolidate</span><span class="p">(</span><span class="nb">struct</span><span class="p">(</span><span class="s">&#39;roi&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">sync_roi_clean</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="summary-what-to-check-first">
+<h2>Summary: what to check first<a class="headerlink" href="#summary-what-to-check-first" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Question</p></th>
+<th class="head"><p>Plot to look at</p></th>
+<th class="head"><p>Panel</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Did DP find the right event pairs?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bml_sync_match_events</span></code></p></td>
+<td><p>DP matrix path</p></td>
+</tr>
+<tr class="row-odd"><td><p>Are residuals &lt; 1 ms?</p></td>
+<td><p>Any function</p></td>
+<td><p>Residual histogram</p></td>
+</tr>
+<tr class="row-even"><td><p>Is there drift?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bml_sync_digital</span></code></p></td>
+<td><p>Residual-over-time (tilted line?)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Is one chunk an outlier?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bml_sync_consolidate</span></code></p></td>
+<td><p>Pairwise heatmap</p></td>
+</tr>
+<tr class="row-even"><td><p>Are all events accounted for?</p></td>
+<td><p>Audio/NeuroOmega</p></td>
+<td><p>Timeline (circle/star ratio)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Is the similarity high enough?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bml_sync_match_events</span></code></p></td>
+<td><p>Similarity vector</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../api/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Function Reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="internals.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Alignment Function Internals</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Brain Modulation Laboratory, MGH / University of Pittsburgh
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/Brain-Modulation-Lab/bml" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0"
+                viewBox="0 0 16 16" height="1em" width="1em"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53
+                5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49
+                -2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72
+                1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78
+                -.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08
+                -.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18
+                1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04
+                2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82
+                1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54
+                .73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46
+                .55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                </svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Diagnostic Plots</a><ul>
+<li><a class="reference internal" href="#bml-sync-match-events-dp-similarity-plot">1. <code class="docutils literal notranslate"><span class="pre">bml_sync_match_events</span></code> — DP similarity plot</a></li>
+<li><a class="reference internal" href="#bml-sync-audio-event-bml-sync-neuroomega-event-event-alignment-plot">2. <code class="docutils literal notranslate"><span class="pre">bml_sync_audio_event</span></code> / <code class="docutils literal notranslate"><span class="pre">bml_sync_neuroomega_event</span></code> — event alignment plot</a></li>
+<li><a class="reference internal" href="#bml-sync-digital-residual-and-alignment-plot">3. <code class="docutils literal notranslate"><span class="pre">bml_sync_digital</span></code> — residual and alignment plot</a></li>
+<li><a class="reference internal" href="#bml-sync-consolidate-pairwise-residual-heatmap">4. <code class="docutils literal notranslate"><span class="pre">bml_sync_consolidate</span></code> — pairwise residual heatmap</a></li>
+<li><a class="reference internal" href="#summary-what-to-check-first">Summary: what to check first</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=ccdb6887"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

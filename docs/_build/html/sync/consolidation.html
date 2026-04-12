@@ -1,0 +1,551 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Best Practices" href="best_practices.html"><link rel="prev" title="DP Event Matching" href="dp_matching.html">
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.12.19 -->
+        <title>Consolidation - BML Toolbox v1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=acfd86a5" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #004890;
+  --color-brand-content: #004890;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: Menlo, Monaco, Consolas, monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #6baed6;
+  --color-brand-content: #6baed6;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #6baed6;
+  --color-brand-content: #6baed6;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">BML Toolbox v1.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">BML Toolbox v1.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Part I · Annotation Tables</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../annotation/index.html">Annotation Tables</a><input aria-label="Toggle navigation of Annotation Tables" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/schema.html">Annotation Table Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/roi_table.html">The ROI Table and Coordinate System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/creating.html">Creating and Loading Annotation Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/set_operations.html">Set Operations on Time Intervals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/grouping.html">Grouping, Consolidation, and Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/joins_features.html">Joining Tables and Computing Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/encoding_viz.html">Signal Encoding and Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/example.html">Complete Worked Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../annotation/reference.html">Function Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/schema.html">Annotation Table Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/roi_table.html">The ROI Table and Coordinate System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/creating.html">Creating and Loading Annotation Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/set_operations.html">Set Operations on Time Intervals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/grouping.html">Grouping, Consolidation, and Measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/joins_features.html">Joining Tables and Computing Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/encoding_viz.html">Signal Encoding and Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/example.html">Complete Worked Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotation/reference.html">Function Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Part II · Synchronization</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Synchronization Pipeline</a><input aria-label="Toggle navigation of Synchronization Pipeline" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">System Overview and Data Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Synchronizing Zoom Audio to Ripple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="neuroomega.html">NeuroOmega Synchronization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psychtoolbox.html">Task Laptop Synchronization (Psychtoolbox)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dp_matching.html">DP Event Matching</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Consolidation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="best_practices.html">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">System Overview and Data Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audio.html">Synchronizing Zoom Audio to Ripple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neuroomega.html">NeuroOmega Synchronization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psychtoolbox.html">Task Laptop Synchronization (Psychtoolbox)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dp_matching.html">DP Event Matching</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Consolidation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="best_practices.html">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internals.html">Alignment Function Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagnostics.html">Diagnostic Plots</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">Function Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/sync/consolidation.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="consolidation">
+<h1>Consolidation<a class="headerlink" href="#consolidation" title="Link to this heading">¶</a></h1>
+<p>After per-chunk synchronization, each file typically has <strong>multiple rows</strong> in the <code class="docutils literal notranslate"><span class="pre">sync_roi</span></code> table — one per time window (chunk). <code class="docutils literal notranslate"><span class="pre">bml_sync_consolidate</span></code> merges these into <strong>one row per file</strong> and optionally merges time-contiguous files of the same type.</p>
+<section id="why-consolidation-is-needed">
+<h2>Why consolidation is needed<a class="headerlink" href="#why-consolidation-is-needed" title="Link to this heading">¶</a></h2>
+<p>Chunking improves noise robustness: short windows catch local drift changes. But analysis tools need a single <code class="docutils literal notranslate"><span class="pre">(s1,</span> <span class="pre">t1,</span> <span class="pre">s2,</span> <span class="pre">t2)</span></code> coordinate pair per file. Consolidation solves:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\min_{t_0, \xi} \sum_{k} \left( t_k^{\text{master}} - \bigl(t_0 + \xi \cdot s_k\bigr) \right)^2\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\((s_k, t_k^{\text{master}})\)</span> are the anchor points from each chunk.</p>
+</section>
+<section id="two-level-consolidation">
+<h2>Two-level consolidation<a class="headerlink" href="#two-level-consolidation" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Level</p></th>
+<th class="head"><p>What it does</p></th>
+<th class="head"><p>When triggered</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Level 1</strong></p></td>
+<td><p>Merge chunks → 1 row per file</p></td>
+<td><p>Always</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Level 2</strong></p></td>
+<td><p>Merge contiguous files of same type</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cfg.contiguous</span> <span class="pre">=</span> <span class="pre">true</span></code> (default)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Level 2 finds files from the same filetype that end where the next begins (within <code class="docutils literal notranslate"><span class="pre">timetol_contiguous</span></code>), then fits a single affine map across all of them.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[];</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">roi</span><span class="w">              </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">sync_roi_analog</span><span class="p">;</span><span class="w"> </span><span class="n">sync_roi_ao</span><span class="p">;</span><span class="w"> </span><span class="n">sync_roi_task</span><span class="p">];</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">timetol</span><span class="w">          </span><span class="p">=</span><span class="w"> </span><span class="mf">1e-3</span><span class="p">;</span><span class="w">    </span><span class="c">% 1 ms residual tolerance</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">contiguous</span><span class="w">       </span><span class="p">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">    </span><span class="c">% merge adjacent files of same type</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">timetol_contiguous</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">1e-3</span><span class="p">;</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">timewarp</span><span class="w">         </span><span class="p">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">    </span><span class="c">% allow linear drift correction</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">group</span><span class="w">            </span><span class="p">=</span><span class="w"> </span><span class="s">&#39;session_id&#39;</span><span class="p">;</span><span class="w">  </span><span class="c">% don&#39;t mix sessions</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">plot_diagnostic</span><span class="w">  </span><span class="p">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">   </span><span class="c">% pairwise residual matrix</span>
+
+<span class="n">sync_roi_final</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">bml_sync_consolidate</span><span class="p">(</span><span class="n">cfg</span><span class="p">);</span>
+
+<span class="c">% Check residuals</span>
+<span class="nb">fprintf</span><span class="p">(</span><span class="s">&#39;Max residual: %.4f ms\n&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">...</span>
+<span class="w">    </span><span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sync_roi_final</span><span class="p">.</span><span class="n">meanerror</span><span class="p">))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timetol</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1e-3</span></code></p></td>
+<td><p>Max allowed residual per file (s)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">timetol_contiguous</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1e-3</span></code></p></td>
+<td><p>Gap &lt; this → treat files as contiguous</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">contiguous</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
+<td><p>Enable Level 2 merge</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">timewarp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
+<td><p>Fit slope as well as offset</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">group</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'session_id'</span></code></p></td>
+<td><p>Column that separates independent sessions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">partial</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Allow partial consolidation (some files fail)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rowisfile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
+<td><p>Assume one physical file per row</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plot_diagnostic</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Show pairwise residual heatmap</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="diagnostic-plot">
+<h2>Diagnostic plot<a class="headerlink" href="#diagnostic-plot" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">cfg.plot_diagnostic</span> <span class="pre">=</span> <span class="pre">true</span></code> generates an <span class="math notranslate nohighlight">\(N \times N\)</span> matrix of pairwise residuals between all file-pairs in a session. A file with systematically large residuals against all others is a rogue chunk (bad sync estimate). Remove it and re-consolidate.</p>
+</section>
+<section id="what-the-output-looks-like">
+<h2>What the output looks like<a class="headerlink" href="#what-the-output-looks-like" title="Link to this heading">¶</a></h2>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">sync_roi_final</span>
+
+<span class="s">%</span><span class="w"> </span><span class="s">id</span><span class="w">  </span><span class="s">starts</span><span class="w">  </span><span class="s">ends</span><span class="w">  </span><span class="s">folder</span><span class="w">  </span><span class="s">name</span><span class="w">  </span><span class="s">filetype</span><span class="w">  </span><span class="s">chantype</span><span class="w">  </span><span class="s">s1</span><span class="w">  </span><span class="s">t1</span><span class="w">  </span><span class="s">s2</span><span class="w">  </span><span class="s">t2</span><span class="w">  </span><span class="s">...</span>
+<span class="c">%  1  52310   52610  /data  sub-DM1001_trellis.nev  trellis  nev  1  52310  ...</span>
+<span class="c">%  2  52310   52610  /data  sub-DM1001_ao.mat  neuroomega  raw  1  NaN+52310  ...</span>
+</pre></div>
+</div>
+<p>Each row has one affine coordinate pair that maps every sample in that file to master-clock time.</p>
+</section>
+<section id="saving">
+<h2>Saving<a class="headerlink" href="#saving" title="Link to this heading">¶</a></h2>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">save</span><span class="p">(</span><span class="nb">fullfile</span><span class="p">(</span><span class="n">PATH_SYNC</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;sync_roi_final.mat&#39;</span><span class="p">),</span><span class="w"> </span><span class="s">&#39;sync_roi_final&#39;</span><span class="p">);</span>
+<span class="c">% Or as TSV for BIDS compatibility:</span>
+<span class="n">bml_annot_write_tsv</span><span class="p">(</span><span class="n">sync_roi_final</span><span class="p">,</span><span class="w"> </span><span class="nb">fullfile</span><span class="p">(</span><span class="n">PATH_SYNC</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;sync_roi_final.tsv&#39;</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+<section id="validation-checklist">
+<h2>Validation checklist<a class="headerlink" href="#validation-checklist" title="Link to this heading">¶</a></h2>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% 1. All files have a sync entry</span>
+<span class="nb">assert</span><span class="p">(</span><span class="nb">height</span><span class="p">(</span><span class="n">sync_roi_final</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">expected_n_files</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;Missing files in sync_roi&#39;</span><span class="p">);</span>
+
+<span class="c">% 2. No NaN delta_t</span>
+<span class="nb">assert</span><span class="p">(</span><span class="o">~</span><span class="nb">any</span><span class="p">(</span><span class="nb">isnan</span><span class="p">(</span><span class="n">sync_roi_final</span><span class="p">.</span><span class="n">delta_t</span><span class="p">)),</span><span class="w"> </span><span class="s">&#39;NaN delta_t found — check raw sync&#39;</span><span class="p">);</span>
+
+<span class="c">% 3. Residuals under 1 ms</span>
+<span class="nb">assert</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sync_roi_final</span><span class="p">.</span><span class="n">meanerror</span><span class="p">))</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1e-3</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;Residual &gt; 1 ms&#39;</span><span class="p">);</span>
+
+<span class="c">% 4. Warpfactors are reasonable (&lt; 50 ppm drift)</span>
+<span class="nb">assert</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sync_roi_final</span><span class="p">.</span><span class="n">warpfactor</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">50e-6</span><span class="p">),</span><span class="w"> </span><span class="s">&#39;Excessive drift&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="common-failures">
+<h2>Common failures<a class="headerlink" href="#common-failures" title="Link to this heading">¶</a></h2>
+<p><strong><code class="docutils literal notranslate"><span class="pre">timetol</span></code> violated</strong> — Two chunks from the same file disagree by more than 1 ms. Inspect the diagnostic plot to find the outlier chunk. Common causes: low signal in one chunk, recording gap.</p>
+<p><strong>Contiguous merge fails</strong> — Files detected as contiguous but their sync estimates diverge. Reduce <code class="docutils literal notranslate"><span class="pre">cfg.contiguous</span> <span class="pre">=</span> <span class="pre">false</span></code> to skip Level 2 and consolidate each file independently.</p>
+<p><strong>Missing <code class="docutils literal notranslate"><span class="pre">session_id</span></code></strong> — If <code class="docutils literal notranslate"><span class="pre">roi</span></code> doesn’t have a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> column, pass <code class="docutils literal notranslate"><span class="pre">cfg.group</span> <span class="pre">=</span> <span class="pre">[]</span></code> to consolidate all rows together.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="best_practices.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Best Practices</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="dp_matching.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">DP Event Matching</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Brain Modulation Laboratory, MGH / University of Pittsburgh
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/Brain-Modulation-Lab/bml" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0"
+                viewBox="0 0 16 16" height="1em" width="1em"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53
+                5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49
+                -2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72
+                1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78
+                -.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08
+                -.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18
+                1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04
+                2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82
+                1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54
+                .73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46
+                .55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                </svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Consolidation</a><ul>
+<li><a class="reference internal" href="#why-consolidation-is-needed">Why consolidation is needed</a></li>
+<li><a class="reference internal" href="#two-level-consolidation">Two-level consolidation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#diagnostic-plot">Diagnostic plot</a></li>
+<li><a class="reference internal" href="#what-the-output-looks-like">What the output looks like</a></li>
+<li><a class="reference internal" href="#saving">Saving</a></li>
+<li><a class="reference internal" href="#validation-checklist">Validation checklist</a></li>
+<li><a class="reference internal" href="#common-failures">Common failures</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=ccdb6887"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>
