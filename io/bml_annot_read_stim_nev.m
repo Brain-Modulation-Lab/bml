@@ -20,6 +20,9 @@ else
 end
 detectflank  = bml_getopt_single(cfg,'detectflank','both');
 
+% ensure NPMK/openNEV is available
+ft_hastoolbox('NPMK', 1);
+
 
 stim = table();
 for i=1:height(roi_nev)
@@ -61,4 +64,3 @@ for i=1:height(roi_nev)
     end
 
 end
-
